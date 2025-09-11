@@ -1,5 +1,3 @@
-import Dexie from 'dexie';
-
 export const isEmptyObject = (obj: unknown) =>
   !!obj && typeof obj === 'object' && Object.keys(obj).length === 0;
 
@@ -24,41 +22,105 @@ interface CacheRow {
   value: unknown;
 }
 
-class CacheDatabase extends Dexie {
-  cache!: Dexie.Table<CacheRow, string>;
-}
+class NativeCache {
+  private dbName = 'CacheDatabase';
+  private storeName = 'cache';
+  private version = 1;
+  private db: IDBDatabase | null = null;
 
-export const indexedDB = new CacheDatabase('CacheDatabase');
-indexedDB.version(1).stores({
-  cache: 'key, value',
-});
+  private async getDB(): Promise<IDBDatabase> {
+    if (this.db) return this.db;
 
-export const insertOrUpdateCacheRow = async (key: string, value: unknown) => {
-  const keys = await indexedDB.cache.orderBy('key').uniqueKeys();
-  if (keys.includes(key)) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.version);
+      
+      request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(request.result);
+      };
+      
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName, { keyPath: 'key' });
+        }
+      };
+    });
+  }
+
+  async get(key: string): Promise<unknown> {
+    if (!key) return null;
+    
     try {
-      await indexedDB.cache.update(key, {
-        value: value,
+      const db = await this.getDB();
+      const transaction = db.transaction([this.storeName], 'readonly');
+      const store = transaction.objectStore(this.storeName);
+      
+      return new Promise((resolve, reject) => {
+        const request = store.get(key);
+        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onsuccess = () => {
+          const result = request.result as CacheRow;
+          if (!result) {
+            resolve(null);
+            return;
+          }
+          
+          if (!isValidCacheData(result.value)) {
+            resolve(null);
+            return;
+          }
+          
+          resolve(result.value);
+        };
       });
     } catch (error) {
-      console.warn(error);
-    }
-  } else {
-    try {
-      await indexedDB.cache.add({
-        key,
-        value,
-      });
-    } catch (error) {
-      console.warn(error);
+      console.warn('Cache get error:', error);
+      return null;
     }
   }
+
+  async set(key: string, value: unknown): Promise<void> {
+    try {
+      const db = await this.getDB();
+      const transaction = db.transaction([this.storeName], 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      
+      return new Promise((resolve, reject) => {
+        const request = store.put({ key, value });
+        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onsuccess = () => resolve();
+      });
+    } catch (error) {
+      console.warn('Cache set error:', error);
+    }
+  }
+
+  async getAllKeys(): Promise<string[]> {
+    try {
+      const db = await this.getDB();
+      const transaction = db.transaction([this.storeName], 'readonly');
+      const store = transaction.objectStore(this.storeName);
+      
+      return new Promise((resolve, reject) => {
+        const request = store.getAllKeys();
+        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onsuccess = () => resolve(request.result as string[]);
+      });
+    } catch (error) {
+      console.warn('Cache getAllKeys error:', error);
+      return [];
+    }
+  }
+}
+
+export const cache = new NativeCache();
+
+export const insertOrUpdateCacheRow = async (key: string, value: unknown) => {
+  await cache.set(key, value);
 };
 
 export const getCacheRow = async (key: string): Promise<unknown> => {
-  if (!key) return null;
-  const data = await indexedDB.cache.where('key').equals(key).first();
-  if (!data) return null;
-  if (!isValidCacheData(data.value)) return null;
-  return data.value;
+  return cache.get(key);
 };
