@@ -1,0 +1,166 @@
+import { For, JSX, Show, createEffect } from 'solid-js';
+import { createStore } from 'solid-js/store';
+
+import { twMerge } from 'tailwind-merge';
+
+import { ChevronLeftIcon } from '../icons';
+
+export interface PanelData {
+  itemKey: string;
+  title: JSX.Element;
+  content: JSX.Element;
+  class?: string;
+}
+
+interface AccordionProps {
+  children?: JSX.Element;
+  panels?: PanelData[];
+  searched?: string;
+  simple?: boolean;
+  itemDetails?: Record<string, boolean>;
+  setItemDetails?: (state: Record<string, boolean>) => void;
+}
+
+const Accordion = (props: AccordionProps) => {
+  const [internalItemDetails, setInternalItemDetails] = createStore<
+    Record<string, boolean>
+  >({});
+
+  const isControlled = () =>
+    props.itemDetails !== undefined && props.setItemDetails !== undefined;
+
+  const getOpenState = (itemKey: string) => {
+    if (isControlled()) {
+      return props.itemDetails?.[itemKey] || false;
+    }
+    return internalItemDetails[itemKey] || false;
+  };
+
+  const togglePanel = (itemKey: string) => {
+    if (isControlled() && props.setItemDetails) {
+      const newState = { ...props.itemDetails };
+      newState[itemKey] = !getOpenState(itemKey);
+      props.setItemDetails(newState);
+    } else {
+      setInternalItemDetails(itemKey, (prev) => !prev);
+    }
+  };
+
+  const getPanels = () => {
+    if (props.panels && props.panels.length > 0) {
+      return props.panels;
+    }
+
+    return [];
+  };
+
+  return (
+    <div class="w-full">
+      <For each={getPanels()}>
+        {(panel) => (
+          <Panel
+            panel={panel}
+            isOpen={getOpenState(panel.itemKey)}
+            toggle={() => togglePanel(panel.itemKey)}
+            simple={props.simple ?? true}
+            searched={props.searched}
+          />
+        )}
+      </For>
+    </div>
+  );
+};
+
+interface PanelProps {
+  panel: PanelData;
+  isOpen: boolean;
+  toggle: () => void;
+  simple: boolean;
+  searched?: string;
+}
+
+const Panel = (props: PanelProps) => {
+  const isSearched = () => props.searched === props.panel.itemKey;
+
+  createEffect(() => {
+    if (isSearched()) {
+      const elementId = `item_title${props.panel.itemKey}`;
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    }
+  });
+
+  return (
+    <div
+      class={twMerge(
+        'border-b dark:border-gray-700',
+        !props.simple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
+      )}
+      id={`item${props.panel.itemKey}`}
+    >
+      {!props.simple && (
+        <style>
+          {`
+            #item${props.panel.itemKey}:first-child > div#item_title${
+              props.panel.itemKey
+            } {
+              border-top-right-radius: 7px;
+              border-top-left-radius: 7px;
+            }
+            #item${props.panel.itemKey}:last-child > div#item_content${
+              props.panel.itemKey
+            } {
+              border-bottom-right-radius: 7px;
+              border-bottom-left-radius: 7px;
+            }
+            ${
+              !props.isOpen
+                ? `#item${props.panel.itemKey}:last-child > div#item_title${props.panel.itemKey} {
+              border-bottom-right-radius: 7px;
+              border-bottom-left-radius: 7px;
+            }`
+                : ''
+            }
+          `}
+        </style>
+      )}
+
+      <div
+        id={`item_title${props.panel.itemKey}`}
+        onClick={() => props.toggle()}
+        class={twMerge(
+          'flex w-full cursor-pointer items-center justify-between p-3',
+          props.isOpen && !props.simple && 'bg-opacity-60 bg-gray-100 dark:bg-gray-700',
+          isSearched() && 'bg-teal-200 dark:bg-teal-800',
+          props.panel.class,
+        )}
+      >
+        <div class="flex w-full items-center">{props.panel.title}</div>
+        <Show when={props.panel.content}>
+          <div>
+            <ChevronLeftIcon
+              class={twMerge('size-3', props.isOpen ? '-rotate-90' : 'rotate-180')}
+            />
+          </div>
+        </Show>
+      </div>
+
+      <Show when={props.panel.content && props.isOpen}>
+        <div
+          id={`item_content${props.panel.itemKey}`}
+          class={twMerge(
+            'border-t p-3 dark:border-gray-700',
+            !props.simple && 'dark:bg-opacity-50 dark:bg-gray-900',
+          )}
+        >
+          {props.panel.content}
+        </div>
+      </Show>
+    </div>
+  );
+};
+
+export default Accordion;

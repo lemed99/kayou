@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: 'inter';
+  src: url('/0336a89fb4e7fc1d-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'inter';
+  src: url('/c91adde9f78caceb-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'inter Fallback';
+  src: local('Arial');
+  ascent-override: 89.79%;
+  descent-override: 22.36%;
+  line-gap-override: 0%;
+  size-adjust: 107.89%;
+}
+@font-face {
+  font-family: 'plexMono';
+  src: url('/44abb7d9d613e278-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'plexMono';
+  src: url('/162e1140ce5a788f-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'plexMono';
+  src: url('/5f4877925f1cef50-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'plexMono';
+  src: url('/dab80f54fa5deafc-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'plexMono';
+  src: url('/551ac2b2ce969c74-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'plexMono';
+  src: url('/5ba23b2b0ac11fa6-s.p.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'plexMono Fallback';
+  src: local('Arial');
+  ascent-override: 77.95%;
+  descent-override: 20.91%;
+  line-gap-override: 0%;
+  size-adjust: 131.49%;
+}
+
+html,
+:host {
+  font-family: inter, 'inter Fallback', system-ui;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}

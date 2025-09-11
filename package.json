@@ -1,0 +1,52 @@
+{
+  "name": "vite-template-solid",
+  "version": "0.0.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --host",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint '**/*.{ts,tsx}' --fix",
+    "lint:ci": "eslint '**/*.{ts,tsx}' --max-warnings 0",
+    "format": "prettier --check --ignore-path .prettierignore .",
+    "format:fix": "prettier --write --ignore-path .prettierignore ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@tailwindcss/vite": "^4.0.7",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.7",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-solid": "^0.14.5",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^4.0.7",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^6.0.0",
+    "vite-plugin-pages": "^0.33.0",
+    "vite-plugin-solid": "^2.11.6"
+  },
+  "dependencies": {
+    "@formatjs/intl": "^3.1.6",
+    "@solid-primitives/i18n": "^2.2.1",
+    "@solidjs/router": "^0.15.3",
+    "axios": "^1.9.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "dexie": "^4.0.11",
+    "floating-ui-solid": "^1.0.63",
+    "solid-js": "^1.9.5",
+    "solid-transition-group": "^0.3.0",
+    "tailwind-merge": "^3.1.0"
+  }
+}
