@@ -15,6 +15,22 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    target: 'esnext',
-  },
+    lib: {
+      entry: './src/index.ts',
+      name: 'YourLibraryName',
+      fileName: (format) => `index.${format}.js`,
+      formats: ['es', 'cjs']
+    },
+    rollupOptions: {
+      external: ['solid-js', 'solid-js/web'],
+      output: {
+        globals: {
+          'solid-js': 'SolidJS',
+          'solid-js/web': 'SolidJSWeb'
+        }
+      }
+    },
+    sourcemap: true,
+    emptyOutDir: true
+  }
 });

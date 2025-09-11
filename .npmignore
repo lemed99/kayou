@@ -1,0 +1,21 @@
+# Source files (redundant but safe)
+src/
+*.tgz
+
+# Development files
+.vscode/
+.git/
+node_modules/
+.env*
+
+# Config files
+vite.config.ts
+tsconfig.json
+tailwind.config.js
+.eslintrc*
+.prettierrc*
+.gitignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
