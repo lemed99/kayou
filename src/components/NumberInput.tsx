@@ -1,6 +1,5 @@
 import { createMemo, onMount, splitProps } from 'solid-js';
 
-import isValidNumber from '../helpers/isValidNumber';
 import TextInput, { TextInputProps } from './TextInput';
 
 type ExtendedTextInputProps = Omit<
@@ -27,6 +26,16 @@ const NON_ALPHANUM_KEYS = [
   'Tab',
 ];
 const DECIMAL_SEPARATORS = [',', '.'];
+
+const isValidNumber = (val: number | string, nullable = false, allowNegative = false) => {
+  val = val.toString();
+  if (!val) return false;
+  const toFloat = parseFloat(val);
+  if (isNaN(toFloat)) return false;
+  if (toFloat === 0 && nullable) return true;
+  if (allowNegative) return true;
+  return toFloat > 0;
+};
 
 const NumberInput = (props: NumberInputProps) => {
   const [local, inputProps] = splitProps(props, [

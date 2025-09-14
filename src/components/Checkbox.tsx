@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import Label from './Label';
 
-interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   labelPosition?: 'left' | 'right';
   labelClass?: string;

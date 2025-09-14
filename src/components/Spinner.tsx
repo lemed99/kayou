@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
 
-interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
+export interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
   color?: 'failure' | 'gray' | 'default';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }

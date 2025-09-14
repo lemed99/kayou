@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import TextInput from './TextInput';
 
-interface SelectWithSearchProps {
+export interface SelectWithSearchProps {
   options: Array<{ value: any; label: string }>;
   onSelect: (option: any) => void;
   onClear?: () => void;

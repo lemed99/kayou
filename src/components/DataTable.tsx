@@ -20,7 +20,7 @@ import Skeleton from './Skeleton';
 import Spinner from './Spinner';
 import Tooltip from './Tooltip';
 
-interface DataTableProps {
+export interface DataTableProps {
   object: any;
   loading: boolean;
   columns: DataTableColumnProps[];

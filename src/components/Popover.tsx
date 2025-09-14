@@ -20,7 +20,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
 
-interface PopoverProps {
+export interface PopoverProps {
   content: JSX.Element;
   children: JSX.Element;
   onHover?: boolean;

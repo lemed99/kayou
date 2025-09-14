@@ -1,0 +1,18 @@
+{
+  "name": "cool",
+  "version": "0.0.0",
+  "description": "A UI component library built with SolidJS",
+  "private": true,
+  "scripts": {
+    "start": "vite --host",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.7",
+    "solid-js": "^1.9.5",
+    "tailwindcss": "^4.0.7",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vite-plugin-solid": "^2.11.6"
+  }
+}

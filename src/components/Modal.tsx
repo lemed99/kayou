@@ -5,7 +5,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { XMarkIcon } from '../icons';
 
-interface ModalProps
+export interface ModalProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
   show?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';

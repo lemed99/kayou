@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { defaultProps } from '../helpers/defaultProps';
 import { useTheme } from '../hooks/useTheme';
 
-interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
   placement?: 'top' | 'bottom';
   style?: 'dark' | 'light' | 'auto';
   content: string | JSX.Element;

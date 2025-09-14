@@ -3,7 +3,7 @@ import { Accessor, JSX, ParentProps, Setter } from 'solid-js';
 import type { ScaleLinear, ScalePoint } from 'd3-scale';
 import { DefaultArcObject, PieArcDatum } from 'd3-shape';
 
-export type LineChartContextType = {
+export interface LineChartContextType {
   data: readonly Record<string, unknown>[];
   innerWidth: Accessor<number>;
   innerHeight: Accessor<number>;
@@ -34,7 +34,7 @@ export type LineChartContextType = {
   setCustomTooltip: Setter<((data: Record<string, unknown>) => JSX.Element) | undefined>;
 };
 
-export type XAxisProps = {
+export interface XAxisProps {
   dataKey: string;
   tickCount?: number;
   tickFormatter?: (v: string | number) => string;
@@ -49,38 +49,38 @@ export type LineChartProps = ParentProps<{
   rheight?: number;
 }>;
 
-export type YAxisProps = {
+export interface YAxisProps {
   tickCount?: number;
   tickFormatter?: (v: number) => string;
   stroke?: string;
 };
 
-export type CartesianGridProps = {
+export interface CartesianGridProps {
   stroke?: string;
   strokeDasharray?: string;
   vertical?: boolean;
   horizontal?: boolean;
 };
 
-export type LineProps = {
+export interface LineProps {
   dataKey: string;
   stroke?: string;
   strokeWidth?: number;
   dot?: boolean;
 };
 
-export type TooltipProps = {
+export interface TooltipProps {
   stroke?: string;
   withLine?: boolean;
   content?: (data: Record<string, unknown>) => JSX.Element;
 };
 
-export type Size = {
+export interface Size {
   rwidth: number;
   rheight: number;
 };
 
-export type PieChartContextType = {
+export interface PieChartContextType {
   width: Accessor<number>;
   height: Accessor<number>;
 };
@@ -92,10 +92,13 @@ export type PieChartProps = ParentProps<{
   rheight?: number;
 }>;
 
-export type ActiveSector = SectorProps &
-  PieArcDatum<Record<string, unknown>> & { percent: number; cx: number; cy: number };
+export type ActiveSector = SectorProps & PieArcDatum<Record<string, unknown>> & {
+  percent: number;
+  cx: number;
+  cy: number;
+};
 
-export type PieProps = {
+export interface PieProps {
   data: Record<string, unknown>[];
   dataKey: keyof Record<string, unknown>;
   cx: number | string;
@@ -106,6 +109,6 @@ export type PieProps = {
   activeShape?: (props: ActiveSector) => JSX.Element;
 };
 
-export type SectorProps = DefaultArcObject & {
+export interface SectorProps extends DefaultArcObject {
   fill: string;
 };

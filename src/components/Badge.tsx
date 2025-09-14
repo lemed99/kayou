@@ -2,7 +2,7 @@ import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
   color?: 'gray' | 'failure' | 'warning' | 'success' | 'dark' | 'default';
   size?: 'xs' | 'sm';
 }

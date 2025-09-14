@@ -6,24 +6,24 @@ import { twMerge } from 'tailwind-merge';
 import { ChevronRightIcon } from '../icons';
 import Popover from './Popover';
 
-export type TSideBarItems = {
+export interface SideBarItems {
   label: string;
   icon?: (props: { class: string }) => JSX.Element;
   className?: string;
   isActive?: boolean;
   id: string;
   onClick?: (event: MouseEvent) => void;
-  children?: TSideBarItems[] | undefined;
+  children?: SideBarItems[] | undefined;
 };
 
-interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
+export interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
   innerClass?: string;
-  items?: TSideBarItems[];
+  items?: SideBarItems[];
   isMobile: boolean;
   children?: JSX.Element;
 }
 
-interface SidebarItemProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface SidebarItemProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement> {
   icon?: (props: { class: string }) => JSX.Element;
   label?: string;
   isActive?: boolean;
@@ -31,7 +31,7 @@ interface SidebarItemProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement> {
   children?: JSX.Element;
 }
 
-interface SidebarCollapseProps extends JSX.HTMLAttributes<HTMLButtonElement> {
+export interface SidebarCollapseProps extends JSX.HTMLAttributes<HTMLButtonElement> {
   icon?: (props: { class: string }) => JSX.Element;
   label?: string;
   isItemCollapsed?: boolean;
@@ -109,7 +109,7 @@ const Sidebar = (props: SidebarProps) => {
 
   const items = createMemo(() => local.items ?? []);
 
-  const isPopoverHidden = (mn: TSideBarItems) => {
+  const isPopoverHidden = (mn: SideBarItems) => {
     return local.isMobile ? true : !!isItemCollapsed?.[mn.id];
   };
 

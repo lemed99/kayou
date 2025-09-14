@@ -2,7 +2,7 @@ import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-interface AlertProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface AlertProps extends JSX.HTMLAttributes<HTMLDivElement> {
   color?: 'info' | 'failure' | 'success' | 'warning' | 'dark';
   icon?: (props: { class: string }) => JSX.Element;
   additionalContent?: JSX.Element;

@@ -1,20 +1,20 @@
-import { ParentComponent, createContext, onMount, useContext } from 'solid-js';
+import { ParentComponent, createContext, onMount } from 'solid-js';
 import { createStore, unwrap } from 'solid-js/store';
 
 import { isDateValid } from '../helpers/dates';
 
-type DaysMap = Record<string, string[]>;
+export type DaysMap = Record<string, string[]>;
 
-interface DatePickerGlobalContextType {
+export interface DatePickerContextType {
   monthCache: DaysMap;
   setMonthCache: (key: string, days: string[]) => void;
   clearDatePickerGlobal: () => void;
   locale: string;
 }
 
-const DatePickerGlobalContext = createContext<DatePickerGlobalContextType>();
+export const DatePickerContext = createContext<DatePickerContextType>();
 
-export const DatePickerGlobalProvider: ParentComponent<{ locale: string }> = (props) => {
+export const DatePickerProvider: ParentComponent<{ locale: string }> = (props) => {
   const [monthCache, setMonthCacheStore] = createStore<DaysMap>({});
 
   onMount(() => {
@@ -43,7 +43,7 @@ export const DatePickerGlobalProvider: ParentComponent<{ locale: string }> = (pr
   };
 
   return (
-    <DatePickerGlobalContext.Provider
+    <DatePickerContext.Provider
       value={{
         monthCache,
         setMonthCache,
@@ -54,15 +54,7 @@ export const DatePickerGlobalProvider: ParentComponent<{ locale: string }> = (pr
       }}
     >
       {props.children}
-    </DatePickerGlobalContext.Provider>
+    </DatePickerContext.Provider>
   );
 };
 
-export const useDatePickerGlobalContext = () => {
-  const ctx = useContext(DatePickerGlobalContext);
-  if (!ctx)
-    throw new Error(
-      'useDatePickerGlobalContext must be used within DatePickerGlobalProvider',
-    );
-  return ctx;
-};

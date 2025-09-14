@@ -11,7 +11,6 @@
     "isolatedModules": true,
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
     "outDir": "dist",
     "jsx": "preserve",
     "jsxImportSource": "solid-js",

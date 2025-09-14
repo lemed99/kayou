@@ -3,7 +3,7 @@ import { JSX } from 'solid-js/jsx-runtime';
 
 import { twMerge } from 'tailwind-merge';
 
-interface SkeletonProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface SkeletonProps extends JSX.HTMLAttributes<HTMLDivElement> {
   width?: string | number;
   height?: string | number;
   gray?: number;

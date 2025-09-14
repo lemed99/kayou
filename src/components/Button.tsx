@@ -13,7 +13,7 @@ export type ButtonColor =
   | 'blue';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: ButtonColor;
   size?: ButtonSize;
 }

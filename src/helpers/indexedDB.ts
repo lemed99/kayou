@@ -1,4 +1,4 @@
-export const isEmptyObject = (obj: unknown) =>
+const isEmptyObject = (obj: unknown) =>
   !!obj && typeof obj === 'object' && Object.keys(obj).length === 0;
 
 const isValidCacheData = (data: unknown): boolean => {
@@ -111,6 +111,21 @@ class NativeCache {
     } catch (error) {
       console.warn('Cache getAllKeys error:', error);
       return [];
+    }
+  }
+
+  async delete(): Promise<void> {
+    try {
+      const db = await this.getDB();
+      const transaction = db.transaction([this.storeName], 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      return new Promise((resolve, reject) => {
+        const request = store.clear();
+        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB clear error'));
+        request.onsuccess = () => resolve();
+      });
+    } catch (error) {
+      console.warn('Cache clear error:', error);
     }
   }
 }

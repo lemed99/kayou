@@ -1,8 +1,6 @@
 import {
   Accessor,
-  ParentComponent,
   Resource,
-  createContext,
   createEffect,
   createMemo,
   createResource,
@@ -10,33 +8,10 @@ import {
   onCleanup,
   useContext,
 } from 'solid-js';
-
+import { CustomError, CustomResourceContext, PendingEntry, ResourceOptions } from '../context/CustomResourceContext';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
 
-interface CustomError {
-  message: string;
-  status?: number;
-  code?: string;
-}
-
-interface ResourceOptions<T> {
-  fetcher?: (url: string) => Promise<T>;
-  onSuccess?: (data: T, fromCache: boolean) => void;
-  onError?: (err: CustomError) => void;
-  retryCount?: number;
-  retryDelay?: number;
-  exponentialBackoff?: boolean;
-  errorsBlackList?: number[];
-  dedupeRequests?: boolean;
-  dedupeInterval?: number;
-}
-
-interface ProviderProps<T> extends ResourceOptions<T> {
-  pendingRequests: Map<string, PendingEntry<T>>;
-  refreshData: Record<string, boolean> | null;
-}
-
-interface CustomResource<T> {
+export interface CustomResource<T> {
   data: Accessor<T | undefined>;
   error: Accessor<CustomError | null>;
   loading: Accessor<boolean>;
@@ -49,78 +24,22 @@ interface CustomResource<T> {
   attempts: Accessor<number>;
 }
 
-interface CustomResourceProps<T> {
+export interface CustomResourceContextProps<T> {
   options: ResourceOptions<T>;
   pendingRequests: Map<string, PendingEntry<T>>;
   refreshData: Record<string, boolean> | null;
 }
 
-type PendingEntry<T> = {
-  promise: Promise<T> | null;
-  lastValue?: T;
-  resolvedAt?: number;
-  timeoutId?: ReturnType<typeof setTimeout>;
-};
-
-const CustomResourceContext = createContext();
-
-export const CustomResourceProvider: ParentComponent<ProviderProps<unknown>> = (
-  props,
-) => {
-  const pendingRequests = new Map<string, PendingEntry<unknown>>();
-  const options: ResourceOptions<unknown> = {
-    get retryCount() {
-      return props.retryCount ?? 3;
-    },
-    get retryDelay() {
-      return props.retryDelay ?? 2000;
-    },
-    get exponentialBackoff() {
-      return props.exponentialBackoff ?? true;
-    },
-    get errorsBlackList() {
-      return props.errorsBlackList ?? [404, 500, 400, 401, 403];
-    },
-    get dedupeRequests() {
-      return props.dedupeRequests ?? true;
-    },
-    get dedupeInterval() {
-      return props.dedupeInterval ?? 2000;
-    },
-    get fetcher() {
-      return props.fetcher;
-    },
-    get onSuccess() {
-      return props.onSuccess;
-    },
-    get onError() {
-      return props.onError;
-    },
-  };
-
-  return (
-    <CustomResourceContext.Provider
-      value={{
-        options,
-        pendingRequests,
-        get refreshData() {
-          return props.refreshData;
-        },
-      }}
-    >
-      {props.children}
-    </CustomResourceContext.Provider>
-  );
-};
-
-export function useCustomResource<T>(props: {
+export interface CustomResourceProps<T> {
   options: ResourceOptions<T>;
   urlString: string;
   refreshKey?: string;
   condition?: boolean;
   forceRefresh?: boolean;
   pullFromCache?: boolean;
-}): CustomResource<T> {
+}
+
+export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResource<T> {
   const [error, setError] = createSignal<CustomError | null>(null);
   const [fromCache, setFromCache] = createSignal(false);
   const [errorStatus, setErrorStatus] = createSignal<number>();
@@ -129,7 +48,7 @@ export function useCustomResource<T>(props: {
 
   const pullFromCache = createMemo(() => props.pullFromCache ?? true);
 
-  const context = useContext(CustomResourceContext) as CustomResourceProps<T>;
+  const context = useContext(CustomResourceContext) as CustomResourceContextProps<T>;
   if (!context) {
     throw new Error('useCustomResource must be used within a CustomResourceProvider');
   }

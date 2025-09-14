@@ -12,7 +12,7 @@ export interface PanelData {
   class?: string;
 }
 
-interface AccordionProps {
+export interface AccordionProps {
   children?: JSX.Element;
   panels?: PanelData[];
   searched?: string;

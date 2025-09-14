@@ -3,7 +3,7 @@ import { Component, For, JSX, createMemo, createSignal, mergeProps } from 'solid
 
 import Button from './Button';
 
-interface PaginationProps {
+export interface PaginationProps {
   total: number; // total number of pages
   currentPage?: number; // controlled current page
   defaultPage?: number; // uncontrolled initial page
@@ -23,7 +23,7 @@ interface PaginationProps {
   renderItem?: (page: number, isCurrent: boolean) => JSX.Element;
 }
 
-export const Pagination: Component<PaginationProps> = (rawProps) => {
+const Pagination: Component<PaginationProps> = (rawProps) => {
   const props = mergeProps(
     {
       siblingCount: 1,
@@ -155,3 +155,5 @@ export const Pagination: Component<PaginationProps> = (rawProps) => {
     </nav>
   );
 };
+
+export default Pagination;

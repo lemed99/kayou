@@ -7,7 +7,7 @@ export function YAxis(props: YAxisProps) {
   const chart = useChart();
   const ticks = createMemo<number[]>(() => {
     let t = chart.yScale().ticks();
-    t = t.filter((v, i) => i % 2 === 0);
+    t = t.filter((_, i) => i % 2 === 0);
     return t;
   });
   const [axisBBox, setAxisBBox] = createSignal<DOMRect | null>(null);

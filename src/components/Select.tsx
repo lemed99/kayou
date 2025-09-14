@@ -5,7 +5,7 @@ import HelperText from './HelperText';
 type SelectSize = 'sm' | 'md' | 'lg';
 type SelectColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
-interface SelectProps extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
   sizing?: SelectSize;
   helperText?: string;
   addon?: JSX.Element;

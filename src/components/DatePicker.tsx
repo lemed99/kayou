@@ -3,18 +3,15 @@ import {
   Match,
   Show,
   Switch,
-  createContext,
   createEffect,
   createMemo,
   createSignal,
-  useContext,
 } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 
 import { Placement, createFloating, flip, shift } from 'floating-ui-solid';
 import { twMerge } from 'tailwind-merge';
 
-import { useDatePickerGlobalContext } from '../context/DatePickerGlobalContext';
 import {
   addMonths,
   formatDate,
@@ -27,6 +24,7 @@ import {
   toISO,
 } from '../helpers/dates';
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '../icons';
+import { useDatePicker } from './../hooks';
 import Badge from './Badge';
 import Button from './Button';
 import NumberInput from './NumberInput';
@@ -53,12 +51,12 @@ export interface DatePickerProps {
   maxDate?: string;
 }
 
-interface DatePickerContextType {
+export interface CalendarProps {
   currentDate: () => Date;
   setCurrentDate: (date: Date) => void;
   selectDate: (date: Date) => void;
   type: () => string;
-  locale: string;
+  locale?: string;
   isSingletonDateSelected: (date: Date) => boolean;
   isRangeDateSelected: (date: Date) => { start: boolean; end: boolean };
   isDateInRange: (date: Date) => boolean;
@@ -68,7 +66,7 @@ interface DatePickerContextType {
 }
 
 const getSixWeeksMargedDaysInMonth = (date: Date): Date[] => {
-  const { monthCache, setMonthCache } = useDatePickerGlobalContext();
+  const { monthCache, setMonthCache } = useDatePicker();
   const year = date.getFullYear();
   const month = date.getMonth();
   const key = `${year}-${month}`;
@@ -100,48 +98,37 @@ const getSixWeeksMargedDaysInMonth = (date: Date): Date[] => {
   return days;
 };
 
-const DatePickerContext = createContext<DatePickerContextType>();
-
-const useDatePicker = () => {
-  const context = useContext(DatePickerContext);
-  if (!context) {
-    throw new Error('useDatePicker must be used within DatePickerProvider');
-  }
-  return context;
-};
-
-const Calendar = () => {
-  const ctx = useDatePicker();
+const Calendar = (props: CalendarProps) => {
   const [showMonthSelector, setShowMonthSelector] = createSignal(false);
   const [showYearSelector, setShowYearSelector] = createSignal(false);
   const [customYear, setCustomYear] = createSignal('');
 
-  const days = createMemo(() => getSixWeeksMargedDaysInMonth(ctx.currentDate()));
+  const days = createMemo(() => getSixWeeksMargedDaysInMonth(props.currentDate()));
 
   const handleDateClick = (date: Date) => {
-    if (ctx.isDateDisabled(date)) return;
-    ctx.selectDate(date);
+    if (props.isDateDisabled(date)) return;
+    props.selectDate(date);
   };
 
   const navigateMonth = (direction: number) => {
-    ctx.setCurrentDate(addMonths(ctx.currentDate(), direction));
+    props.setCurrentDate(addMonths(props.currentDate(), direction));
   };
 
   const isCurrentMonth = (date: Date) => {
-    return date.getMonth() === ctx.currentDate().getMonth();
+    return date.getMonth() === props.currentDate().getMonth();
   };
 
   const handleMonthSelect = (monthIndex: number) => {
-    const newDate = new Date(ctx.currentDate());
+    const newDate = new Date(props.currentDate());
     newDate.setMonth(monthIndex);
-    ctx.setCurrentDate(newDate);
+    props.setCurrentDate(newDate);
     setShowMonthSelector(false);
   };
 
   const handleYearSelect = (year: number) => {
-    const newDate = new Date(ctx.currentDate());
+    const newDate = new Date(props.currentDate());
     newDate.setFullYear(year);
-    ctx.setCurrentDate(newDate);
+    props.setCurrentDate(newDate);
     setShowYearSelector(false);
   };
 
@@ -164,11 +151,11 @@ const Calendar = () => {
     return years;
   };
 
-  const isSelected = (date: Date) => ctx.isSingletonDateSelected(date);
-  const rangeSelection = (date: Date) => ctx.isRangeDateSelected(date);
+  const isSelected = (date: Date) => props.isSingletonDateSelected(date);
+  const rangeSelection = (date: Date) => props.isRangeDateSelected(date);
   const isInCurrentMonth = (date: Date) => isCurrentMonth(date);
-  const isInDateRange = (date: Date) => ctx.isDateInRange(date);
-  const isDisabled = (date: Date) => ctx.isDateDisabled(date);
+  const isInDateRange = (date: Date) => props.isDateInRange(date);
+  const isDisabled = (date: Date) => props.isDateDisabled(date);
   const isToday = (date: Date) => isSameDay(date, new Date());
 
   return (
@@ -195,7 +182,7 @@ const Calendar = () => {
               }}
               class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] tracking-wide uppercase transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
             >
-              {getMonthsShort(ctx.locale)[ctx.currentDate().getMonth()]}
+              {getMonthsShort(props.locale!)[props.currentDate().getMonth()]}
             </button>
           </div>
           <div class="w-1/2">
@@ -207,7 +194,7 @@ const Calendar = () => {
               }}
               class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] tracking-wide uppercase transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
             >
-              {ctx.currentDate().getFullYear()}
+              {props.currentDate().getFullYear()}
             </button>
           </div>
         </div>
@@ -228,7 +215,7 @@ const Calendar = () => {
         fallback={
           <div class="my-0.5">
             <div class="grid grid-cols-7 border-b border-gray-300 py-2 dark:border-gray-700">
-              <For each={getDaysShort(ctx.locale)}>
+              <For each={getDaysShort(props.locale!)}>
                 {(day) => (
                   <div class="text-center tracking-wide text-gray-500 capitalize">
                     {day}
@@ -286,14 +273,14 @@ const Calendar = () => {
         <Match when={showMonthSelector()}>
           <div class="px-0.5 sm:px-2">
             <div class="mt-2 mb-[3px] grid w-full grid-cols-2 gap-x-2 gap-y-1">
-              <For each={getMonthsShort(ctx.locale)}>
+              <For each={getMonthsShort(props.locale!)}>
                 {(month, index) => (
                   <button
                     type="button"
                     onClick={() => handleMonthSelect(index())}
                     class={twMerge(
                       'w-full cursor-pointer rounded-md p-3 tracking-wide uppercase transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10',
-                      index() === ctx.currentDate().getMonth()
+                      index() === props.currentDate().getMonth()
                         ? 'bg-gray-50 font-semibold dark:bg-white/5'
                         : '',
                     )}
@@ -315,7 +302,7 @@ const Calendar = () => {
                     onClick={() => handleYearSelect(year)}
                     class={twMerge(
                       'w-full cursor-pointer rounded-md p-3 tracking-wide uppercase transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10',
-                      year === ctx.currentDate().getFullYear()
+                      year === props.currentDate().getFullYear()
                         ? 'bg-gray-50 font-semibold dark:bg-white/5'
                         : '',
                     )}
@@ -348,7 +335,7 @@ const DatePicker = (props: DatePickerProps) => {
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [datesObjectValue, setDatesObjectValue] = createStore<DateValue>({});
 
-  const { locale } = useDatePickerGlobalContext();
+  const { locale } = useDatePicker();
 
   const type = () => props.type || 'single';
   const displayFormat = () => props.displayFormat || 'DD/MM/YYYY';
@@ -517,26 +504,6 @@ const DatePicker = (props: DatePickerProps) => {
     }
   };
 
-  const contextValue: DatePickerContextType = {
-    currentDate,
-    setCurrentDate,
-    selectDate,
-    type,
-    get locale() {
-      return props.locale || locale;
-    },
-    isSingletonDateSelected,
-    isRangeDateSelected,
-    isDateInRange,
-    isDateDisabled,
-    get minDate() {
-      return minDate();
-    },
-    get maxDate() {
-      return maxDate();
-    },
-  };
-
   const { refs, placement: finalPlacement } = createFloating({
     get placement() {
       return `${props.popoverPosition}-start` as Placement;
@@ -565,70 +532,80 @@ const DatePicker = (props: DatePickerProps) => {
   });
 
   return (
-    <DatePickerContext.Provider value={contextValue}>
-      <div class={twMerge('relative w-full text-gray-700', props.containerClass || '')}>
-        <div
-          ref={refs.setReference}
-          tabIndex={0}
-          onMouseDown={handleInputClick}
-          class={twMerge(
-            'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-6 text-sm text-gray-900 focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
-            props.inputClass || '',
-          )}
+    <div class={twMerge('relative w-full text-gray-700', props.containerClass || '')}>
+      <div
+        ref={refs.setReference}
+        tabIndex={0}
+        onMouseDown={handleInputClick}
+        class={twMerge(
+          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-6 text-sm text-gray-900 focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
+          props.inputClass || '',
+        )}
+      >
+        <Show
+          when={getDisplayValue()}
+          fallback={
+            <span class="text-gray-400">{props.placeholder || displayFormat()}</span>
+          }
         >
-          <Show
-            when={getDisplayValue()}
-            fallback={
-              <span class="text-gray-400">{props.placeholder || displayFormat()}</span>
-            }
-          >
-            <Show when={type() === 'multiple'} fallback={getDisplayValue()}>
-              <div class="flex flex-wrap gap-1">
-                <For each={getDisplayValue().split(',')}>
-                  {(date) => <Badge class="w-fit">{date}</Badge>}
-                </For>
-              </div>
-            </Show>
+          <Show when={type() === 'multiple'} fallback={getDisplayValue()}>
+            <div class="flex flex-wrap gap-1">
+              <For each={getDisplayValue().split(',')}>
+                {(date) => <Badge class="w-fit">{date}</Badge>}
+              </For>
+            </div>
           </Show>
-          <Show when={getDisplayValue() && !props.disabled}>
-            <button
-              type="button"
-              onFocusIn={() => {
-                setDatesObjectValue(reconcile({}));
-                (refs.reference() as HTMLElement)?.focus();
-              }}
-              class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <XMarkIcon class="h-5 w-5" />
-            </button>
-          </Show>
-        </div>
-
-        <Show when={isOpen()}>
-          <div
-            ref={refs.setFloating}
-            class={twMerge(
-              'absolute w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
-              finalPlacement() === 'top-start' ? 'bottom-full mb-3' : '',
-              finalPlacement() === 'bottom-start' ? 'top-full mt-3' : '',
-            )}
+        </Show>
+        <Show when={getDisplayValue() && !props.disabled}>
+          <button
+            type="button"
+            onFocusIn={() => {
+              setDatesObjectValue(reconcile({}));
+              (refs.reference() as HTMLElement)?.focus();
+            }}
+            class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <div
-              class={twMerge(
-                'absolute z-20 ml-[1.2rem] h-4 w-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
-                finalPlacement() === 'top-start'
-                  ? '-bottom-[8.5px] border-r border-b'
-                  : '',
-                finalPlacement() === 'bottom-start'
-                  ? '-top-[8.5px] border-t border-l'
-                  : '',
-              )}
-            />
-            <Calendar />
-          </div>
+            <XMarkIcon class="h-5 w-5" />
+          </button>
         </Show>
       </div>
-    </DatePickerContext.Provider>
+
+      <Show when={isOpen()}>
+        <div
+          ref={refs.setFloating}
+          class={twMerge(
+            'absolute w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
+            finalPlacement() === 'top-start' ? 'bottom-full mb-3' : '',
+            finalPlacement() === 'bottom-start' ? 'top-full mt-3' : '',
+          )}
+        >
+          <div
+            class={twMerge(
+              'absolute z-20 ml-[1.2rem] h-4 w-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
+              finalPlacement() === 'top-start'
+                ? '-bottom-[8.5px] border-r border-b'
+                : '',
+              finalPlacement() === 'bottom-start'
+                ? '-top-[8.5px] border-t border-l'
+                : '',
+            )}
+          />
+          <Calendar
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            selectDate={selectDate}
+            type={type}
+            locale={props.locale || locale}
+            isSingletonDateSelected={isSingletonDateSelected}
+            isRangeDateSelected={isRangeDateSelected}
+            isDateInRange={isDateInRange}
+            isDateDisabled={isDateDisabled}
+            minDate={minDate()}
+            maxDate={maxDate()}
+          />
+        </div>
+      </Show>
+    </div>
   );
 };
 

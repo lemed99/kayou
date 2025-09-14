@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { XMarkIcon } from '../icons';
 
-interface DrawerProps
+export interface DrawerProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'children'> {
   children?: JSX.Element | ((props: { close: () => void }) => JSX.Element);
   show?: boolean;

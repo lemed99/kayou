@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 type LabelColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
-interface LabelProps extends Omit<JSX.LabelHTMLAttributes<HTMLLabelElement>, 'color'> {
+export interface LabelProps extends Omit<JSX.LabelHTMLAttributes<HTMLLabelElement>, 'color'> {
   color?: LabelColor;
   value?: string;
   children?: JSX.Element;

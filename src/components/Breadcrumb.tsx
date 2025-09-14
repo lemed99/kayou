@@ -4,11 +4,11 @@ import { twMerge } from 'tailwind-merge';
 
 import { ChevronRightIcon } from '../icons';
 
-interface BreadcrumbProps extends JSX.HTMLAttributes<HTMLElement> {
+export interface BreadcrumbProps extends JSX.HTMLAttributes<HTMLElement> {
   children?: JSX.Element;
 }
 
-interface BreadcrumbItemProps extends Omit<JSX.LiHTMLAttributes<HTMLLIElement>, 'ref'> {
+export interface BreadcrumbItemProps extends Omit<JSX.LiHTMLAttributes<HTMLLIElement>, 'ref'> {
   href?: string;
   children?: JSX.Element;
   ref?: HTMLLIElement;
