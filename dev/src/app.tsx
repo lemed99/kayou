@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { type Component, createSignal } from 'solid-js';
 
 import {
   Alert,
@@ -10,13 +10,19 @@ import {
   Select,
   TextInput,
   Textarea,
+  ToggleSwitch,
 } from '../../src';
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
+import { ToastAPI } from '../../src/context/ToastContext';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
 
 const App: Component = () => {
-  const toast = useToast();
+  const toast = useToast() as ToastAPI & {
+    success: (msg: string, options?: any) => string;
+  };
+
+  const [checked, setChecked] = createSignal(false);
 
   return (
     // <IntlProvider locale="en" messages={{}}>
@@ -78,7 +84,7 @@ const App: Component = () => {
           </Popover>
         </div>
 
-        <div class="mb-16 max-w-sm p-8 text-sm">
+        <div class="max-w-sm p-8 text-sm">
           <DatePicker
             type="single"
             locale="fr"
@@ -97,16 +103,18 @@ const App: Component = () => {
             // maxDate="2025-09-20"
           />
         </div>
-        <div>On a beaucoup de toasts</div>
-        <Button
-          onClick={() => {
-            toast.success('This is a success message!');
-          }}
-        >
-          Show Success Toast
-        </Button>
 
-        <div class="max-w-lg p-8">
+        <div class="max-w-lg space-y-8 p-8">
+          <Button
+            onClick={() => {
+              toast.success('This is a success message!', {
+                duration: 5000,
+                pauseOnHover: false,
+              });
+            }}
+          >
+            Show Success Toast
+          </Button>
           <Alert color="failure" icon={InformationCircleIcon}>
             <div>
               <div>This is an alert — check it out!</div>
@@ -114,6 +122,12 @@ const App: Component = () => {
             <div>This is an alert — check it out!</div> */}
             </div>
           </Alert>
+          <ToggleSwitch
+            color="dark"
+            checked={checked()}
+            label="Toggle me"
+            onChange={setChecked}
+          />
         </div>
       </>
     </DatePickerProvider>

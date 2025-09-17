@@ -29,6 +29,7 @@ export interface PopoverProps {
   hidden?: boolean;
   isClosed?: boolean;
   setIsClosed?: (state: boolean) => void;
+  strategy?: 'absolute' | 'fixed';
 }
 
 const Popover: ParentComponent<PopoverProps> = (props) => {
@@ -37,6 +38,7 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
       onHover: false,
       menu: false,
       hidden: false,
+      strategy: 'absolute',
     },
     props,
   );
@@ -47,7 +49,7 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
     get placement() {
       return merged.position || undefined;
     },
-    strategy: 'fixed',
+    strategy: merged.strategy,
     get middleware() {
       return [
         offset(merged.menu ? 0 : 8),

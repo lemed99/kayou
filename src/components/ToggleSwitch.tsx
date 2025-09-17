@@ -20,8 +20,8 @@ const toggleClassName = `
   after:border-gray-300
   after:border
   after:rounded-full
-  after:h-5
-  after:w-5
+  after:h-4
+  after:w-4
   after:duration-[0.15s]
 `;
 
@@ -35,13 +35,13 @@ const theme = {
     label: 'ml-3 text-sm font-medium text-gray-900 dark:text-gray-300',
   },
   toggle: {
-    base: toggleClassName + ' h-6 w-11 rounded-full border',
+    base: toggleClassName + ' h-5 w-9 rounded-full border',
     checked: {
       on: 'after:translate-x-full after:border-white',
       off: 'border-gray-200 bg-gray-200 dark:border-gray-600 dark:bg-gray-700',
       color: {
         blue: 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500',
-        dark: 'bg-dark-700 border-dark-900',
+        dark: 'bg-gray-700 border-gray-900',
         failure: 'bg-red-700 border-red-900',
         gray: 'bg-gray-500 border-gray-600',
         success: 'bg-green-500 border-green-500',

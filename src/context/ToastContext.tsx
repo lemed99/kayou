@@ -41,8 +41,11 @@ interface ToastOptions {
 
 export interface ToastMethodProps {
   message: string;
-  toastId: string;
-  options: Required<ToastOptions>;
+  paused: () => boolean;
+  duration: number;
+  dismiss: () => void;
+  pause: () => void;
+  play: () => void;
 }
 
 export type ToastMethods = Record<string, Component<ToastMethodProps>>;
@@ -135,8 +138,11 @@ const ToastContainer = () => {
                   >
                     <Component
                       message={toast.message}
-                      toastId={toast.id}
-                      options={toast.options}
+                      paused={() => !!toast.pausedAt}
+                      duration={toast.options.duration}
+                      dismiss={() => context.api.dismiss(toast.id)}
+                      pause={() => context.api.pause(toast.id)}
+                      play={() => context.api.play(toast.id)}
                     />
                   </div>
                 );
@@ -206,12 +212,11 @@ export const ToastProvider = (props: ToastProviderProps) => {
     const toastIndex = toasts.findIndex((t) => t.id === id);
     if (toast && !toast.pausedAt) {
       stopTimer(id);
-      const elapsed = Date.now() - toast.createdAt;
       setToasts(
         toastIndex,
         produce((t) => {
           t.pausedAt = Date.now();
-          t.remainingTime = t.remainingTime - elapsed;
+          t.remainingTime = t.remainingTime - (Date.now() - toast.createdAt);
         }),
       );
     }
@@ -243,7 +248,7 @@ export const ToastProvider = (props: ToastProviderProps) => {
       pauseOnHover: options.pauseOnHover ?? defaultOptions.pauseOnHover,
     };
 
-    if (!(method in Object.keys(defaultOptions.methods))) {
+    if (!Object.keys(defaultOptions.methods).includes(method)) {
       console.warn(`Toast method "${method}" is not defined.`);
       return '';
     }

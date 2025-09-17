@@ -574,20 +574,16 @@ const DatePicker = (props: DatePickerProps) => {
         <div
           ref={refs.setFloating}
           class={twMerge(
-            'absolute w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
+            'absolute z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
             finalPlacement() === 'top-start' ? 'bottom-full mb-3' : '',
             finalPlacement() === 'bottom-start' ? 'top-full mt-3' : '',
           )}
         >
           <div
             class={twMerge(
-              'absolute z-20 ml-[1.2rem] h-4 w-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
-              finalPlacement() === 'top-start'
-                ? '-bottom-[8.5px] border-r border-b'
-                : '',
-              finalPlacement() === 'bottom-start'
-                ? '-top-[8.5px] border-t border-l'
-                : '',
+              'absolute z-50 ml-[1.2rem] h-4 w-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
+              finalPlacement() === 'top-start' ? '-bottom-[8.5px] border-r border-b' : '',
+              finalPlacement() === 'bottom-start' ? '-top-[8.5px] border-t border-l' : '',
             )}
           />
           <Calendar
