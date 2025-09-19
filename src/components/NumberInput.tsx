@@ -93,10 +93,13 @@ const NumberInput = (props: NumberInputProps) => {
 
     if (isValidNumber(value, nullable(), allowNegative())) {
       const num = parseFloat(value);
-      const formatted =
+      let formatted: number | string =
         inputType() === 'integer'
-          ? Math.round(num).toString()
-          : parseFloat(num.toFixed(precision())).toString();
+          ? Math.round(num)
+          : parseFloat(num.toFixed(precision()));
+      if (formatted < (props.min as number)) formatted = props.min as number;
+      if (formatted > (props.max as number)) formatted = props.max as number;
+      formatted = formatted.toString();
 
       if (formatted !== value) {
         e.target.value = formatted;
@@ -122,7 +125,7 @@ const NumberInput = (props: NumberInputProps) => {
   const incrementValue = () => {
     if (!inputRef) return;
     setButtonActive(upBtnRef, true);
-    const currentVal = parseFloat(inputRef.value);
+    const currentVal = parseFloat(inputRef.value || (props.min as string));
     let newVal: number;
     if (!isValidNumber(currentVal, nullable(), allowNegative())) {
       newVal = step();
@@ -130,6 +133,7 @@ const NumberInput = (props: NumberInputProps) => {
       newVal = currentVal + step();
     }
     if (!allowNegative() && newVal < 0) newVal = 0;
+    if (newVal > (props.max as number)) newVal = props.max as number;
     inputRef.value = newVal.toString();
     const event = new Event('change', { bubbles: true });
     inputRef.dispatchEvent(event);
@@ -138,7 +142,7 @@ const NumberInput = (props: NumberInputProps) => {
   const decrementValue = () => {
     if (!inputRef) return;
     setButtonActive(downBtnRef, true);
-    const currentVal = parseFloat(inputRef.value);
+    const currentVal = parseFloat(inputRef.value || (props.min as string));
     if (!isValidNumber(currentVal, nullable(), allowNegative())) {
       inputRef.value = allowNegative() ? (-step()).toString() : '';
       const event = new Event('change', { bubbles: true });
@@ -147,6 +151,7 @@ const NumberInput = (props: NumberInputProps) => {
     }
     let newVal = currentVal - step();
     if (!allowNegative() && newVal < 0) newVal = 0;
+    if (newVal < (props.min as number)) newVal = props.min as number;
     inputRef.value = newVal.toString();
     const event = new Event('change', { bubbles: true });
     inputRef.dispatchEvent(event);
@@ -296,6 +301,8 @@ const NumberInput = (props: NumberInputProps) => {
         return;
       }
     }
+
+    // Gerer le paste apres, ctrl + v, etc...
 
     if (typeof local.onPaste === 'function') {
       local.onPaste(e);

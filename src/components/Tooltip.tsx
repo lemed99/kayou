@@ -43,7 +43,7 @@ const Tooltip = (props: TooltipProps) => {
   const [isVisible, setIsVisible] = createSignal(false);
   const [reactiveMiddleware, setReactiveMiddleware] = createSignal([
     offset(8),
-    shift({}),
+    shift({ padding: 8 }),
     flip({}),
   ]);
   const [currentTheme, setCurrentTheme] = createSignal<'light' | 'dark'>();
@@ -81,11 +81,6 @@ const Tooltip = (props: TooltipProps) => {
     middleware: reactiveMiddleware,
   });
 
-  const tooltipArrowStyles = {
-    ...(finalPlacement() === 'top' && { bottom: theme.arrow.placement }),
-    ...(finalPlacement() === 'bottom' && { top: theme.arrow.placement }),
-  };
-
   return (
     <div class="relative">
       <div
@@ -122,15 +117,14 @@ const Tooltip = (props: TooltipProps) => {
                   ? getThemeOpposite(currentTheme())
                   : getThemeOpposite(merged.style)
               ],
+              finalPlacement() === 'top' ? '-bottom-1' : '',
+              finalPlacement() === 'bottom' ? '-top-1' : '',
             )}
             style={{
               position: 'absolute',
-              ...tooltipArrowStyles,
               left: `${middleware().arrow?.x || 0}px`,
             }}
-          >
-            &nbsp;
-          </div>
+          />
           <div class="relative z-20 whitespace-nowrap normal-case">{merged.content}</div>
         </div>
       </Show>

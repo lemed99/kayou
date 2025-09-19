@@ -1,4 +1,4 @@
-import { type Component, createSignal } from 'solid-js';
+import { type Component, createEffect, createSignal } from 'solid-js';
 
 import {
   Alert,
@@ -8,14 +8,113 @@ import {
   NumberInput,
   Popover,
   Select,
+  SelectWithSearch,
   TextInput,
   Textarea,
   ToggleSwitch,
+  Tooltip,
 } from '../../src';
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ToastAPI } from '../../src/context/ToastContext';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
+
+const SelectWithSearchDemo = () => {
+  const [selectedProduct, setSelectedProduct] = createSignal(null);
+  const [isLazyLoading, setIsLazyLoading] = createSignal(false);
+
+  const productOptions = [
+    {
+      label: 'Apple iPhone 14',
+      value: {
+        id: '1',
+        sku: 'APL-IP14',
+        gtin: '1234567890123',
+      },
+    },
+    {
+      label: 'Samsung Galaxy S23',
+      value: {
+        id: '2',
+        sku: 'SMS-GS23',
+        gtin: '1234567890456',
+      },
+    },
+    {
+      label: 'Google Pixel 7',
+      value: {
+        id: '3',
+        sku: 'GGL-PX7',
+        gtin: '1234567890789',
+      },
+    },
+    {
+      label: 'OnePlus 11',
+      value: {
+        id: '4',
+        sku: 'ONE-11',
+        gtin: '1234567890111',
+      },
+    },
+  ];
+
+  const [productOption, setProductOptions] = createSignal([...productOptions]);
+
+  const handleSelect = (option) => {
+    setSelectedProduct(option);
+    console.log('Selected:', option);
+  };
+
+  const handleClear = () => {
+    setSelectedProduct(null);
+    console.log('Selection cleared');
+  };
+
+  createEffect(() => {
+    if (isLazyLoading()) {
+      setTimeout(() => {
+        // In a real scenario, fetch and append more options here
+        setProductOptions((prev) => [...prev, ...productOptions]);
+        setIsLazyLoading(false);
+      }, 1500);
+    }
+  });
+
+  return (
+    <div class="">
+      <h2 class="mb-2 font-bold">Select a Product</h2>
+      <SelectWithSearch
+        options={productOption()}
+        onSelect={handleSelect}
+        onClear={handleClear}
+        placeholder="Search products..."
+        autoFillSearchKey
+        noSearchResultText="No products found"
+        // cta={
+        //   <div
+        //     onClick={() => console.log('Add New Product clicked')}
+        //     class="p-2 text-sm text-blue-600"
+        //   >
+        //     Add New Product
+        //   </div>
+        // }
+        isLazyLoading={isLazyLoading()}
+        onLazyLoad={(scrollProgress) => {
+          console.log('Scroll Progress:', scrollProgress);
+          if (scrollProgress > 80 && !isLazyLoading() && productOption().length < 100) {
+            setIsLazyLoading(true);
+            // Simulate loading more options
+          }
+        }}
+        // target="products"
+      />
+      <div class="mt-4 mb-8">
+        <strong>Selected Product:</strong>{' '}
+        {selectedProduct() ? selectedProduct().label : 'None'}
+      </div>
+    </div>
+  );
+};
 
 const App: Component = () => {
   const toast = useToast() as ToastAPI & {
@@ -46,6 +145,11 @@ const App: Component = () => {
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
           />
+          <div class="fixed right-4 bottom-4 z-50 w-fit">
+            <Tooltip content="This is a tooltip" style="light">
+              <Button color="dark">me</Button>
+            </Tooltip>
+          </div>
           <Textarea
             label="Label"
             onChange={(e) => console.log(e.target.value)}
@@ -84,24 +188,27 @@ const App: Component = () => {
           </Popover>
         </div>
 
-        <div class="max-w-sm p-8 text-sm">
-          <DatePicker
-            type="single"
-            locale="fr"
-            displayFormat="DD/MM/YYYY"
-            value={{
-              multipleDates: ['2025-09-24', '2025-09-25', '2025-09-19'],
-              // date: '2024-06-01',
-              // endDate: '2025-09-30',
-            }}
-            onChange={(newValue) => {
-              // setDate(newValue?.date as string);
-              console.log('Selected:', newValue);
-            }}
-            popoverPosition="bottom"
-            // minDate="2025-09-07"
-            // maxDate="2025-09-20"
-          />
+        <div class="flex w-full justify-center text-sm">
+          <div class="w-full max-w-sm">
+            <SelectWithSearchDemo />
+            <DatePicker
+              type="single"
+              locale="fr"
+              displayFormat="DD/MM/YYYY"
+              value={{
+                multipleDates: ['2025-09-24', '2025-09-25', '2025-09-19'],
+                // date: '2024-06-01',
+                // endDate: '2025-09-30',
+              }}
+              onChange={(newValue) => {
+                // setDate(newValue?.date as string);
+                console.log('Selected:', newValue);
+              }}
+              popoverPosition="bottom"
+              // minDate="2025-09-07"
+              // maxDate="2025-09-20"
+            />
+          </div>
         </div>
 
         <div class="max-w-lg space-y-8 p-8">
