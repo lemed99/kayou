@@ -25,12 +25,12 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
 const theme = {
   base: 'flex',
   addon:
-    'inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-200 px-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400',
+    'inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 bg-gray-200 px-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400',
   field: {
     base: 'relative w-full',
     icon: {
-      base: 'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3',
-      svg: 'h-5 w-5 text-gray-500 dark:text-gray-400',
+      base: 'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5',
+      svg: 'size-4 text-gray-500 dark:text-gray-400',
     },
     arrows: {
       base: 'absolute inset-y-0 right-0 flex items-center flex-col gap-0.5 justify-center pr-3',
@@ -55,11 +55,11 @@ const theme = {
           'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:outline-green-500 dark:border-green-400 dark:bg-green-100 dark:focus:outline-green-500',
       },
       withIcon: {
-        on: 'pl-10',
+        on: 'pl-9',
         off: '',
       },
       withArrows: {
-        on: 'pr-8',
+        on: 'pr-10',
         off: '',
       },
       withAddon: {
@@ -122,10 +122,10 @@ const TextInput = (props: TextInputProps) => {
             class={twMerge(
               theme.field.input.base,
               theme.field.input.colors[color()],
+              theme.field.input.sizes[sizing()],
               theme.field.input.withAddon[local.addon ? 'on' : 'off'],
               theme.field.input.withIcon[local.icon ? 'on' : 'off'],
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
-              theme.field.input.sizes[sizing()],
             )}
             ref={local.ref}
             {...inputProps}

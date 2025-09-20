@@ -111,7 +111,7 @@ const Drawer = (props: DrawerProps) => {
               type="button"
               onClick={closeDrawer}
             >
-              <XMarkIcon class="h-5 w-5" />
+              <XMarkIcon class="size-5" />
             </button>
           </div>
           <div class="p-6 pt-0">

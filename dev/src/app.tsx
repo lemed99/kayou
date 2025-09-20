@@ -5,10 +5,10 @@ import {
   Button,
   Checkbox,
   DatePicker,
+  MultiSelect,
   NumberInput,
   Popover,
   Select,
-  SelectWithSearch,
   TextInput,
   Textarea,
   ToggleSwitch,
@@ -62,13 +62,15 @@ const SelectWithSearchDemo = () => {
 
   const handleSelect = (option) => {
     setSelectedProduct(option);
-    console.log('Selected:', option);
+    // console.log('Selected:', option);
+    console.log('All Selected:', option);
   };
 
-  const handleClear = () => {
-    setSelectedProduct(null);
-    console.log('Selection cleared');
-  };
+  const [clearValues, setClearValues] = createSignal(false);
+
+  setTimeout(() => {
+    setClearValues(true);
+  }, 5000);
 
   createEffect(() => {
     if (isLazyLoading()) {
@@ -83,13 +85,28 @@ const SelectWithSearchDemo = () => {
   return (
     <div class="">
       <h2 class="mb-2 font-bold">Select a Product</h2>
-      <SelectWithSearch
-        options={productOption()}
+      <MultiSelect
+        options={productOption().map((p) => ({
+          label: p.label,
+          value: p.value.id,
+          labelWrapper: (label) => (
+            <div class="flex items-center gap-0.5">
+              <InformationCircleIcon /> {label}
+            </div>
+          ),
+        }))}
         onSelect={handleSelect}
-        onClear={handleClear}
+        // clearValues={clearValues()}
+        // values={selectedProduct().map((p) => p.value.id) || []}
         placeholder="Search products..."
-        autoFillSearchKey
-        noSearchResultText="No products found"
+        // autoFillSearchKey
+        noSearchResultPlaceholder="No products found"
+        searchPlaceholder="Search productoooos..."
+        values={['2', '3']}
+        withSearch={true}
+        // multiple={true}
+        // value="leo"
+        // idValue="3"
         // cta={
         //   <div
         //     onClick={() => console.log('Add New Product clicked')}
@@ -106,6 +123,7 @@ const SelectWithSearchDemo = () => {
             // Simulate loading more options
           }
         }}
+        helperText='Search for a product... e.g., "iPhone"'
         // target="products"
       />
       <div class="mt-4 mb-8">
@@ -140,7 +158,8 @@ const App: Component = () => {
             allowNegativeValues={true}
           />
           <TextInput
-            addon="CFA"
+            // addon="CFA"
+            icon={(props) => <InformationCircleIcon class={props.class} />}
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
@@ -165,6 +184,8 @@ const App: Component = () => {
               { label: 'Option 2', value: '2' },
               { label: 'Option 3', value: '3' },
             ]}
+            onSelect={(option) => console.log('Selected:', option)}
+            value="2"
           />
           <Checkbox label="Checkbox" />
           {/* <div class="fixed right-4 bottom-4 z-50 w-fit">

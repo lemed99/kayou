@@ -1,114 +1,214 @@
-import { For, JSX, ParentComponent, Show, createMemo, splitProps } from 'solid-js';
+import {
+  For,
+  JSX,
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+  splitProps,
+} from 'solid-js';
 
+import { autoPlacement, createFloating, offset } from 'floating-ui-solid';
+import { twMerge } from 'tailwind-merge';
+
+import { CheckIcon, ChevronDownIcon } from '../icons';
 import HelperText from './HelperText';
+import TextInput, { TextInputProps } from './TextInput';
 
-type SelectSize = 'sm' | 'md' | 'lg';
-type SelectColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
-
-export interface SelectProps extends JSX.SelectHTMLAttributes<HTMLSelectElement> {
-  sizing?: SelectSize;
-  helperText?: string;
-  addon?: JSX.Element;
-  icon?: (props: JSX.SvgSVGAttributes<SVGSVGElement>) => JSX.Element;
-  color?: SelectColor;
-  options?: { label: string; value: string }[];
-  defaultValue?: string | number | readonly string[] | undefined;
+interface Option {
+  value: string;
+  label: string;
+  labelWrapper?: (label: string) => JSX.Element;
 }
 
-const style = `
-  bg-[url('data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0ndHJ1ZScgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyBmaWxsPSdub25lJyB2aWV3Qm94PScwIDAgMTAgNic+IDxwYXRoIHN0cm9rZT0nIzZCNzI4MCcgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJyBzdHJva2UtbGluZWpvaW49J3JvdW5kJyBzdHJva2Utd2lkdGg9JzInIGQ9J20xIDEgNCA0IDQtNCcvPiA8L3N2Zz4=')]
-  bg-[right_0.75rem_center]
-  bg-no-repeat
-  bg-[length:0.75em_0.75em]
-  pr-[2.5rem]`;
+export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
+  options: Option[];
+  onSelect: (option?: Option) => void;
+  value?: string;
+  helperText?: string;
+}
 
-const selectTheme = {
-  base: 'flex',
-  addon:
-    'inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-200 px-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400',
-  field: {
-    base: 'relative w-full',
-    icon: {
-      base: 'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3',
-      svg: 'h-5 w-5 text-gray-500 dark:text-gray-400',
-    },
-    select: {
-      base: 'block w-full border disabled:cursor-not-allowed appearance-none disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
-      withIcon: {
-        on: 'pl-10',
-        off: '',
-      },
-      withAddon: {
-        on: 'rounded-r-lg',
-        off: 'rounded-lg',
-      },
-      withShadow: {
-        on: 'shadow-sm dark:shadow-sm-light',
-        off: '',
-      },
-      sizes: {
-        sm: 'p-2 text-xs',
-        md: 'p-2.5 text-sm',
-        lg: 'text-md p-4',
-      },
-      colors: {
-        gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
-        info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-400 dark:bg-blue-100 dark:focus:outline-blue-500',
-        failure:
-          'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:outline-red-500',
-        warning:
-          'border-yellow-500 bg-yellow-50 text-yellow-900 placeholder-yellow-700 focus:outline-yellow-500 dark:border-yellow-400 dark:bg-yellow-100 dark:focus:outline-yellow-500',
-        success:
-          'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:outline-green-500 dark:border-green-400 dark:bg-green-100 dark:focus:outline-green-500',
-      },
-    },
-  },
-};
-
-const Select: ParentComponent<SelectProps> = (props) => {
-  const [local, selectProps] = splitProps(props, [
-    'color',
-    'sizing',
+export default function Select(props: SelectProps) {
+  const [local, otherProps] = splitProps(props, [
     'options',
-    'defaultValue',
-    'addon',
-    'icon',
+    'onSelect',
+    'value',
     'helperText',
-    'class',
   ]);
 
-  const color = createMemo(() => local.color || 'gray');
-  const sizing = createMemo(() => local.sizing || 'md');
+  const [selectedOption, setSelectedOption] = createSignal<Option | null>(null);
+  const [highlightedOption, setHighlightedOption] = createSignal<Option | null>(null);
+
+  const [isOpen, setIsOpen] = createSignal(false);
+
+  createEffect(() => {
+    if (local.value) {
+      const opt = local.options.find((o) => o.value == local.value);
+      if (opt) {
+        setSelectedOption(opt);
+        setHighlightedOption(opt);
+      }
+    }
+  });
+
+  const handleOptionClick = (option: Option) => {
+    setSelectedOption(option);
+    setHighlightedOption(option);
+    local.onSelect(option);
+    setIsOpen(false);
+  };
+
+  const handleInputClick = () => {
+    if (!props.disabled) {
+      setIsOpen(true);
+    }
+  };
+
+  const { refs, placement: finalPlacement } = createFloating({
+    isOpen: isOpen,
+    middleware: [
+      offset(4),
+      autoPlacement({
+        allowedPlacements: ['top-start', 'bottom-start', 'top-end', 'bottom-end'],
+      }),
+    ],
+  });
+
+  createEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        refs.floating() &&
+        !refs.floating()?.contains(event.target as Node) &&
+        refs.reference() &&
+        !(refs.reference() as HTMLElement)?.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
+  });
+
+  const handleKeyDown = (
+    e: KeyboardEvent & {
+      currentTarget: HTMLInputElement;
+      target: Element;
+    },
+  ) => {
+    const { key } = e;
+
+    if (key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedOption((prev) => {
+        if (local.options.length === 0) return null;
+        if (!prev) return local.options[local.options.length - 1];
+        const currentIndex = local.options.findIndex((o) => o.value === prev.value);
+        if (currentIndex === 0) {
+          return prev;
+        }
+        if (currentIndex === -1) {
+          return local.options[local.options.length - 1];
+        }
+        return local.options[currentIndex - 1];
+      });
+      return;
+    }
+
+    if (key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedOption((prev) => {
+        if (local.options.length === 0) return null;
+        if (!prev) return local.options[0];
+        const currentIndex = local.options.findIndex((o) => o.value === prev.value);
+        if (currentIndex === local.options.length - 1) {
+          return prev;
+        }
+        if (currentIndex === -1) {
+          return local.options[0];
+        }
+        return local.options[currentIndex + 1];
+      });
+      return;
+    }
+
+    if (key === 'Enter') {
+      e.preventDefault();
+      const currentIndex = highlightedOption()
+        ? local.options.findIndex((o) => o.value === highlightedOption()?.value)
+        : -1;
+      if (highlightedOption() && currentIndex !== -1) {
+        handleOptionClick(highlightedOption()!);
+      } else if (local.options.length === 1) {
+        handleOptionClick(local.options[0]);
+      }
+      return;
+    }
+  };
 
   return (
-    <div class={`${selectTheme.base} ${local.class}`}>
-      <Show when={local.addon}>
-        <span class={selectTheme.addon}>{local.addon}</span>
-      </Show>
-      <div class={selectTheme.field.base}>
-        <Show when={local.icon}>
-          <div class={selectTheme.field.icon.base}>
-            {local.icon?.({ class: selectTheme.field.icon.svg })}
+    <div class="w-full">
+      <div class="relative w-full">
+        <div ref={refs.setReference} onClick={handleInputClick} class="relative w-full">
+          <TextInput
+            readOnly={true}
+            value={selectedOption()?.label || ''}
+            placeholder={props.placeholder}
+            class="w-full"
+            onKeyDown={handleKeyDown}
+            style={{
+              'padding-right': '36px',
+              cursor: props.disabled ? 'not-allowed' : 'pointer',
+            }}
+            {...otherProps}
+          />
+          <button
+            type="button"
+            class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronDownIcon class="size-4" />
+          </button>
+        </div>
+
+        <Show when={isOpen()}>
+          <div
+            ref={refs.setFloating}
+            class={twMerge(
+              'scrollbar-thin scrollbar-track-gray-50 scrollbar-thumb-gray-400 dark:scrollbar-track-gray-700 dark:scrollbar-thumb-gray-500 absolute z-50 box-border max-h-[240px] w-fit overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow dark:bg-gray-700',
+              finalPlacement() === 'top-start' ? 'bottom-full mb-1' : '',
+              finalPlacement() === 'bottom-start' ? 'top-full mt-1' : '',
+              finalPlacement() === 'top-end' ? 'right-0 bottom-full mb-1' : '',
+              finalPlacement() === 'bottom-end' ? 'top-full right-0 mt-1' : '',
+            )}
+          >
+            <For each={local.options}>
+              {(option) => (
+                <div
+                  class={twMerge(
+                    'flex cursor-pointer items-center justify-between px-2 py-1.5 text-sm whitespace-nowrap',
+                    highlightedOption()?.value == option.value
+                      ? 'rounded bg-gray-100'
+                      : '',
+                  )}
+                  onClick={() => handleOptionClick(option)}
+                  onMouseEnter={() => setHighlightedOption(option)}
+                >
+                  {option.labelWrapper ? option.labelWrapper(option.label) : option.label}
+                  <div class="ml-2.5 size-4">
+                    <Show when={selectedOption()?.value === option.value}>
+                      <CheckIcon class="size-4" />
+                    </Show>
+                  </div>
+                </div>
+              )}
+            </For>
           </div>
         </Show>
-        <select
-          class={` ${selectTheme.field.select.base} ${selectTheme.field.select.colors[color()]} ${selectTheme.field.select.withAddon[local.addon ? 'on' : 'off']} ${selectTheme.field.select.withIcon[local.icon ? 'on' : 'off']} ${selectTheme.field.select.sizes[sizing()]} ${selectTheme.base} ${style} `}
-          {...selectProps}
-        >
-          <For each={local.options}>
-            {(option) => (
-              <option value={option.value} selected={local.defaultValue === option.value}>
-                {option.label}
-              </option>
-            )}
-          </For>
-        </select>
-        <Show when={local.helperText}>
-          <HelperText content={local.helperText as string} color={local.color} />
-        </Show>
       </div>
+      <Show when={local.helperText}>
+        <HelperText content={local.helperText as string} color={otherProps.color} />
+      </Show>
     </div>
   );
-};
-
-export default Select;
+}

@@ -19,7 +19,7 @@ const theme = {
       'text-yellow-700 bg-yellow-100 border-yellow-500 dark:bg-yellow-200 dark:text-yellow-800',
     dark: 'text-gray-200 bg-gray-800 border-gray-600 dark:bg-gray-900 dark:text-gray-300',
   },
-  icon: 'h-5 w-5',
+  icon: 'size-5',
   iconWrapper: 'absolute -top-1.5 -left-1.5 rounded-full p-0.5',
   rounded: 'rounded-lg',
 };

@@ -14,6 +14,7 @@ export { default as Drawer } from './components/Drawer';
 export { default as HelperText } from './components/HelperText';
 export { default as Label } from './components/Label';
 export { default as Modal } from './components/Modal';
+export { default as MultiSelect } from './components/MultiSelect';
 export { default as NumberInput } from './components/NumberInput';
 export { default as Pagination } from './components/Pagination';
 export { default as Popover } from './components/Popover';
@@ -26,4 +27,3 @@ export { default as Textarea } from './components/Textarea';
 export { default as TextInput } from './components/TextInput';
 export { default as ToggleSwitch } from './components/ToggleSwitch';
 export { default as Tooltip } from './components/Tooltip';
-

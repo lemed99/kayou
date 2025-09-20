@@ -14,7 +14,7 @@ export interface SideBarItems {
   id: string;
   onClick?: (event: MouseEvent) => void;
   children?: SideBarItems[] | undefined;
-};
+}
 
 export interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
   innerClass?: string;
@@ -66,7 +66,7 @@ const sidebarItemTheme = {
       base: 'px-3 flex-1 truncate',
     },
     icon: {
-      base: 'h-5 w-5 flex-shrink-0 transition duration-75',
+      base: 'size-5 flex-shrink-0 transition duration-75',
     },
   },
 };
@@ -76,7 +76,7 @@ const sidebarCollapseTheme = {
     button:
       'group mb-1 flex w-full text-sm items-center rounded-md px-2.5 py-2 font-normal transition duration-75 cursor-pointer',
     icon: {
-      base: 'h-5 w-5 transition duration-75',
+      base: 'size-5 transition duration-75',
       open: {
         off: '',
         on: 'text-gray-900',

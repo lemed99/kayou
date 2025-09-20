@@ -1,10 +1,11 @@
 import {
-    Accessor,
-    ParentComponent,
-    createContext,
-    createEffect,
-    createSignal,
-    onMount,
+  Accessor,
+  ParentComponent,
+  createContext,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
 } from 'solid-js';
 
 export interface ThemeType {
@@ -45,17 +46,25 @@ export const ThemeProvider: ParentComponent = (props) => {
   };
 
   createEffect(() => {
+    const handleThemeChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setSystemTheme('dark');
+        if (theme() === 'system') updateDOM('dark');
+      } else {
+        setSystemTheme('light');
+        if (theme() === 'system') updateDOM('light');
+      }
+    };
+
     window
       .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', (event) => {
-        if (event.matches) {
-          setSystemTheme('dark');
-          if (theme() === 'system') updateDOM('dark');
-        } else {
-          setSystemTheme('light');
-          if (theme() === 'system') updateDOM('light');
-        }
-      });
+      .addEventListener('change', handleThemeChange);
+
+    onCleanup(() => {
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .removeEventListener('change', handleThemeChange);
+    });
   });
 
   onMount(() => {

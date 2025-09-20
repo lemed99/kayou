@@ -6,6 +6,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  onCleanup,
 } from 'solid-js';
 
 import {
@@ -70,9 +71,7 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
 
     document.addEventListener('mousedown', handleClickOutside);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
   });
 
   const handleTogglePopover = () => {

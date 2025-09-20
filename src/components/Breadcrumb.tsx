@@ -8,7 +8,8 @@ export interface BreadcrumbProps extends JSX.HTMLAttributes<HTMLElement> {
   children?: JSX.Element;
 }
 
-export interface BreadcrumbItemProps extends Omit<JSX.LiHTMLAttributes<HTMLLIElement>, 'ref'> {
+export interface BreadcrumbItemProps
+  extends Omit<JSX.LiHTMLAttributes<HTMLLIElement>, 'ref'> {
   href?: string;
   children?: JSX.Element;
   ref?: HTMLLIElement;
@@ -16,7 +17,7 @@ export interface BreadcrumbItemProps extends Omit<JSX.LiHTMLAttributes<HTMLLIEle
 
 const theme = {
   base: 'group flex items-center',
-  chevron: 'mx-1 h-4 w-4 text-gray-400 group-first:hidden md:mx-2',
+  chevron: 'mx-1 size-4 text-gray-400 group-first:hidden md:mx-2',
   href: {
     off: 'flex items-center text-sm font-medium text-gray-500 dark:text-gray-400',
     on: 'flex items-center text-sm text-gray-800 hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400 cursor-pointer',

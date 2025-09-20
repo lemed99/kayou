@@ -6,6 +6,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  onCleanup,
 } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 
@@ -168,7 +169,7 @@ const Calendar = (props: CalendarProps) => {
               onClick={() => navigateMonth(-1)}
               class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
             >
-              <ChevronLeftIcon class="h-5 w-5" />
+              <ChevronLeftIcon class="size-5" />
             </button>
           </div>
         </Show>
@@ -205,7 +206,7 @@ const Calendar = (props: CalendarProps) => {
               onClick={() => navigateMonth(1)}
               class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
             >
-              <ChevronRightIcon class="h-5 w-5" />
+              <ChevronRightIcon class="size-5" />
             </button>
           </div>
         </Show>
@@ -321,7 +322,7 @@ const Calendar = (props: CalendarProps) => {
               min={1970}
             />
             <Button type="submit" size="md">
-              <CheckIcon class="h-5 w-5" />
+              <CheckIcon class="size-4" />
             </Button>
           </form>
         </Match>
@@ -530,9 +531,7 @@ const DatePicker = (props: DatePickerProps) => {
 
     document.addEventListener('mousedown', handleClickOutside);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
   });
 
   return (
@@ -542,7 +541,7 @@ const DatePicker = (props: DatePickerProps) => {
         tabIndex={0}
         onMouseDown={handleInputClick}
         class={twMerge(
-          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-6 text-sm text-gray-900 focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
+          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-9 text-sm text-gray-900 focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
           props.inputClass || '',
         )}
       >
@@ -569,7 +568,7 @@ const DatePicker = (props: DatePickerProps) => {
             }}
             class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <XMarkIcon class="h-5 w-5" />
+            <XMarkIcon class="size-4" />
           </button>
         </Show>
       </div>
@@ -584,7 +583,7 @@ const DatePicker = (props: DatePickerProps) => {
         >
           <div
             class={twMerge(
-              'absolute z-50 h-4 w-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
+              'absolute z-50 size-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
               finalPlacement() === 'top-start'
                 ? '-bottom-[8.5px] left-0 ml-[1.2rem] border-r border-b'
                 : '',
