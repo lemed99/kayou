@@ -5,10 +5,10 @@ import {
   Button,
   Checkbox,
   DatePicker,
-  MultiSelect,
   NumberInput,
   Popover,
   Select,
+  SelectWithSearch,
   TextInput,
   Textarea,
   ToggleSwitch,
@@ -85,25 +85,26 @@ const SelectWithSearchDemo = () => {
   return (
     <div class="">
       <h2 class="mb-2 font-bold">Select a Product</h2>
-      <MultiSelect
+      <SelectWithSearch
         options={productOption().map((p) => ({
           label: p.label,
           value: p.value.id,
-          labelWrapper: (label) => (
-            <div class="flex items-center gap-0.5">
-              <InformationCircleIcon /> {label}
-            </div>
-          ),
+          // labelWrapper: (label) => (
+          //   <div class="flex items-center gap-0.5">
+          //     <InformationCircleIcon /> {label}
+          //   </div>
+          // ),
         }))}
+        // onMultiSelect={handleSelect}
         onSelect={handleSelect}
         // clearValues={clearValues()}
         // values={selectedProduct().map((p) => p.value.id) || []}
         placeholder="Search products..."
-        // autoFillSearchKey
+        autoFillSearchKey
         noSearchResultPlaceholder="No products found"
-        searchPlaceholder="Search productoooos..."
-        values={['2', '3']}
-        withSearch={true}
+        // searchPlaceholder="Search productoooos..."
+        // values={['2', '3']}
+        // withSearch={true}
         // multiple={true}
         // value="leo"
         // idValue="3"
@@ -176,7 +177,7 @@ const App: Component = () => {
             color="info"
           />
           <Select
-            color="info"
+            // color="info"
             sizing="md"
             helperText="Choose an option"
             options={[

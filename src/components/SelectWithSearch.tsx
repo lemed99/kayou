@@ -1,32 +1,14 @@
-import {
-  For,
-  JSX,
-  Show,
-  createEffect,
-  createSignal,
-  onCleanup,
-  splitProps,
-} from 'solid-js';
+import { For, JSX, Show, splitProps } from 'solid-js';
 
-import { autoPlacement, createFloating, offset } from 'floating-ui-solid';
-import { twMerge } from 'tailwind-merge';
-
-import { getScrollProgress } from '../helpers';
-import { CheckIcon, XMarkIcon } from '../icons';
-import HelperText from './HelperText';
-import Spinner from './Spinner';
+import type { Option } from '../helpers/selectUtils';
+import { ClearContentButton, OptionLabel, optionClass } from '../helpers/selectUtils';
+import useSelect from '../hooks/useSelect';
 import TextInput, { TextInputProps } from './TextInput';
-
-interface Option {
-  value: string;
-  label: string;
-  labelWrapper?: (label: string) => JSX.Element;
-}
 
 export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> {
   options: Option[];
   onSelect: (option?: Option) => void;
-  clearValue?: () => void;
+  clearValue?: boolean;
   autoFillSearchKey?: boolean;
   idValue?: string;
   value?: string;
@@ -52,190 +34,29 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
     'helperText',
   ]);
 
-  const [searchKey, setSearchKey] = createSignal('');
-  const [selectedOption, setSelectedOption] = createSignal<Option | null>(null);
-  const [highlightedOption, setHighlightedOption] = createSignal<Option | null>(null);
-
-  const [filteredOptions, setFilteredOptions] = createSignal<Option[]>([]);
-  const [isOpen, setIsOpen] = createSignal(false);
-
-  let searchRef: HTMLInputElement | undefined;
-
-  createEffect(() => {
-    setFilteredOptions(local.options);
-  });
-
-  createEffect(() => {
-    if (local.idValue) {
-      const opt = local.options.find((o) => o.value == local.idValue);
-      if (opt) {
-        if (local.autoFillSearchKey) setSearchKey(opt.label);
-        setSelectedOption(opt);
-        setHighlightedOption(opt);
-      }
-    } else if (local.value) {
-      setSearchKey(local.value);
-    }
-  });
-
-  createEffect(() => {
-    if (local.clearValue) {
-      setSelectedOption(null);
-      local.onSelect(undefined);
-      setSearchKey('');
-      setFilteredOptions(local.options);
-      setHighlightedOption(null);
-    }
-  });
-
-  const handleSearchChange = (
-    e: InputEvent & {
-      currentTarget: HTMLInputElement;
-      target: HTMLInputElement;
-    },
-  ) => {
-    const value = e.target.value;
-    setSearchKey(value);
-    if (!value) {
-      setFilteredOptions(local.options);
-    } else {
-      setFilteredOptions(
-        local.options.filter((opt) =>
-          opt.label.toLowerCase().includes(value.toLowerCase()),
-        ),
-      );
-      setHighlightedOption(filteredOptions()[0]);
-    }
-    setSelectedOption(null);
-    if (!isOpen()) setIsOpen(true);
-  };
-
-  const handleOptionClick = (option: Option) => {
-    if (local.autoFillSearchKey) setSearchKey(option.label);
-    setSelectedOption(option);
-    setHighlightedOption(option);
-    local.onSelect(option);
-    setIsOpen(false);
-  };
-
-  const handleInputClick = () => {
-    if (!props.disabled) {
-      setIsOpen(true);
-      if (!searchKey()) setFilteredOptions(props.options);
-    }
-  };
-
-  const { refs, placement: finalPlacement } = createFloating({
-    isOpen: isOpen,
-    middleware: [
-      offset(4),
-      autoPlacement({
-        allowedPlacements: ['top-start', 'bottom-start', 'top-end', 'bottom-end'],
-      }),
-    ],
-  });
-
-  createEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        refs.floating() &&
-        !refs.floating()?.contains(event.target as Node) &&
-        refs.reference() &&
-        !(refs.reference() as HTMLElement)?.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
-  });
-
-  createEffect(() => {
-    const el = refs.floating();
-    if (!el) return;
-
-    let lastScrollTop = el.scrollTop;
-    let dir: 'up' | 'down' | 'none' = 'none';
-
-    const handleLazyLoading = () => {
-      const current = el.scrollTop;
-      dir = current > lastScrollTop ? 'down' : current < lastScrollTop ? 'up' : 'none';
-      lastScrollTop = current <= 0 ? 0 : current;
-      const progress = getScrollProgress(el);
-      if (local.isLazyLoading) return;
-      if (dir !== 'down') return;
-      local.onLazyLoad?.(progress);
-    };
-
-    el.addEventListener('scroll', handleLazyLoading);
-
-    onCleanup(() => el.removeEventListener('scroll', handleLazyLoading));
-  });
-
-  const handleKeyDown = (
-    e: KeyboardEvent & {
-      currentTarget: HTMLInputElement;
-      target: Element;
-    },
-  ) => {
-    const { key } = e;
-
-    if (key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightedOption((prev) => {
-        if (filteredOptions().length === 0) return null;
-        if (!prev) return filteredOptions()[filteredOptions().length - 1];
-        const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
-        if (currentIndex === 0) {
-          return prev;
-        }
-        if (currentIndex === -1) {
-          return filteredOptions()[filteredOptions().length - 1];
-        }
-        return filteredOptions()[currentIndex - 1];
-      });
-      return;
-    }
-
-    if (key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightedOption((prev) => {
-        if (filteredOptions().length === 0) return null;
-        if (!prev) return filteredOptions()[0];
-        const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
-        if (currentIndex === filteredOptions().length - 1) {
-          return prev;
-        }
-        if (currentIndex === -1) {
-          return filteredOptions()[0];
-        }
-        return filteredOptions()[currentIndex + 1];
-      });
-      return;
-    }
-
-    if (key === 'Enter') {
-      e.preventDefault();
-      const currentIndex = highlightedOption()
-        ? filteredOptions().findIndex((o) => o.value === highlightedOption()?.value)
-        : -1;
-      if (highlightedOption() && currentIndex !== -1) {
-        handleOptionClick(highlightedOption()!);
-      } else if (filteredOptions().length === 1) {
-        handleOptionClick(filteredOptions()[0]);
-      }
-      return;
-    }
-  };
+  const {
+    Layout,
+    highlightedOption,
+    handleOptionClick,
+    setHighlightedOption,
+    selectedOption,
+    handleKeyDown,
+    searchRef,
+    searchKey,
+    handleSearchChange,
+    filteredOptions,
+    setFilteredOptions,
+    setSelectedOption,
+    setSearchKey,
+    setSearchRef,
+  } = useSelect(local, 'selectWithSearch');
 
   return (
-    <div class="w-full">
-      <div class="relative w-full">
-        <div ref={refs.setReference} onClick={handleInputClick} class="relative w-full">
+    <Layout
+      inputComponent={
+        <>
           <TextInput
-            ref={searchRef}
+            ref={setSearchRef}
             value={searchKey()}
             onInput={handleSearchChange}
             placeholder={props.placeholder}
@@ -250,71 +71,36 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
           />
 
           <Show when={searchKey() && !props.disabled}>
-            <button
-              type="button"
+            <ClearContentButton
               onClick={() => {
                 setSelectedOption(null);
                 setSearchKey('');
                 setFilteredOptions(local.options);
                 setHighlightedOption(null);
-                (searchRef as HTMLElement)?.focus();
+                (searchRef() as HTMLElement)?.focus();
               }}
-              class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <XMarkIcon class="size-4" />
-            </button>
+            />
           </Show>
-        </div>
-
-        <Show when={isOpen()}>
-          <div
-            ref={refs.setFloating}
-            class={twMerge(
-              'scrollbar-thin scrollbar-track-gray-50 scrollbar-thumb-gray-400 dark:scrollbar-track-gray-700 dark:scrollbar-thumb-gray-500 absolute z-50 box-border max-h-[240px] w-fit overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow dark:bg-gray-700',
-              finalPlacement() === 'top-start' ? 'bottom-full mb-1' : '',
-              finalPlacement() === 'bottom-start' ? 'top-full mt-1' : '',
-              finalPlacement() === 'top-end' ? 'right-0 bottom-full mb-1' : '',
-              finalPlacement() === 'bottom-end' ? 'top-full right-0 mt-1' : '',
-            )}
-          >
-            <For
-              each={filteredOptions()}
-              fallback={
-                <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
-              }
+        </>
+      }
+      optionsComponent={
+        <For
+          each={filteredOptions()}
+          fallback={
+            <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
+          }
+        >
+          {(option) => (
+            <div
+              class={optionClass(option, highlightedOption())}
+              onClick={() => handleOptionClick(option)}
+              onMouseEnter={() => setHighlightedOption(option)}
             >
-              {(option) => (
-                <div
-                  class={twMerge(
-                    'flex cursor-pointer items-center justify-between px-2 py-1.5 text-sm whitespace-nowrap',
-                    highlightedOption()?.value == option.value
-                      ? 'rounded bg-gray-100'
-                      : '',
-                  )}
-                  onClick={() => handleOptionClick(option)}
-                  onMouseEnter={() => setHighlightedOption(option)}
-                >
-                  {option.labelWrapper ? option.labelWrapper(option.label) : option.label}
-                  <div class="ml-2.5 size-4">
-                    <Show when={selectedOption()?.value === option.value}>
-                      <CheckIcon class="size-4" />
-                    </Show>
-                  </div>
-                </div>
-              )}
-            </For>
-            <Show when={local.isLazyLoading}>
-              <div class="p-1 text-center">
-                <Spinner color="gray" size="xs" />
-              </div>
-            </Show>
-            <Show when={local.cta}>{local.cta}</Show>
-          </div>
-        </Show>
-      </div>
-      <Show when={local.helperText}>
-        <HelperText content={local.helperText as string} color={otherProps.color} />
-      </Show>
-    </div>
+              <OptionLabel option={option} selectedOption={selectedOption()} />
+            </div>
+          )}
+        </For>
+      }
+    />
   );
 }

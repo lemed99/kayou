@@ -113,7 +113,7 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
             !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
           }
         >
-          <div class="w-fit rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
+          <div class="w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
             {merged.content}
           </div>
         </div>
