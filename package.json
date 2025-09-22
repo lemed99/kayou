@@ -33,8 +33,6 @@
     "dist"
   ],
   "scripts": {
-    "start": "vite --config dev/vite.config.ts --host",
-    "dev": "vite --config dev/vite.config.ts",
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
     "prepublishOnly": "pnpm build",
     "serve": "vite preview",
@@ -80,6 +78,7 @@
     "vite-plugin-solid": "^2.11.6"
   },
   "dependencies": {
+    "@solid-primitives/presence": "^0.1.2",
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.2.0",

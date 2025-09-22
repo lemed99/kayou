@@ -5,6 +5,8 @@ import {
   Button,
   Checkbox,
   DatePicker,
+  Drawer,
+  Modal,
   NumberInput,
   Popover,
   Select,
@@ -135,6 +137,64 @@ const SelectWithSearchDemo = () => {
   );
 };
 
+const [modal, setModal] = createSignal(false);
+
+const DrawerExample = () => {
+  const [isOpen, setIsOpen] = createSignal(false);
+
+  const openDrawer = () => {
+    setIsOpen(true);
+    console.log('cliked');
+  };
+  const closeDrawer = () => setIsOpen(false);
+
+  return (
+    <div class="p-4">
+      <h2 class="mb-4 text-xl font-bold">Drawer Component Example</h2>
+
+      <button
+        class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        onClick={openDrawer}
+      >
+        Open Drawer!!
+      </button>
+
+      <Drawer
+        show={isOpen()}
+        onClose={closeDrawer}
+        position="left"
+        // widthClass="w-fit"
+        // heightClass="h-fit"
+        // backdropType="blurry"
+        // closeOnBackdropClick={true}
+      >
+        <div>
+          <h3 class="mb-3 text-lg font-semibold">Drawer Content</h3>
+
+          <p class="mb-4">
+            This is the content of the drawer. You can put any components or content here.
+          </p>
+
+          <div class="space-y-2">
+            <div class="rounded bg-gray-100 p-3 dark:bg-gray-700">Item 1</div>
+            <div class="rounded bg-gray-100 p-3 dark:bg-gray-700">Item 2</div>
+            <div class="rounded bg-gray-100 p-3 dark:bg-gray-700">Item 3</div>
+          </div>
+
+          <div class="mt-6">
+            <button
+              class="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+              onClick={closeDrawer}
+            >
+              Close Drawer
+            </button>
+          </div>
+        </div>
+      </Drawer>
+    </div>
+  );
+};
+
 const App: Component = () => {
   const toast = useToast() as ToastAPI & {
     success: (msg: string, options?: any) => string;
@@ -230,6 +290,10 @@ const App: Component = () => {
               // minDate="2025-09-07"
               // maxDate="2025-09-20"
             />
+            <DrawerExample />
+            <Modal position="center" show={modal()} onClose={() => setModal(false)}>
+              <div>Je suis la</div>
+            </Modal>
           </div>
         </div>
 

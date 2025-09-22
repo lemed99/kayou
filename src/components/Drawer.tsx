@@ -1,126 +1,131 @@
-import { JSX, Show, createEffect, createSignal } from 'solid-js';
+import { JSX, Show, createMemo } from 'solid-js';
+import { Portal } from 'solid-js/web';
 
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { XMarkIcon } from '../icons';
 
 export interface DrawerProps
-  extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'children'> {
-  children?: JSX.Element | ((props: { close: () => void }) => JSX.Element);
+  extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
+  children?: JSX.Element;
   show?: boolean;
   position?: 'right' | 'left' | 'top' | 'bottom';
-  widthClass?: string;
-  heightClass?: string;
-  backdropType?: 'none' | 'default' | 'blurry';
-  closeOnBackdropClick?: boolean;
-  onClose: () => void;
+  width?: string;
+  height?: string;
+  onClose: (event: MouseEvent) => void;
+  roundedEdges?: boolean;
 }
 
+const theme = {
+  backdrop: {
+    base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
+    show: 'bg-gray-800/50 dark:bg-gray-800/80',
+  },
+  content: {
+    positions: {
+      top: 'top-0 left-0 right-0 w-full',
+      bottom: 'bottom-0 left-0 right-0 w-full',
+      left: 'left-0 top-0 h-full',
+      right: 'right-0 top-0 h-full',
+    },
+    base: 'fixed z-[91]',
+    inner: {
+      base: 'relative bg-white w-full h-full dark:bg-gray-700',
+      positions: {
+        top: 'rounded-b-lg',
+        bottom: 'rounded-t-lg',
+        left: 'rounded-r-lg',
+        right: 'rounded-l-lg',
+      },
+    },
+  },
+  body: {
+    base: 'p-6',
+    popup: 'pt-0',
+  },
+  header: {
+    base: 'flex items-start justify-between rounded-t dark:border-gray-600 border-b p-5',
+    popup: '!p-2 !border-b-0',
+    close: {
+      base: 'ml-auto inline-flex cursor-pointer items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
+      icon: 'size-5',
+    },
+  },
+};
+
 const Drawer = (props: DrawerProps) => {
-  const [isOpening, setIsOpening] = createSignal(false);
-  const [isOpen, setIsOpen] = createSignal(false);
-
-  const positions = {
-    right: 'right-0 translate-x-full',
-    left: 'left-0 -translate-x-full',
-    top: 'top-0 -translate-y-full',
-    bottom: 'bottom-0 translate-y-full',
-  };
-
-  const openPositions = {
-    right: 'translate-x-0',
-    left: 'translate-x-0',
-    top: 'translate-y-0',
-    bottom: 'translate-y-0',
-  };
-
-  const backdropStyles = {
-    none: '',
-    default: 'bg-gray-900/50 dark:bg-gray-900/80',
-    blurry: 'backdrop-blur-sm bg-gray-900/30 dark:bg-gray-900/50',
-  };
-
-  const handleBackdropClick = (e: MouseEvent) => {
-    if (props.closeOnBackdropClick && e.target === e.currentTarget) {
-      closeDrawer();
-    }
-  };
-
   const getSizeClasses = () => {
     if (props.position === 'top' || props.position === 'bottom') {
-      return props.heightClass ?? 'h-full md:h-1/2';
+      return props.height ?? 'h-full md:h-fit';
     }
-    return props.widthClass ?? 'w-full md:w-1/2';
+    return props.width ?? 'w-full md:w-fit';
   };
 
-  const openDrawer = () => {
-    document.body.style.overflow = 'hidden';
-    setIsOpening(true);
-    setTimeout(() => {
-      setIsOpening(false);
-      setIsOpen(true);
-    }, 50);
-  };
+  const position = createMemo(() => props.position || 'right');
 
-  const closeDrawer = () => {
-    setIsOpen(false);
-    setTimeout(() => {
-      document.body.style.overflow = '';
-      props.onClose();
-    }, 300); // Match this with your transition duration
-  };
+  const { isVisible, isMounted } = createPresence(() => props.show, {
+    transitionDuration: 500,
+  });
 
-  createEffect(() => {
-    if (props.show) {
-      setTimeout(() => {
-        openDrawer();
-      }, 0);
+  const translateDirection = createMemo(() => {
+    switch (position()) {
+      case 'right':
+        return 'translate(100%, 0)';
+      case 'left':
+        return 'translate(-100%, 0)';
+      case 'top':
+        return 'translate(0, -100%)';
+      case 'bottom':
+        return 'translate(0, 100%)';
+      default:
+        return 'translate(0, 0)';
     }
   });
 
   return (
-    <Show when={props.show || isOpening() || isOpen()}>
-      <div
-        class={twMerge(
-          'fixed inset-0 z-[90] h-full w-full overflow-x-hidden overflow-y-auto',
-          'scrollbar-thin scrollbar-track-gray-400 scrollbar-thumb-gray-100 dark:scrollbar-track-gray-800 dark:scrollbar-thumb-gray-500',
-          'flex transition-all duration-300',
-          backdropStyles[props.backdropType || 'default'],
-          props.class,
-        )}
-        onClick={handleBackdropClick}
-        aria-modal="true"
-        role="dialog"
-      >
+    <Show when={isMounted()}>
+      <Portal>
+        <div
+          class={twMerge(theme.backdrop.base, theme.backdrop.show)}
+          style={{
+            transition: 'all .5s cubic-bezier(.32, .72, 0, 1)',
+            opacity: isVisible() ? '1' : '0',
+          }}
+          onClick={(e) => props?.onClose(e)}
+        />
         <div
           class={twMerge(
-            'fixed z-50 overflow-y-auto bg-white shadow dark:bg-gray-800',
-            'duration-500 ease-in-out',
-            props.position === 'left' || props.position === 'right'
-              ? 'top-0 h-screen'
-              : 'left-0 w-screen',
+            theme.content.base,
+            theme.content.positions[position()],
+            props.class,
             getSizeClasses(),
-            positions[props.position || 'right'],
-            (isOpen() || isOpening()) && openPositions[props.position || 'right'],
           )}
+          style={{
+            transition: 'transform .5s cubic-bezier(.32, .72, 0, 1)',
+            transform: isVisible() ? 'translate(0, 0)' : translateDirection(),
+          }}
         >
-          <div class="flex items-start justify-between !border-b-0 p-2">
-            <button
-              aria-label="Close"
-              class="ml-auto inline-flex cursor-pointer items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
-              type="button"
-              onClick={closeDrawer}
-            >
-              <XMarkIcon class="size-5" />
-            </button>
-          </div>
-          <div class="p-6 pt-0">
-            {typeof props.children === 'function'
-              ? props.children({ close: closeDrawer })
-              : props.children}
+          <div
+            class={twMerge(
+              theme.content.inner.base,
+              props.roundedEdges ? theme.content.inner.positions[position()] : '',
+            )}
+          >
+            <div class={twMerge(theme.header.base, theme.header.popup)}>
+              <button
+                aria-label="Close"
+                class={theme.header.close.base}
+                type="button"
+                onClick={(e) => props.onClose(e)}
+              >
+                <XMarkIcon class={theme.header.close.icon} />
+              </button>
+            </div>
+            <div class={twMerge(theme.body.base, theme.body.popup)}>{props.children}</div>
           </div>
         </div>
-      </div>
+      </Portal>
     </Show>
   );
 };

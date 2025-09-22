@@ -21,7 +21,7 @@ const SuccessToast: Component<ToastMethodProps> = (props) => {
 render(
   () => (
     <ToastProvider
-      position="bottom-center"
+      position="top-right"
       duration={30000}
       pauseOnHover={true}
       gutter={16}
