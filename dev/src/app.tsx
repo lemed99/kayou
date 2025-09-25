@@ -301,7 +301,7 @@ const App: Component = () => {
           <Button
             onClick={() => {
               toast.success('This is a success message!', {
-                duration: 5000,
+                duration: 3000,
                 pauseOnHover: false,
               });
             }}

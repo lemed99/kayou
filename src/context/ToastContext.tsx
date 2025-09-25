@@ -2,6 +2,7 @@ import {
   Component,
   For,
   ParentProps,
+  Show,
   createContext,
   createEffect,
   createSignal,
@@ -9,10 +10,10 @@ import {
   onCleanup,
   useContext,
 } from 'solid-js';
-import { createStore, produce } from 'solid-js/store';
+import { createStore, produce, reconcile } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
-import { TransitionGroup } from 'solid-transition-group';
 
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 type ToastPosition =
@@ -30,7 +31,11 @@ interface Toast {
   options: Required<ToastOptions>;
   createdAt: number;
   pausedAt?: number;
+  dismissedAt?: number;
   remainingTime: number;
+  top: number | string;
+  bottom: number | string;
+  height: number;
 }
 
 interface ToastOptions {
@@ -71,7 +76,10 @@ interface ToastContextValue {
   methods: ToastMethods;
   toasts: Toast[];
   api: ToastAPI;
+  remove: (id: string) => void;
   setHoveredToastId: (id: string | null) => void;
+  setToastHeight: (id: string, height: number) => void;
+  setToasts: (toasts: Toast[]) => void;
 }
 
 interface ToastAPIBase {
@@ -83,15 +91,100 @@ interface ToastAPIBase {
 export type ToastAPI = ToastAPIBase & ToastAPIMethods;
 
 const positionsClass = {
-  'top-left': 'top-4 left-4 items-start',
-  'top-center': 'top-4 left-1/2 transform -translate-x-1/2 items-center',
-  'top-right': 'top-4 right-4 items-end',
-  'bottom-left': 'bottom-4 left-4 items-start',
-  'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2 items-center',
-  'bottom-right': 'bottom-4 right-4 items-end',
+  'top-left': 'top-4 left-4',
+  'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
+  'top-right': 'top-4 right-4',
+  'bottom-left': 'bottom-4 left-4',
+  'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
+  'bottom-right': 'bottom-4 right-4',
 };
 
 export const ToastContext = createContext<ToastContextValue>();
+
+const ToastComponentWrapper = (toast: Toast, context: ToastContextValue) => {
+  const [renderToast, setRenderToast] = createSignal(false);
+  const [toastRef, setToastRef] = createSignal<HTMLDivElement>();
+  const isTop = () => context.position.includes('top');
+  const isLeft = () => context.position.includes('left');
+  const isCenter = () => context.position.includes('center');
+  const getToastYDirection = () => {
+    return isTop() ? -1 : 1;
+  };
+
+  createEffect(() => {
+    if (toast && !toast.dismissedAt) {
+      setRenderToast(true);
+    } else {
+      setRenderToast(false);
+    }
+  });
+
+  const { isVisible, isMounted } = createPresence(renderToast, {
+    transitionDuration: 300,
+  });
+
+  createEffect(() => {
+    if (toast.dismissedAt && !isMounted()) context.remove(toast.id);
+  });
+
+  createEffect(() => {
+    if (toastRef() && !toast.height) {
+      const toastHeight = toastRef()!.getBoundingClientRect().height / 0.6; // divided by 0.6 because it captures the height at scale 0.6
+      context.setToastHeight(toast.id, toastHeight);
+      context.setToasts(
+        context.toasts.map((t, i, ar) => {
+          return {
+            ...t,
+            top: isTop()
+              ? i === ar.length - 1
+                ? 0
+                : (t.top as number) + toastHeight + context.gutter
+              : '',
+            bottom: isTop()
+              ? ''
+              : i === ar.length - 1
+                ? 0
+                : (t.bottom as number) + toastHeight + context.gutter,
+          };
+        }),
+      );
+    }
+  });
+
+  const Component = context.methods[toast.method];
+
+  return (
+    <Show when={isMounted()}>
+      <div
+        ref={setToastRef}
+        onMouseEnter={() => context.setHoveredToastId(toast.id)}
+        onMouseLeave={() => context.setHoveredToastId(null)}
+        style={{
+          position: 'absolute',
+          right: isLeft() || isCenter() ? '' : '0px',
+          left: isLeft() ? '0px' : isCenter() ? '50%' : '',
+          top: `${toast.top}px`,
+          bottom: `${toast.bottom}px`,
+          transition: 'all .3s cubic-bezier(.32, .72, 0, 1)',
+          opacity: isVisible() ? '1' : '0',
+          scale: isVisible() ? 1 : 0.6,
+          transform: isVisible()
+            ? `translate(${isCenter() ? '-50%' : 0}, 0)`
+            : `translate(${isCenter() ? '-50%' : 0}, ${getToastYDirection() * 100}%)`,
+        }}
+      >
+        <Component
+          message={toast.message}
+          paused={() => !!toast.pausedAt}
+          duration={toast.options.duration}
+          dismiss={() => context.api.dismiss(toast.id)}
+          pause={() => context.api.pause(toast.id)}
+          play={() => context.api.play(toast.id)}
+        />
+      </div>
+    </Show>
+  );
+};
 
 const ToastContainer = () => {
   const context = useContext(ToastContext);
@@ -99,56 +192,16 @@ const ToastContainer = () => {
     throw new Error('useToast must be used within ToastProvider');
   }
 
-  const { toasts, position, gutter, methods, setHoveredToastId } = context;
-
-  const getToastYDirection = () => {
-    return position.includes('top') ? -1 : 1;
-  };
+  const { toasts, position, gutter } = context;
 
   return (
     <>
-      <style>
-        {`
-        .group-item {
-          transition: all 0.3s;
-        }
-        .group-item-enter,
-        .group-item-exit-to {
-          opacity: 0;
-          transform: translateY(${getToastYDirection() * 10}px);
-        }
-        `}
-      </style>
       <Portal>
         <div
           style={{ gap: `${gutter}px` }}
-          class={twMerge('fixed z-50 flex flex-col', positionsClass[position])}
+          class={twMerge('fixed z-50', positionsClass[position])}
         >
-          <TransitionGroup name="group-item">
-            <For each={toasts}>
-              {(toast) => {
-                const Component = methods[toast.method];
-                if (!Component) return null;
-
-                return (
-                  <div
-                    onMouseEnter={() => setHoveredToastId(toast.id)}
-                    onMouseLeave={() => setHoveredToastId(null)}
-                    class="group-item"
-                  >
-                    <Component
-                      message={toast.message}
-                      paused={() => !!toast.pausedAt}
-                      duration={toast.options.duration}
-                      dismiss={() => context.api.dismiss(toast.id)}
-                      pause={() => context.api.pause(toast.id)}
-                      play={() => context.api.play(toast.id)}
-                    />
-                  </div>
-                );
-              }}
-            </For>
-          </TransitionGroup>
+          <For each={toasts}>{(toast) => ToastComponentWrapper(toast, context)}</For>
         </div>
       </Portal>
     </>
@@ -177,6 +230,7 @@ export const ToastProvider = (props: ToastProviderProps) => {
   const [toasts, setToasts] = createStore<Toast[]>([]);
   const [hoveredToastId, setHoveredToastId] = createSignal<string | null>(null);
   const timers = new Map<string, NodeJS.Timeout>();
+  const isTop = () => defaultOptions.position.includes('top');
 
   onCleanup(() => {
     timers.forEach((timer) => clearTimeout(timer));
@@ -204,6 +258,31 @@ export const ToastProvider = (props: ToastProviderProps) => {
 
   const dismiss = (id: string): void => {
     stopTimer(id);
+    const toast = toasts.find((t) => t.id === id);
+    const toastIndex = toasts.findIndex((t) => t.id === id);
+    setToasts(
+      reconcile(
+        toasts.map((t, i) => {
+          return {
+            ...t,
+            dismissedAt: i === toastIndex ? Date.now() : t.dismissedAt,
+            top: isTop()
+              ? i < toastIndex
+                ? (t.top as number) - toast!.height - defaultOptions.gutter
+                : t.top
+              : '',
+            bottom: isTop()
+              ? ''
+              : i < toastIndex
+                ? (t.bottom as number) - toast!.height - defaultOptions.gutter
+                : t.bottom,
+          };
+        }),
+      ),
+    );
+  };
+
+  const remove = (id: string): void => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
@@ -236,6 +315,16 @@ export const ToastProvider = (props: ToastProviderProps) => {
     }
   };
 
+  const setToastHeight = (id: string, height: number): void => {
+    const toastIndex = toasts.findIndex((t) => t.id === id);
+    setToasts(
+      toastIndex,
+      produce((t) => {
+        t.height = height;
+      }),
+    );
+  };
+
   const createToast = (
     method: string,
     message: string,
@@ -260,6 +349,9 @@ export const ToastProvider = (props: ToastProviderProps) => {
       options: mergedOptions,
       createdAt: Date.now(),
       remainingTime: mergedOptions.duration,
+      top: isTop() ? 0 : '',
+      bottom: isTop() ? '' : 0,
+      height: 0,
     };
 
     setToasts(toasts.length, toast);
@@ -311,7 +403,12 @@ export const ToastProvider = (props: ToastProviderProps) => {
     ...defaultOptions,
     toasts,
     api,
+    remove,
     setHoveredToastId,
+    setToastHeight,
+    setToasts: (toasts: Toast[]) => {
+      setToasts(reconcile(toasts));
+    },
   };
 
   return (
