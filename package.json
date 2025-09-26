@@ -1,6 +1,6 @@
 {
   "name": "@exowpee/the_rock",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "A UI component library built with SolidJS",
   "private": true,
   "type": "module",
@@ -56,26 +56,26 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.36.0",
     "@solidjs/router": "^0.15.3",
-    "@tailwindcss/vite": "^4.0.7",
+    "@tailwindcss/vite": "^4.1.13",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/d3-scale": "^4.0.9",
     "@types/d3-selection": "^3.0.11",
     "@types/d3-shape": "^3.1.7",
-    "@types/node": "^24.3.1",
-    "eslint": "^9.33.0",
+    "@types/node": "^24.5.2",
+    "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-solid": "^0.14.5",
-    "eslint-plugin-unused-imports": "^4.1.4",
+    "eslint-plugin-unused-imports": "^4.2.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
-    "solid-js": "^1.9.5",
-    "tailwindcss": "^4.0.7",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.39.1",
-    "vite": "^6.0.0",
-    "vite-plugin-solid": "^2.11.6"
+    "solid-js": "^1.9.9",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1",
+    "vite": "^6.3.6",
+    "vite-plugin-solid": "^2.11.8"
   },
   "dependencies": {
     "@solid-primitives/presence": "^0.1.2",
@@ -83,7 +83,7 @@
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.2.0",
     "floating-ui-solid": "^1.0.63",
-    "tailwind-merge": "^3.1.0"
+    "tailwind-merge": "^3.3.1"
   },
   "repository": {
     "type": "git"
