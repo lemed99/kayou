@@ -8,7 +8,6 @@ export * from './components/Charts/LineCharts';
 export * from './components/Charts/PieChart';
 export { ResponsiveContainer } from './components/Charts/ResponsiveContainer';
 export { default as Checkbox } from './components/Checkbox';
-export { default as DataTable } from './components/DataTable';
 export { default as DatePicker } from './components/DatePicker';
 export { default as Drawer } from './components/Drawer';
 export { DynamicVirtualList } from './components/DynamicVirtualList';
