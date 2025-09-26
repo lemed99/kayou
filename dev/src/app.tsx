@@ -15,6 +15,7 @@ import {
   Textarea,
   ToggleSwitch,
   Tooltip,
+  VirtualGrid,
 } from '../../src';
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ToastAPI } from '../../src/context/ToastContext';
@@ -138,6 +139,86 @@ const SelectWithSearchDemo = () => {
 };
 
 const [modal, setModal] = createSignal(false);
+
+function VList() {
+  // Create 1000 items with varying content length
+  const [items] = createSignal(
+    Array.from({ length: 1000 }, (_, i) => ({
+      id: i,
+      height: 30 + Math.floor(Math.random() * 100), // random 30–130px
+      text: `Item ${i}`, // longer strings = taller items
+    })),
+  );
+  const rows = Array.from({ length: 1000 }, (_, i) => ({
+    id: i + 1,
+    name: `User ${i + 1}`,
+    age: 20 + (i % 50),
+    bio: 'Lorem ipsum '.repeat((i % 10) + 1), // variable height for dynamic table
+  }));
+
+  return (
+    /*<div style="padding: 1rem">
+      <h2>Dynamic Virtualized List</h2>
+
+      <DynamicVirtualList
+        each={items()}
+        rootHeight={400} // visible height of container
+        overscanCount={3} // render extra items above/below
+      >
+        {(item, index) => (
+          <div
+            style={{
+              'box-sizing': 'border-box',
+              border: '1px solid #ccc',
+              padding: '8px',
+              margin: '4px 0',
+              height: `${item.height}px`, // <— force height
+              'background-color': index % 2 === 0 ? '#f9f9f9' : '#fff',
+            }}
+          >
+            <strong>{item.id}</strong>: {item.text}
+          </div>
+        )}
+      </DynamicVirtualList>
+    </div>*/
+    <DynamicVirtualTable columns={['ID', 'Name', 'Bio']} data={rows} rootHeight={300}>
+      {(row) => (
+        <>
+          <td>{row.id}</td>
+          <td>{row.name}</td>
+          <td>{row.bio}</td>
+        </>
+      )}
+    </DynamicVirtualTable>
+  );
+}
+
+function DemoGrid() {
+  const data = Array.from({ length: 1000 }, (_, i) => `Item ${i + 1}`);
+
+  return (
+    <VirtualGrid
+      data={data}
+      rootHeight={400}
+      gap={16}
+      class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+      itemHeight={60}
+    >
+      {(item) => (
+        <div
+          style={{
+            height: '100%',
+            border: '1px solid #ccc',
+            padding: '16px',
+            'box-sizing': 'border-box',
+          }}
+        >
+          {item}
+        </div>
+      )}
+    </VirtualGrid>
+  );
+}
 
 const DrawerExample = () => {
   const [isOpen, setIsOpen] = createSignal(false);
@@ -269,7 +350,6 @@ const App: Component = () => {
             </div>
           </Popover>
         </div>
-
         <div class="flex w-full justify-center text-sm">
           <div class="w-full max-w-sm">
             <SelectWithSearchDemo />
@@ -296,7 +376,6 @@ const App: Component = () => {
             </Modal>
           </div>
         </div>
-
         <div class="max-w-lg space-y-8 p-8">
           <Button
             onClick={() => {
@@ -322,6 +401,8 @@ const App: Component = () => {
             onChange={setChecked}
           />
         </div>
+        <DemoGrid />
+        <div class="h-[400px]"></div>
       </>
     </DatePickerProvider>
     //   </ThemeProvider>
