@@ -2,7 +2,6 @@
   "name": "@exowpee/the_rock",
   "version": "0.0.1",
   "description": "A UI component library built with SolidJS",
-  "private": true,
   "type": "module",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
