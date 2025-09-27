@@ -8,7 +8,13 @@ import {
   onCleanup,
   useContext,
 } from 'solid-js';
-import { CustomError, CustomResourceContext, PendingEntry, ResourceOptions } from '../context/CustomResourceContext';
+
+import {
+  CustomError,
+  CustomResourceContext,
+  PendingEntry,
+  ResourceOptions,
+} from '../context/CustomResourceContext';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
 
 export interface CustomResource<T> {

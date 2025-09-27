@@ -1,7 +1,4 @@
-import {
-    ParentComponent,
-    createContext,
-} from 'solid-js';
+import { ParentComponent, createContext } from 'solid-js';
 
 export interface CustomError {
   message: string;
@@ -31,13 +28,13 @@ export interface PendingEntry<T> {
   lastValue?: T;
   resolvedAt?: number;
   timeoutId?: ReturnType<typeof setTimeout>;
-};
+}
 
 export const CustomResourceContext = createContext();
 
-export const CustomResourceProvider: ParentComponent<CustomResourceProviderProps<unknown>> = (
-  props,
-) => {
+export const CustomResourceProvider: ParentComponent<
+  CustomResourceProviderProps<unknown>
+> = (props) => {
   const pendingRequests = new Map<string, PendingEntry<unknown>>();
   const options: ResourceOptions<unknown> = {
     get retryCount() {

@@ -57,4 +57,3 @@ export const DatePickerProvider: ParentComponent<{ locale: string }> = (props) =
     </DatePickerContext.Provider>
   );
 };
-

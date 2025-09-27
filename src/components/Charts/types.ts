@@ -32,14 +32,14 @@ export interface LineChartContextType {
   xAxisBBox: Accessor<DOMRect | null>;
   setXAxisBBox: Setter<DOMRect | null>;
   setCustomTooltip: Setter<((data: Record<string, unknown>) => JSX.Element) | undefined>;
-};
+}
 
 export interface XAxisProps {
   dataKey: string;
   tickCount?: number;
   tickFormatter?: (v: string | number) => string;
   stroke?: string;
-};
+}
 
 export type LineChartProps = ParentProps<{
   width: number;
@@ -53,37 +53,37 @@ export interface YAxisProps {
   tickCount?: number;
   tickFormatter?: (v: number) => string;
   stroke?: string;
-};
+}
 
 export interface CartesianGridProps {
   stroke?: string;
   strokeDasharray?: string;
   vertical?: boolean;
   horizontal?: boolean;
-};
+}
 
 export interface LineProps {
   dataKey: string;
   stroke?: string;
   strokeWidth?: number;
   dot?: boolean;
-};
+}
 
 export interface TooltipProps {
   stroke?: string;
   withLine?: boolean;
   content?: (data: Record<string, unknown>) => JSX.Element;
-};
+}
 
 export interface Size {
   rwidth: number;
   rheight: number;
-};
+}
 
 export interface PieChartContextType {
   width: Accessor<number>;
   height: Accessor<number>;
-};
+}
 
 export type PieChartProps = ParentProps<{
   width: number;
@@ -92,11 +92,12 @@ export type PieChartProps = ParentProps<{
   rheight?: number;
 }>;
 
-export type ActiveSector = SectorProps & PieArcDatum<Record<string, unknown>> & {
-  percent: number;
-  cx: number;
-  cy: number;
-};
+export type ActiveSector = SectorProps &
+  PieArcDatum<Record<string, unknown>> & {
+    percent: number;
+    cx: number;
+    cy: number;
+  };
 
 export interface PieProps {
   data: Record<string, unknown>[];
@@ -107,8 +108,8 @@ export interface PieProps {
   outerRadius: number;
   fill: string;
   activeShape?: (props: ActiveSector) => JSX.Element;
-};
+}
 
 export interface SectorProps extends DefaultArcObject {
   fill: string;
-};
+}

@@ -1,6 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
+//import { dirname, resolve } from 'node:path';
+//import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+
+//const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   publicDir: false,
@@ -14,8 +18,9 @@ export default defineConfig({
         helpers: './src/helpers/index.ts',
         icons: './src/icons/index.tsx',
       },
-      name: 'TheRock',
-      fileName: (format) => `index.${format}.js`,
+      name: 'the_rock',
+      fileName: (_, entryName) =>
+        entryName === 'index' ? 'index.es.js' : `${entryName}/index.es.js`,
       formats: ['es'],
     },
     rollupOptions: {

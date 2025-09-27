@@ -1,6 +1,8 @@
-import { IntlShape } from "@formatjs/intl";
-import { useContext } from "solid-js";
-import { IntlContext } from "../context/IntlContext";
+import { useContext } from 'solid-js';
+
+import { IntlShape } from '@formatjs/intl';
+
+import { IntlContext } from '../context/IntlContext';
 
 export const useIntl = (): IntlShape => {
   const intl = useContext(IntlContext);

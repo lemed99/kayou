@@ -1,5 +1,6 @@
-import { useContext } from "solid-js";
-import { ThemeContext } from "../context/ThemeContext";
+import { useContext } from 'solid-js';
+
+import { ThemeContext } from '../context/ThemeContext';
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);

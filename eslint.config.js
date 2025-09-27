@@ -8,7 +8,7 @@ const tsParser = tseslint.parser;
 
 export default [
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist', 'node_modules', 'dev'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -33,13 +33,14 @@ class NativeCache {
 
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
-      
-      request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+
+      request.onerror = () =>
+        reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
       request.onsuccess = () => {
         this.db = request.result;
         resolve(request.result);
       };
-      
+
       request.onupgradeneeded = () => {
         const db = request.result;
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -51,27 +52,28 @@ class NativeCache {
 
   async get(key: string): Promise<unknown> {
     if (!key) return null;
-    
+
     try {
       const db = await this.getDB();
       const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
-      
+
       return new Promise((resolve, reject) => {
         const request = store.get(key);
-        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onerror = () =>
+          reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
         request.onsuccess = () => {
           const result = request.result as CacheRow;
           if (!result) {
             resolve(null);
             return;
           }
-          
+
           if (!isValidCacheData(result.value)) {
             resolve(null);
             return;
           }
-          
+
           resolve(result.value);
         };
       });
@@ -86,10 +88,11 @@ class NativeCache {
       const db = await this.getDB();
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      
+
       return new Promise((resolve, reject) => {
         const request = store.put({ key, value });
-        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onerror = () =>
+          reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
         request.onsuccess = () => resolve();
       });
     } catch (error) {
@@ -102,10 +105,11 @@ class NativeCache {
       const db = await this.getDB();
       const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
-      
+
       return new Promise((resolve, reject) => {
         const request = store.getAllKeys();
-        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
+        request.onerror = () =>
+          reject(new Error(request.error?.message || 'IndexedDB getAllKeys error'));
         request.onsuccess = () => resolve(request.result as string[]);
       });
     } catch (error) {
@@ -121,7 +125,8 @@ class NativeCache {
       const store = transaction.objectStore(this.storeName);
       return new Promise((resolve, reject) => {
         const request = store.clear();
-        request.onerror = () => reject(new Error(request.error?.message || 'IndexedDB clear error'));
+        request.onerror = () =>
+          reject(new Error(request.error?.message || 'IndexedDB clear error'));
         request.onsuccess = () => resolve();
       });
     } catch (error) {
