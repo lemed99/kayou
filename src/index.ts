@@ -20,7 +20,7 @@ export { default as Pagination } from './components/Pagination';
 export { default as Popover } from './components/Popover';
 export { default as Select } from './components/Select';
 export { default as SelectWithSearch } from './components/SelectWithSearch';
-export { default as Sidebar } from './components/SideBarComponent';
+export { default as Sidebar } from './components/Sidebar';
 export { default as Skeleton } from './components/Skeleton';
 export { default as Spinner } from './components/Spinner';
 export { default as Textarea } from './components/Textarea';
