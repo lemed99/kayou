@@ -19,6 +19,7 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
   onMultiSelect: (options?: Option[]) => void;
   clearValues?: boolean;
   values: string[];
+  optionRowHeight?: number;
   withSearch?: boolean;
   noSearchResultPlaceholder: string;
   searchPlaceholder: string;
@@ -34,6 +35,7 @@ export default function MultiSelect(props: MultiSelectProps) {
     'onMultiSelect',
     'clearValues',
     'values',
+    'optionRowHeight',
     'withSearch',
     'noSearchResultPlaceholder',
     'searchPlaceholder',
@@ -134,13 +136,35 @@ export default function MultiSelect(props: MultiSelectProps) {
         </Show>
       }
       optionsComponent={
-        <For
-          each={filteredOptions()}
-          fallback={
-            <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
-          }
-        >
-          {(option) => (
+        !props.optionRowHeight ? (
+          <For
+            each={filteredOptions()}
+            fallback={
+              <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
+            }
+          >
+            {(option) => (
+              <div
+                class={twMerge(
+                  'flex cursor-pointer items-center text-sm whitespace-nowrap',
+                  highlightedOption()?.value == option.value ? 'rounded bg-blue-50' : '',
+                )}
+                onMouseEnter={() => setHighlightedOption(option)}
+              >
+                <Checkbox
+                  labelClass="px-2 py-1.5 w-full"
+                  class="flex items-center"
+                  onChange={() => handleOptionClick(option)}
+                  checked={selectedOptions().some((o) => o.value === option.value)}
+                  label={
+                    option.labelWrapper ? option.labelWrapper(option.label) : option.label
+                  }
+                />
+              </div>
+            )}
+          </For>
+        ) : (
+          (option) => (
             <div
               class={twMerge(
                 'flex cursor-pointer items-center text-sm whitespace-nowrap',
@@ -158,8 +182,8 @@ export default function MultiSelect(props: MultiSelectProps) {
                 }
               />
             </div>
-          )}
-        </For>
+          )
+        )
       }
     />
   );

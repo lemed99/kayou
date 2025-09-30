@@ -12,7 +12,7 @@ export interface Option {
 }
 
 export const optionsContainerClass =
-  'scrollbar-thin scrollbar-track-gray-50 scrollbar-thumb-gray-400 dark:scrollbar-track-gray-700 dark:scrollbar-thumb-gray-500 box-border max-h-[200px] overflow-y-auto p-1';
+  'scrollbar-thin scrollbar-track-gray-50 scrollbar-thumb-gray-400 dark:scrollbar-track-gray-700 dark:scrollbar-thumb-gray-500 box-border max-h-[200px] h-full overflow-y-auto p-1';
 
 export const optionClass = (option: Option, highlightedOption: Option | null) => {
   return twMerge(

@@ -12,6 +12,7 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> 
   autoFillSearchKey?: boolean;
   idValue?: string;
   value?: string;
+  optionRowHeight?: number;
   noSearchResultPlaceholder: string;
   cta?: JSX.Element;
   isLazyLoading?: boolean;
@@ -27,6 +28,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
     'autoFillSearchKey',
     'idValue',
     'value',
+    'optionRowHeight',
     'noSearchResultPlaceholder',
     'cta',
     'isLazyLoading',
@@ -84,13 +86,25 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
         </>
       }
       optionsComponent={
-        <For
-          each={filteredOptions()}
-          fallback={
-            <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
-          }
-        >
-          {(option) => (
+        !props.optionRowHeight ? (
+          <For
+            each={filteredOptions()}
+            fallback={
+              <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
+            }
+          >
+            {(option) => (
+              <div
+                class={optionClass(option, highlightedOption())}
+                onClick={() => handleOptionClick(option)}
+                onMouseEnter={() => setHighlightedOption(option)}
+              >
+                <OptionLabel option={option} selectedOption={selectedOption()} />
+              </div>
+            )}
+          </For>
+        ) : (
+          (option) => (
             <div
               class={optionClass(option, highlightedOption())}
               onClick={() => handleOptionClick(option)}
@@ -98,8 +112,8 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
             >
               <OptionLabel option={option} selectedOption={selectedOption()} />
             </div>
-          )}
-        </For>
+          )
+        )
       }
     />
   );

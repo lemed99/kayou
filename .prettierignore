@@ -31,3 +31,7 @@ package-lock.json
 
 compiled-lang
 pnpm-lock.yaml
+
+/dist
+/dev
+.vscode

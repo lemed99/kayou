@@ -14,6 +14,7 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   options: Option[];
   onSelect: (option?: Option) => void;
   value?: string;
+  optionRowHeight?: number;
   helperText?: string;
 }
 
@@ -22,6 +23,7 @@ export default function Select(props: SelectProps) {
     'options',
     'onSelect',
     'value',
+    'optionRowHeight',
     'helperText',
   ]);
 
@@ -55,8 +57,20 @@ export default function Select(props: SelectProps) {
         </>
       }
       optionsComponent={
-        <For each={local.options}>
-          {(option) => (
+        props.optionRowHeight ? (
+          <For each={local.options}>
+            {(option) => (
+              <div
+                class={optionClass(option, highlightedOption())}
+                onClick={() => handleOptionClick(option)}
+                onMouseEnter={() => setHighlightedOption(option)}
+              >
+                <OptionLabel option={option} selectedOption={selectedOption()} />
+              </div>
+            )}
+          </For>
+        ) : (
+          (option) => (
             <div
               class={optionClass(option, highlightedOption())}
               onClick={() => handleOptionClick(option)}
@@ -64,8 +78,8 @@ export default function Select(props: SelectProps) {
             >
               <OptionLabel option={option} selectedOption={selectedOption()} />
             </div>
-          )}
-        </For>
+          )
+        )
       }
     />
   );

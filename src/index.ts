@@ -28,3 +28,4 @@ export { default as TextInput } from './components/TextInput';
 export { default as ToggleSwitch } from './components/ToggleSwitch';
 export { default as Tooltip } from './components/Tooltip';
 export { VirtualGrid } from './components/VirtualGrid';
+export { VirtualList } from './components/VirtualList';

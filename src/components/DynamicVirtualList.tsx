@@ -1,4 +1,4 @@
-import { For, JSX } from 'solid-js';
+import { Accessor, For, JSX } from 'solid-js';
 
 import { useDynamicVirtualList } from '../hooks/useDynamicVirtualList';
 
@@ -8,13 +8,23 @@ export function DynamicVirtualList<
 >(props: {
   each: T;
   rootHeight: number;
+  estimatedRowHeight: number;
   overscanCount?: number;
-  children: (item: T[number], index: number) => U;
+  children: (item: T[number], index: Accessor<number>) => U;
 }) {
   const [virtual, onScroll, registerSize] = useDynamicVirtualList({
-    items: () => props.each,
-    rootHeight: () => props.rootHeight,
-    overscanCount: () => props.overscanCount || 2,
+    get items() {
+      return props.each;
+    },
+    get rootHeight() {
+      return props.rootHeight;
+    },
+    get estimatedRowHeight() {
+      return props.estimatedRowHeight;
+    },
+    get overscanCount() {
+      return props.overscanCount || 2;
+    },
   });
 
   return (
@@ -37,11 +47,14 @@ export function DynamicVirtualList<
           }}
         >
           <For each={virtual().visibleItems}>
-            {(item, i) => (
-              <div ref={(el) => registerSize(virtual().startIndex + i(), el)}>
-                {props.children(item, virtual().startIndex + i())}
-              </div>
-            )}
+            {(item, i) => {
+              const newIndex = () => virtual().startIndex + i();
+              return (
+                <div ref={(el) => registerSize(newIndex, el)}>
+                  {props.children(item, newIndex)}
+                </div>
+              );
+            }}
           </For>
         </div>
       </div>

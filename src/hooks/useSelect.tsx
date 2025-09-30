@@ -1,10 +1,11 @@
-import { JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
+import { Accessor, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
 
 import { autoPlacement, createFloating, offset } from 'floating-ui-solid';
 import { twMerge } from 'tailwind-merge';
 
 import HelperText from '../components/HelperText';
 import { TextInputProps } from '../components/TextInput';
+import { VirtualList } from '../components/VirtualList';
 import { getScrollProgress } from '../helpers';
 import {
   CTA,
@@ -26,6 +27,7 @@ interface MergedSelectProps extends Omit<TextInputProps, 'onSelect'> {
   clearValue?: boolean;
   autoFillSearchKey?: boolean;
   idValue?: string;
+  optionRowHeight?: number;
   noSearchResultPlaceholder?: string;
   cta?: JSX.Element;
   isLazyLoading?: boolean;
@@ -275,7 +277,9 @@ const useSelect = <T extends MergedSelectProps>(
 
   const Layout = (layoutProps: {
     inputComponent: JSX.Element;
-    optionsComponent: JSX.Element;
+    optionsComponent:
+      | ((option: Option, index: Accessor<number>) => JSX.Element)
+      | JSX.Element;
     preOptionsComponent?: JSX.Element;
   }) => {
     return (
@@ -294,10 +298,39 @@ const useSelect = <T extends MergedSelectProps>(
               )}
             >
               {layoutProps.preOptionsComponent}
-              <div ref={setOptionsContainerRef} class={optionsContainerClass}>
-                {layoutProps.optionsComponent}
-                <LazyLoading isLazyLoading={props.isLazyLoading} />
-              </div>
+
+              <Show
+                when={props.optionRowHeight}
+                fallback={
+                  <div ref={setOptionsContainerRef} class={optionsContainerClass}>
+                    {layoutProps.optionsComponent as JSX.Element}
+                    <LazyLoading isLazyLoading={props.isLazyLoading} />
+                  </div>
+                }
+              >
+                <VirtualList
+                  items={filteredOptions}
+                  rootHeight={200}
+                  rowHeight={props.optionRowHeight!}
+                  overscanCount={3}
+                  setContainerRef={setOptionsContainerRef}
+                  loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
+                  fallback={
+                    props.noSearchResultPlaceholder ? (
+                      <div class="px-2 py-1.5 text-sm">
+                        {props.noSearchResultPlaceholder}
+                      </div>
+                    ) : null
+                  }
+                >
+                  {
+                    layoutProps.optionsComponent as (
+                      option: Option,
+                      index: Accessor<number>,
+                    ) => JSX.Element
+                  }
+                </VirtualList>
+              </Show>
               <CTA cta={props.cta} />
             </div>
           </Show>
