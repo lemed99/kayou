@@ -1,158 +1,93 @@
-// components/Pagination.tsx
-import { Component, For, JSX, createMemo, createSignal, mergeProps } from 'solid-js';
+import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
 import Button from './Button';
+import NumberInput from './NumberInput';
+import Tooltip from './Tooltip';
 
 export interface PaginationProps {
-  total: number; // total number of pages
-  currentPage?: number; // controlled current page
-  defaultPage?: number; // uncontrolled initial page
-  siblingCount?: number; // how many pages to show around current
-  boundaryCount?: number; // pages to show at the start and end
-  onPageChange?: (page: number) => void;
-  classNames?: {
-    button?: string;
-    buttonActive?: string;
-    buttonDisabled?: string;
-    buttonEllipsis?: string;
-    buttonFirst?: string;
-    buttonLast?: string;
-    buttonNext?: string;
-    buttonPrevious?: string;
-  };
-  renderItem?: (page: number, isCurrent: boolean) => JSX.Element;
+  total: number;
+  page: number;
+  onChange: (page: number) => void;
 }
 
-const Pagination: Component<PaginationProps> = (rawProps) => {
-  const props = mergeProps(
-    {
-      siblingCount: 1,
-      boundaryCount: 1,
-      defaultPage: 1,
-      class: '',
-    },
-    rawProps,
-  );
+const Pagination: Component<PaginationProps> = (props) => {
+  const [pageValue, setPageValue] = createSignal(1);
 
-  const [internalPage, setInternalPage] = createSignal(props.defaultPage);
-
-  const currentPage = () =>
-    props.currentPage !== undefined ? props.currentPage : internalPage();
-
-  const totalPages = () => Math.max(1, props.total);
+  createEffect(() => setPageValue(props.page));
 
   const setPage = (page: number) => {
-    if (props.currentPage === undefined) {
-      setInternalPage(page);
-    }
-    props.onPageChange?.(page);
+    props.onChange(page);
+    setPageValue(page);
   };
 
-  const range = (start: number, end: number) =>
-    Array.from({ length: end - start + 1 }, (_, i) => i + start);
-
-  const paginationRange = createMemo(() => {
-    const total = totalPages();
-    const page = currentPage();
-    const siblingCount = props.siblingCount;
-    const boundaryCount = props.boundaryCount;
-
-    const totalVisible = siblingCount * 2 + boundaryCount * 2 + 1; // +2 for current and 2 dots
-
-    if (total <= totalVisible) {
-      return range(1, total);
-    }
-
-    const startPages = range(1, boundaryCount);
-    const endPages = range(total - boundaryCount + 1, total);
-
-    const siblingsStart = Math.max(boundaryCount + 2, page - siblingCount);
-    const siblingsEnd = Math.min(total - boundaryCount - 1, page + siblingCount);
-
-    const showStartEllipsis = siblingsStart > boundaryCount + 2;
-    const showEndEllipsis = siblingsEnd < total - boundaryCount - 1;
-
-    const pages = [];
-
-    pages.push(...startPages);
-
-    if (showStartEllipsis) {
-      pages.push(-1); // ellipsis
-    } else {
-      pages.push(...range(boundaryCount + 1, siblingsStart - 1));
-    }
-
-    pages.push(...range(siblingsStart, siblingsEnd));
-
-    if (showEndEllipsis) {
-      pages.push(-2); // ellipsis
-    } else {
-      pages.push(...range(siblingsEnd + 1, total - boundaryCount));
-    }
-
-    pages.push(...endPages);
-
-    return pages;
-  });
-
-  const isActivePage = (page: number) => page === currentPage();
-
-  const defaultRenderItem = (page: number) => {
-    if (page === -1 || page === -2) {
-      return <span class="px-2">...</span>;
-    }
-
-    return (
+  const NavigationButton = (props: {
+    onClick: () => void;
+    disabled: boolean;
+    content: JSX.Element;
+    tooltip: string;
+  }) => (
+    <Tooltip content={props.tooltip} theme="auto">
       <Button
-        onClick={() => setPage(page)}
-        class={`h-7 rounded px-1 py-1 ${
-          isActivePage(page)
-            ? props.classNames?.buttonActive
-              ? props.classNames?.buttonActive
-              : 'bg-blue-600 text-white'
-            : props.classNames?.buttonDisabled
-              ? props.classNames?.buttonDisabled
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        }`}
+        color="light"
+        onClick={props.onClick}
+        disabled={props.disabled}
+        class="w-8"
         size="xs"
       >
-        {page}
+        {props.content}
       </Button>
-    );
-  };
+    </Tooltip>
+  );
 
   return (
-    <nav class={`flex items-center gap-1 ${props.class}`}>
-      <Button
-        onClick={() => setPage(Math.max(1, currentPage() - 1))}
-        disabled={currentPage() === 1}
-        class={`h-7 cursor-pointer rounded bg-slate-50 px-2 py-1 text-sm text-gray-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 ${
-          props.classNames?.buttonPrevious || ''
-        } ${currentPage() === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
-        size="xs"
-      >
-        &laquo;
-      </Button>
-
-      <For each={paginationRange()}>
-        {(page) =>
-          props.renderItem
-            ? props.renderItem(page, isActivePage(page))
-            : defaultRenderItem(page)
-        }
-      </For>
-
-      <Button
-        onClick={() => setPage(Math.min(totalPages(), currentPage() + 1))}
-        disabled={currentPage() === totalPages()}
-        class={`h-7 cursor-pointer rounded bg-slate-50 px-2 py-1 text-sm text-gray-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 ${
-          props.classNames?.buttonNext || ''
-        }`}
-        size="xs"
-      >
-        &raquo;
-      </Button>
-    </nav>
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-1 italic">
+        <p>Page</p>
+        <NumberInput
+          type="integer"
+          showArrows={false}
+          sizing="xs"
+          value={pageValue()}
+          onInput={(e) => setPageValue(parseInt(e.target.value))}
+          fitContent={true}
+          style={{
+            'text-align': 'center',
+            'font-style': 'normal',
+            'min-width': '25px',
+          }}
+          onChange={(e) => setPage(parseInt(e.target.value))}
+          min={1}
+          max={props.total}
+        />
+        <p class="text-nowrap">sur {props.total}</p>
+      </div>
+      <nav class="flex items-center gap-1">
+        <NavigationButton
+          onClick={() => setPage(1)}
+          disabled={props.page === 1}
+          content="«"
+          tooltip="Page 1"
+        />
+        <NavigationButton
+          onClick={() => setPage(Math.max(1, props.page - 1))}
+          disabled={props.page === 1}
+          content="‹"
+          tooltip={`Page ${Math.max(1, props.page - 1)}`}
+        />
+        <NavigationButton
+          onClick={() => setPage(Math.min(props.total, props.page + 1))}
+          disabled={props.page === props.total}
+          content="›"
+          tooltip={`Page ${Math.min(props.total, props.page + 1)}`}
+        />
+        <NavigationButton
+          onClick={() => setPage(props.total)}
+          disabled={props.page === props.total}
+          content="»"
+          tooltip={`Page ${props.total}`}
+        />
+      </nav>
+    </div>
   );
 };
 

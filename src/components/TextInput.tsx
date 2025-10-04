@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo, splitProps } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -7,13 +7,14 @@ import HelperText from './HelperText';
 import Label from './Label';
 
 export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
-  sizing?: 'sm' | 'md' | 'lg';
+  sizing?: 'xs' | 'sm' | 'md';
   helperText?: string;
   label?: string;
   addon?: JSX.Element;
   icon?: (props: { class: string }) => JSX.Element;
   color?: 'gray' | 'info' | 'failure' | 'warning' | 'success';
   showArrows?: boolean;
+  fitContent?: boolean;
   onArrowUp?: (event: MouseEvent) => void;
   onArrowDown?: (event: MouseEvent) => void;
   onArrowUpMouseUp?: (event: MouseEvent) => void;
@@ -40,9 +41,9 @@ const theme = {
     input: {
       base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
       sizes: {
-        sm: 'p-2 text-xs',
+        xs: 'p-1.5 text-xs',
+        sm: 'p-2 text-sm',
         md: 'p-2.5 text-sm',
-        lg: 'text-md p-4',
       },
       colors: {
         gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400',
@@ -85,6 +86,7 @@ const TextInput = (props: TextInputProps) => {
     'label',
     'ref',
     'showArrows',
+    'fitContent',
     'onArrowUp',
     'onArrowDown',
     'onArrowUpMouseUp',
@@ -96,6 +98,48 @@ const TextInput = (props: TextInputProps) => {
   const color = createMemo(() => local.color || 'gray');
   const sizing = createMemo(() => local.sizing || 'md');
   const showArrows = createMemo(() => local.showArrows || false);
+  const fitContent = createMemo(() => local.fitContent || false);
+
+  let inputRef: HTMLInputElement | undefined;
+
+  const handleRef = (el: HTMLInputElement) => {
+    inputRef = el;
+    if (typeof local.ref === 'function') {
+      local.ref(el);
+    } else if (typeof local.ref === 'object' && 'current' in local.ref) {
+      (local.ref as { current: HTMLInputElement | undefined }).current = el;
+    }
+  };
+
+  createEffect(() => {
+    if (!fitContent() || !inputRef) return;
+    if ('fieldSizing' in inputRef.style) {
+      inputRef.style.fieldSizing = 'content';
+      return;
+    }
+
+    const updateWidth = () => {
+      const value = (props.value || inputRef!.placeholder) as string;
+      const span = document.createElement('span');
+      span.style.cssText = `
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+        font-size: ${window.getComputedStyle(inputRef!).fontSize};
+        padding: ${window.getComputedStyle(inputRef!).padding};
+        border: ${window.getComputedStyle(inputRef!).border};
+      `;
+      span.textContent = value;
+      document.body.appendChild(span);
+
+      const width = parseFloat(getComputedStyle(span).width);
+      document.body.removeChild(span);
+
+      inputRef!.style.width = `${Math.max(width, 25)}px`;
+    };
+
+    updateWidth();
+  });
 
   return (
     <div class="w-full">
@@ -127,7 +171,7 @@ const TextInput = (props: TextInputProps) => {
               theme.field.input.withIcon[local.icon ? 'on' : 'off'],
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
             )}
-            ref={local.ref}
+            ref={(el) => handleRef(el)}
             {...inputProps}
           />
 
@@ -141,7 +185,7 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
                 tabIndex={-1}
               >
-                <ChevronUpIcon class="size-3" />
+                <ChevronUpIcon class="size-2" />
               </button>
               <button
                 type="button"
@@ -151,7 +195,7 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}
                 tabIndex={-1}
               >
-                <ChevronDownIcon class="size-3" />
+                <ChevronDownIcon class="size-2" />
               </button>
             </div>
           </Show>

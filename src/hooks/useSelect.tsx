@@ -1,4 +1,12 @@
-import { Accessor, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
+import {
+  Accessor,
+  For,
+  JSX,
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+} from 'solid-js';
 
 import { autoPlacement, createFloating, offset } from 'floating-ui-solid';
 import { twMerge } from 'tailwind-merge';
@@ -48,6 +56,7 @@ const useSelect = <T extends MergedSelectProps>(
   const [optionsContainerRef, setOptionsContainerRef] = createSignal<
     HTMLDivElement | undefined
   >();
+  const [scrollTop, setScrollTop] = createSignal(0);
 
   createEffect(() => {
     setFilteredOptions(props.options);
@@ -95,6 +104,26 @@ const useSelect = <T extends MergedSelectProps>(
     }
   });
 
+  const scrollToHighlightedOption = (index: number) => {
+    const container = optionsContainerRef();
+    if (!container) return;
+
+    const rowHeight = props.optionRowHeight || 32; // 32 because it is the rowHeight we currently use
+    const containerHeight = container.clientHeight;
+    const scrollTop = container.scrollTop;
+
+    const optionTop = index * rowHeight;
+    const optionBottom = optionTop + rowHeight;
+
+    if (optionTop < scrollTop) {
+      container.scrollTop = index * rowHeight;
+    } else if (optionBottom > scrollTop + containerHeight) {
+      const rowsVisible = Math.floor(containerHeight / rowHeight);
+      const targetIndex = index - rowsVisible + 1;
+      container.scrollTop = Math.max(0, targetIndex * rowHeight);
+    }
+  };
+
   const handleSearchChange = (
     e: InputEvent & {
       currentTarget: HTMLInputElement;
@@ -115,7 +144,12 @@ const useSelect = <T extends MergedSelectProps>(
     }
     if (type === 'selectWithSearch') {
       setSelectedOption(null);
-      if (!isOpen()) setIsOpen(true);
+      if (!isOpen()) {
+        setIsOpen(true);
+        const container = optionsContainerRef();
+        if (!container) return;
+        container.scrollTop = scrollTop();
+      }
     }
   };
 
@@ -145,6 +179,9 @@ const useSelect = <T extends MergedSelectProps>(
   const handleInputClick = () => {
     if (!props.disabled) {
       setIsOpen(true);
+      const container = optionsContainerRef();
+      if (!container) return;
+      container.scrollTop = scrollTop();
       if (type === 'selectWithSearch' && !searchKey()) setFilteredOptions(props.options);
       if (type === 'multiSelect' && props.withSearch === true) {
         (searchRef() as HTMLElement)?.focus();
@@ -206,7 +243,7 @@ const useSelect = <T extends MergedSelectProps>(
 
   const handleKeyDown = (
     e: KeyboardEvent & {
-      currentTarget: HTMLInputElement;
+      currentTarget: HTMLElement;
       target: Element;
     },
   ) => {
@@ -216,15 +253,22 @@ const useSelect = <T extends MergedSelectProps>(
       e.preventDefault();
       setHighlightedOption((prev) => {
         if (filteredOptions().length === 0) return null;
-        if (!prev) return filteredOptions()[filteredOptions().length - 1];
+        const lastOptionIndex = filteredOptions().length - 1;
+        if (!prev) {
+          scrollToHighlightedOption(lastOptionIndex);
+          return filteredOptions()[lastOptionIndex];
+        }
         const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
         if (currentIndex === 0) {
           return prev;
         }
         if (currentIndex === -1) {
-          return filteredOptions()[filteredOptions().length - 1];
+          scrollToHighlightedOption(lastOptionIndex);
+          return filteredOptions()[lastOptionIndex];
         }
-        return filteredOptions()[currentIndex - 1];
+        const newIndex = currentIndex - 1;
+        scrollToHighlightedOption(newIndex);
+        return filteredOptions()[newIndex];
       });
       return;
     }
@@ -233,15 +277,21 @@ const useSelect = <T extends MergedSelectProps>(
       e.preventDefault();
       setHighlightedOption((prev) => {
         if (filteredOptions().length === 0) return null;
-        if (!prev) return filteredOptions()[0];
+        if (!prev) {
+          scrollToHighlightedOption(0);
+          return filteredOptions()[0];
+        }
         const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
         if (currentIndex === filteredOptions().length - 1) {
           return prev;
         }
         if (currentIndex === -1) {
+          scrollToHighlightedOption(0);
           return filteredOptions()[0];
         }
-        return filteredOptions()[currentIndex + 1];
+        const newIndex = currentIndex + 1;
+        scrollToHighlightedOption(newIndex);
+        return filteredOptions()[newIndex];
       });
       return;
     }
@@ -277,9 +327,7 @@ const useSelect = <T extends MergedSelectProps>(
 
   const Layout = (layoutProps: {
     inputComponent: JSX.Element;
-    optionsComponent:
-      | ((option: Option, index: Accessor<number>) => JSX.Element)
-      | JSX.Element;
+    optionsComponent: (option: Option, index: Accessor<number>) => JSX.Element;
     preOptionsComponent?: JSX.Element;
   }) => {
     return (
@@ -302,8 +350,28 @@ const useSelect = <T extends MergedSelectProps>(
               <Show
                 when={props.optionRowHeight}
                 fallback={
-                  <div ref={setOptionsContainerRef} class={optionsContainerClass}>
-                    {layoutProps.optionsComponent as JSX.Element}
+                  <div
+                    ref={setOptionsContainerRef}
+                    class={optionsContainerClass}
+                    onScroll={(e: Event) => {
+                      const el = e.target as HTMLElement;
+                      if (el?.scrollTop !== undefined) {
+                        setScrollTop(el.scrollTop);
+                      }
+                    }}
+                  >
+                    <For
+                      each={filteredOptions()}
+                      fallback={
+                        props.noSearchResultPlaceholder ? (
+                          <div class="px-2 py-1.5 text-sm">
+                            {props.noSearchResultPlaceholder}
+                          </div>
+                        ) : null
+                      }
+                    >
+                      {layoutProps.optionsComponent}
+                    </For>
                     <LazyLoading isLazyLoading={props.isLazyLoading} />
                   </div>
                 }
@@ -315,6 +383,7 @@ const useSelect = <T extends MergedSelectProps>(
                   overscanCount={3}
                   setContainerRef={setOptionsContainerRef}
                   loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
+                  setScrollPosition={setScrollTop}
                   fallback={
                     props.noSearchResultPlaceholder ? (
                       <div class="px-2 py-1.5 text-sm">
@@ -323,12 +392,7 @@ const useSelect = <T extends MergedSelectProps>(
                     ) : null
                   }
                 >
-                  {
-                    layoutProps.optionsComponent as (
-                      option: Option,
-                      index: Accessor<number>,
-                    ) => JSX.Element
-                  }
+                  {layoutProps.optionsComponent}
                 </VirtualList>
               </Show>
               <CTA cta={props.cta} />

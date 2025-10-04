@@ -1,4 +1,4 @@
-import { Accessor, For, JSX, createEffect, createSignal, onCleanup } from 'solid-js';
+import { Accessor, For, JSX, createSignal, onCleanup, onMount } from 'solid-js';
 
 import { useVirtualList } from '../hooks/useVirtualList';
 
@@ -12,6 +12,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   containerWidth?: string | number;
   containerPadding?: number;
   loading?: JSX.Element;
+  setScrollPosition?: (scrollTop: number) => void;
   fallback?: JSX.Element;
 }) {
   const [ref, setRef] = createSignal<HTMLElement | undefined>();
@@ -30,11 +31,14 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     get overscanCount() {
       return props.overscanCount || 2;
     },
+    get setScrollPosition() {
+      return props.setScrollPosition;
+    },
   });
 
   let observer: ResizeObserver;
 
-  createEffect(() => {
+  onMount(() => {
     if (!ref()) return;
     observer = new ResizeObserver(() => {
       setWidth(ref()!.offsetWidth);

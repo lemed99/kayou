@@ -8,7 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 
 export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
   placement?: 'top' | 'bottom';
-  style?: 'dark' | 'light' | 'auto';
+  theme?: 'dark' | 'light' | 'auto';
   content: string | JSX.Element;
 }
 
@@ -16,7 +16,7 @@ const theme = {
   animation: 'transition-opacity',
   arrow: {
     base: 'absolute z-10 h-2 w-2 rotate-45',
-    style: {
+    theme: {
       dark: 'bg-gray-700 dark:bg-gray-700',
       light: 'bg-white',
     },
@@ -24,7 +24,7 @@ const theme = {
   },
   base: 'absolute inline-block z-10 rounded-lg py-2 px-3 text-sm font-medium shadow-sm',
   hidden: 'invisible opacity-0',
-  style: {
+  theme: {
     dark: 'bg-gray-700 text-white dark:bg-gray-700',
     light: 'border border-gray-200 bg-white text-gray-900',
   },
@@ -34,7 +34,7 @@ const Tooltip = (props: TooltipProps) => {
   const merged = defaultProps(
     {
       placement: 'top',
-      style: 'dark',
+      theme: 'dark',
       class: '',
     },
     props,
@@ -51,7 +51,7 @@ const Tooltip = (props: TooltipProps) => {
   catchError(
     () => {
       createEffect(() => {
-        if (merged.style === 'auto') {
+        if (merged.theme === 'auto') {
           const { systemTheme, appTheme } = useTheme();
           setCurrentTheme(
             appTheme() === 'system' ? systemTheme() : (appTheme() as 'light' | 'dark'),
@@ -99,10 +99,10 @@ const Tooltip = (props: TooltipProps) => {
             merged.class,
             theme.animation,
             theme.base,
-            theme.style[
-              merged.style === 'auto'
+            theme.theme[
+              merged.theme === 'auto'
                 ? getThemeOpposite(currentTheme())
-                : getThemeOpposite(merged.style)
+                : getThemeOpposite(merged.theme)
             ],
           )}
         >
@@ -112,10 +112,10 @@ const Tooltip = (props: TooltipProps) => {
             }
             class={twMerge(
               theme.arrow.base,
-              theme.arrow.style[
-                merged.style === 'auto'
+              theme.arrow.theme[
+                merged.theme === 'auto'
                   ? getThemeOpposite(currentTheme())
-                  : getThemeOpposite(merged.style)
+                  : getThemeOpposite(merged.theme)
               ],
               finalPlacement() === 'top' ? '-bottom-1' : '',
               finalPlacement() === 'bottom' ? '-top-1' : '',

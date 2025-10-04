@@ -1,4 +1,4 @@
-import { For, JSX, Show, splitProps } from 'solid-js';
+import { JSX, Show, splitProps } from 'solid-js';
 
 import type { Option } from '../helpers/selectUtils';
 import { ClearContentButton, OptionLabel, optionClass } from '../helpers/selectUtils';
@@ -46,7 +46,6 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
     searchRef,
     searchKey,
     handleSearchChange,
-    filteredOptions,
     setFilteredOptions,
     setSelectedOption,
     setSearchKey,
@@ -85,36 +84,15 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
           </Show>
         </>
       }
-      optionsComponent={
-        !props.optionRowHeight ? (
-          <For
-            each={filteredOptions()}
-            fallback={
-              <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
-            }
-          >
-            {(option) => (
-              <div
-                class={optionClass(option, highlightedOption())}
-                onClick={() => handleOptionClick(option)}
-                onMouseEnter={() => setHighlightedOption(option)}
-              >
-                <OptionLabel option={option} selectedOption={selectedOption()} />
-              </div>
-            )}
-          </For>
-        ) : (
-          (option) => (
-            <div
-              class={optionClass(option, highlightedOption())}
-              onClick={() => handleOptionClick(option)}
-              onMouseEnter={() => setHighlightedOption(option)}
-            >
-              <OptionLabel option={option} selectedOption={selectedOption()} />
-            </div>
-          )
-        )
-      }
+      optionsComponent={(option: Option) => (
+        <div
+          class={optionClass(option, highlightedOption())}
+          onClick={() => handleOptionClick(option)}
+          onMouseEnter={() => setHighlightedOption(option)}
+        >
+          <OptionLabel option={option} selectedOption={selectedOption()} />
+        </div>
+      )}
     />
   );
 }

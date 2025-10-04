@@ -40,11 +40,7 @@ const Checkbox = (props: CheckboxProps) => {
 
   return (
     <Label
-      class={twMerge(
-        'inline-block cursor-pointer',
-        local.label && 'inline-flex items-center',
-        local.labelClass,
-      )}
+      class={twMerge('inline-flex cursor-pointer items-center', '', local.labelClass)}
       id={id}
     >
       <Show when={local.label && labelPosition() === 'left'}>

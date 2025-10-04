@@ -52,7 +52,7 @@ const NumberInput = (props: NumberInputProps) => {
     'allowNegativeValues',
   ]);
 
-  const nullable = createMemo(() => local.nullable ?? false);
+  const nullable = createMemo(() => local.nullable ?? true);
   const precision = createMemo(() => local.precision ?? 3);
   const showArrows = createMemo(() => local.showArrows ?? true);
   const allowNegative = createMemo(() => local.allowNegativeValues ?? false);
@@ -100,23 +100,26 @@ const NumberInput = (props: NumberInputProps) => {
       if (formatted < (props.min as number)) formatted = props.min as number;
       if (formatted > (props.max as number)) formatted = props.max as number;
       formatted = formatted.toString();
-
-      if (formatted !== value) {
-        e.target.value = formatted;
-
-        if (typeof local.onChange === 'function') {
-          const syntheticEvent = {
-            ...e,
-            target: { ...e.target, value: formatted },
-          };
-          local.onChange(syntheticEvent);
-        }
-      }
-    } else {
-      e.target.value = '';
+      e.target.value = formatted;
 
       if (typeof local.onChange === 'function') {
-        const syntheticEvent = { ...e, target: { ...e.target, value: '' } };
+        const syntheticEvent = {
+          ...e,
+          target: { ...e.target, value: formatted },
+        };
+        local.onChange(syntheticEvent);
+      }
+    } else {
+      let value = '';
+      if (props.min) value = props.min as string;
+      else if (inputType() === 'integer') {
+        value = '1';
+      } else {
+        value = props.step?.toString() || '';
+      }
+
+      if (typeof local.onChange === 'function') {
+        const syntheticEvent = { ...e, target: { ...e.target, value: value } };
         local.onChange(syntheticEvent);
       }
     }
@@ -309,17 +312,6 @@ const NumberInput = (props: NumberInputProps) => {
     }
   };
 
-  const handleChange = (
-    e: Event & {
-      currentTarget: HTMLInputElement;
-      target: HTMLInputElement;
-    },
-  ) => {
-    if (typeof local.onChange === 'function') {
-      local.onChange(e);
-    }
-  };
-
   const handleArrowUp = (e: MouseEvent) => {
     e.preventDefault();
     incrementValue();
@@ -342,7 +334,6 @@ const NumberInput = (props: NumberInputProps) => {
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
       onBlur={onBlur}
-      onChange={handleChange}
       onInput={handleInput}
       type="text"
       showArrows={showArrows()}

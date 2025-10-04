@@ -5,6 +5,7 @@ type DynamicVirtualListConfig<T extends readonly unknown[]> = {
   rootHeight: number;
   estimatedRowHeight: number;
   overscanCount: number;
+  setScrollPosition?: (scrollTop: number) => void;
 };
 
 export function useDynamicVirtualList<T extends readonly unknown[]>({
@@ -12,6 +13,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
   rootHeight,
   estimatedRowHeight,
   overscanCount,
+  setScrollPosition,
 }: DynamicVirtualListConfig<T>) {
   const [scrollTop, setScrollTop] = createSignal(0);
   const [sizeMapVersion, setSizeMapVersion] = createSignal(0);
@@ -100,7 +102,10 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
 
   const handleScroll = (e: Event) => {
     const el = e.target as HTMLElement;
-    if (el?.scrollTop !== undefined) setScrollTop(el.scrollTop);
+    if (el?.scrollTop !== undefined) {
+      setScrollTop(el.scrollTop);
+      setScrollPosition?.(el.scrollTop);
+    }
   };
 
   onCleanup(() => {

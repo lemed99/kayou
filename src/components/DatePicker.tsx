@@ -322,7 +322,7 @@ const Calendar = (props: CalendarProps) => {
               min={1970}
             />
             <Button type="submit" size="md">
-              <CheckIcon class="size-4" />
+              <CheckIcon class="size-5" />
             </Button>
           </form>
         </Match>

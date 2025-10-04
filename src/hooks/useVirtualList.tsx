@@ -5,6 +5,7 @@ type VirtualListConfig<T extends readonly unknown[]> = {
   rootHeight: number;
   rowHeight: number;
   overscanCount: number;
+  setScrollPosition?: (scrollTop: number) => void;
 };
 
 export function useVirtualList<T extends readonly unknown[]>({
@@ -12,6 +13,7 @@ export function useVirtualList<T extends readonly unknown[]>({
   rootHeight,
   rowHeight,
   overscanCount,
+  setScrollPosition,
 }: VirtualListConfig<T>) {
   const [scrollTop, setScrollTop] = createSignal(0);
 
@@ -36,7 +38,10 @@ export function useVirtualList<T extends readonly unknown[]>({
 
   const handleScroll = (e: Event) => {
     const el = e.target as HTMLElement;
-    if (el?.scrollTop !== undefined) setScrollTop(el.scrollTop);
+    if (el?.scrollTop !== undefined) {
+      setScrollTop(el.scrollTop);
+      setScrollPosition?.(el.scrollTop);
+    }
   };
 
   return [virtual, handleScroll] as const;

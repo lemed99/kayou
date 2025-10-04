@@ -1,4 +1,4 @@
-import { For, JSX, Show, splitProps } from 'solid-js';
+import { JSX, Show, createSignal, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -21,8 +21,9 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
   values: string[];
   optionRowHeight?: number;
   withSearch?: boolean;
-  noSearchResultPlaceholder: string;
-  searchPlaceholder: string;
+  displayValue?: string;
+  noSearchResultPlaceholder?: string;
+  searchPlaceholder?: string;
   cta?: JSX.Element;
   isLazyLoading?: boolean;
   onLazyLoad?: (scrollProgress: number) => void;
@@ -34,9 +35,11 @@ export default function MultiSelect(props: MultiSelectProps) {
     'options',
     'onMultiSelect',
     'clearValues',
+    'style',
     'values',
     'optionRowHeight',
     'withSearch',
+    'displayValue',
     'noSearchResultPlaceholder',
     'searchPlaceholder',
     'cta',
@@ -44,6 +47,8 @@ export default function MultiSelect(props: MultiSelectProps) {
     'onLazyLoad',
     'helperText',
   ]);
+
+  const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
 
   const {
     Layout,
@@ -55,7 +60,6 @@ export default function MultiSelect(props: MultiSelectProps) {
     searchRef,
     searchKey,
     handleSearchChange,
-    filteredOptions,
     setFilteredOptions,
     setSelectedOptions,
     setSearchKey,
@@ -65,6 +69,7 @@ export default function MultiSelect(props: MultiSelectProps) {
   const getDisplayValue = () => {
     if (selectedOptions().length === 0) return '';
     return selectedOptions()
+      .reverse()
       .map((o) => o.label)
       .join(' • ');
   };
@@ -74,25 +79,30 @@ export default function MultiSelect(props: MultiSelectProps) {
       inputComponent={
         <>
           <TextInput
+            ref={setInputRef}
             title={getDisplayValue()}
             readOnly={true}
             disabled={props.disabled}
-            value={getDisplayValue()}
+            value={local.displayValue ?? getDisplayValue()}
             placeholder={props.placeholder}
             class="w-full"
             onKeyDown={handleKeyDown}
             style={{
               'padding-right': '36px',
               cursor: props.disabled ? 'not-allowed' : 'pointer',
+              ...(typeof local.style === 'object' && local.style !== null
+                ? local.style
+                : {}),
             }}
             {...otherProps}
           />
           <Show
-            when={getDisplayValue() && !props.disabled}
+            when={!local.displayValue && getDisplayValue() && !props.disabled}
             fallback={
               <ChevronDownButton
                 onClick={() => {
                   if (local.withSearch === true) (searchRef() as HTMLElement)?.focus();
+                  else (inputRef() as HTMLElement)?.focus();
                 }}
               />
             }
@@ -102,6 +112,7 @@ export default function MultiSelect(props: MultiSelectProps) {
                 setSelectedOptions([]);
                 local.onMultiSelect([]);
                 if (local.withSearch === true) (searchRef() as HTMLElement)?.focus();
+                else (inputRef() as HTMLElement)?.focus();
                 e.stopPropagation();
               }}
             />
@@ -135,56 +146,23 @@ export default function MultiSelect(props: MultiSelectProps) {
           </div>
         </Show>
       }
-      optionsComponent={
-        !props.optionRowHeight ? (
-          <For
-            each={filteredOptions()}
-            fallback={
-              <div class="px-2 py-1.5 text-sm">{local.noSearchResultPlaceholder}</div>
-            }
-          >
-            {(option) => (
-              <div
-                class={twMerge(
-                  'flex cursor-pointer items-center text-sm whitespace-nowrap',
-                  highlightedOption()?.value == option.value ? 'rounded bg-blue-50' : '',
-                )}
-                onMouseEnter={() => setHighlightedOption(option)}
-              >
-                <Checkbox
-                  labelClass="px-2 py-1.5 w-full"
-                  class="flex items-center"
-                  onChange={() => handleOptionClick(option)}
-                  checked={selectedOptions().some((o) => o.value === option.value)}
-                  label={
-                    option.labelWrapper ? option.labelWrapper(option.label) : option.label
-                  }
-                />
-              </div>
-            )}
-          </For>
-        ) : (
-          (option) => (
-            <div
-              class={twMerge(
-                'flex cursor-pointer items-center text-sm whitespace-nowrap',
-                highlightedOption()?.value == option.value ? 'rounded bg-blue-50' : '',
-              )}
-              onMouseEnter={() => setHighlightedOption(option)}
-            >
-              <Checkbox
-                labelClass="px-2 py-1.5 w-full"
-                class="flex items-center"
-                onChange={() => handleOptionClick(option)}
-                checked={selectedOptions().some((o) => o.value === option.value)}
-                label={
-                  option.labelWrapper ? option.labelWrapper(option.label) : option.label
-                }
-              />
-            </div>
-          )
-        )
-      }
+      optionsComponent={(option) => (
+        <div
+          class={twMerge(
+            'flex cursor-pointer items-center text-sm whitespace-nowrap',
+            highlightedOption()?.value == option.value ? 'rounded bg-blue-50' : '',
+          )}
+          onMouseEnter={() => setHighlightedOption(option)}
+        >
+          <Checkbox
+            labelClass="px-2 py-1.5 w-full"
+            class="flex items-center"
+            onChange={() => handleOptionClick(option)}
+            checked={selectedOptions().some((o) => o.value === option.value)}
+            label={option.labelWrapper ? option.labelWrapper(option.label) : option.label}
+          />
+        </div>
+      )}
     />
   );
 }

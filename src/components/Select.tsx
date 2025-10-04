@@ -1,4 +1,4 @@
-import { For, JSX, splitProps } from 'solid-js';
+import { JSX, createSignal, splitProps } from 'solid-js';
 
 import { ChevronDownButton, OptionLabel, optionClass } from '../helpers/selectUtils';
 import useSelect from '../hooks/useSelect';
@@ -23,9 +23,12 @@ export default function Select(props: SelectProps) {
     'options',
     'onSelect',
     'value',
+    'style',
     'optionRowHeight',
     'helperText',
   ]);
+
+  const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
 
   const {
     Layout,
@@ -41,6 +44,7 @@ export default function Select(props: SelectProps) {
       inputComponent={
         <>
           <TextInput
+            ref={setInputRef}
             readOnly={true}
             value={selectedOption()?.label || ''}
             placeholder={props.placeholder}
@@ -49,38 +53,25 @@ export default function Select(props: SelectProps) {
             style={{
               'padding-right': '36px',
               cursor: props.disabled ? 'not-allowed' : 'pointer',
+              ...(typeof local.style === 'object' && local.style !== null
+                ? local.style
+                : {}),
             }}
             {...otherProps}
           />
 
-          <ChevronDownButton />
+          <ChevronDownButton onClick={() => inputRef()?.focus()} />
         </>
       }
-      optionsComponent={
-        props.optionRowHeight ? (
-          <For each={local.options}>
-            {(option) => (
-              <div
-                class={optionClass(option, highlightedOption())}
-                onClick={() => handleOptionClick(option)}
-                onMouseEnter={() => setHighlightedOption(option)}
-              >
-                <OptionLabel option={option} selectedOption={selectedOption()} />
-              </div>
-            )}
-          </For>
-        ) : (
-          (option) => (
-            <div
-              class={optionClass(option, highlightedOption())}
-              onClick={() => handleOptionClick(option)}
-              onMouseEnter={() => setHighlightedOption(option)}
-            >
-              <OptionLabel option={option} selectedOption={selectedOption()} />
-            </div>
-          )
-        )
-      }
+      optionsComponent={(option) => (
+        <div
+          class={optionClass(option, highlightedOption())}
+          onClick={() => handleOptionClick(option)}
+          onMouseEnter={() => setHighlightedOption(option)}
+        >
+          <OptionLabel option={option} selectedOption={selectedOption()} />
+        </div>
+      )}
     />
   );
 }

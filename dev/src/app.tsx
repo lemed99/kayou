@@ -2,13 +2,16 @@ import { type Component, createEffect, createSignal } from 'solid-js';
 
 import {
   Alert,
+  Badge,
   Button,
   Checkbox,
+  DataTable,
   DatePicker,
   Drawer,
   Modal,
   MultiSelect,
   NumberInput,
+  Pagination,
   Popover,
   Select,
   TextInput,
@@ -19,6 +22,7 @@ import {
   VirtualList,
 } from '../../src';
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
+import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
@@ -741,17 +745,64 @@ const App: Component = () => {
   };
 
   const [checked, setChecked] = createSignal(false);
+  const [page, setPage] = createSignal(8);
+
+  const [data] = createSignal([
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor', status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'User', status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Admin', status: 'Active' },
+  ]);
+  const columns = [
+    {
+      label: 'ID',
+      key: 'id',
+      width: 10,
+    },
+    {
+      label: 'Nom',
+      key: 'name',
+      width: 15,
+    },
+    {
+      label: 'Email',
+      key: 'email',
+      width: 20,
+    },
+    {
+      label: 'Role',
+      key: 'role',
+      width: 25,
+      render: (value) => (
+        <Badge class='w-fit' color="dark" size="sm">
+          {String(value)}
+        </Badge>
+      ),
+    },
+    {
+      label: 'Status',
+      key: 'status',
+      width: 30,
+      render: (value) => (
+        <span class={value === 'Active' ? 'text-green-600' : 'text-gray-400'}>
+          {String(value)}
+        </span>
+      ),
+    },
+  ];
 
   return (
     // <IntlProvider locale="en" messages={{}}>
-    //   <ThemeProvider>
+      <ThemeProvider>
     <DatePickerProvider locale="fr">
       <>
         <div class="flex max-w-sm flex-col gap-4 p-8">
           <Button color="dark">I'm a button</Button>
           <NumberInput
             onChange={(e) => console.log(e.target.value)}
-            step={0.5}
+              step={0.5}
+              max={40}
             label="Nombre floatant"
             helperText="Un helper text"
             required={true}
@@ -766,7 +817,7 @@ const App: Component = () => {
             helperText="Un helper text"
           />
           <div class="fixed right-4 bottom-4 z-50 w-fit">
-            <Tooltip content="This is a tooltip" style="light">
+            <Tooltip content="This is a tooltip" theme="light">
               <Button color="dark">me</Button>
             </Tooltip>
           </div>
@@ -784,6 +835,12 @@ const App: Component = () => {
               { label: 'Option 1', value: '1' },
               { label: 'Option 2', value: '2' },
               { label: 'Option 3', value: '3' },
+              { label: 'Option 4', value: '4' },
+              { label: 'Option 5', value: '5' },
+              { label: 'Option 6', value: '6' },
+              { label: 'Option 7', value: '7' },
+              { label: 'Option 8', value: '8' },
+              { label: 'Option 9', value: '9' },
             ]}
             onSelect={(option) => console.log('Selected:', option)}
             value="2"
@@ -829,7 +886,14 @@ const App: Component = () => {
               // minDate="2025-09-07"
               // maxDate="2025-09-20"
             />
-            <DrawerExample />
+            <DrawerExample /><div class="mt-4 flex flex-col gap-3">
+          <h2 class="text-lg font-bold">Pagination</h2>
+          <Pagination
+            total={15}
+            page={page()}
+            onChange={setPage}
+          />
+        </div>
             <Modal position="center" show={modal()} onClose={() => setModal(false)}>
               <div>Je suis la</div>
             </Modal>
@@ -860,11 +924,28 @@ const App: Component = () => {
             onChange={setChecked}
           />
         </div>
-        {/* <VList /> */}
+          {/* <VList /> */}
+          <div class='p-12 text-sm'>
+          <DataTable
+            data={data()}
+            loading={false}
+              error={null}
+              defaultColumns={['id', 'name', 'email']}
+            columns={columns}
+            rowSelection={true}
+            searchBar={true}
+              filters={<></>}
+              configureColumns={true}
+              expandable={true}
+            pageTotal={15}
+            itemsTotal={215}
+            perPageControl={true}
+            onPageChange={(page) => console.log('Page changed:', page)}
+          /></div>
         <div class="h-[400px]"></div>
       </>
     </DatePickerProvider>
-    //   </ThemeProvider>
+    </ThemeProvider>
     // </IntlProvider>
   );
 };

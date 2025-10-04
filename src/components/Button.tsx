@@ -11,7 +11,7 @@ export type ButtonColor =
   | 'success'
   | 'warning'
   | 'blue';
-type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type ButtonSize = 'xs' | 'sm' | 'md';
 
 export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: ButtonColor;
@@ -19,7 +19,7 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const theme = {
-  base: 'group flex h-min items-center justify-center p-0.5 text-center font-medium focus:z-10 rounded-lg cursor-pointer',
+  base: 'group flex h-min items-center justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer',
   color: {
     gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 disabled:hover:bg-white focus:text-blue-700 dark:bg-transparent dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800',
     dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 disabled:hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 dark:disabled:hover:bg-gray-800',
@@ -36,11 +36,9 @@ const theme = {
   },
   disabled: 'cursor-not-allowed opacity-50',
   size: {
-    xs: 'text-xs px-2 py-1',
-    sm: 'text-sm px-3 py-1.5',
-    md: 'text-sm px-4 py-2',
-    lg: 'text-base px-5 py-2.5',
-    xl: 'text-base px-6 py-3',
+    xs: 'text-xs px-2 py-1.5',
+    sm: 'text-sm px-3 py-2',
+    md: 'text-sm px-4 py-2.5',
   },
 };
 
