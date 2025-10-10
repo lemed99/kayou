@@ -63,10 +63,10 @@ export const ClearContentButton = (props: {
   );
 };
 
-export const ChevronDownButton = (props: { onClick?: () => void }) => (
+export const ChevronDownButton = (props: { onFocus?: () => void }) => (
   <button
     type="button"
-    onClick={() => props.onClick?.()}
+    onFocus={() => props.onFocus?.()}
     class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
   >
     <ChevronDownIcon class="size-4" />

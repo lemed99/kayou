@@ -14,6 +14,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   loading?: JSX.Element;
   setScrollPosition?: (scrollTop: number) => void;
   fallback?: JSX.Element;
+  rowClass?: string;
 }) {
   const [ref, setRef] = createSignal<HTMLElement | undefined>();
   const [width, setWidth] = createSignal(0);
@@ -91,7 +92,9 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
         >
           <For each={virtual().visibleItems} fallback={props.fallback}>
             {(item, i) => (
-              <div>{props.children(item, () => virtual().startIndex + i())}</div>
+              <div class={props.rowClass}>
+                {props.children(item, () => virtual().startIndex + i())}
+              </div>
             )}
           </For>
           {props.loading}

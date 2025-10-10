@@ -100,9 +100,8 @@ export default function MultiSelect(props: MultiSelectProps) {
             when={!local.displayValue && getDisplayValue() && !props.disabled}
             fallback={
               <ChevronDownButton
-                onClick={() => {
-                  if (local.withSearch === true) (searchRef() as HTMLElement)?.focus();
-                  else (inputRef() as HTMLElement)?.focus();
+                onFocus={() => {
+                  (inputRef() as HTMLElement)?.focus();
                 }}
               />
             }

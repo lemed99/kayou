@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, onCleanup } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { createPresence } from '@solid-primitives/presence';
@@ -9,7 +9,7 @@ import { XMarkIcon } from '../icons';
 export interface ModalProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
   show?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'screen';
   position?: 'top-center' | 'center';
   onClose: (event: MouseEvent) => void;
   children: JSX.Element;
@@ -21,28 +21,27 @@ const theme = {
     show: 'bg-gray-900/50 dark:bg-gray-900/80',
   },
   content: {
-    base: 'fixed w-full h-auto z-[91]',
-    inner: 'relative rounded-lg bg-white shadow dark:bg-gray-700',
+    base: 'fixed inset-0 flex w-full h-full z-[91] p-4',
+    inner:
+      'relative rounded-lg bg-white shadow dark:bg-gray-700 w-full max-h-full flex flex-col overflow-hidden',
     sizes: {
       sm: 'max-w-sm',
       md: 'max-w-md',
       lg: 'max-w-lg',
       xl: 'max-w-xl',
+      screen: 'h-full',
     },
     positions: {
-      'top-center': 'top-4 left-1/2 -translate-x-1/2',
-      center: 'top-1/2 left-1/2 -translate-1/2',
+      'top-center': 'items-start justify-center',
+      center: 'items-center justify-center',
     },
   },
-  body: {
-    base: 'p-6',
-    popup: 'pt-0',
-  },
+  body: 'p-6 pt-0 grow overflow-y-auto overflow-x-hidden',
   header: {
-    base: 'flex items-start justify-between rounded-t dark:border-gray-600 border-b p-5',
+    base: 'flex items-start justify-between rounded-t dark:border-gray-600 border-b p-5 shrink-0',
     popup: '!p-2 !border-b-0',
     close: {
-      base: 'ml-auto inline-flex items-center cursor-pointer rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
+      base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
       icon: 'size-5',
     },
   },
@@ -56,30 +55,47 @@ const Modal = (props: ModalProps) => {
     transitionDuration: 500,
   });
 
+  createEffect(() => {
+    if (props.show) {
+      document.body.classList.add('overflow-y-hidden');
+    } else {
+      document.body.classList.remove('overflow-y-hidden');
+    }
+  });
+
+  onCleanup(() => {
+    document.body.classList.remove('overflow-y-hidden');
+  });
+
+  const transitionStyle = () => {
+    return size() === 'screen'
+      ? {}
+      : {
+          transition: 'opacity .5s cubic-bezier(.32, .72, 0, 1)',
+          opacity: isVisible() ? '1' : '0',
+        };
+  };
+
   return (
     <Show when={isMounted()}>
       <Portal>
         <div
           class={twMerge(theme.backdrop.base, theme.backdrop.show)}
-          style={{
-            transition: 'opacity .5s cubic-bezier(.32, .72, 0, 1)',
-            opacity: isVisible() ? '1' : '0',
-          }}
-          onClick={(e) => props?.onClose(e)}
+          style={transitionStyle()}
         />
         <div
           class={twMerge(
             theme.content.base,
-            theme.content.sizes[size()],
             theme.content.positions[position()],
             props.class,
           )}
-          style={{
-            transition: 'opacity .5s cubic-bezier(.32, .72, 0, 1)',
-            opacity: isVisible() ? '1' : '0',
-          }}
+          style={transitionStyle()}
+          onClick={(e) => props?.onClose(e)}
         >
-          <div class={theme.content.inner}>
+          <div
+            class={twMerge(theme.content.inner, theme.content.sizes[size()])}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div class={twMerge(theme.header.base, theme.header.popup)}>
               <button
                 aria-label="Close"
@@ -90,7 +106,7 @@ const Modal = (props: ModalProps) => {
                 <XMarkIcon class={theme.header.close.icon} />
               </button>
             </div>
-            <div class={twMerge(theme.body.base, theme.body.popup)}>{props.children}</div>
+            <div class={theme.body}>{props.children}</div>
           </div>
         </div>
       </Portal>

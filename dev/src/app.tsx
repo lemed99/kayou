@@ -2,7 +2,6 @@ import { type Component, createEffect, createSignal } from 'solid-js';
 
 import {
   Alert,
-  Badge,
   Button,
   Checkbox,
   DataTable,
@@ -14,12 +13,12 @@ import {
   Pagination,
   Popover,
   Select,
-  TextInput,
   Textarea,
+  TextInput,
   ToggleSwitch,
   Tooltip,
   VirtualGrid,
-  VirtualList,
+  VirtualList
 } from '../../src';
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ThemeProvider } from '../../src/context/ThemeContext';
@@ -687,7 +686,7 @@ const DrawerExample = () => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const openDrawer = () => {
-    setIsOpen(true);
+    setModal(true);
     console.log('cliked');
   };
   const closeDrawer = () => setIsOpen(false);
@@ -748,11 +747,131 @@ const App: Component = () => {
   const [page, setPage] = createSignal(8);
 
   const [data] = createSignal([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Editor', status: 'Inactive' },
-    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'User', status: 'Active' },
-    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Admin', status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: ['Admin', 'bbhhf', 'errk'], status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: ['User'], status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: ['Editor', 'uue'], status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: ['User','User','User','User'], status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: ['Admin'], status: 'Active' },
   ]);
   const columns = [
     {
@@ -769,16 +888,17 @@ const App: Component = () => {
       label: 'Email',
       key: 'email',
       width: 20,
+      tooltip: 'Je suis la'
     },
     {
       label: 'Role',
       key: 'role',
       width: 25,
-      render: (value) => (
-        <Badge class='w-fit' color="dark" size="sm">
-          {String(value)}
-        </Badge>
-      ),
+      // render: (value) => (
+      //   <For each={value}>
+      //     {(v) => <Badge class='w-fit' color="dark" size="sm">{v}</Badge>}
+      //   </For>
+      // ),
     },
     {
       label: 'Status',
@@ -811,7 +931,7 @@ const App: Component = () => {
           />
           <TextInput
             // addon="CFA"
-            icon={(props) => <InformationCircleIcon class={props.class} />}
+            icon={InformationCircleIcon}
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
@@ -850,7 +970,7 @@ const App: Component = () => {
           <Tooltip content="This is a tooltip" style="auto">
             <Button color="dark">me</Button>
           </Tooltip>
-        </div> */}
+          </div> */}
           <Popover
             position="top"
             content={
@@ -930,13 +1050,15 @@ const App: Component = () => {
             data={data()}
             loading={false}
               error={null}
-              defaultColumns={['id', 'name', 'email']}
+              defaultColumns={['id', 'name', 'email', 'role']}
             columns={columns}
             rowSelection={true}
             searchBar={true}
               filters={<></>}
               configureColumns={true}
               expandable={true}
+              // estimatedRowHeight={52}
+              rowHeight={52}
             pageTotal={15}
             itemsTotal={215}
             perPageControl={true}

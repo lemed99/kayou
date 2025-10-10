@@ -60,7 +60,7 @@ export default function Select(props: SelectProps) {
             {...otherProps}
           />
 
-          <ChevronDownButton onClick={() => inputRef()?.focus()} />
+          <ChevronDownButton onFocus={() => inputRef()?.focus()} />
         </>
       }
       optionsComponent={(option) => (

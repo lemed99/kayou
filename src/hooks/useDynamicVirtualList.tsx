@@ -1,11 +1,12 @@
 import { Accessor, createMemo, createSignal, onCleanup } from 'solid-js';
 
 type DynamicVirtualListConfig<T extends readonly unknown[]> = {
-  items: T;
+  items: Accessor<T>;
   rootHeight: number;
   estimatedRowHeight: number;
   overscanCount: number;
   setScrollPosition?: (scrollTop: number) => void;
+  setAverageRowHeight?: (height: number) => void;
 };
 
 export function useDynamicVirtualList<T extends readonly unknown[]>({
@@ -14,6 +15,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
   estimatedRowHeight,
   overscanCount,
   setScrollPosition,
+  setAverageRowHeight,
 }: DynamicVirtualListConfig<T>) {
   const [scrollTop, setScrollTop] = createSignal(0);
   const [sizeMapVersion, setSizeMapVersion] = createSignal(0);
@@ -30,8 +32,8 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
 
   const registerSize = (index: Accessor<number>, el: HTMLElement) => {
     if (!el) return;
-    const elHeight = sizeMap.get(index());
-    if (elHeight) return;
+    // const elHeight = sizeMap.get(index());
+    // if (elHeight) return; // Some elements might change after being registered. Better to just reevaluate their height each time
     const observer = new ResizeObserver(() => {
       sizeMap.set(index(), el.offsetHeight);
       setSizeMapVersion((v) => v + 1);
@@ -44,18 +46,20 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     sizeMapVersion(); // called to trigger reactivity
 
     if (sizeMap.size === 0) return undefined;
-    return [...sizeMap.values()].reduce((acc, v) => acc + v, 0) / sizeMap.size;
+    const averageHeight =
+      [...sizeMap.values()].reduce((acc, v) => acc + v, 0) / sizeMap.size;
+    setAverageRowHeight?.(averageHeight);
+    return averageHeight;
   });
 
   const getPrefixHeights = createMemo(() => {
-    sizeMapVersion();
+    sizeMapVersion(); // called to trigger reactivity
 
-    const arr = items;
     const estimatedHeight = getAverageRowHeight() ?? estimatedRowHeight;
     let total = 0;
     const offsets: number[] = [];
 
-    for (let i = 0; i < arr.length; i++) {
+    for (let i = 0; i < items().length; i++) {
       offsets[i] = total;
       total += sizeMap.get(i) ?? estimatedHeight;
     }
@@ -64,7 +68,6 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
   });
 
   const virtual = createMemo(() => {
-    const arr = items;
     const { offsets, total } = getPrefixHeights();
 
     const st = scrollTop();
@@ -72,7 +75,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     const ov = overscanCount;
 
     let start = 0;
-    let end = arr.length - 1;
+    let end = items().length - 1;
     while (start < end) {
       const mid = Math.floor((start + end) / 2);
       if (offsets[mid] < st) start = mid + 1;
@@ -81,10 +84,10 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     const firstIdx = Math.max(0, start - ov);
 
     let lastIdx = firstIdx;
-    while (lastIdx < arr.length && offsets[lastIdx] < st + rh) {
+    while (lastIdx < items().length && offsets[lastIdx] < st + rh) {
       lastIdx++;
     }
-    lastIdx = Math.min(arr.length, lastIdx + ov);
+    lastIdx = Math.min(items().length, lastIdx + ov);
 
     observerMap.forEach((_, index) => {
       if (index < firstIdx || index >= lastIdx) {
@@ -95,7 +98,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     return {
       containerHeight: total,
       viewerTop: offsets[firstIdx] ?? 0,
-      visibleItems: arr.slice(firstIdx, lastIdx) as unknown as T,
+      visibleItems: items().slice(firstIdx, lastIdx) as unknown as T,
       startIndex: firstIdx,
     };
   });

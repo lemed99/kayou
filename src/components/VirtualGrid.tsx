@@ -1,4 +1,4 @@
-import { For, JSX, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
+import { For, JSX, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 
 export function VirtualGrid<T>(props: {
   data: T[];
@@ -24,8 +24,8 @@ export function VirtualGrid<T>(props: {
 
   let resizeObserver: ResizeObserver | undefined;
 
-  onMount(() => {
-    if (gridEl) {
+  createEffect(() => {
+    if (gridEl()) {
       requestAnimationFrame(() => {
         updateColumns(gridEl()!);
       });
