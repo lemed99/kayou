@@ -185,7 +185,7 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
                 tabIndex={-1}
               >
-                <ChevronUpIcon class="size-2" />
+                <ChevronUpIcon class="size-2.5" />
               </button>
               <button
                 type="button"
@@ -195,7 +195,7 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}
                 tabIndex={-1}
               >
-                <ChevronDownIcon class="size-2" />
+                <ChevronDownIcon class="size-2.5" />
               </button>
             </div>
           </Show>

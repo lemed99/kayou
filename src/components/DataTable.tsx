@@ -238,7 +238,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         {/* Search Section */}
         <Show when={props.searchBar}>
           <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-gray-600">
-            <div class="relative flex max-w-md items-center">
+            <div class="relative flex w-full max-w-md items-center">
               <MagnifyingGlassIcon class="size-5 text-gray-400" />
               <input
                 ref={setSearchRef}

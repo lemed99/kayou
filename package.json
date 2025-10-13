@@ -33,7 +33,6 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
-    "prepublishOnly": "pnpm build",
     "serve": "vite preview",
     "lint": "eslint '**/*.{ts,tsx}' --fix",
     "lint:ci": "eslint '**/*.{ts,tsx}' --max-warnings 0",

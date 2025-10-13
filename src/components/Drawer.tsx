@@ -48,7 +48,7 @@ const theme = {
     base: 'flex items-start justify-between rounded-t dark:border-gray-600 border-b p-5',
     popup: '!p-2 !border-b-0',
     close: {
-      base: 'ml-auto inline-flex cursor-pointer items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
+      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
       icon: 'size-5',
     },
   },

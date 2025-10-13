@@ -686,21 +686,25 @@ const DrawerExample = () => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const openDrawer = () => {
-    setModal(true);
+    setIsOpen(true);
     console.log('cliked');
   };
   const closeDrawer = () => setIsOpen(false);
 
   return (
-    <div class="p-4">
+    <div class="p-4 space-y-3">
       <h2 class="mb-4 text-xl font-bold">Drawer Component Example</h2>
 
-      <button
-        class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+      <Button
         onClick={openDrawer}
       >
         Open Drawer!!
-      </button>
+      </Button>
+      <Button
+        onClick={() => setModal(true)}
+      >
+        Open Modal
+      </Button>
 
       <Drawer
         show={isOpen()}
