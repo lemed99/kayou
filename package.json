@@ -1,30 +1,30 @@
 {
   "name": "@exowpee/the_rock",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A UI component library built with SolidJS",
   "type": "module",
   "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/index.es.js"
     },
     "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
+      "types": "./dist/src/hooks/index.d.ts",
       "import": "./dist/hooks/index.es.js"
     },
     "./context": {
-      "types": "./dist/context/index.d.ts",
+      "types": "./dist/src/context/index.d.ts",
       "import": "./dist/context/index.es.js"
     },
     "./helpers": {
-      "types": "./dist/helpers/index.d.ts",
+      "types": "./dist/src/helpers/index.d.ts",
       "import": "./dist/helpers/index.es.js"
     },
     "./icons": {
-      "types": "./dist/icons/index.d.ts",
+      "types": "./dist/src/icons/index.d.ts",
       "import": "./dist/icons/index.es.js"
     }
   },
