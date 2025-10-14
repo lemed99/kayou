@@ -19,7 +19,7 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const theme = {
-  base: 'group flex h-min items-center justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer',
+  base: 'group flex h-min items-center justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer transition-all duration-200',
   color: {
     gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 disabled:hover:bg-white focus:text-blue-700 dark:bg-transparent dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800',
     dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 disabled:hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 dark:disabled:hover:bg-gray-800',
@@ -69,12 +69,7 @@ const Button = (props: ButtonProps) => {
       disabled={disabled()}
       {...buttonProps}
     >
-      <span
-        class={twMerge(
-          'flex items-center rounded-md transition-all duration-200',
-          theme.size[size()],
-        )}
-      >
+      <span class={twMerge('flex items-center', theme.size[size()])}>
         {local.children}
       </span>
     </button>
