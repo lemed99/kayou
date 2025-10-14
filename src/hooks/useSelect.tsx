@@ -40,6 +40,7 @@ interface MergedSelectProps extends Omit<TextInputProps, 'onSelect'> {
   cta?: JSX.Element;
   isLazyLoading?: boolean;
   onLazyLoad?: (scrollProgress: number) => void;
+  positionning?: 'absolute' | 'fixed';
 }
 
 const useSelect = <T extends MergedSelectProps>(
@@ -198,6 +199,7 @@ const useSelect = <T extends MergedSelectProps>(
         allowedPlacements: ['top-start', 'bottom-start', 'top-end', 'bottom-end'],
       }),
     ],
+    strategy: props.positionning ?? 'absolute',
   });
 
   createEffect(() => {

@@ -16,6 +16,7 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   value?: string;
   optionRowHeight?: number;
   helperText?: string;
+  positionning?: 'absolute' | 'fixed';
 }
 
 export default function Select(props: SelectProps) {
@@ -26,6 +27,7 @@ export default function Select(props: SelectProps) {
     'style',
     'optionRowHeight',
     'helperText',
+    'positionning',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();

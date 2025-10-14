@@ -50,6 +50,7 @@ export interface DatePickerProps {
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
+  positionning?: 'absolute' | 'fixed';
 }
 
 export interface CalendarProps {
@@ -515,6 +516,7 @@ const DatePicker = (props: DatePickerProps) => {
     },
     isOpen: isOpen,
     middleware: [offset(12), flip({})],
+    strategy: () => props.positionning ?? 'absolute',
   });
 
   createEffect(() => {

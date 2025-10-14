@@ -40,11 +40,11 @@ const Checkbox = (props: CheckboxProps) => {
 
   return (
     <Label
-      class={twMerge('inline-flex cursor-pointer items-center', '', local.labelClass)}
+      class={twMerge('inline-flex cursor-pointer items-center text-sm', local.labelClass)}
       id={id}
     >
       <Show when={local.label && labelPosition() === 'left'}>
-        <span class="pr-2 text-sm text-gray-700 dark:text-gray-300">{local.label}</span>
+        <span class="pr-2 text-gray-700 dark:text-gray-300">{local.label}</span>
       </Show>
       <input
         {...inputProps}
@@ -57,7 +57,7 @@ const Checkbox = (props: CheckboxProps) => {
         type="checkbox"
       />
       <Show when={local.label && labelPosition() === 'right'}>
-        <span class="pl-2 text-sm text-gray-700 dark:text-gray-300">{local.label}</span>
+        <span class="pl-2 text-gray-700 dark:text-gray-300">{local.label}</span>
       </Show>
     </Label>
   );

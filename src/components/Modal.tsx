@@ -38,8 +38,7 @@ const theme = {
   },
   body: 'p-6 pt-0 grow overflow-y-auto overflow-x-hidden',
   header: {
-    base: 'flex items-start justify-between rounded-t dark:border-gray-600 border-b p-5 shrink-0',
-    popup: '!p-2 !border-b-0',
+    base: 'flex items-start justify-between rounded-t p-2 pb-0 shrink-0',
     close: {
       base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white',
       icon: 'size-5',
@@ -96,7 +95,7 @@ const Modal = (props: ModalProps) => {
             class={twMerge(theme.content.inner, theme.content.sizes[size()])}
             onClick={(e) => e.stopPropagation()}
           >
-            <div class={twMerge(theme.header.base, theme.header.popup)}>
+            <div class={theme.header.base}>
               <button
                 aria-label="Close"
                 class={theme.header.close.base}

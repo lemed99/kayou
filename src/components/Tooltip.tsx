@@ -1,5 +1,6 @@
 import { JSX, Show, catchError, createEffect, createSignal } from 'solid-js';
 
+import { createPresence } from '@solid-primitives/presence';
 import { Placement, arrow, createFloating, flip, offset, shift } from 'floating-ui-solid';
 import { twMerge } from 'tailwind-merge';
 
@@ -10,6 +11,7 @@ export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
   placement?: 'top' | 'bottom';
   theme?: 'dark' | 'light' | 'auto';
   content: string | JSX.Element;
+  positionning?: 'absolute' | 'fixed';
 }
 
 const theme = {
@@ -22,7 +24,7 @@ const theme = {
     },
     placement: '-4px',
   },
-  base: 'absolute inline-block z-10 rounded-lg py-2 px-3 text-sm font-medium shadow-sm',
+  base: 'absolute inline-block z-10 rounded-lg py-2 px-3 text-sm w-max shadow-sm',
   hidden: 'invisible opacity-0',
   theme: {
     dark: 'bg-gray-700 text-white dark:bg-gray-700',
@@ -36,11 +38,12 @@ const Tooltip = (props: TooltipProps) => {
       placement: 'top',
       theme: 'dark',
       class: '',
+      positionning: 'absolute',
     },
     props,
   );
 
-  const [isVisible, setIsVisible] = createSignal(false);
+  const [showTooltip, setShowTooltip] = createSignal(false);
   const [reactiveMiddleware, setReactiveMiddleware] = createSignal([
     offset(8),
     shift({ padding: 8 }),
@@ -68,6 +71,10 @@ const Tooltip = (props: TooltipProps) => {
     return theme === 'dark' ? 'light' : 'dark';
   };
 
+  const { isVisible, isMounted } = createPresence(() => showTooltip(), {
+    transitionDuration: 200,
+  });
+
   const {
     refs,
     floatingStyles,
@@ -77,24 +84,30 @@ const Tooltip = (props: TooltipProps) => {
     get placement() {
       return merged.placement as Placement;
     },
-    isOpen: isVisible,
+    isOpen: isMounted,
     middleware: reactiveMiddleware,
+    strategy: merged.positionning,
   });
 
   return (
     <div class="relative">
       <div
         ref={refs.setReference}
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => setIsVisible(false)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         {props.children}
       </div>
 
-      <Show when={isVisible()}>
+      <Show when={isMounted()}>
         <div
           ref={refs.setFloating}
-          style={{ ...floatingStyles() }}
+          style={{
+            ...floatingStyles(),
+            transition: 'all .2s cubic-bezier(.32, .72, 0, 1)',
+            opacity: isVisible() ? '1' : '0',
+            scale: isVisible() ? 1 : 0.8,
+          }}
           class={twMerge(
             merged.class,
             theme.animation,
@@ -125,7 +138,7 @@ const Tooltip = (props: TooltipProps) => {
               left: `${middleware().arrow?.x || 0}px`,
             }}
           />
-          <div class="relative z-20 whitespace-nowrap normal-case">{merged.content}</div>
+          <div class="relative z-20 normal-case">{merged.content}</div>
         </div>
       </Show>
     </div>
