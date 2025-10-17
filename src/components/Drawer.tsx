@@ -1,9 +1,10 @@
-import { JSX, Show, createMemo } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
 import { XMarkIcon } from '../icons';
 
 export interface DrawerProps
@@ -55,12 +56,20 @@ const theme = {
 };
 
 const Drawer = (props: DrawerProps) => {
+  const [drawerEl, setDrawerEl] = createSignal<HTMLDivElement | undefined>();
+
   const getSizeClasses = () => {
     if (props.position === 'top' || props.position === 'bottom') {
       return props.height ?? 'h-full md:h-fit';
     }
     return props.width ?? 'w-full md:w-fit';
   };
+
+  createEffect(() => {
+    if (props.show && drawerEl()) {
+      preventBackgroundScroll(drawerEl()!);
+    }
+  });
 
   const position = createMemo(() => props.position || 'right');
 
@@ -95,6 +104,7 @@ const Drawer = (props: DrawerProps) => {
           onClick={(e) => props?.onClose(e)}
         />
         <div
+          ref={setDrawerEl}
           class={twMerge(
             theme.content.base,
             theme.content.positions[position()],

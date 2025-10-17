@@ -80,7 +80,6 @@
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.2.0",
-    "floating-ui-solid": "^1.0.63",
     "tailwind-merge": "^3.3.1"
   },
   "repository": {

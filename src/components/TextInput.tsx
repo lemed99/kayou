@@ -132,7 +132,7 @@ const TextInput = (props: TextInputProps) => {
       span.textContent = value;
       document.body.appendChild(span);
 
-      const width = parseFloat(getComputedStyle(span).width);
+      const width = parseFloat(window.getComputedStyle(span).width);
       document.body.removeChild(span);
 
       inputRef!.style.width = `${Math.max(width, 25)}px`;

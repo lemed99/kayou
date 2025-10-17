@@ -1,5 +1,6 @@
-import { type Component, createEffect, createSignal } from 'solid-js';
+import { type Component, createEffect, createSignal, Show } from 'solid-js';
 
+import { Portal } from 'solid-js/web';
 import {
   Alert,
   Button,
@@ -23,6 +24,7 @@ import {
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
+import { useFloating } from '../../src/hooks';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
 
@@ -916,12 +918,28 @@ const App: Component = () => {
     },
   ];
 
+  // const [referenceEl, setReferenceEl] = createSignal<HTMLElement | null>(null);
+  // const [floatingEl, setFloatingEl] = createSignal<HTMLElement | null>(null);
+  // const [arrowEl, setArrowEl] = createSignal<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = createSignal(false);
+
+  const { refs, floatingStyles, arrowStyles, container } = useFloating(
+    {
+      placement: 'bottom',
+      offset: 0,
+      isOpen,
+      renderArrow: true,
+      arrowOffset: 8
+    }
+  );
+
   return (
     // <IntlProvider locale="en" messages={{}}>
       <ThemeProvider>
     <DatePickerProvider locale="fr">
-      <>
-        <div class="flex max-w-sm flex-col gap-4 p-8">
+        <>
+          <div>Bonjour</div>
+        <div class="mt-32 flex items-start max-w-sm flex-col gap-4 p-8 border border-gray-500 h-[500px] overflow-y-auto">
           <Button color="dark">I'm a button</Button>
           <NumberInput
             onChange={(e) => console.log(e.target.value)}
@@ -940,17 +958,39 @@ const App: Component = () => {
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
           />
-          <div class="fixed right-4 bottom-4 z-50 w-fit">
-            <Tooltip content="This is a tooltip" theme="light">
+            <div class="z-50 w-fit fixed right-4 bottom-4 space-y-2">
+              <div>J'existe depuis</div>
+              <div>Tu es fou</div>
+              <div><Tooltip content="This is a tooltip for a mother fucker" theme="light">
               <Button color="dark">me</Button>
-            </Tooltip>
+            </Tooltip></div>
+            
           </div>
           <Textarea
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
             color="info"
-          />
+            />
+            <button id='opi' class='w-fit bg-blue-200' ref={refs.setReference} onClick={() => setIsOpen(true)}>
+              Open Tooltip
+            </button>
+            <Show when={isOpen()}>
+              <Portal mount={container()}>
+                <div ref={refs.setFloating} style={floatingStyles()} class='bg-red-500 text-white z-50'>
+                  <div class='p-4 space-y-1 h-32 overflow-y-auto'>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div>
+                  <div>Tooltip</div></div>
+                  <div class='text-black border border-black' ref={refs.setArrow} style={arrowStyles()}>▼</div>
+                </div>
+              </Portal>
+            </Show>
+
           <Select
             // color="info"
             sizing="md"
@@ -967,7 +1007,8 @@ const App: Component = () => {
               { label: 'Option 9', value: '9' },
             ]}
             onSelect={(option) => console.log('Selected:', option)}
-            value="2"
+              value="2"
+              positionning='fixed'
           />
           <Checkbox label="Checkbox" />
           {/* <div class="fixed right-4 bottom-4 z-50 w-fit">
@@ -990,6 +1031,9 @@ const App: Component = () => {
             </div>
           </Popover>
         </div>
+            <button class='w-fit bg-blue-200 mt-32' onClick={() => setIsOpen(false)}>
+              Close Tooltip
+            </button>
         <div class="flex w-full justify-center text-sm">
           <div class="w-full max-w-sm">
             <SelectWithSearchDemo />
@@ -1019,7 +1063,7 @@ const App: Component = () => {
           />
         </div>
             <Modal position="center" show={modal()} onClose={() => setModal(false)}>
-              <div>Je suis la</div>
+              <div class='h-[2000px]'>Je suis la</div>
             </Modal>
           </div>
         </div>

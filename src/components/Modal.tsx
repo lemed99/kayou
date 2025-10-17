@@ -1,9 +1,10 @@
-import { JSX, Show, createEffect, createMemo, onCleanup } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
 import { XMarkIcon } from '../icons';
 
 export interface ModalProps
@@ -49,21 +50,16 @@ const theme = {
 const Modal = (props: ModalProps) => {
   const size = createMemo(() => props.size || 'md');
   const position = createMemo(() => props.position || 'top-center');
+  const [modalEl, setModalEl] = createSignal<HTMLDivElement | undefined>();
 
   const { isVisible, isMounted } = createPresence(() => props.show, {
     transitionDuration: 500,
   });
 
   createEffect(() => {
-    if (props.show) {
-      document.body.classList.add('overflow-y-hidden');
-    } else {
-      document.body.classList.remove('overflow-y-hidden');
+    if (props.show && modalEl()) {
+      preventBackgroundScroll(modalEl()!);
     }
-  });
-
-  onCleanup(() => {
-    document.body.classList.remove('overflow-y-hidden');
   });
 
   const transitionStyle = () => {
@@ -92,6 +88,7 @@ const Modal = (props: ModalProps) => {
           onClick={(e) => props?.onClose(e)}
         >
           <div
+            ref={setModalEl}
             class={twMerge(theme.content.inner, theme.content.sizes[size()])}
             onClick={(e) => e.stopPropagation()}
           >

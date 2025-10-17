@@ -7,8 +7,9 @@ import {
   createSignal,
   onCleanup,
 } from 'solid-js';
+import { Portal } from 'solid-js/web';
 
-import { autoPlacement, createFloating, offset } from 'floating-ui-solid';
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import HelperText from '../components/HelperText';
@@ -21,6 +22,7 @@ import {
   type Option,
   optionsContainerClass,
 } from '../helpers/selectUtils';
+import { useFloating } from './useFloating';
 
 interface MergedSelectProps extends Omit<TextInputProps, 'onSelect'> {
   options: Option[];
@@ -191,15 +193,14 @@ const useSelect = <T extends MergedSelectProps>(
     }
   };
 
-  const { refs, placement: finalPlacement } = createFloating({
-    isOpen: isOpen,
-    middleware: [
-      offset(4),
-      autoPlacement({
-        allowedPlacements: ['top-start', 'bottom-start', 'top-end', 'bottom-end'],
-      }),
-    ],
-    strategy: props.positionning ?? 'absolute',
+  const { isVisible, isMounted } = createPresence(() => isOpen(), {
+    transitionDuration: 200,
+  });
+
+  const { refs, floatingStyles, container } = useFloating({
+    placement: 'bottom-start',
+    isOpen: isMounted,
+    offset: 4,
   });
 
   createEffect(() => {
@@ -312,21 +313,6 @@ const useSelect = <T extends MergedSelectProps>(
     }
   };
 
-  const getFloatingClass = () => {
-    switch (finalPlacement()) {
-      case 'top-start':
-        return 'bottom-full mb-1';
-      case 'bottom-start':
-        return 'top-full mt-1';
-      case 'top-end':
-        return 'right-0 bottom-full mb-1';
-      case 'bottom-end':
-        return 'top-full right-0 mt-1';
-      default:
-        return '';
-    }
-  };
-
   const Layout = (layoutProps: {
     inputComponent: JSX.Element;
     optionsComponent: (option: Option, index: Accessor<number>) => JSX.Element;
@@ -339,66 +325,75 @@ const useSelect = <T extends MergedSelectProps>(
             {layoutProps.inputComponent}
           </div>
 
-          <Show when={isOpen()}>
-            <div
-              ref={refs.setFloating}
-              class={twMerge(
-                'absolute z-50 w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
-                getFloatingClass(),
-              )}
-            >
-              {layoutProps.preOptionsComponent}
-
-              <Show
-                when={props.optionRowHeight}
-                fallback={
-                  <div
-                    ref={setOptionsContainerRef}
-                    class={optionsContainerClass}
-                    onScroll={(e: Event) => {
-                      const el = e.target as HTMLElement;
-                      if (el?.scrollTop !== undefined) {
-                        setScrollTop(el.scrollTop);
-                      }
-                    }}
-                  >
-                    <For
-                      each={filteredOptions()}
-                      fallback={
-                        props.noSearchResultPlaceholder ? (
-                          <div class="px-2 py-1.5 text-sm">
-                            {props.noSearchResultPlaceholder}
-                          </div>
-                        ) : null
-                      }
-                    >
-                      {layoutProps.optionsComponent}
-                    </For>
-                    <LazyLoading isLazyLoading={props.isLazyLoading} />
-                  </div>
-                }
+          <Show when={isMounted()}>
+            <Portal mount={container()}>
+              <div
+                ref={refs.setFloating}
+                class={twMerge(
+                  'z-50 w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
+                )}
+                style={{
+                  ...floatingStyles(),
+                  opacity: isVisible() ? '1' : '0',
+                  scale: isVisible() ? 1 : 0.8,
+                  'transition-property': 'opacity, scale',
+                  'transition-duration': '.2s',
+                  'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+                }}
               >
-                <VirtualList
-                  items={filteredOptions}
-                  rootHeight={200}
-                  rowHeight={props.optionRowHeight!}
-                  overscanCount={3}
-                  setContainerRef={setOptionsContainerRef}
-                  loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
-                  setScrollPosition={setScrollTop}
+                {layoutProps.preOptionsComponent}
+
+                <Show
+                  when={props.optionRowHeight}
                   fallback={
-                    props.noSearchResultPlaceholder ? (
-                      <div class="px-2 py-1.5 text-sm">
-                        {props.noSearchResultPlaceholder}
-                      </div>
-                    ) : null
+                    <div
+                      ref={setOptionsContainerRef}
+                      class={optionsContainerClass}
+                      onScroll={(e: Event) => {
+                        const el = e.target as HTMLElement;
+                        if (el?.scrollTop !== undefined) {
+                          setScrollTop(el.scrollTop);
+                        }
+                      }}
+                    >
+                      <For
+                        each={filteredOptions()}
+                        fallback={
+                          props.noSearchResultPlaceholder ? (
+                            <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                              {props.noSearchResultPlaceholder}
+                            </div>
+                          ) : null
+                        }
+                      >
+                        {layoutProps.optionsComponent}
+                      </For>
+                      <LazyLoading isLazyLoading={props.isLazyLoading} />
+                    </div>
                   }
                 >
-                  {layoutProps.optionsComponent}
-                </VirtualList>
-              </Show>
-              <CTA cta={props.cta} />
-            </div>
+                  <VirtualList
+                    items={filteredOptions}
+                    rootHeight={200}
+                    rowHeight={props.optionRowHeight!}
+                    overscanCount={3}
+                    setContainerRef={setOptionsContainerRef}
+                    loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
+                    setScrollPosition={setScrollTop}
+                    fallback={
+                      props.noSearchResultPlaceholder ? (
+                        <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                          {props.noSearchResultPlaceholder}
+                        </div>
+                      ) : null
+                    }
+                  >
+                    {layoutProps.optionsComponent}
+                  </VirtualList>
+                </Show>
+                <CTA cta={props.cta} />
+              </div>
+            </Portal>
           </Show>
         </div>
         <Show when={props.helperText}>

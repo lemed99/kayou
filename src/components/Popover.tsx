@@ -1,25 +1,19 @@
 import {
-  Accessor,
   JSX,
   ParentComponent,
   Show,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
 } from 'solid-js';
+import { Portal } from 'solid-js/web';
 
-import {
-  Placement,
-  autoPlacement,
-  createFloating,
-  flip,
-  offset,
-  shift,
-} from 'floating-ui-solid';
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
+import { useFloating } from '../hooks';
+import { Placement } from '../hooks/useFloating/types';
 
 export interface PopoverProps {
   content: JSX.Element;
@@ -30,7 +24,6 @@ export interface PopoverProps {
   hidden?: boolean;
   isClosed?: boolean;
   setIsClosed?: (state: boolean) => void;
-  strategy?: 'absolute' | 'fixed';
 }
 
 const Popover: ParentComponent<PopoverProps> = (props) => {
@@ -39,27 +32,22 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
       onHover: false,
       menu: false,
       hidden: false,
-      strategy: 'absolute',
     },
     props,
   );
 
   const [isPopoverVisible, setIsPopoverVisible] = createSignal(false);
 
-  const { refs, floatingStyles } = createFloating({
+  const { isVisible, isMounted } = createPresence(() => isPopoverVisible(), {
+    transitionDuration: 200,
+  });
+
+  const { refs, floatingStyles, container } = useFloating({
+    isOpen: isMounted,
     get placement() {
       return merged.position || undefined;
     },
-    strategy: merged.strategy,
-    get middleware() {
-      return [
-        offset(merged.menu ? 0 : 8),
-        merged.position
-          ? flip()
-          : autoPlacement({ allowedPlacements: ['top', 'bottom', 'right'] }),
-        shift({ padding: 8 }),
-      ];
-    },
+    offset: merged.menu ? 0 : 8,
   });
 
   createEffect(() => {
@@ -78,14 +66,6 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
     setIsPopoverVisible(!isPopoverVisible());
   };
 
-  const popoverStyle: Accessor<JSX.CSSProperties> = createMemo(() => {
-    return {
-      visibility: isPopoverVisible() ? 'visible' : 'hidden',
-      opacity: isPopoverVisible() ? 1 : 0,
-      transition: 'opacity 0.2s ease-in-out',
-    } as JSX.CSSProperties;
-  });
-
   return (
     <div class="relative flex grow">
       <div
@@ -101,22 +81,31 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
       >
         {merged.children}
       </div>
-      <Show when={isPopoverVisible()}>
-        <div
-          ref={refs.setFloating}
-          class={twMerge('z-50', merged.menu ? 'pl-4' : '')}
-          style={{ ...popoverStyle(), ...floatingStyles() }}
-          onMouseEnter={() =>
-            !merged.hidden && merged.onHover ? setIsPopoverVisible(true) : null
-          }
-          onMouseLeave={() =>
-            !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
-          }
-        >
-          <div class="w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
-            {merged.content}
+      <Show when={isMounted()}>
+        <Portal mount={container()}>
+          <div
+            ref={refs.setFloating}
+            class={twMerge('z-50', merged.menu ? 'pl-4' : '')}
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              scale: isVisible() ? 1 : 0.8,
+              'transition-property': 'opacity, scale',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
+            onMouseEnter={() =>
+              !merged.hidden && merged.onHover ? setIsPopoverVisible(true) : null
+            }
+            onMouseLeave={() =>
+              !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
+            }
+          >
+            <div class="w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
+              {merged.content}
+            </div>
           </div>
-        </div>
+        </Portal>
       </Show>
     </div>
   );

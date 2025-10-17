@@ -1,10 +1,12 @@
 import { JSX, Show, catchError, createEffect, createSignal } from 'solid-js';
+import { Portal } from 'solid-js/web';
 
 import { createPresence } from '@solid-primitives/presence';
-import { Placement, arrow, createFloating, flip, offset, shift } from 'floating-ui-solid';
 import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
+import { useFloating } from '../hooks';
+import { Placement } from '../hooks/useFloating/types';
 import { useTheme } from '../hooks/useTheme';
 
 export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -17,14 +19,14 @@ export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const theme = {
   animation: 'transition-opacity',
   arrow: {
-    base: 'absolute z-10 h-2 w-2 rotate-45',
+    base: 'absolute z-50 text-2xl leading-0',
     theme: {
-      dark: 'bg-gray-700 dark:bg-gray-700',
-      light: 'bg-white',
+      dark: 'text-gray-700 dark:text-gray-700',
+      light: 'text-white',
     },
     placement: '-4px',
   },
-  base: 'absolute inline-block z-10 rounded-lg py-2 px-3 text-sm w-max shadow-sm',
+  base: 'absolute inline-block z-50 rounded-lg py-2 px-3 text-sm w-max shadow-sm',
   hidden: 'invisible opacity-0',
   theme: {
     dark: 'bg-gray-700 text-white dark:bg-gray-700',
@@ -44,11 +46,6 @@ const Tooltip = (props: TooltipProps) => {
   );
 
   const [showTooltip, setShowTooltip] = createSignal(false);
-  const [reactiveMiddleware, setReactiveMiddleware] = createSignal([
-    offset(8),
-    shift({ padding: 8 }),
-    flip({}),
-  ]);
   const [currentTheme, setCurrentTheme] = createSignal<'light' | 'dark'>();
 
   catchError(
@@ -75,23 +72,19 @@ const Tooltip = (props: TooltipProps) => {
     transitionDuration: 200,
   });
 
-  const {
-    refs,
-    floatingStyles,
-    placement: finalPlacement,
-    middleware,
-  } = createFloating({
+  const { refs, floatingStyles, arrowStyles, container } = useFloating({
     get placement() {
       return merged.placement as Placement;
     },
+    offset: 8,
     isOpen: isMounted,
-    middleware: reactiveMiddleware,
-    strategy: merged.positionning,
+    renderArrow: true,
   });
 
   return (
-    <div class="relative">
+    <>
       <div
+        class="w-fit"
         ref={refs.setReference}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -100,48 +93,47 @@ const Tooltip = (props: TooltipProps) => {
       </div>
 
       <Show when={isMounted()}>
-        <div
-          ref={refs.setFloating}
-          style={{
-            ...floatingStyles(),
-            transition: 'all .2s cubic-bezier(.32, .72, 0, 1)',
-            opacity: isVisible() ? '1' : '0',
-            scale: isVisible() ? 1 : 0.8,
-          }}
-          class={twMerge(
-            merged.class,
-            theme.animation,
-            theme.base,
-            theme.theme[
-              merged.theme === 'auto'
-                ? getThemeOpposite(currentTheme())
-                : getThemeOpposite(merged.theme)
-            ],
-          )}
-        >
+        <Portal mount={container()}>
           <div
-            ref={(node) =>
-              setReactiveMiddleware((prev) => [...prev, arrow({ element: node })])
-            }
+            ref={refs.setFloating}
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              scale: isVisible() ? 1 : 0.8,
+              'transition-property': 'opacity, scale',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
             class={twMerge(
-              theme.arrow.base,
-              theme.arrow.theme[
+              merged.class,
+              theme.animation,
+              theme.base,
+              theme.theme[
                 merged.theme === 'auto'
                   ? getThemeOpposite(currentTheme())
                   : getThemeOpposite(merged.theme)
               ],
-              finalPlacement() === 'top' ? '-bottom-1' : '',
-              finalPlacement() === 'bottom' ? '-top-1' : '',
             )}
-            style={{
-              position: 'absolute',
-              left: `${middleware().arrow?.x || 0}px`,
-            }}
-          />
-          <div class="relative z-20 normal-case">{merged.content}</div>
-        </div>
+          >
+            <div
+              ref={refs.setArrow}
+              class={twMerge(
+                theme.arrow.base,
+                theme.arrow.theme[
+                  merged.theme === 'auto'
+                    ? getThemeOpposite(currentTheme())
+                    : getThemeOpposite(merged.theme)
+                ],
+              )}
+              style={arrowStyles()!}
+            >
+              ▾
+            </div>
+            <div class="relative z-20 normal-case">{merged.content}</div>
+          </div>
+        </Portal>
       </Show>
-    </div>
+    </>
   );
 };
 

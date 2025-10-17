@@ -9,8 +9,9 @@ import {
   onCleanup,
 } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
+import { Portal } from 'solid-js/web';
 
-import { Placement, createFloating, flip, offset } from 'floating-ui-solid';
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import {
@@ -24,8 +25,9 @@ import {
   parseDate,
   toISO,
 } from '../helpers/dates';
+import { Placement } from '../hooks/useFloating/types';
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '../icons';
-import { useDatePicker } from './../hooks';
+import { useDatePicker, useFloating } from './../hooks';
 import Badge from './Badge';
 import Button from './Button';
 import NumberInput from './NumberInput';
@@ -506,17 +508,19 @@ const DatePicker = (props: DatePickerProps) => {
     }
   };
 
-  const {
-    refs,
-    placement: finalPlacement,
-    floatingStyles,
-  } = createFloating({
+  const { isVisible, isMounted } = createPresence(() => isOpen(), {
+    transitionDuration: 200,
+  });
+
+  const { refs, floatingStyles, arrowStyles, container } = useFloating({
     get placement() {
       return `${props.popoverPosition}-start` as Placement;
     },
-    isOpen: isOpen,
-    middleware: [offset(12), flip({})],
-    strategy: () => props.positionning ?? 'absolute',
+    isOpen: isMounted,
+    offset: 0,
+    renderArrow: true,
+    arrowAlignment: 'start',
+    arrowOffset: 19,
   });
 
   createEffect(() => {
@@ -575,45 +579,64 @@ const DatePicker = (props: DatePickerProps) => {
         </Show>
       </div>
 
-      <Show when={isOpen()}>
-        <div
-          ref={refs.setFloating}
-          style={{ ...floatingStyles() }}
-          class={twMerge(
-            'absolute z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
-          )}
-        >
+      <Show when={isMounted()}>
+        <Portal mount={container()}>
           <div
+            ref={refs.setFloating}
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              scale: isVisible() ? 1 : 0.8,
+              'transition-property': 'opacity, scale',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
             class={twMerge(
-              'absolute z-50 size-4 rotate-45 border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800',
-              finalPlacement() === 'top-start'
-                ? '-bottom-[8.5px] left-0 ml-[1.2rem] border-r border-b'
-                : '',
-              finalPlacement() === 'top-end'
-                ? 'right-0 -bottom-[8.5px] mr-[1.2rem] border-r border-b'
-                : '',
-              finalPlacement() === 'bottom-end'
-                ? '-top-[8.5px] right-0 mr-[1.2rem] border-t border-l'
-                : '',
-              finalPlacement() === 'bottom-start'
-                ? '-top-[8.5px] left-0 ml-[1.2rem] border-t border-l'
-                : '',
+              'z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
             )}
-          />
-          <Calendar
-            currentDate={currentDate}
-            setCurrentDate={setCurrentDate}
-            selectDate={selectDate}
-            type={type}
-            locale={props.locale || locale}
-            isSingletonDateSelected={isSingletonDateSelected}
-            isRangeDateSelected={isRangeDateSelected}
-            isDateInRange={isDateInRange}
-            isDateDisabled={isDateDisabled}
-            minDate={minDate()}
-            maxDate={maxDate()}
-          />
-        </div>
+          >
+            <div ref={refs.setArrow} style={arrowStyles()!}>
+              <svg
+                width="30"
+                height="15"
+                viewBox="0 0 30 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 1.42182L27.5208 13.9426H2.47924L15 1.42182Z"
+                  fill="white"
+                  stroke="oklch(87.2% 0.01 258.338)"
+                />
+                <path
+                  d="M2.27208 13.4427H27.7279L29.1421 14.8569H0.857865L2.27208 13.4427Z"
+                  fill="white"
+                />
+                <path
+                  d="M27.7275 14.8569H29.1417L27.7275 13.4426H26.3133L27.7275 14.8569Z"
+                  fill="oklch(87.2% 0.01 258.338)"
+                />
+                <path
+                  d="M2.27239 13.4429H3.6866L2.27239 14.8572H0.858172L2.27239 13.4429Z"
+                  fill="oklch(87.2% 0.01 258.338)"
+                />
+              </svg>
+            </div>
+            <Calendar
+              currentDate={currentDate}
+              setCurrentDate={setCurrentDate}
+              selectDate={selectDate}
+              type={type}
+              locale={props.locale || locale}
+              isSingletonDateSelected={isSingletonDateSelected}
+              isRangeDateSelected={isRangeDateSelected}
+              isDateInRange={isDateInRange}
+              isDateDisabled={isDateDisabled}
+              minDate={minDate()}
+              maxDate={maxDate()}
+            />
+          </div>
+        </Portal>
       </Show>
     </div>
   );
