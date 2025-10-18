@@ -6,7 +6,6 @@ import {
   Dimensions,
   FloatingPosition,
   Placement,
-  Rect,
   UseFloatingOptions,
   UseFloatingReturn,
 } from './types';
@@ -29,7 +28,6 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
   const [position, setPosition] = createSignal<FloatingPosition>({ top: 0, left: 0 });
   const [arrowPosition, setArrowPosition] = createSignal<ArrowPosition | null>(null);
   const [isFixed, setIsFixed] = createSignal(false);
-  const [containerPositionChanged, setContainerPositionChanged] = createSignal(false);
 
   const {
     placement: initialPlacement = 'bottom',
@@ -49,18 +47,22 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
     const floatingEl = floating();
     if (!referenceEl || !floatingEl) return;
 
-    let refRect: Rect;
-    let viewportRect: Rect;
+    let refRect = getElementRect(referenceEl, document.body);
+    let viewportRect = getViewportRect(document.body);
 
     const floatDimensions: Dimensions = {
       width: floatingEl.offsetWidth,
       height: floatingEl.offsetHeight,
     };
 
-    if (hasFixedAncestor(referenceEl)) {
+    const fixedLogic = () => {
       setIsFixed(true);
       refRect = getElementRect(referenceEl, document.body);
       viewportRect = getViewportRect(document.body);
+    };
+
+    if (hasFixedAncestor(referenceEl)) {
+      setIsFixed(true);
     } else {
       const container = getScrollableAncestor(referenceEl);
       if (container) {
@@ -75,15 +77,13 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
             offset,
           )
         ) {
-          setIsFixed(true);
-          refRect = getElementRect(referenceEl, document.body);
-          viewportRect = getViewportRect(document.body);
+          fixedLogic();
         } else {
-          setRenderContainer(container);
           const style = window.getComputedStyle(container);
           if (style.position === 'static') {
-            container.style.position = 'relative';
-            setContainerPositionChanged(true);
+            fixedLogic();
+          } else {
+            setRenderContainer(container);
           }
         }
       } else {
@@ -167,10 +167,6 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
 
     onCleanup(() => {
       resizeObserver.disconnect();
-      if (containerPositionChanged()) {
-        renderContainer().style.position = '';
-        setContainerPositionChanged(false);
-      }
       setRenderContainer(document.body);
       setIsFixed(false);
     });

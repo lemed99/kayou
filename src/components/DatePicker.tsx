@@ -52,7 +52,6 @@ export interface DatePickerProps {
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
-  positionning?: 'absolute' | 'fixed';
 }
 
 export interface CalendarProps {

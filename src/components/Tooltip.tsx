@@ -13,7 +13,6 @@ export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
   placement?: 'top' | 'bottom';
   theme?: 'dark' | 'light' | 'auto';
   content: string | JSX.Element;
-  positionning?: 'absolute' | 'fixed';
 }
 
 const theme = {
@@ -40,7 +39,6 @@ const Tooltip = (props: TooltipProps) => {
       placement: 'top',
       theme: 'dark',
       class: '',
-      positionning: 'absolute',
     },
     props,
   );

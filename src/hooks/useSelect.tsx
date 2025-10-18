@@ -42,7 +42,6 @@ interface MergedSelectProps extends Omit<TextInputProps, 'onSelect'> {
   cta?: JSX.Element;
   isLazyLoading?: boolean;
   onLazyLoad?: (scrollProgress: number) => void;
-  positionning?: 'absolute' | 'fixed';
 }
 
 const useSelect = <T extends MergedSelectProps>(

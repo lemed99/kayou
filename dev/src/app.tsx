@@ -1008,7 +1008,6 @@ const App: Component = () => {
             ]}
             onSelect={(option) => console.log('Selected:', option)}
               value="2"
-              positionning='fixed'
           />
           <Checkbox label="Checkbox" />
           {/* <div class="fixed right-4 bottom-4 z-50 w-fit">
