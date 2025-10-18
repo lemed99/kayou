@@ -512,15 +512,12 @@ const DatePicker = (props: DatePickerProps) => {
     transitionDuration: 200,
   });
 
-  const { refs, floatingStyles, arrowStyles, container } = useFloating({
+  const { refs, floatingStyles, container } = useFloating({
     get placement() {
       return `${props.popoverPosition}-start` as Placement;
     },
     isOpen: isMounted,
-    offset: 0,
-    renderArrow: true,
-    arrowAlignment: 'start',
-    arrowOffset: 19,
+    offset: 4,
   });
 
   createEffect(() => {
@@ -595,33 +592,6 @@ const DatePicker = (props: DatePickerProps) => {
               'z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
             )}
           >
-            <div ref={refs.setArrow} style={arrowStyles()!}>
-              <svg
-                width="30"
-                height="15"
-                viewBox="0 0 30 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 1.42182L27.5208 13.9426H2.47924L15 1.42182Z"
-                  fill="white"
-                  stroke="oklch(87.2% 0.01 258.338)"
-                />
-                <path
-                  d="M2.27208 13.4427H27.7279L29.1421 14.8569H0.857865L2.27208 13.4427Z"
-                  fill="white"
-                />
-                <path
-                  d="M27.7275 14.8569H29.1417L27.7275 13.4426H26.3133L27.7275 14.8569Z"
-                  fill="oklch(87.2% 0.01 258.338)"
-                />
-                <path
-                  d="M2.27239 13.4429H3.6866L2.27239 14.8572H0.858172L2.27239 13.4429Z"
-                  fill="oklch(87.2% 0.01 258.338)"
-                />
-              </svg>
-            </div>
             <Calendar
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
