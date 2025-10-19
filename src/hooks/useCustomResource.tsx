@@ -38,10 +38,10 @@ export interface CustomResourceContextProps<T> {
 
 export interface CustomResourceProps<T> {
   options: ResourceOptions<T>;
-  urlString: string;
+  urlString: Accessor<string>;
   refreshKey?: string;
-  condition?: boolean;
-  forceRefresh?: boolean;
+  condition?: Accessor<boolean>;
+  forceRefresh?: Accessor<boolean>;
   pullFromCache?: boolean;
 }
 
@@ -109,7 +109,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     url: string;
     options?: ResourceOptions<T>;
     pendingRequests: Map<string, PendingEntry<T>>;
-  }): Promise<T> => {
+  }): Promise<T | null> => {
+    if (!url) return null;
     const fetcher = options?.fetcher ?? defaultFetcher;
     const fetchPromiseCallback = async (data: T) => {
       setFromCache(false);
@@ -119,51 +120,62 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       options?.onSuccess?.(data, false);
       setResourceData(() => data);
       await insertOrUpdateCacheRow(url, data);
+      return data;
     };
 
-    if (options?.dedupeRequests && pendingRequests.has(url)) {
-      const entry = pendingRequests.get(url);
-      if (entry?.timeoutId) {
-        clearTimeout(entry.timeoutId);
-      }
-      if (
-        entry?.lastValue !== undefined &&
-        entry.resolvedAt &&
-        Date.now() - entry.resolvedAt < options.dedupeInterval!
-      ) {
-        return Promise.resolve(entry.lastValue as T);
-      }
-      return entry?.promise as Promise<T>;
-    }
-
-    const fetchPromise = (async () => {
+    const fetchPromise = async () => {
       const data = await fetcher(url);
-      await fetchPromiseCallback(data);
-      if (options?.dedupeRequests) {
-        pendingRequests.set(url, {
-          promise: null,
-          lastValue: data,
-          resolvedAt: Date.now(),
-        });
-      }
       return data;
-    })();
+    };
 
     if (options?.dedupeRequests) {
-      const timeOut = setTimeout(() => {
-        const entry = pendingRequests.get(url);
-        if (
-          entry &&
-          entry.resolvedAt &&
-          Date.now() - entry.resolvedAt >= options.dedupeInterval!
-        ) {
-          pendingRequests.delete(url);
+      let entry = pendingRequests.get(url);
+
+      if (entry?.resolvedAt && Date.now() - entry.resolvedAt >= options.dedupeInterval!) {
+        if (entry.timeoutId) {
+          clearTimeout(entry.timeoutId);
         }
-      }, options.dedupeInterval);
-      pendingRequests.set(url, { promise: fetchPromise, timeoutId: timeOut });
+        pendingRequests.delete(url);
+        entry = undefined;
+      }
+
+      if (
+        entry?.lastValue !== undefined &&
+        entry?.resolvedAt &&
+        Date.now() - entry.resolvedAt < options.dedupeInterval!
+      ) {
+        return fetchPromiseCallback(entry.lastValue);
+      }
+
+      let promiseReturn: Promise<T>;
+
+      if (entry?.promise) {
+        promiseReturn = entry.promise;
+      } else {
+        promiseReturn = fetchPromise().then((data) => {
+          const timeOut = setTimeout(() => {
+            pendingRequests.delete(url);
+          }, options.dedupeInterval);
+
+          pendingRequests.set(url, {
+            promise: null,
+            lastValue: data,
+            resolvedAt: Date.now(),
+            timeoutId: timeOut,
+          });
+
+          return data;
+        });
+
+        pendingRequests.set(url, {
+          promise: promiseReturn,
+        });
+      }
+
+      return promiseReturn.then((data) => fetchPromiseCallback(data));
     }
 
-    return fetchPromise;
+    return fetchPromise().then((data) => fetchPromiseCallback(data));
   };
 
   const clearAllRetryTimers = () => {
@@ -174,21 +186,23 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const [shouldFetch] = createResource(
     () => ({
       refreshData: context.refreshData,
-      url: props.urlString,
-      forceRefresh: props.forceRefresh,
-      condition: props.condition,
+      url: props.urlString(),
+      forceRefresh: props.forceRefresh?.(),
+      condition: props.condition?.(),
       key: props.refreshKey,
       pullFromCache: pullFromCache(),
     }),
     async ({ refreshData, url, forceRefresh, condition, key, pullFromCache }) => {
-      if (!url) return false;
+      if (!url) return undefined;
+
+      if (!refreshData) return true;
 
       if (forceRefresh) return true;
 
       if (condition === false) return false;
 
       const cacheData = pullFromCache ? await getCacheRow(url) : null;
-      const needsFetch = key ? refreshData?.[key] === true : true;
+      const needsFetch = key ? refreshData[key] === true : true;
 
       return needsFetch || !cacheData;
     },
@@ -196,7 +210,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   const [resource, { refetch: originalRefetch }] = createResource(
     () => ({
-      url: shouldFetch() ? props.urlString : '',
+      url: shouldFetch() ? props.urlString() : '',
       options: mergedOptions,
       pendingRequests: context.pendingRequests,
     }),
@@ -205,10 +219,11 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   createResource(
     () => ({
-      url: (!shouldFetch() && pullFromCache() && props.urlString) || '',
+      url: (shouldFetch() === false && pullFromCache() && props.urlString()) || '',
       onSuccess: mergedOptions?.onSuccess,
     }),
     async ({ url, onSuccess }) => {
+      if (!url) return undefined;
       const cached = (await getCacheRow(url)) as T | null;
       if (cached) {
         setFromCache(true);
@@ -217,7 +232,6 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
         setResourceData(() => cached);
         return cached;
       }
-      return undefined;
     },
   );
 
@@ -289,7 +303,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     attempts,
     loading: () => resource.loading,
     state: () => resource.state,
-    latest: () => resource.latest,
+    latest: () => resource.latest ?? undefined,
     refetch,
     fromCache,
   };

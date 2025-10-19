@@ -1,14 +1,14 @@
-import { Show, createMemo } from 'solid-js';
+import { JSX, Show, createMemo } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
 type HelperTextColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
-export interface HelperTextProps {
+export interface HelperTextProps
+  extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
   content: string;
   class?: string;
   color?: HelperTextColor;
-  action?: () => void;
 }
 
 const helperTextTheme = {
@@ -28,13 +28,12 @@ const HelperText = (props: HelperTextProps) => {
   return (
     <Show when={props.content}>
       <span
-        onClick={() => props.action?.() ?? void 0}
         class={twMerge(
           'mt-0.5 block',
           helperTextTheme.colors[color()],
           helperTextTheme.content,
           props.class,
-          props.action ? 'cursor-pointer' : '',
+          props.onClick ? 'cursor-pointer' : '',
         )}
       >
         {props.content}

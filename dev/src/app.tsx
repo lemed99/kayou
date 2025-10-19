@@ -24,7 +24,7 @@ import {
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
-import { useFloating } from '../../src/hooks';
+import { useCustomResource, useFloating } from '../../src/hooks';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
 
@@ -933,12 +933,74 @@ const App: Component = () => {
     }
   );
 
+  const [fetch, setFetch] = createSignal(0);
+
+
+  // setInterval(() => setFetch(true), 2500);
+
+  // for (let i = 0; i < 5; i++) {
+  //   useCustomResource({
+  //   urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+  //   options: {
+  //     onSuccess: (data, f) => console.log(JSON.stringify(data), f),
+  //   },
+  //   // refreshKey: 'todos',
+  // })
+  // }
+
+  const A = () => {
+    const { data } = useCustomResource({
+    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    options: {
+      onSuccess: (data) => console.log(1),
+    },
+    // refreshKey: 'todos',
+  });
+    return <div>Cool { JSON.stringify(data())}</div>
+  }
+  const B = () => {
+    const { data } = useCustomResource({
+    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    options: {
+      onSuccess: (data) => console.log(2),
+    },
+    // refreshKey: 'todos',
+  });
+    return <div>Cool { JSON.stringify(data())}</div>
+  }
+  const C = () => {
+    const { data } = useCustomResource({
+    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    options: {
+      onSuccess: (data) => console.log(3),
+    },
+    // refreshKey: 'todos',
+  });
+    return <div>Cool { JSON.stringify(data())}</div>
+  }
+  const D = () => {
+    setTimeout(() => setFetch(2), 2000)
+    const { data } = useCustomResource({
+    urlString: () => fetch() ? 'https://jsonplaceholder.typicode.com/todos/2' : '',
+    options: {
+      onSuccess: (data,f) => console.log(4, f),
+    },
+    // refreshKey: 'todos',
+  });
+    return <div>Cool { JSON.stringify(data())}</div>
+  }
+
+
   return (
     // <IntlProvider locale="en" messages={{}}>
       <ThemeProvider>
     <DatePickerProvider locale="fr">
         <>
           <div>Bonjour</div>
+          <A/>
+          <B/>
+          <C/>
+          <D/>
         <div class="mt-32 flex items-start max-w-sm flex-col gap-4 p-8 border border-gray-500 h-[500px] overflow-y-auto">
           <Button color="dark">I'm a button</Button>
           <NumberInput

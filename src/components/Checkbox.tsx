@@ -12,7 +12,7 @@ export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement>
 }
 
 const textInputTheme = {
-  base: 'size-4 cursor-pointer rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-white shrink-0 appearance-none bg-white',
+  base: 'size-4 cursor-pointer disabled:cursor-not-allowed rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-white shrink-0 appearance-none bg-white',
 };
 
 const checked = (color: CheckboxProps['color']) => `
@@ -40,7 +40,11 @@ const Checkbox = (props: CheckboxProps) => {
 
   return (
     <Label
-      class={twMerge('inline-flex cursor-pointer items-center text-sm', local.labelClass)}
+      class={twMerge(
+        'inline-flex items-center text-sm',
+        local.labelClass,
+        inputProps.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+      )}
       id={id}
     >
       <Show when={local.label && labelPosition() === 'left'}>

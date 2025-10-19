@@ -19,8 +19,8 @@ export interface ResourceOptions<T> {
 }
 
 export interface CustomResourceProviderProps<T> extends ResourceOptions<T> {
-  pendingRequests: Map<string, PendingEntry<T>>;
-  refreshData: Record<string, boolean> | null;
+  pendingRequests?: Map<string, PendingEntry<T>>;
+  refreshData?: Record<string, boolean> | null;
 }
 
 export interface PendingEntry<T> {

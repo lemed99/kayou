@@ -1,6 +1,7 @@
 import { Component, createUniqueId } from 'solid-js';
 import { render } from 'solid-js/web';
 
+import { CustomResourceProvider } from '../../src/context/CustomResourceContext';
 import { ToastMethodProps, ToastProvider } from '../../src/context/ToastContext';
 import App from './app';
 import './index.css';
@@ -20,17 +21,22 @@ const SuccessToast: Component<ToastMethodProps> = (props) => {
 
 render(
   () => (
-    <ToastProvider
-      position="top-left"
-      duration={30000}
-      pauseOnHover={true}
-      gutter={16}
-      methods={{
-        success: SuccessToast,
-      }}
+    <CustomResourceProvider
+      // pendingRequests={new Map()}
+      // refreshData={{ todos: true }}
     >
-      <App />
-    </ToastProvider>
+      <ToastProvider
+        position="top-left"
+        duration={30000}
+        pauseOnHover={true}
+        gutter={16}
+        methods={{
+          success: SuccessToast,
+        }}
+      >
+        <App />
+      </ToastProvider>
+    </CustomResourceProvider>
   ),
   document.querySelector('#root')!,
 );
