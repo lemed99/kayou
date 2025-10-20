@@ -24,9 +24,26 @@ import {
 import { DatePickerProvider } from '../../src/context/DatePickerContext';
 import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
-import { useCustomResource, useFloating } from '../../src/hooks';
+import { useCustomResource, useFloating, useMutation } from '../../src/hooks';
 import { useToast } from '../../src/hooks/useToast';
 import { InformationCircleIcon } from '../../src/icons';
+
+const defaultFetcher = async (url, arg) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(arg),
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.text();
+      throw new Error(errorData || `HTTP ${res.status}`);
+    }
+    
+    return (await res.json());
+  };
 
 const SelectWithSearchDemo = () => {
   const [selectedProduct, setSelectedProduct] = createSignal(null);
@@ -990,6 +1007,27 @@ const App: Component = () => {
     return <div>Cool { JSON.stringify(data())}</div>
   }
 
+  const MyComponent = () => {
+  const mutation = useMutation<any, { title: string }>({
+    urlString: 'https://cadb807f41d78def396f.free.beeceptor.com/api/users/',
+    options: {
+      fetcher: defaultFetcher,
+      onSuccess: (data) => console.log('Created:', data),
+      onError: (error) => console.error('Failed:', error),
+    },
+  });
+
+  return (
+    <div>
+      <button onClick={() => mutation.trigger({ title: 'New Todo' })} disabled={mutation.isMutating()}>
+        Create Todo
+      </button>
+      {mutation.data() && <div>Created: {mutation.data()?.title}</div>}
+      {mutation.error() && <div>Error: {mutation.error()?.message}</div>}
+    </div>
+  );
+};
+
 
   return (
     // <IntlProvider locale="en" messages={{}}>
@@ -997,6 +1035,7 @@ const App: Component = () => {
     <DatePickerProvider locale="fr">
         <>
           <div>Bonjour</div>
+          <MyComponent/>
           <A/>
           <B/>
           <C/>
