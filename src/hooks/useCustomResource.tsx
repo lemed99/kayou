@@ -10,7 +10,6 @@ import {
 } from 'solid-js';
 
 import {
-  CustomError,
   CustomResourceContext,
   PendingEntry,
   ResourceOptions,
@@ -19,7 +18,7 @@ import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
 
 export interface CustomResource<T> {
   data: Accessor<T | undefined>;
-  error: Accessor<CustomError | null>;
+  error: Accessor<unknown>;
   loading: Accessor<boolean>;
   state: Accessor<Resource<T>['state']>;
   latest: Accessor<T | undefined>;
@@ -46,7 +45,7 @@ export interface CustomResourceProps<T> {
 }
 
 export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResource<T> {
-  const [error, setError] = createSignal<CustomError | null>(null);
+  const [error, setError] = createSignal<unknown>(null);
   const [fromCache, setFromCache] = createSignal(false);
   const [errorStatus, setErrorStatus] = createSignal<number>();
   const [attempts, setAttempts] = createSignal(0);
@@ -261,22 +260,10 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     }
   });
 
-  const parseError = (error: unknown): CustomError => {
-    if (typeof error === 'string') {
-      try {
-        return JSON.parse(error) as CustomError;
-      } catch {
-        return { message: error };
-      }
-    }
-    return { message: String(error) };
-  };
-
   createEffect(() => {
     if (resource.error) {
-      const parsedError = parseError(resource.error);
-      setError(parsedError);
-      mergedOptions.onError?.(parsedError);
+      setError(resource.error);
+      mergedOptions.onError?.(resource.error);
     }
   });
 

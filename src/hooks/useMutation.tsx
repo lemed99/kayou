@@ -1,23 +1,21 @@
 import { Accessor, createSignal } from 'solid-js';
 
-import { CustomError } from '../context/CustomResourceContext';
-
 export interface MutationOptions<TData, TArg> {
   fetcher: (url: string, arg: TArg) => Promise<TData>;
   onSuccess?: (data: TData, arg: TArg) => void;
-  onError?: (error: CustomError, arg: TArg) => void;
+  onError?: (error: unknown, arg: TArg) => void;
 }
 
 export interface Mutation<TData, TArg> {
   data: Accessor<TData | undefined>;
-  error: Accessor<CustomError | null>;
+  error: Accessor<unknown>;
   isMutating: Accessor<boolean>;
   trigger: (arg: TArg, options?: MutationTriggerOptions<TData, TArg>) => Promise<TData>;
 }
 
 export interface MutationTriggerOptions<TData, TArg> {
   onSuccess?: (data: TData, arg: TArg) => void;
-  onError?: (error: CustomError, arg: TArg) => void;
+  onError?: (error: unknown, arg: TArg) => void;
 }
 
 export interface MutationProps<TData, TArg> {
@@ -28,23 +26,9 @@ export interface MutationProps<TData, TArg> {
 export function useMutation<TData = unknown, TArg = unknown>(
   props: MutationProps<TData, TArg>,
 ): Mutation<TData, TArg> {
-  const [error, setError] = createSignal<CustomError | null>(null);
+  const [error, setError] = createSignal<unknown>(null);
   const [mutationData, setMutationData] = createSignal<TData | undefined>();
   const [isMutating, setIsMutating] = createSignal(false);
-
-  const parseError = (error: unknown): CustomError => {
-    if (typeof error === 'string') {
-      try {
-        return JSON.parse(error) as CustomError;
-      } catch {
-        return { message: error };
-      }
-    }
-    if (error instanceof Error) {
-      return { message: error.message };
-    }
-    return { message: String(error) };
-  };
 
   const trigger = async (
     arg: TArg,
@@ -65,11 +49,10 @@ export function useMutation<TData = unknown, TArg = unknown>(
       setIsMutating(false);
       return data;
     } catch (err) {
-      const parsedError = parseError(err);
-      setError(parsedError);
+      setError(err);
 
-      options?.onError?.(parsedError, arg);
-      props.options?.onError?.(parsedError, arg);
+      options?.onError?.(err, arg);
+      props.options?.onError?.(err, arg);
 
       setIsMutating(false);
       throw err;

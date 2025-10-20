@@ -1,15 +1,9 @@
 import { ParentComponent, createContext } from 'solid-js';
 
-export interface CustomError {
-  message: string;
-  status?: number;
-  code?: string;
-}
-
 export interface ResourceOptions<T> {
   fetcher?: (url: string) => Promise<T>;
   onSuccess?: (data: T, fromCache: boolean) => void;
-  onError?: (err: CustomError) => void;
+  onError?: (err: unknown) => void;
   retryCount?: number;
   retryDelay?: number;
   exponentialBackoff?: boolean;

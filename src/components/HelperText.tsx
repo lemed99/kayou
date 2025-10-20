@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo } from 'solid-js';
+import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -23,18 +23,20 @@ const helperTextTheme = {
 };
 
 const HelperText = (props: HelperTextProps) => {
-  const color = createMemo(() => props.color || 'gray');
+  const [local, otherProps] = splitProps(props, ['color', 'class', 'content']);
+  const color = createMemo(() => local.color || 'gray');
 
   return (
-    <Show when={props.content}>
+    <Show when={local.content}>
       <span
         class={twMerge(
           'mt-0.5 block',
           helperTextTheme.colors[color()],
           helperTextTheme.content,
-          props.class,
-          props.onClick ? 'cursor-pointer' : '',
+          local.class,
+          otherProps.onClick ? 'cursor-pointer' : '',
         )}
+        {...otherProps}
       >
         {props.content}
       </span>
