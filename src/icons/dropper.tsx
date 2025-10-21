@@ -1,0 +1,8 @@
+import { JSX } from 'solid-js';
+import { IconWrapper, IconProps } from '../components/IconWrapper';
+
+export const DropperIcon = (props: IconProps): JSX.Element => (
+  <IconWrapper {...props}>
+    <path d="M10.5 6.50006L17.5 13.5001M2 22.0001C2 22.0001 6.5 21.5001 9 19.0001L21 7.00006C22.1046 5.89549 22.1046 4.10463 21 3.00006C19.8954 1.89549 18.1046 1.89549 17 3.00006L5 15.0001C2.5 17.5001 2 22.0001 2 22.0001Z" stroke-linecap="round" stroke-linejoin="round"/>
+  </IconWrapper>
+);

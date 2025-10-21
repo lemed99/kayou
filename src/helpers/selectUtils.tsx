@@ -3,7 +3,7 @@ import { JSX, Show } from 'solid-js';
 import { twMerge } from 'tailwind-merge';
 
 import Spinner from '../components/Spinner';
-import { CheckIcon, ChevronDownIcon, XMarkIcon } from '../icons';
+import { CheckIcon, ChevronDownIcon, XCloseIcon } from '../icons';
 
 export interface Option {
   value: string;
@@ -58,7 +58,7 @@ export const ClearContentButton = (props: {
       onClick={(e: Event) => props.onClick(e)}
       class={defalutClass || props.class}
     >
-      <XMarkIcon class="size-4" />
+      <XCloseIcon class="size-4" />
     </button>
   );
 };

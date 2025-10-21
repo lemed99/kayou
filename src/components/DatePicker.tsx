@@ -26,7 +26,7 @@ import {
   toISO,
 } from '../helpers/dates';
 import { Placement } from '../hooks/useFloating/types';
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '../icons';
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, XCloseIcon } from '../icons';
 import { useDatePicker, useFloating } from './../hooks';
 import Badge from './Badge';
 import Button from './Button';
@@ -570,7 +570,7 @@ const DatePicker = (props: DatePickerProps) => {
             }}
             class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <XMarkIcon class="size-4" />
+            <XCloseIcon class="size-4" />
           </button>
         </Show>
       </div>

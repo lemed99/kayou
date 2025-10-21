@@ -5,7 +5,7 @@ import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
-import { XMarkIcon } from '../icons';
+import { XCloseIcon } from '../icons';
 
 export interface DrawerProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
@@ -129,7 +129,7 @@ const Drawer = (props: DrawerProps) => {
                 type="button"
                 onClick={(e) => props.onClose(e)}
               >
-                <XMarkIcon class={theme.header.close.icon} />
+                <XCloseIcon class={theme.header.close.icon} />
               </button>
             </div>
             <div class={twMerge(theme.body.base, theme.body.popup)}>{props.children}</div>

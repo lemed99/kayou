@@ -337,7 +337,7 @@ const useSelect = <T extends MergedSelectProps>(
               <div
                 ref={refs.setFloating}
                 class={twMerge(
-                  'z-50 w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
+                  'z-[100] w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
                 )}
                 style={{
                   ...floatingStyles(),

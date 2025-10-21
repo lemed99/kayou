@@ -5,7 +5,7 @@ import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
-import { XMarkIcon } from '../icons';
+import { XCloseIcon } from '../icons';
 
 export interface ModalProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
@@ -99,7 +99,7 @@ const Modal = (props: ModalProps) => {
                 type="button"
                 onClick={(e) => props.onClose(e)}
               >
-                <XMarkIcon class={theme.header.close.icon} />
+                <XCloseIcon class={theme.header.close.icon} />
               </button>
             </div>
             <div class={theme.body}>{props.children}</div>

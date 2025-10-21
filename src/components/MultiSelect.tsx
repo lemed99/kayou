@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { ChevronDownButton, ClearContentButton } from '../helpers/selectUtils';
 import useSelect from '../hooks/useSelect';
-import { MagnifyingGlassIcon } from '../icons';
+import { SearchRefractionIcon } from '../icons';
 import Checkbox from './Checkbox';
 import TextInput, { TextInputProps } from './TextInput';
 
@@ -122,7 +122,7 @@ export default function MultiSelect(props: MultiSelectProps) {
       preOptionsComponent={
         <Show when={local.withSearch === true}>
           <div class="relative flex items-center border-b border-gray-200 px-3 dark:border-gray-600">
-            <MagnifyingGlassIcon class="size-4 text-gray-400" />
+            <SearchRefractionIcon class="size-4 text-gray-400" />
             <input
               ref={setSearchRef}
               value={searchKey()}

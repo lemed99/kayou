@@ -12,12 +12,12 @@ import {
 import { twMerge } from 'tailwind-merge';
 
 import {
-  Columns,
-  FilterFunnel,
-  InformationCircleIcon,
-  MagnifyingGlassIcon,
-  Maximise,
-  XMarkIcon,
+  Columns03Icon,
+  FilterFunnel01Icon,
+  InfoCircleIcon,
+  Maximize01Icon,
+  SearchRefractionIcon,
+  XCloseIcon,
 } from '../icons';
 import Button from './Button';
 import Checkbox from './Checkbox';
@@ -233,13 +233,13 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
     return (
       <div
         ref={setTableRef}
-        class="flex h-full w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
+        class="mt-2 flex h-full w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
       >
         {/* Search Section */}
         <Show when={props.searchBar}>
           <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-gray-600">
             <div class="relative flex w-full max-w-md items-center">
-              <MagnifyingGlassIcon class="size-5 text-gray-400" />
+              <SearchRefractionIcon class="size-5 text-gray-400" />
               <input
                 ref={setSearchRef}
                 value={searchKey()}
@@ -257,7 +257,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                   }}
                   class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <XMarkIcon class="size-4" />
+                  <XCloseIcon class="size-4" />
                 </button>
               </Show>
             </div>
@@ -274,7 +274,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
           >
             <div class="flex items-center">
               <div class="flex items-center border-r border-gray-200 py-3 pr-6">
-                <FilterFunnel class="mr-2 size-5" />
+                <FilterFunnel01Icon class="mr-2 size-5" />
                 <p>Filtres</p>
                 <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-white dark:text-gray-600">
                   {2}
@@ -297,7 +297,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                     }}
                     values={columns().map((c) => c.key)}
                     displayValue="Colonnes"
-                    icon={() => <Columns class="size-5" />}
+                    icon={() => <Columns03Icon class="size-5" />}
                     fitContent={true}
                   />
                 </Show>
@@ -359,7 +359,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                     placement="top"
                     class="capitalize"
                   >
-                    <InformationCircleIcon />
+                    <InfoCircleIcon />
                   </Tooltip>
                 </Show>
               </div>
@@ -423,7 +423,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
             class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700"
           >
             <span>Voir plus</span>
-            <Maximise class="size-3 transition-all group-hover:size-4" />
+            <Maximize01Icon class="size-3 transition-all group-hover:size-4" />
           </div>
         </Show>
 
