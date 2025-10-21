@@ -15,6 +15,7 @@ export interface ResourceOptions<T> {
 export interface CustomResourceProviderProps<T> extends ResourceOptions<T> {
   pendingRequests?: Map<string, PendingEntry<T>>;
   refreshData?: Record<string, boolean> | null;
+  baseUrl?: string;
 }
 
 export interface PendingEntry<T> {
@@ -67,6 +68,9 @@ export const CustomResourceProvider: ParentComponent<
         pendingRequests,
         get refreshData() {
           return props.refreshData;
+        },
+        get baseUrl() {
+          return props.baseUrl;
         },
       }}
     >

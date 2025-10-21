@@ -24,6 +24,7 @@ render(
     <CustomResourceProvider
       // pendingRequests={new Map()}
       // refreshData={{ todos: true }}
+      baseUrl='https://jsonplaceholder.typicode.com'
     >
       <ToastProvider
         position="top-left"

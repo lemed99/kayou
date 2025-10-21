@@ -33,6 +33,7 @@ export interface CustomResourceContextProps<T> {
   options: ResourceOptions<T>;
   pendingRequests: Map<string, PendingEntry<T>>;
   refreshData: Record<string, boolean> | null;
+  baseUrl: string;
 }
 
 export interface CustomResourceProps<T> {
@@ -57,6 +58,9 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   if (!context) {
     throw new Error('useCustomResource must be used within a CustomResourceProvider');
   }
+
+  const urlString = () =>
+    context.baseUrl ? context.baseUrl + props.urlString() : props.urlString();
 
   const mergedOptions: ResourceOptions<T> = {
     get retryCount() {
@@ -185,7 +189,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const [shouldFetch] = createResource(
     () => ({
       refreshData: context.refreshData,
-      url: props.urlString(),
+      url: urlString(),
       forceRefresh: props.forceRefresh?.(),
       condition: props.condition?.(),
       key: props.refreshKey,
@@ -209,7 +213,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   const [resource, { refetch: originalRefetch }] = createResource(
     () => ({
-      url: shouldFetch() ? props.urlString() : '',
+      url: shouldFetch() ? urlString() : '',
       options: mergedOptions,
       pendingRequests: context.pendingRequests,
     }),
@@ -218,7 +222,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   createResource(
     () => ({
-      url: (shouldFetch() === false && pullFromCache() && props.urlString()) || '',
+      url: (shouldFetch() === false && pullFromCache() && urlString()) || '',
       onSuccess: mergedOptions?.onSuccess,
     }),
     async ({ url, onSuccess }) => {

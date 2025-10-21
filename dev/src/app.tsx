@@ -957,7 +957,7 @@ const App: Component = () => {
 
   // for (let i = 0; i < 5; i++) {
   //   useCustomResource({
-  //   urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+  //   urlString: () => '/todos/2',
   //   options: {
   //     onSuccess: (data, f) => console.log(JSON.stringify(data), f),
   //   },
@@ -967,7 +967,7 @@ const App: Component = () => {
 
   const A = () => {
     const { data } = useCustomResource({
-    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    urlString: () => '/todos/2',
     options: {
       onSuccess: (data) => console.log(1),
     },
@@ -977,7 +977,7 @@ const App: Component = () => {
   }
   const B = () => {
     const { data } = useCustomResource({
-    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    urlString: () => '/todos/2',
     options: {
       onSuccess: (data) => console.log(2),
     },
@@ -987,7 +987,7 @@ const App: Component = () => {
   }
   const C = () => {
     const { data } = useCustomResource({
-    urlString: () => 'https://jsonplaceholder.typicode.com/todos/2',
+    urlString: () => '/todos/2',
     options: {
       onSuccess: (data) => console.log(3),
     },
@@ -998,7 +998,7 @@ const App: Component = () => {
   const D = () => {
     setTimeout(() => setFetch(2), 2000)
     const { data } = useCustomResource({
-    urlString: () => fetch() ? 'https://jsonplaceholder.typicode.com/todos/2' : '',
+    urlString: () => fetch() ? '/todos/2' : '',
     options: {
       onSuccess: (data,f) => console.log(4, f),
     },
