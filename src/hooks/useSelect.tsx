@@ -13,6 +13,7 @@ import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import HelperText from '../components/HelperText';
+import Label from '../components/Label';
 import { TextInputProps } from '../components/TextInput';
 import { VirtualList } from '../components/VirtualList';
 import { getScrollProgress } from '../helpers';
@@ -26,7 +27,6 @@ import { useFloating } from './useFloating';
 
 interface MergedSelectProps extends Omit<TextInputProps, 'onSelect'> {
   options: Option[];
-  helperText?: string;
   value?: string;
   onSelect?: (option?: Option) => void;
   onMultiSelect?: (options?: Option[]) => void;
@@ -320,6 +320,14 @@ const useSelect = <T extends MergedSelectProps>(
     return (
       <div class="w-full">
         <div class="relative w-full">
+          <Show when={props.label}>
+            <div class="mb-1 block">
+              <Label value={props.label} color={props.color} />
+              <Show when={props.required}>
+                <span class="ml-0.5 font-medium text-red-500">*</span>
+              </Show>
+            </div>
+          </Show>
           <div ref={refs.setReference} onClick={handleInputClick} class="relative w-full">
             {layoutProps.inputComponent}
           </div>

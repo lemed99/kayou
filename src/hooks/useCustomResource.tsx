@@ -37,8 +37,8 @@ export interface CustomResourceContextProps<T> {
 }
 
 export interface CustomResourceProps<T> {
-  options: ResourceOptions<T>;
   urlString: Accessor<string>;
+  options?: ResourceOptions<T>;
   refreshKey?: string;
   condition?: Accessor<boolean>;
   forceRefresh?: Accessor<boolean>;
@@ -64,31 +64,31 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   const mergedOptions: ResourceOptions<T> = {
     get retryCount() {
-      return props.options.retryCount ?? context.options.retryCount;
+      return props.options?.retryCount ?? context.options.retryCount;
     },
     get retryDelay() {
-      return props.options.retryDelay ?? context.options.retryDelay;
+      return props.options?.retryDelay ?? context.options.retryDelay;
     },
     get exponentialBackoff() {
-      return props.options.exponentialBackoff ?? context.options.exponentialBackoff;
+      return props.options?.exponentialBackoff ?? context.options.exponentialBackoff;
     },
     get errorsBlackList() {
-      return props.options.errorsBlackList ?? context.options.errorsBlackList;
+      return props.options?.errorsBlackList ?? context.options.errorsBlackList;
     },
     get dedupeRequests() {
-      return props.options.dedupeRequests ?? context.options.dedupeRequests;
+      return props.options?.dedupeRequests ?? context.options.dedupeRequests;
     },
     get dedupeInterval() {
-      return props.options.dedupeInterval ?? context.options.dedupeInterval;
+      return props.options?.dedupeInterval ?? context.options.dedupeInterval;
     },
     get fetcher() {
-      return props.options.fetcher ?? context.options.fetcher;
+      return props.options?.fetcher ?? context.options.fetcher;
     },
     get onSuccess() {
-      return props.options.onSuccess ?? context.options.onSuccess;
+      return props.options?.onSuccess ?? context.options.onSuccess;
     },
     get onError() {
-      return props.options.onError ?? context.options.onError;
+      return props.options?.onError ?? context.options.onError;
     },
   };
 

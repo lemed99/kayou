@@ -15,7 +15,6 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   onSelect: (option?: Option) => void;
   value?: string;
   optionRowHeight?: number;
-  helperText?: string;
 }
 
 export default function Select(props: SelectProps) {
@@ -26,6 +25,8 @@ export default function Select(props: SelectProps) {
     'style',
     'optionRowHeight',
     'helperText',
+    'label',
+    'required',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
@@ -42,7 +43,7 @@ export default function Select(props: SelectProps) {
   return (
     <Layout
       inputComponent={
-        <>
+        <div>
           <TextInput
             ref={setInputRef}
             readOnly={true}
@@ -61,7 +62,7 @@ export default function Select(props: SelectProps) {
           />
 
           <ChevronDownButton onFocus={() => inputRef()?.focus()} />
-        </>
+        </div>
       }
       optionsComponent={(option) => (
         <div

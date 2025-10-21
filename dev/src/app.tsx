@@ -572,8 +572,8 @@ const SelectWithSearchDemo = () => {
 
   return (
     <div class="">
-      <h2 class="mb-2 font-bold">Select a Product</h2>
       <MultiSelect
+        label='Select a Product'
         options={productOption().map((p) => ({
           label: p.label,
           value: p.value.id,
@@ -614,7 +614,7 @@ const SelectWithSearchDemo = () => {
         //     // Simulate loading more options
         //   }
         // }}
-        // helperText='Search for a product... e.g., "iPhone"'
+        helperText='Search for a product... e.g., "iPhone"'
         // target="products"
       />
       <div class="mt-4 mb-8">
@@ -1093,7 +1093,9 @@ const App: Component = () => {
             </Show>
 
           <Select
-            // color="info"
+              // color="info"
+              label="Cool"
+              required={true}
             sizing="md"
             helperText="Choose an option"
             options={[

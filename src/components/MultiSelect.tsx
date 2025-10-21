@@ -27,7 +27,6 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
   cta?: JSX.Element;
   isLazyLoading?: boolean;
   onLazyLoad?: (scrollProgress: number) => void;
-  helperText?: string;
 }
 
 export default function MultiSelect(props: MultiSelectProps) {
@@ -46,6 +45,8 @@ export default function MultiSelect(props: MultiSelectProps) {
     'isLazyLoading',
     'onLazyLoad',
     'helperText',
+    'label',
+    'required',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();

@@ -17,7 +17,6 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> 
   cta?: JSX.Element;
   isLazyLoading?: boolean;
   onLazyLoad?: (scrollProgress: number) => void;
-  helperText?: string;
 }
 
 export default function SelectWithSearch(props: SelectWithSearchProps) {
@@ -34,6 +33,8 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
     'isLazyLoading',
     'onLazyLoad',
     'helperText',
+    'label',
+    'required',
   ]);
 
   const {
