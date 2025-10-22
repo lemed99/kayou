@@ -3,19 +3,19 @@ import { Accessor, createSignal } from 'solid-js';
 export interface MutationOptions<TData, TArg> {
   fetcher: (url: string, arg: TArg) => Promise<TData>;
   onSuccess?: (data: TData, arg: TArg) => void;
-  onError?: (error: unknown, arg: TArg) => void;
+  onError?: (error: Error, arg: TArg) => void;
 }
 
 export interface Mutation<TData, TArg> {
   data: Accessor<TData | undefined>;
-  error: Accessor<unknown>;
+  error: Accessor<Error | undefined>;
   isMutating: Accessor<boolean>;
   trigger: (arg: TArg, options?: MutationTriggerOptions<TData, TArg>) => Promise<TData>;
 }
 
 export interface MutationTriggerOptions<TData, TArg> {
   onSuccess?: (data: TData, arg: TArg) => void;
-  onError?: (error: unknown, arg: TArg) => void;
+  onError?: (error: Error, arg: TArg) => void;
 }
 
 export interface MutationProps<TData, TArg> {
@@ -26,7 +26,7 @@ export interface MutationProps<TData, TArg> {
 export function useMutation<TData = unknown, TArg = unknown>(
   props: MutationProps<TData, TArg>,
 ): Mutation<TData, TArg> {
-  const [error, setError] = createSignal<unknown>(null);
+  const [error, setError] = createSignal<Error | undefined>();
   const [mutationData, setMutationData] = createSignal<TData | undefined>();
   const [isMutating, setIsMutating] = createSignal(false);
 
@@ -37,7 +37,7 @@ export function useMutation<TData = unknown, TArg = unknown>(
     const fetcher = props.options.fetcher;
 
     setIsMutating(true);
-    setError(null);
+    setError();
 
     try {
       const data = await fetcher(props.urlString, arg);
@@ -49,10 +49,10 @@ export function useMutation<TData = unknown, TArg = unknown>(
       setIsMutating(false);
       return data;
     } catch (err) {
-      setError(err);
+      setError(err as Error);
 
-      options?.onError?.(err, arg);
-      props.options?.onError?.(err, arg);
+      options?.onError?.(err as Error, arg);
+      props.options?.onError?.(err as Error, arg);
 
       setIsMutating(false);
       throw err;

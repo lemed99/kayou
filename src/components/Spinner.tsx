@@ -5,8 +5,8 @@ import { twMerge } from 'tailwind-merge';
 import { defaultProps } from '../helpers/defaultProps';
 
 export interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
-  color?: 'failure' | 'gray' | 'default';
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  color?: 'gray' | 'dark' | 'failure' | 'info' | 'light' | 'success' | 'warning' | 'blue';
+  size?: 'xs' | 'sm' | 'md';
 }
 
 const theme = {
@@ -14,19 +14,22 @@ const theme = {
   color: {
     failure: 'fill-red-600',
     gray: 'fill-gray-600',
-    default: 'fill-blue-600',
+    info: 'fill-blue-600',
+    success: 'fill-green-700',
+    dark: 'fill-gray-800',
+    warning: 'fill-yellow-400',
+    blue: 'fill-blue-600',
+    light: 'fill-gray-600',
   },
   size: {
     xs: 'w-3 h-3',
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-    xl: 'w-10 h-10',
   },
 };
 
 const Spinner = (props: SpinnerProps) => {
-  const merged = defaultProps({ color: 'default', size: 'sm' }, props);
+  const merged = defaultProps({ color: 'info', size: 'sm' }, props);
 
   return (
     <span role="status">

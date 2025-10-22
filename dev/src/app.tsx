@@ -26,7 +26,7 @@ import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
 import { useCustomResource, useFloating, useMutation } from '../../src/hooks';
 import { useToast } from '../../src/hooks/useToast';
-import { InformationCircleIcon } from '../../src/icons';
+import { InfoCircleIcon } from '../../src/icons';
 
 const defaultFetcher = async (url, arg) => {
     const res = await fetch(url, {
@@ -579,7 +579,7 @@ const SelectWithSearchDemo = () => {
           value: p.value.id,
           // labelWrapper: (label) => (
           //   <div class="flex items-center gap-0.5">
-          //     <InformationCircleIcon /> {label}
+          //     <InfoCircleIcon /> {label}
           //   </div>
           // ),
         }))}
@@ -715,15 +715,63 @@ const DrawerExample = () => {
       <h2 class="mb-4 text-xl font-bold">Drawer Component Example</h2>
 
       <Button
+        color='failure'
         onClick={openDrawer}
       >
         Open Drawer!!
       </Button>
       <Button
+        color='gray'
+        onClick={openDrawer}
+        isLoading
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='info'
+        onClick={openDrawer}
+        isLoading
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='success'
+        onClick={openDrawer}
+        disabled
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='dark'
+        onClick={openDrawer}
+        isLoading
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='warning'
+        onClick={openDrawer}
+        isLoading
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='blue'
+        onClick={openDrawer}
+      >
+        Open Drawer!!
+      </Button>
+      <Button
+        color='light'
+        onClick={openDrawer}
+      >
+        Open Drawer!!
+      </Button>
+      {/* <Button
         onClick={() => setModal(true)}
       >
         Open Modal
-      </Button>
+      </Button> */}
 
       <Drawer
         show={isOpen()}
@@ -1054,7 +1102,7 @@ const App: Component = () => {
           />
           <TextInput
             // addon="CFA"
-            icon={InformationCircleIcon}
+            icon={InfoCircleIcon}
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
@@ -1180,7 +1228,7 @@ const App: Component = () => {
           >
             Show Success Toast
           </Button>
-          <Alert color="failure" icon={InformationCircleIcon}>
+          <Alert color="failure" icon={InfoCircleIcon}>
             <div>
               <div>This is an alert — check it out!</div>
               {/* <div>This is an alert — check it out!</div>

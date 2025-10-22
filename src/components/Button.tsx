@@ -1,6 +1,8 @@
-import { JSX, createMemo, splitProps } from 'solid-js';
+import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
+
+import Spinner from './Spinner';
 
 export type ButtonColor =
   | 'gray'
@@ -16,16 +18,17 @@ type ButtonSize = 'xs' | 'sm' | 'md';
 export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: ButtonColor;
   size?: ButtonSize;
+  isLoading?: boolean;
 }
 
 const theme = {
-  base: 'group flex h-min items-center justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer transition-all duration-200',
+  base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer transition-all duration-200',
   color: {
     gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 disabled:hover:bg-white focus:text-blue-700 dark:bg-transparent dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800',
     dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 disabled:hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 dark:disabled:hover:bg-gray-800',
     failure:
       'text-white bg-red-700 border border-transparent hover:bg-red-800 disabled:hover:bg-red-800 dark:bg-red-500 dark:hover:bg-red-600 dark:disabled:hover:bg-red-500',
-    info: 'text-white dark:text-gray-800 bg-blue-600 border border-transparent hover:bg-blue-700 disabled:opacity-50 dark:bg-gray-50 dark:hover:bg-gray-200',
+    info: 'text-white dark:text-gray-800 bg-blue-600 border border-transparent hover:bg-blue-700 disabled:bg-blue-600 dark:bg-gray-50 dark:hover:bg-gray-200',
     light:
       'text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 disabled:hover:bg-white dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700',
     success:
@@ -34,7 +37,7 @@ const theme = {
       'text-white bg-yellow-400 border border-transparent hover:bg-yellow-500 disabled:hover:bg-yellow-400 dark:disabled:hover:bg-yellow-400',
     blue: 'text-blue-900 bg-white border border-blue-300 hover:bg-blue-100 disabled:hover:bg-white dark:bg-blue-600 dark:text-white dark:border-blue-600 dark:hover:bg-blue-700 dark:hover:border-blue-700',
   },
-  disabled: 'cursor-not-allowed opacity-50',
+  disabled: '',
   size: {
     xs: 'text-xs px-2 py-1.5',
     sm: 'text-sm px-3 py-2',
@@ -50,12 +53,13 @@ const Button = (props: ButtonProps) => {
     'size',
     'class',
     'disabled',
+    'isLoading',
   ]);
 
   const type = createMemo(() => local.type || 'button');
   const color = createMemo(() => local.color || 'info');
   const size = createMemo(() => local.size || 'md');
-  const disabled = createMemo(() => local.disabled || false);
+  const disabled = createMemo(() => local.disabled || local.isLoading);
 
   return (
     <button
@@ -64,14 +68,19 @@ const Button = (props: ButtonProps) => {
         theme.base,
         theme.color[color()],
         local.class,
-        disabled() ? theme.disabled : '',
+        local.disabled ? 'opacity-50' : '',
       )}
       disabled={disabled()}
       {...buttonProps}
     >
-      <span class={twMerge('flex items-center', theme.size[size()])}>
-        {local.children}
-      </span>
+      <div class={twMerge('relative flex items-center', theme.size[size()])}>
+        <div class={twMerge(local.isLoading ? 'opacity-5' : '')}>{local.children}</div>
+        <Show when={local.isLoading}>
+          <div class="absolute inset-0 z-5 flex h-full w-full items-center justify-center">
+            <Spinner size="sm" color={color()} />
+          </div>
+        </Show>
+      </div>
     </button>
   );
 };

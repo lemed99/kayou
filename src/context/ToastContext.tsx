@@ -199,7 +199,7 @@ const ToastContainer = () => {
       <Portal>
         <div
           style={{ gap: `${gutter}px` }}
-          class={twMerge('fixed z-50', positionsClass[position])}
+          class={twMerge('fixed z-[105]', positionsClass[position])}
         >
           <For each={toasts}>{(toast) => ToastComponentWrapper(toast, context)}</For>
         </div>
