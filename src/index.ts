@@ -30,3 +30,10 @@ export { default as ToggleSwitch } from './components/ToggleSwitch';
 export { default as Tooltip } from './components/Tooltip';
 export { VirtualGrid } from './components/VirtualGrid';
 export { VirtualList } from './components/VirtualList';
+
+export type {
+  SidebarCollapseProps,
+  SidebarItemProps,
+  SideBarItems,
+  SidebarProps,
+} from './components/Sidebar';

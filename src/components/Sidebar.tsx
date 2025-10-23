@@ -7,9 +7,10 @@ import { ChevronRightIcon } from '../icons';
 import Popover from './Popover';
 
 export interface SideBarItems {
-  label: string;
+  label: JSX.Element;
   icon?: (props: { class: string }) => JSX.Element;
-  className?: string;
+  path?: string;
+  class?: string;
   isActive?: boolean;
   id: string;
   onClick?: (event: MouseEvent) => void;
@@ -33,7 +34,7 @@ export interface SidebarItemProps extends JSX.AnchorHTMLAttributes<HTMLAnchorEle
 
 export interface SidebarCollapseProps extends JSX.HTMLAttributes<HTMLButtonElement> {
   icon?: (props: { class: string }) => JSX.Element;
-  label?: string;
+  label?: JSX.Element;
   isItemCollapsed?: boolean;
   setIsItemCollapsed?: (state: boolean) => void;
   isActive?: boolean;
@@ -130,7 +131,7 @@ const Sidebar = (props: SidebarProps) => {
                     <SidebarItem
                       icon={mn.icon}
                       onClick={mn.onClick}
-                      class={mn.className}
+                      class={mn.class}
                       isActive={mn.isActive}
                       id={mn.id}
                     >
@@ -176,7 +177,7 @@ const Sidebar = (props: SidebarProps) => {
                           {(sb) => (
                             <SidebarItem
                               onClick={sb.onClick}
-                              class={sb.className}
+                              class={sb.class}
                               isActive={sb.isActive}
                               id={sb.id}
                             >
