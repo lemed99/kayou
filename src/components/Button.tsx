@@ -73,8 +73,10 @@ const Button = (props: ButtonProps) => {
       disabled={disabled()}
       {...buttonProps}
     >
-      <div class={twMerge('relative flex items-center', theme.size[size()])}>
-        <div class={twMerge(local.isLoading ? 'opacity-5' : '')}>{local.children}</div>
+      <div class={twMerge('relative', theme.size[size()])}>
+        <div class={twMerge('flex items-center', local.isLoading ? 'opacity-5' : '')}>
+          {local.children}
+        </div>
         <Show when={local.isLoading}>
           <div class="absolute inset-0 z-5 flex h-full w-full items-center justify-center">
             <Spinner size="sm" color={color()} />

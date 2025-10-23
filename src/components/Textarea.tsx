@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import HelperText from './HelperText';
 import Label from './Label';
+import Spinner from './Spinner';
 
 type TextareaColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
@@ -12,6 +13,7 @@ export interface TextareaProps
   helperText?: string;
   label?: string;
   color?: TextareaColor;
+  isLoading?: boolean;
 }
 
 const theme = {
@@ -36,6 +38,10 @@ const Textarea = (props: TextareaProps) => {
     'label',
     'ref',
     'required',
+    'disabled',
+    'isLoading',
+    'value',
+    'placeholder',
   ]);
 
   const color = createMemo(() => local.color || 'gray');
@@ -50,12 +56,22 @@ const Textarea = (props: TextareaProps) => {
           </Show>
         </div>
       </Show>
+      <div class="relative w-full">
+        <Show when={local.isLoading}>
+          <div class="pointer-events-none absolute top-2.5 left-2.5 flex items-center">
+            <Spinner size="sm" color={color()} />
+          </div>
+        </Show>
 
-      <textarea
-        class={twMerge(theme.base, theme.colors[color()], local.class)}
-        ref={local.ref}
-        {...textareaProps}
-      />
+        <textarea
+          class={twMerge(theme.base, theme.colors[color()], local.class)}
+          ref={local.ref}
+          disabled={local.disabled || local.isLoading}
+          placeholder={local.isLoading ? '' : local.placeholder}
+          value={local.isLoading ? '' : local.value}
+          {...textareaProps}
+        />
+      </div>
 
       <Show when={local.helperText}>
         <HelperText content={local.helperText as string} color={color()} />

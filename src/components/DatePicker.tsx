@@ -31,6 +31,7 @@ import { useDatePicker, useFloating } from './../hooks';
 import Badge from './Badge';
 import Button from './Button';
 import NumberInput from './NumberInput';
+import Spinner from './Spinner';
 
 export interface DateValue {
   date?: string;
@@ -49,6 +50,7 @@ export interface DatePickerProps {
   locale: string;
   popoverPosition?: 'top' | 'bottom';
   disabled?: boolean;
+  isLoading?: boolean;
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
@@ -502,7 +504,7 @@ const DatePicker = (props: DatePickerProps) => {
   };
 
   const handleInputClick = () => {
-    if (!props.disabled) {
+    if (!props.disabled && !props.isLoading) {
       setIsOpen(true);
     }
   };
@@ -543,32 +545,44 @@ const DatePicker = (props: DatePickerProps) => {
         tabIndex={0}
         onMouseDown={handleInputClick}
         class={twMerge(
-          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-9 text-sm text-gray-900 focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:outline-blue-500',
+          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-9 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
           props.inputClass || '',
+          props.disabled || props.isLoading
+            ? 'cursor-not-allowed opacity-50'
+            : 'focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 dark:focus:outline-blue-500',
         )}
       >
         <Show
-          when={getDisplayValue()}
+          when={!props.isLoading}
           fallback={
-            <span class="text-gray-400">{props.placeholder || displayFormat()}</span>
+            <div class="pointer-events-none absolute inset-y-0 left-2.5 flex items-center">
+              <Spinner size="sm" color="gray" />
+            </div>
           }
         >
-          <Show when={type() === 'multiple'} fallback={getDisplayValue()}>
-            <div class="flex flex-wrap gap-1">
-              <For each={getDisplayValue().split(',')}>
-                {(date) => <Badge class="w-fit">{date}</Badge>}
-              </For>
-            </div>
+          <Show
+            when={getDisplayValue()}
+            fallback={
+              <span class="text-gray-400">{props.placeholder || displayFormat()}</span>
+            }
+          >
+            <Show when={type() === 'multiple'} fallback={getDisplayValue()}>
+              <div class="flex flex-wrap gap-1">
+                <For each={getDisplayValue().split(',')}>
+                  {(date) => <Badge class="w-fit">{date}</Badge>}
+                </For>
+              </div>
+            </Show>
           </Show>
         </Show>
-        <Show when={getDisplayValue() && !props.disabled}>
+        <Show when={getDisplayValue() && !props.disabled && !props.isLoading}>
           <button
             type="button"
             onFocusIn={() => {
               setDatesObjectValue(reconcile({}));
               (refs.reference() as HTMLElement)?.focus();
             }}
-            class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+            class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none"
           >
             <XCloseIcon class="size-4" />
           </button>

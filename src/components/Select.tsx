@@ -53,7 +53,7 @@ export default function Select(props: SelectProps) {
             onKeyDown={handleKeyDown}
             style={{
               'padding-right': '36px',
-              cursor: props.disabled ? 'not-allowed' : 'pointer',
+              cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
               ...(typeof local.style === 'object' && local.style !== null
                 ? local.style
                 : {}),
@@ -61,7 +61,10 @@ export default function Select(props: SelectProps) {
             {...otherProps}
           />
 
-          <ChevronDownButton onFocus={() => inputRef()?.focus()} />
+          <ChevronDownButton
+            onFocus={() => inputRef()?.focus()}
+            disabled={props.disabled || props.isLoading}
+          />
         </div>
       }
       optionsComponent={(option) => (

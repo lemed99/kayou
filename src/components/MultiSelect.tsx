@@ -90,7 +90,7 @@ export default function MultiSelect(props: MultiSelectProps) {
             onKeyDown={handleKeyDown}
             style={{
               'padding-right': '36px',
-              cursor: props.disabled ? 'not-allowed' : 'pointer',
+              cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
               ...(typeof local.style === 'object' && local.style !== null
                 ? local.style
                 : {}),
@@ -98,12 +98,18 @@ export default function MultiSelect(props: MultiSelectProps) {
             {...otherProps}
           />
           <Show
-            when={!local.displayValue && getDisplayValue() && !props.disabled}
+            when={
+              !local.displayValue &&
+              getDisplayValue() &&
+              !props.disabled &&
+              !props.isLoading
+            }
             fallback={
               <ChevronDownButton
                 onFocus={() => {
                   (inputRef() as HTMLElement)?.focus();
                 }}
+                disabled={props.disabled || props.isLoading}
               />
             }
           >
@@ -132,7 +138,7 @@ export default function MultiSelect(props: MultiSelectProps) {
               class="w-full max-w-xs py-3 pl-2 text-sm outline-none"
               onKeyDown={handleKeyDown}
             />
-            <Show when={searchKey() && !props.disabled}>
+            <Show when={searchKey() && !props.disabled && !props.isLoading}>
               <ClearContentButton
                 onClick={() => {
                   setSearchKey('');
@@ -140,7 +146,7 @@ export default function MultiSelect(props: MultiSelectProps) {
                   setHighlightedOption(null);
                   (searchRef() as HTMLElement)?.focus();
                 }}
-                class="ml-3 h-full cursor-pointer text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                class="ml-3 h-full cursor-pointer text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               />
             </Show>
           </div>

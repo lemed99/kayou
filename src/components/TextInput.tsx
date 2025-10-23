@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { ChevronDownIcon, ChevronUpIcon } from '../icons';
 import HelperText from './HelperText';
 import Label from './Label';
+import Spinner from './Spinner';
 
 export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   sizing?: 'xs' | 'sm' | 'md';
@@ -21,6 +22,7 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   onArrowDownMouseUp?: (event: MouseEvent) => void;
   upBtnRef?: (el: HTMLButtonElement) => void;
   downBtnRef?: (el: HTMLButtonElement) => void;
+  isLoading?: boolean;
 }
 
 const theme = {
@@ -36,7 +38,7 @@ const theme = {
     arrows: {
       base: 'absolute inset-y-0 right-0 flex items-center flex-col gap-0.5 justify-center pr-3',
       button:
-        'border border-gray-300 px-1 text-gray-500 dark:text-gray-400 cursor-pointer dark:border-gray-600',
+        'border border-gray-300 px-1 text-gray-500 dark:text-gray-400 cursor-pointer dark:border-gray-600 disabled:cursor-not-allowed disabled:opacity-50',
     },
     input: {
       base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
@@ -93,6 +95,10 @@ const TextInput = (props: TextInputProps) => {
     'onArrowDownMouseUp',
     'upBtnRef',
     'downBtnRef',
+    'disabled',
+    'isLoading',
+    'value',
+    'placeholder',
   ]);
 
   const color = createMemo(() => local.color || 'gray');
@@ -161,6 +167,11 @@ const TextInput = (props: TextInputProps) => {
               {local.icon?.({ class: theme.field.icon.svg })}
             </div>
           </Show>
+          <Show when={local.isLoading}>
+            <div class={twMerge(theme.field.icon.base, local.icon ? 'pl-9' : 'pl-3')}>
+              <Spinner size="sm" color={color()} />
+            </div>
+          </Show>
 
           <input
             class={twMerge(
@@ -172,6 +183,9 @@ const TextInput = (props: TextInputProps) => {
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
             )}
             ref={(el) => handleRef(el)}
+            disabled={local.disabled || local.isLoading}
+            placeholder={local.isLoading ? '' : local.placeholder}
+            value={local.isLoading ? '' : local.value}
             {...inputProps}
           />
 
@@ -184,6 +198,7 @@ const TextInput = (props: TextInputProps) => {
                 onMouseUp={(e) => local.onArrowUpMouseUp?.(e)}
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
                 tabIndex={-1}
+                disabled={local.disabled || local.isLoading}
               >
                 <ChevronUpIcon class="size-2.5" />
               </button>
@@ -194,6 +209,7 @@ const TextInput = (props: TextInputProps) => {
                 onMouseUp={(e) => local.onArrowDownMouseUp?.(e)}
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}
                 tabIndex={-1}
+                disabled={local.disabled || local.isLoading}
               >
                 <ChevronDownIcon class="size-2.5" />
               </button>

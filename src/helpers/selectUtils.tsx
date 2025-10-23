@@ -49,12 +49,14 @@ export const OptionLabel = (props: { option: Option; selectedOption: Option | nu
 export const ClearContentButton = (props: {
   onClick: (e: Event) => void;
   class?: string;
+  disabled?: boolean;
 }) => {
   const defalutClass =
-    'absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40';
+    'absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50';
   return (
     <button
       type="button"
+      disabled={props.disabled}
       onClick={(e: Event) => props.onClick(e)}
       class={defalutClass || props.class}
     >
@@ -63,11 +65,15 @@ export const ClearContentButton = (props: {
   );
 };
 
-export const ChevronDownButton = (props: { onFocus?: () => void }) => (
+export const ChevronDownButton = (props: {
+  onFocus?: () => void;
+  disabled?: boolean;
+}) => (
   <button
     type="button"
+    disabled={props.disabled}
     onFocus={() => props.onFocus?.()}
-    class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+    class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
   >
     <ChevronDownIcon class="size-4" />
   </button>

@@ -32,10 +32,10 @@ const Spinner = (props: SpinnerProps) => {
   const merged = defaultProps({ color: 'info', size: 'sm' }, props);
 
   return (
-    <span role="status">
+    <span role="status" class="flex items-center justify-center">
       <svg
         fill="none"
-        viewBox="0 0 100 101"
+        viewBox="0 0 100 100"
         class={twMerge(
           theme.base,
           theme.color[merged.color],

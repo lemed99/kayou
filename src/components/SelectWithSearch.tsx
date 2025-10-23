@@ -72,7 +72,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
             {...otherProps}
           />
 
-          <Show when={searchKey() && !props.disabled}>
+          <Show when={searchKey() && !props.disabled && !props.isLoading}>
             <ClearContentButton
               onClick={() => {
                 setSelectedOption(null);

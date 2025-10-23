@@ -255,7 +255,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                     setSearchKey('');
                     (searchRef() as HTMLElement)?.focus();
                   }}
-                  class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                  class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <XCloseIcon class="size-4" />
                 </button>

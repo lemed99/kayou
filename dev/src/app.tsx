@@ -26,7 +26,7 @@ import { ThemeProvider } from '../../src/context/ThemeContext';
 import { ToastAPI } from '../../src/context/ToastContext';
 import { useCustomResource, useFloating, useMutation } from '../../src/hooks';
 import { useToast } from '../../src/hooks/useToast';
-import { InfoCircleIcon } from '../../src/icons';
+import { CheckCircleIcon, InfoCircleIcon } from '../../src/icons';
 
 const defaultFetcher = async (url, arg) => {
     const res = await fetch(url, {
@@ -573,6 +573,7 @@ const SelectWithSearchDemo = () => {
   return (
     <div class="">
       <MultiSelect
+        isLoading
         label='Select a Product'
         options={productOption().map((p) => ({
           label: p.label,
@@ -719,6 +720,7 @@ const DrawerExample = () => {
         onClick={openDrawer}
       >
         Open Drawer!!
+        <CheckCircleIcon/>
       </Button>
       <Button
         color='gray'
@@ -1098,11 +1100,14 @@ const App: Component = () => {
             helperText="Un helper text"
             required={true}
             type="float"
-            allowNegativeValues={true}
+              allowNegativeValues={true}
+              isLoading
           />
           <TextInput
             // addon="CFA"
-            icon={InfoCircleIcon}
+              icon={InfoCircleIcon}
+              isLoading
+              placeholder='coolll'
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
@@ -1119,7 +1124,8 @@ const App: Component = () => {
             label="Label"
             onChange={(e) => console.log(e.target.value)}
             helperText="Un helper text"
-            color="info"
+              color="info"
+              // isLoading
             />
             <button id='opi' class='w-fit bg-blue-200' ref={refs.setReference} onClick={() => setIsOpen(true)}>
               Open Tooltip
@@ -1144,6 +1150,7 @@ const App: Component = () => {
               // color="info"
               label="Cool"
               required={true}
+              isLoading
             sizing="md"
             helperText="Choose an option"
             options={[
@@ -1187,7 +1194,8 @@ const App: Component = () => {
         <div class="flex w-full justify-center text-sm">
           <div class="w-full max-w-sm">
             <SelectWithSearchDemo />
-            <DatePicker
+              <DatePicker
+                // isLoading
               type="single"
               locale="fr"
               displayFormat="DD/MM/YYYY"
