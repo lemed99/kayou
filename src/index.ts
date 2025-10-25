@@ -37,3 +37,5 @@ export type {
   SideBarItems,
   SidebarProps,
 } from './components/Sidebar';
+
+export type { DataTableColumnProps } from './components/DataTable';

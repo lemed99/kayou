@@ -52,7 +52,7 @@ const sidebarTheme = {
       'h-full overflow-y-auto overflow-x-hidden bg-blue-800/[.01] py-4 px-2 dark:bg-gray-800 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800',
   },
   itemGroup:
-    'mt-4 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700',
+    'mt-4 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 list-none',
 };
 
 const sidebarItemTheme = {
@@ -87,7 +87,7 @@ const sidebarCollapseTheme = {
       base: 'ml-3 flex-1 whitespace-nowrap text-left',
       icon: 'transition h-3 w-3',
     },
-    list: 'space-y-1 mt-1',
+    list: 'space-y-1 mt-1 list-none',
   },
   item: {
     active: 'bg-blue-800/10 text-blue-800 dark:bg-gray-700 dark:text-blue-300',

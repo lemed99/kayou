@@ -23,6 +23,7 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   upBtnRef?: (el: HTMLButtonElement) => void;
   downBtnRef?: (el: HTMLButtonElement) => void;
   isLoading?: boolean;
+  inputClass?: string;
 }
 
 const theme = {
@@ -99,6 +100,7 @@ const TextInput = (props: TextInputProps) => {
     'isLoading',
     'value',
     'placeholder',
+    'inputClass',
   ]);
 
   const color = createMemo(() => local.color || 'gray');
@@ -181,6 +183,7 @@ const TextInput = (props: TextInputProps) => {
               theme.field.input.withAddon[local.addon ? 'on' : 'off'],
               theme.field.input.withIcon[local.icon ? 'on' : 'off'],
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
+              local.inputClass,
             )}
             ref={(el) => handleRef(el)}
             disabled={local.disabled || local.isLoading}

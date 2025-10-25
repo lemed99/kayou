@@ -35,3 +35,5 @@ pnpm-lock.yaml
 /dist
 /dev
 .vscode
+
+/src/icons

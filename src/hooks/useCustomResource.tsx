@@ -20,6 +20,7 @@ export interface CustomResource<T> {
   data: Accessor<T | undefined>;
   error: Accessor<unknown>;
   loading: Accessor<boolean>;
+  validating: Accessor<boolean>;
   state: Accessor<Resource<T>['state']>;
   latest: Accessor<T | undefined>;
   refetch: () => void;
@@ -43,6 +44,7 @@ export interface CustomResourceProps<T> {
   condition?: Accessor<boolean>;
   forceRefresh?: Accessor<boolean>;
   pullFromCache?: boolean;
+  swr?: boolean;
 }
 
 export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResource<T> {
@@ -51,8 +53,10 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const [errorStatus, setErrorStatus] = createSignal<number>();
   const [attempts, setAttempts] = createSignal(0);
   const [resourceData, setResourceData] = createSignal<T>();
+  const [validating, setValidating] = createSignal(false);
 
   const pullFromCache = createMemo(() => props.pullFromCache ?? true);
+  const swr = createMemo(() => props.swr ?? true);
 
   const context = useContext(CustomResourceContext) as CustomResourceContextProps<T>;
   if (!context) {
@@ -108,12 +112,17 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     url,
     options,
     pendingRequests,
+    swr,
   }: {
     url: string;
     options?: ResourceOptions<T>;
     pendingRequests: Map<string, PendingEntry<T>>;
+    swr?: boolean;
   }): Promise<T | null> => {
     if (!url) return null;
+    if (swr) {
+      setValidating(true);
+    }
     const fetcher = options?.fetcher ?? defaultFetcher;
     const fetchPromiseCallback = async (data: T) => {
       setFromCache(false);
@@ -122,6 +131,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       clearAllRetryTimers();
       options?.onSuccess?.(data, false);
       setResourceData(() => data);
+      setValidating(false);
       await insertOrUpdateCacheRow(url, data);
       return data;
     };
@@ -216,13 +226,14 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       url: shouldFetch() ? urlString() : '',
       options: mergedOptions,
       pendingRequests: context.pendingRequests,
+      swr: swr(),
     }),
     wrappedFetcher,
   );
 
   createResource(
     () => ({
-      url: (shouldFetch() === false && pullFromCache() && urlString()) || '',
+      url: (((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
       onSuccess: mergedOptions?.onSuccess,
     }),
     async ({ url, onSuccess }) => {
@@ -268,6 +279,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     if (resource.error) {
       setError(resource.error);
       mergedOptions.onError?.(resource.error);
+      setValidating(false);
     }
   });
 
@@ -292,10 +304,11 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     errorStatus,
     setErrorStatus,
     attempts,
-    loading: () => resource.loading,
+    loading: () => (swr() ? false : resource.loading),
     state: () => resource.state,
     latest: () => resource.latest ?? undefined,
     refetch,
     fromCache,
+    validating,
   };
 }

@@ -1255,6 +1255,7 @@ const App: Component = () => {
           <DataTable
             data={data()}
             loading={false}
+            validating={true}
               error={null}
               defaultColumns={['id', 'name', 'email', 'role']}
             columns={columns}

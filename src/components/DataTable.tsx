@@ -26,6 +26,7 @@ import Modal from './Modal';
 import MultiSelect from './MultiSelect';
 import Pagination from './Pagination';
 import Select from './Select';
+import Skeleton from './Skeleton';
 import Spinner from './Spinner';
 import Tooltip from './Tooltip';
 import { VirtualList } from './VirtualList';
@@ -33,6 +34,7 @@ import { VirtualList } from './VirtualList';
 interface DataTableProps<T> {
   data: T[];
   loading: boolean;
+  validating?: boolean;
   defaultColumns: string[];
   defaultRowsCount?: number;
   columns: DataTableColumnProps<T>[];
@@ -48,9 +50,15 @@ interface DataTableProps<T> {
   perPageControl?: boolean;
   rowHeight?: number;
   estimatedRowHeight?: number;
+  errorMessage: string;
+  noDataMessage: string;
+  seeMoreText: string;
+  filtersText: string;
+  elementsPerPageText: string;
+  selectedElementsText: (count: number, total: number) => string;
 }
 
-interface DataTableColumnProps<T> {
+export interface DataTableColumnProps<T> {
   label: string;
   key: string;
   render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
@@ -213,7 +221,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
 
   const NoItemsComponent = () => (
     <div class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white">
-      Aucune donnée disponible
+      {props.noDataMessage}
     </div>
   );
 
@@ -275,7 +283,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
             <div class="flex items-center">
               <div class="flex items-center border-r border-gray-200 py-3 pr-6">
                 <FilterFunnel01Icon class="mr-2 size-5" />
-                <p>Filtres</p>
+                <p>{props.filtersText}</p>
                 <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-white dark:text-gray-600">
                   {2}
                 </span>
@@ -319,7 +327,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                 ···
               </Button>
               <span class="text-sm font-medium text-gray-700">
-                {selectedRows().size} sélectionné(s) sur {props.data.length}
+                {props.selectedElementsText(selectedRows().size, props.data.length)}
               </span>
             </div>
           </div>
@@ -383,12 +391,35 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                 </Show>
                 <Show when={props.error}>
                   <div class="px-6 py-4 text-center font-medium whitespace-nowrap text-red-600 dark:text-red-400">
-                    Une erreur s'est produite lors du chargement des données
+                    {props.errorMessage}
                   </div>
                 </Show>
               </div>
             }
           >
+            <Show when={props.validating}>
+              <div
+                class={twMerge(
+                  'grid w-fit border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800',
+                )}
+                style={{
+                  'grid-template-columns': rowGridStyle(),
+                }}
+              >
+                <Show when={props.rowSelection}>
+                  <div class="flex items-center pl-6">
+                    <Skeleton width={16} height={16} />
+                  </div>
+                </Show>
+                <For each={columns()}>
+                  {() => (
+                    <div class="px-6 py-5">
+                      <Skeleton width={100} height={10} />
+                    </div>
+                  )}
+                </For>
+              </div>
+            </Show>
             <Show when={props.rowHeight && fullView() && tableBodyHeight()}>
               <VirtualList rowHeight={props.rowHeight!} {...VProps()}>
                 {List}
@@ -422,7 +453,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
             }}
             class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700"
           >
-            <span>Voir plus</span>
+            <span>{props.seeMoreText}</span>
             <Maximize01Icon class="size-3 transition-all group-hover:size-4" />
           </div>
         </Show>
@@ -445,7 +476,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                   fitContent={true}
                 />
                 <span class="text-sm whitespace-nowrap text-gray-700">
-                  Éléments Par Page
+                  {props.elementsPerPageText}
                 </span>
               </div>
             </Show>
