@@ -58,12 +58,16 @@ interface DataTableProps<T> {
   selectedElementsText: (count: number, total: number) => string;
 }
 
-export interface DataTableColumnProps<T> {
+export interface DataTableColumnProps<T, K extends keyof T = keyof T> {
   label: string;
-  key: string;
-  render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
+  key: K;
+  render?: (value: T[K], record: T, index: number) => JSX.Element;
   width: number;
   tooltip?: string;
+}
+
+export function defineDataTableColumns<T>() {
+  return <K extends keyof T>(columns: DataTableColumnProps<T, K>[]) => columns;
 }
 
 export function DataTable<T extends Record<string, unknown>>(props: DataTableProps<T>) {
@@ -95,7 +99,9 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
   });
 
   createEffect(() => {
-    setColumns(props.columns.filter((c) => props.defaultColumns.includes(c.key)));
+    setColumns(
+      props.columns.filter((c) => props.defaultColumns.includes(c.key as string)),
+    );
   });
 
   const toggleSelectAll = () => {
@@ -142,9 +148,9 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
       `${props.rowSelection ? '40px ' : ''}${columns()
         .map((col, i) => {
           const minWidth = Math.max(
-            ...Array.from(document.querySelectorAll(`[data-column="${col.key}"]`)).map(
-              (e) => (e as HTMLElement).offsetWidth,
-            ),
+            ...Array.from(
+              document.querySelectorAll(`[data-column="${col.key as string}"]`),
+            ).map((e) => (e as HTMLElement).offsetWidth),
           );
           return `minmax(${Math.max(0, minWidth + 48)}px, ${Math.max(0, (tableWidth() * (col.width + sharedPurcentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`; // +48 because of px-6
         })
@@ -295,15 +301,18 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                 <Show when={props.configureColumns}>
                   <MultiSelect
                     sizing="sm"
-                    options={props.columns.map((c) => ({ label: c.label, value: c.key }))}
+                    options={props.columns.map((c) => ({
+                      label: c.label,
+                      value: c.key as string,
+                    }))}
                     onMultiSelect={(options) => {
                       setColumns(
                         props.columns.filter((c) =>
-                          options?.map((o) => o.value).includes(c.key),
+                          options?.map((o) => o.value).includes(c.key as string),
                         ),
                       );
                     }}
-                    values={columns().map((c) => c.key)}
+                    values={columns().map((c) => c.key as string)}
                     displayValue="Colonnes"
                     icon={() => <Columns03Icon class="size-5" />}
                     fitContent={true}

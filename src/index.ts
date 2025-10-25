@@ -8,7 +8,7 @@ export * from './components/Charts/LineCharts';
 export * from './components/Charts/PieChart';
 export { ResponsiveContainer } from './components/Charts/ResponsiveContainer';
 export { default as Checkbox } from './components/Checkbox';
-export { DataTable } from './components/DataTable';
+export { DataTable, defineDataTableColumns } from './components/DataTable';
 export { default as DatePicker } from './components/DatePicker';
 export { default as Drawer } from './components/Drawer';
 export { DynamicVirtualList } from './components/DynamicVirtualList';
@@ -38,4 +38,5 @@ export type {
   SidebarProps,
 } from './components/Sidebar';
 
+export type { PanelData } from './components/Accordion';
 export type { DataTableColumnProps } from './components/DataTable';

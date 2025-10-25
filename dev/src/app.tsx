@@ -2,10 +2,10 @@ import { type Component, createEffect, createSignal, Show } from 'solid-js';
 
 import { Portal } from 'solid-js/web';
 import {
+  Accordion,
   Alert,
   Button,
   Checkbox,
-  DataTable,
   DatePicker,
   Drawer,
   Modal,
@@ -573,7 +573,7 @@ const SelectWithSearchDemo = () => {
   return (
     <div class="">
       <MultiSelect
-        isLoading
+        // isLoading
         label='Select a Product'
         options={productOption().map((p) => ({
           label: p.label,
@@ -1251,8 +1251,25 @@ const App: Component = () => {
           />
         </div>
           {/* <VList /> */}
-          <div class='p-12 text-sm'>
-          <DataTable
+          <div class='p-12 text-sm max-w-sm'>
+            <Accordion
+                simple={false}
+                panels={[
+                  {
+                    itemKey: 'intro',
+                    title: <h3 class="font-medium">Introduction</h3>,
+                    content: <p>Our flagship product combines cutting-edge technology with sleek design. Built with premium materials, it offers unparalleled performance and reliability.
+
+Key features include advanced processing capabilities, and an intuitive user interface designed for both beginners and experts.</p>,
+                  },
+                  {
+                    itemKey: 'details',
+                    title: <h3 class="font-medium">Technical Details</h3>,
+                    content: <p>Here are the technical specifications.</p>,
+                  },
+                ]}
+              />
+          {/* <DataTable
             data={data()}
             loading={false}
             validating={true}
@@ -1270,7 +1287,8 @@ const App: Component = () => {
             itemsTotal={215}
             perPageControl={true}
             onPageChange={(page) => console.log('Page changed:', page)}
-          /></div>
+            /> */}
+          </div>
         <div class="h-[400px]"></div>
       </>
     </DatePickerProvider>

@@ -8,6 +8,7 @@ export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement>
   label?: JSX.Element;
   labelPosition?: 'left' | 'right';
   labelClass?: string;
+  labelSpanClass?: string;
   color?: 'blue' | 'dark';
 }
 
@@ -31,6 +32,7 @@ const Checkbox = (props: CheckboxProps) => {
     'label',
     'labelPosition',
     'labelClass',
+    'labelSpanClass',
     'color',
   ]);
 
@@ -48,7 +50,11 @@ const Checkbox = (props: CheckboxProps) => {
       id={id}
     >
       <Show when={local.label && labelPosition() === 'left'}>
-        <span class="pr-2 text-gray-700 dark:text-gray-300">{local.label}</span>
+        <span
+          class={twMerge('pr-2 text-gray-700 dark:text-gray-300', props.labelSpanClass)}
+        >
+          {local.label}
+        </span>
       </Show>
       <input
         {...inputProps}
@@ -61,7 +67,11 @@ const Checkbox = (props: CheckboxProps) => {
         type="checkbox"
       />
       <Show when={local.label && labelPosition() === 'right'}>
-        <span class="pl-2 text-gray-700 dark:text-gray-300">{local.label}</span>
+        <span
+          class={twMerge('pl-2 text-gray-700 dark:text-gray-300', props.labelSpanClass)}
+        >
+          {local.label}
+        </span>
       </Show>
     </Label>
   );

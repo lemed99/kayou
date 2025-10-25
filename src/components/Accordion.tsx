@@ -1,9 +1,10 @@
 import { For, JSX, Show, createEffect } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
-import { ChevronLeftIcon } from '../icons';
+import { ChevronRightIcon } from '../icons';
 
 export interface PanelData {
   itemKey: string;
@@ -16,6 +17,7 @@ export interface AccordionProps {
   children?: JSX.Element;
   panels?: PanelData[];
   searched?: string;
+  searchedClass?: string;
   simple?: boolean;
   itemDetails?: Record<string, boolean>;
   setItemDetails?: (state: Record<string, boolean>) => void;
@@ -64,6 +66,7 @@ const Accordion = (props: AccordionProps) => {
             toggle={() => togglePanel(panel.itemKey)}
             simple={props.simple ?? true}
             searched={props.searched}
+            searchedClass={props.searchedClass}
           />
         )}
       </For>
@@ -77,6 +80,7 @@ interface PanelProps {
   toggle: () => void;
   simple: boolean;
   searched?: string;
+  searchedClass?: string;
 }
 
 const Panel = (props: PanelProps) => {
@@ -93,10 +97,17 @@ const Panel = (props: PanelProps) => {
     }
   });
 
+  const { isVisible, isMounted } = createPresence(
+    () => props.panel.content && props.isOpen,
+    {
+      transitionDuration: 200,
+    },
+  );
+
   return (
     <div
       class={twMerge(
-        'border-b dark:border-gray-700',
+        'border-b border-gray-300 dark:border-gray-700',
         !props.simple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
       )}
       id={`item${props.panel.itemKey}`}
@@ -132,31 +143,41 @@ const Panel = (props: PanelProps) => {
         id={`item_title${props.panel.itemKey}`}
         onClick={() => props.toggle()}
         class={twMerge(
-          'flex w-full cursor-pointer items-center justify-between p-3',
-          props.isOpen && !props.simple && 'bg-opacity-60 bg-gray-100 dark:bg-gray-700',
-          isSearched() && 'bg-teal-200 dark:bg-teal-800',
+          'flex w-full cursor-pointer items-center justify-between p-3 transition-all duration-200',
+          props.isOpen && !props.simple && 'bg-gray-100/60 dark:bg-gray-700',
+          isSearched() &&
+            (props.searchedClass ? props.searchedClass : 'bg-teal-200 dark:bg-teal-800'),
           props.panel.class,
         )}
       >
         <div class="flex w-full items-center">{props.panel.title}</div>
         <Show when={props.panel.content}>
           <div>
-            <ChevronLeftIcon
-              class={twMerge('size-3', props.isOpen ? '-rotate-90' : 'rotate-180')}
+            <ChevronRightIcon
+              class={twMerge(
+                'size-3 transition-all duration-200',
+                props.isOpen ? 'rotate-90' : '',
+              )}
             />
           </div>
         </Show>
       </div>
 
-      <Show when={props.panel.content && props.isOpen}>
+      <Show when={isMounted()}>
         <div
           id={`item_content${props.panel.itemKey}`}
           class={twMerge(
-            'border-t p-3 dark:border-gray-700',
-            !props.simple && 'dark:bg-opacity-50 dark:bg-gray-900',
+            'overflow-hidden border-t border-gray-300 dark:border-gray-700',
+            !props.simple && 'dark:bg-gray-900/50',
           )}
+          style={{
+            height: isVisible()
+              ? `${(document.querySelector(`#item_content${props.panel.itemKey}>div`) as HTMLElement)?.offsetHeight}px`
+              : 0,
+            transition: 'height .2s ease-in-out',
+          }}
         >
-          {props.panel.content}
+          <div class="p-3">{props.panel.content}</div>
         </div>
       </Show>
     </div>

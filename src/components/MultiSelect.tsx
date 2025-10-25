@@ -161,7 +161,7 @@ export default function MultiSelect(props: MultiSelectProps) {
           onMouseEnter={() => setHighlightedOption(option)}
         >
           <Checkbox
-            labelClass="px-2 py-1.5 w-full"
+            labelClass="px-2 py-1.5 w-full font-normal"
             class="flex items-center"
             onChange={() => handleOptionClick(option)}
             checked={selectedOptions().some((o) => o.value === option.value)}
