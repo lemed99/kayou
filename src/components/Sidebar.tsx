@@ -208,7 +208,7 @@ const SidebarItem = (props: SidebarItemProps) => {
   ]);
 
   return (
-    <li id={local.id}>
+    <li id={local.id} class="list-none">
       <a
         class={twMerge(
           local.class,
@@ -255,7 +255,7 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
   ]);
 
   return (
-    <li id={`sidebar-collapse-${local.id}`}>
+    <li id={`sidebar-collapse-${local.id}`} class="list-none">
       <button
         onClick={() => local.setIsItemCollapsed?.(!local.isItemCollapsed)}
         type="button"

@@ -215,7 +215,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       if (condition === false) return false;
 
       const cacheData = pullFromCache ? await getCacheRow(url) : null;
-      const needsFetch = key ? refreshData[key] === true : true;
+      const needsFetch = key ? refreshData[key] !== false : true;
 
       return needsFetch || !cacheData;
     },
