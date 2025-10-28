@@ -6,6 +6,7 @@ import {
   Alert,
   Button,
   Checkbox,
+  DataTable,
   DatePicker,
   Drawer,
   Modal,
@@ -1269,7 +1270,7 @@ Key features include advanced processing capabilities, and an intuitive user int
                   },
                 ]}
               />
-          {/* <DataTable
+          <DataTable
             data={data()}
             loading={false}
             validating={true}
@@ -1283,11 +1284,12 @@ Key features include advanced processing capabilities, and an intuitive user int
               expandable={true}
               // estimatedRowHeight={52}
               rowHeight={52}
+              footer={false}
             pageTotal={15}
             itemsTotal={215}
             perPageControl={true}
             onPageChange={(page) => console.log('Page changed:', page)}
-            /> */}
+            />
           </div>
         <div class="h-[400px]"></div>
       </>

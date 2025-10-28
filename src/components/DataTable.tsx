@@ -35,7 +35,7 @@ interface DataTableProps<T> {
   data: T[];
   loading: boolean;
   validating?: boolean;
-  defaultColumns: string[];
+  defaultColumns?: string[];
   defaultRowsCount?: number;
   columns: DataTableColumnProps<T>[];
   pageTotal?: number;
@@ -46,7 +46,6 @@ interface DataTableProps<T> {
   configureColumns?: boolean;
   expandable?: boolean;
   filters?: JSX.Element;
-  itemsTotal?: number;
   perPageControl?: boolean;
   rowHeight?: number;
   estimatedRowHeight?: number;
@@ -56,18 +55,15 @@ interface DataTableProps<T> {
   filtersText: string;
   elementsPerPageText: string;
   selectedElementsText: (count: number, total: number) => string;
+  footer?: boolean;
 }
 
-export interface DataTableColumnProps<T, K extends keyof T = keyof T> {
+export interface DataTableColumnProps<T> {
   label: string;
-  key: K;
-  render?: (value: T[K], record: T, index: number) => JSX.Element;
+  key: string;
+  render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
   width: number;
   tooltip?: string;
-}
-
-export function defineDataTableColumns<T>() {
-  return <K extends keyof T>(columns: DataTableColumnProps<T, K>[]) => columns;
 }
 
 export function DataTable<T extends Record<string, unknown>>(props: DataTableProps<T>) {
@@ -100,7 +96,9 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
 
   createEffect(() => {
     setColumns(
-      props.columns.filter((c) => props.defaultColumns.includes(c.key as string)),
+      props.defaultColumns
+        ? props.columns.filter((c) => props.defaultColumns?.includes(c.key))
+        : props.columns,
     );
   });
 
@@ -148,9 +146,9 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
       `${props.rowSelection ? '40px ' : ''}${columns()
         .map((col, i) => {
           const minWidth = Math.max(
-            ...Array.from(
-              document.querySelectorAll(`[data-column="${col.key as string}"]`),
-            ).map((e) => (e as HTMLElement).offsetWidth),
+            ...Array.from(document.querySelectorAll(`[data-column="${col.key}"]`)).map(
+              (e) => (e as HTMLElement).offsetWidth,
+            ),
           );
           return `minmax(${Math.max(0, minWidth + 48)}px, ${Math.max(0, (tableWidth() * (col.width + sharedPurcentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`; // +48 because of px-6
         })
@@ -303,16 +301,16 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                     sizing="sm"
                     options={props.columns.map((c) => ({
                       label: c.label,
-                      value: c.key as string,
+                      value: c.key,
                     }))}
                     onMultiSelect={(options) => {
                       setColumns(
                         props.columns.filter((c) =>
-                          options?.map((o) => o.value).includes(c.key as string),
+                          options?.map((o) => o.value).includes(c.key),
                         ),
                       );
                     }}
-                    values={columns().map((c) => c.key as string)}
+                    values={columns().map((c) => c.key)}
                     displayValue="Colonnes"
                     icon={() => <Columns03Icon class="size-5" />}
                     fitContent={true}
@@ -387,7 +385,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         {/* Table Body */}
         <div
           ref={(el) => (fullView() ? setTableBodyContainerRef(el) : void 0)}
-          class="flex grow flex-col"
+          class={twMerge('flex flex-col', fullView() ? 'grow' : '')}
         >
           <Show
             when={!props.loading && !props.error}
@@ -468,37 +466,39 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         </Show>
 
         {/* Table Footer */}
-        <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row">
-          <div class="flex items-center gap-4">
-            <Show when={props.perPageControl}>
-              <div class="flex items-center gap-2">
-                <Select
-                  options={[
-                    { value: '10', label: '10' },
-                    { value: '25', label: '25' },
-                    { value: '50', label: '50' },
-                    { value: '100', label: '100' },
-                  ]}
-                  sizing="xs"
-                  value={String(perPage())}
-                  onSelect={(option) => setPerPage(Number(option?.value || 10))}
-                  fitContent={true}
-                />
-                <span class="text-sm whitespace-nowrap text-gray-700">
-                  {props.elementsPerPageText}
-                </span>
-              </div>
+        <Show when={props.footer ?? true}>
+          <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row">
+            <div class="flex items-center gap-4">
+              <Show when={props.perPageControl}>
+                <div class="flex items-center gap-2">
+                  <Select
+                    options={[
+                      { value: '10', label: '10' },
+                      { value: '25', label: '25' },
+                      { value: '50', label: '50' },
+                      { value: '100', label: '100' },
+                    ]}
+                    sizing="xs"
+                    value={String(perPage())}
+                    onSelect={(option) => setPerPage(Number(option?.value || 10))}
+                    fitContent={true}
+                  />
+                  <span class="text-sm whitespace-nowrap text-gray-700">
+                    {props.elementsPerPageText}
+                  </span>
+                </div>
+              </Show>
+            </div>
+
+            <Show when={props.pageTotal && props.pageTotal > 1}>
+              <Pagination
+                total={props.pageTotal!}
+                page={currentPage()}
+                onChange={handlePageChange}
+              />
             </Show>
           </div>
-
-          <Show when={props.pageTotal && props.pageTotal > 1}>
-            <Pagination
-              total={props.pageTotal!}
-              page={currentPage()}
-              onChange={handlePageChange}
-            />
-          </Show>
-        </div>
+        </Show>
       </div>
     );
   };
