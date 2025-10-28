@@ -245,7 +245,12 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
     return (
       <div
         ref={setTableRef}
-        class="mt-2 flex h-full w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
+        class={
+          (twMerge(
+            'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white',
+          ),
+          fullView() ? 'h-full' : 'h-auto')
+        }
       >
         {/* Search Section */}
         <Show when={props.searchBar}>

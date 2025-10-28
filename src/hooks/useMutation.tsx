@@ -19,7 +19,7 @@ export interface MutationTriggerOptions<TData, TArg> {
 }
 
 export interface MutationProps<TData, TArg> {
-  urlString: string;
+  urlString: Accessor<string>;
   options: MutationOptions<TData, TArg>;
 }
 
@@ -40,7 +40,7 @@ export function useMutation<TData = unknown, TArg = unknown>(
     setError();
 
     try {
-      const data = await fetcher(props.urlString, arg);
+      const data = await fetcher(props.urlString(), arg);
       setMutationData(() => data);
 
       options?.onSuccess?.(data, arg);
