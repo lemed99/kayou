@@ -22,20 +22,20 @@ const toggleClassName = `
   after:rounded-full
   after:h-4
   after:w-4
-  after:duration-[0.15s]
+  after:duration-150
 `;
 
 const theme = {
   root: {
-    base: 'group relative flex items-center rounded-lg focus:outline-none',
+    base: 'flex items-center rounded-lg focus:outline-none',
     active: {
       on: 'cursor-pointer',
       off: 'cursor-not-allowed opacity-50',
     },
-    label: 'ml-3 text-sm font-medium text-gray-900 dark:text-gray-300',
+    label: 'mr-2 text-sm font-medium text-gray-900 dark:text-gray-300',
   },
   toggle: {
-    base: toggleClassName + ' h-5 w-9 rounded-full border',
+    base: toggleClassName + ' h-5 w-9 rounded-full border tansition-all',
     checked: {
       on: 'after:translate-x-full after:border-white',
       off: 'border-gray-200 bg-gray-200 dark:border-gray-600 dark:bg-gray-700',
@@ -97,18 +97,21 @@ const ToggleSwitch = (props: ToggleSwitchProps) => {
         )}
         {...otherProps}
       >
-        <div
-          class={twMerge(
-            theme.toggle.base,
-            theme.toggle.checked[local.checked ? 'on' : 'off'],
-            !local.disabled &&
-              local.checked &&
-              theme.toggle.checked.color[local.color || 'blue'],
-          )}
-        />
         <span id={`${id}-toggleswitch-label`} class={theme.root.label}>
           {local.label}
         </span>
+
+        <div class="relative">
+          <div
+            class={twMerge(
+              theme.toggle.base,
+              theme.toggle.checked[local.checked ? 'on' : 'off'],
+              !local.disabled &&
+                local.checked &&
+                theme.toggle.checked.color[local.color || 'blue'],
+            )}
+          />
+        </div>
       </button>
     </>
   );

@@ -68,6 +68,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
             }}
             onFocus={(e) => e.target.select()}
             class="w-full"
+            required={local.required}
             onKeyDown={handleKeyDown}
             {...otherProps}
           />

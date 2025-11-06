@@ -1,6 +1,16 @@
-import { For, JSX, Show, createMemo, splitProps } from 'solid-js';
+import {
+  For,
+  JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+  splitProps,
+} from 'solid-js';
 import { createStore } from 'solid-js/store';
 
+import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { ChevronRightIcon } from '../icons';
@@ -52,14 +62,14 @@ const sidebarTheme = {
       'h-full overflow-y-auto overflow-x-hidden bg-blue-800/[.01] py-4 px-2 dark:bg-gray-800 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800',
   },
   itemGroup:
-    'mt-4 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 list-none',
+    'mt-4 space-y-1 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 list-none',
 };
 
 const sidebarItemTheme = {
   item: {
     active: 'bg-blue-800/10 text-blue-800 dark:bg-gray-700 dark:text-blue-300',
     inactive: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700',
-    base: 'cursor-pointer text-sm flex mb-1 items-center justify-center rounded-md px-2.5 py-2 font-normal relative',
+    base: 'cursor-pointer text-sm flex items-center justify-center rounded-md px-2.5 py-2 font-normal relative',
     collapsed: {
       noIcon: 'font-bold',
     },
@@ -75,7 +85,7 @@ const sidebarItemTheme = {
 const sidebarCollapseTheme = {
   collapse: {
     button:
-      'group mb-1 flex w-full text-sm items-center rounded-md px-2.5 py-2 font-normal transition duration-75 cursor-pointer',
+      'mb-1 flex w-full text-sm items-center rounded-md px-2.5 py-2 font-normal transition duration-75 cursor-pointer',
     icon: {
       base: 'size-5 transition duration-75',
       open: {
@@ -85,15 +95,15 @@ const sidebarCollapseTheme = {
     },
     label: {
       base: 'ml-3 flex-1 whitespace-nowrap text-left',
-      icon: 'transition h-3 w-3',
+      icon: 'transition duration-200 size-3',
     },
-    list: 'space-y-1 mt-1 list-none',
+    list: 'list-none',
   },
   item: {
     active: 'bg-blue-800/10 text-blue-800 dark:bg-gray-700 dark:text-blue-300',
     inactive: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700',
     collapsed: {
-      insideCollapse: 'group w-full pl-5 transition duration-75',
+      insideCollapse: 'w-full pl-5',
     },
   },
 };
@@ -145,7 +155,7 @@ const Sidebar = (props: SidebarProps) => {
                       menu={true}
                       hidden={isPopoverHidden(mn)}
                       content={
-                        <div class="min-w-[180px] px-1.5 py-2">
+                        <div class="min-w-[180px] space-y-1 px-1.5 py-2">
                           <For each={mn.children}>
                             {(sb) => (
                               <SidebarItem
@@ -153,7 +163,7 @@ const Sidebar = (props: SidebarProps) => {
                                 class={
                                   sb.isActive
                                     ? ''
-                                    : 'hover:!bg-gray-100/75 dark:hover:!bg-gray-700'
+                                    : 'hover:bg-gray-100/75! dark:hover:bg-gray-700!'
                                 }
                                 isActive={sb.isActive}
                                 id={sb.id}
@@ -253,6 +263,30 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
     'icon',
     'label',
   ]);
+  const [collapsedContentElement, setCollapsedContentElement] =
+    createSignal<HTMLDivElement>();
+  const [collapsedElementHeight, setCollapsedElementHeight] = createSignal(0);
+
+  const { isVisible, isMounted } = createPresence(() => local.isItemCollapsed, {
+    transitionDuration: 200,
+  });
+
+  createEffect(() => {
+    if (collapsedContentElement()) {
+      requestAnimationFrame(() => {
+        setCollapsedElementHeight(collapsedContentElement()?.offsetHeight || 0);
+      });
+
+      const resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() =>
+          setCollapsedElementHeight(collapsedContentElement()?.offsetHeight || 0),
+        );
+      });
+      resizeObserver.observe(collapsedContentElement() as Element);
+
+      onCleanup(() => resizeObserver?.disconnect());
+    }
+  });
 
   return (
     <li id={`sidebar-collapse-${local.id}`} class="list-none">
@@ -292,15 +326,23 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
           )}
         />
       </button>
-      <ul
-        hidden={!local.isItemCollapsed}
-        class={twMerge(
-          sidebarCollapseTheme.collapse.list,
-          '*:' + sidebarCollapseTheme.item.collapsed.insideCollapse,
-        )}
-      >
-        {local.children}
-      </ul>
+      <Show when={isMounted()}>
+        <ul
+          class={twMerge(
+            sidebarCollapseTheme.collapse.list,
+            sidebarCollapseTheme.item.collapsed.insideCollapse,
+            'overflow-hidden',
+          )}
+          style={{
+            height: isVisible() ? `${collapsedElementHeight()}px` : 0,
+            transition: 'height .2s ease-in-out',
+          }}
+        >
+          <div ref={setCollapsedContentElement} class="space-y-1">
+            {local.children}
+          </div>
+        </ul>
+      </Show>
     </li>
   );
 };

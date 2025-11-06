@@ -1,4 +1,4 @@
-import { ParentComponent, createContext } from 'solid-js';
+import { Accessor, ParentComponent, createContext } from 'solid-js';
 
 export interface ResourceOptions<T> {
   fetcher?: (url: string) => Promise<T>;
@@ -13,8 +13,7 @@ export interface ResourceOptions<T> {
 }
 
 export interface CustomResourceProviderProps<T> extends ResourceOptions<T> {
-  pendingRequests?: Map<string, PendingEntry<T>>;
-  refreshData?: Record<string, boolean> | null;
+  refreshData: Accessor<Record<string, boolean>> | null;
   baseUrl?: string;
 }
 

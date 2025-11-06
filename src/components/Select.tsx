@@ -46,12 +46,13 @@ export default function Select(props: SelectProps) {
         <div>
           <TextInput
             ref={setInputRef}
-            readOnly={true}
+            required={local.required}
             value={selectedOption()?.label || ''}
             placeholder={props.placeholder}
             class="w-full"
             onKeyDown={handleKeyDown}
             style={{
+              'caret-color': 'transparent',
               'padding-right': '36px',
               cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
               ...(typeof local.style === 'object' && local.style !== null

@@ -77,7 +77,7 @@ const useSelect = <T extends MergedSelectProps>(
         setSearchKey(props.value);
       }
     }
-    if (type === 'multiSelect' && props.values && props.values.length > 0) {
+    if (type === 'multiSelect' && props.values) {
       const selected = props.options.filter((o) => props.values?.includes(o.value));
       setSelectedOptions(selected);
     }
@@ -248,8 +248,10 @@ const useSelect = <T extends MergedSelectProps>(
       currentTarget: HTMLElement;
       target: Element;
     },
+    copy = false,
   ) => {
     const { key } = e;
+    if ((type === 'select' || type === 'multiSelect') && !copy) e.preventDefault();
 
     if (key === 'ArrowUp') {
       e.preventDefault();
@@ -337,7 +339,7 @@ const useSelect = <T extends MergedSelectProps>(
               <div
                 ref={refs.setFloating}
                 class={twMerge(
-                  'z-[100] w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
+                  'z-100 w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
                 )}
                 style={{
                   ...floatingStyles(),

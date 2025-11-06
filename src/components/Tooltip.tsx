@@ -16,16 +16,14 @@ export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 const theme = {
-  animation: 'transition-opacity',
   arrow: {
-    base: 'absolute z-50 text-2xl leading-0',
+    base: 'absolute z-100',
     theme: {
       dark: 'text-gray-700 dark:text-gray-700',
       light: 'text-white',
     },
-    placement: '-4px',
   },
-  base: 'absolute inline-block z-50 rounded-lg py-2 px-3 text-sm w-max shadow-sm',
+  base: 'absolute inline-block z-100 rounded-lg py-2 px-3 text-sm w-max shadow-sm',
   hidden: 'invisible opacity-0',
   theme: {
     dark: 'bg-gray-700 text-white dark:bg-gray-700',
@@ -37,8 +35,7 @@ const Tooltip = (props: TooltipProps) => {
   const merged = defaultProps(
     {
       placement: 'top',
-      theme: 'dark',
-      class: '',
+      theme: 'auto',
     },
     props,
   );
@@ -74,7 +71,7 @@ const Tooltip = (props: TooltipProps) => {
     get placement() {
       return merged.placement as Placement;
     },
-    offset: 8,
+    offset: 2,
     isOpen: isMounted,
     renderArrow: true,
   });
@@ -104,7 +101,6 @@ const Tooltip = (props: TooltipProps) => {
             }}
             class={twMerge(
               merged.class,
-              theme.animation,
               theme.base,
               theme.theme[
                 merged.theme === 'auto'
@@ -125,7 +121,9 @@ const Tooltip = (props: TooltipProps) => {
               )}
               style={arrowStyles()!}
             >
-              ▾
+              <svg width="16" height="8" viewBox="0 0 16 8">
+                <path d="M16 0H0L8 8L16 0Z" fill="currentColor" />
+              </svg>
             </div>
             <div class="relative z-20 normal-case">{merged.content}</div>
           </div>

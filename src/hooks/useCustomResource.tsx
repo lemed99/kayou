@@ -33,7 +33,7 @@ export interface CustomResource<T> {
 export interface CustomResourceContextProps<T> {
   options: ResourceOptions<T>;
   pendingRequests: Map<string, PendingEntry<T>>;
-  refreshData: Record<string, boolean> | null;
+  refreshData: Accessor<Record<string, boolean>> | null;
   baseUrl: string;
 }
 
@@ -110,19 +110,17 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   const wrappedFetcher = async ({
     url,
-    options,
-    pendingRequests,
     swr,
   }: {
     url: string;
-    options?: ResourceOptions<T>;
-    pendingRequests: Map<string, PendingEntry<T>>;
     swr?: boolean;
   }): Promise<T | null> => {
     if (!url) return null;
     if (swr) {
       setValidating(true);
     }
+    const options = mergedOptions;
+    const pendingRequests = context.pendingRequests;
     const fetcher = options?.fetcher ?? defaultFetcher;
     const fetchPromiseCallback = async (data: T) => {
       setFromCache(false);
@@ -196,53 +194,52 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     retryTimers.clear();
   };
 
-  const [shouldFetch] = createResource(
+  const [shouldFetch, { refetch: shouldRefetch }] = createResource(
     () => ({
-      refreshData: context.refreshData,
       url: urlString(),
       forceRefresh: props.forceRefresh?.(),
       condition: props.condition?.(),
       key: props.refreshKey,
       pullFromCache: pullFromCache(),
     }),
-    async ({ refreshData, url, forceRefresh, condition, key, pullFromCache }) => {
+    async ({ url, forceRefresh, condition, key, pullFromCache }) => {
       if (!url) return undefined;
 
-      if (!refreshData) return true;
+      if (!context.refreshData?.()) return true;
 
       if (forceRefresh) return true;
 
       if (condition === false) return false;
 
       const cacheData = pullFromCache ? await getCacheRow(url) : null;
-      const needsFetch = key ? refreshData[key] !== false : true;
+      const needsFetch = key ? context.refreshData?.()[key] !== false : true;
 
       return needsFetch || !cacheData;
     },
   );
 
+  createEffect(() => {
+    const refresh = context.refreshData?.();
+    if (refresh) void shouldRefetch();
+  });
+
   const [resource, { refetch: originalRefetch }] = createResource(
     () => ({
       url: shouldFetch() ? urlString() : '',
-      options: mergedOptions,
-      pendingRequests: context.pendingRequests,
       swr: swr(),
     }),
     wrappedFetcher,
   );
 
   createResource(
-    () => ({
-      url: (((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
-      onSuccess: mergedOptions?.onSuccess,
-    }),
-    async ({ url, onSuccess }) => {
+    () => (((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
+    async (url) => {
       if (!url) return undefined;
       const cached = (await getCacheRow(url)) as T | null;
       if (cached) {
         setFromCache(true);
         setErrorStatus(undefined);
-        onSuccess?.(cached, true);
+        mergedOptions?.onSuccess?.(cached, true);
         setResourceData(() => cached);
         return cached;
       }

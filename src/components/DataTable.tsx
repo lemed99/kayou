@@ -247,7 +247,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         ref={setTableRef}
         class={twMerge(
           'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white',
-          fullView() ? 'h-full' : 'h-auto',
+          fullView() ? 'mt-2 h-[calc(100%-8px)]' : 'h-auto',
         )}
       >
         {/* Search Section */}
@@ -388,15 +388,31 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         {/* Table Body */}
         <div
           ref={(el) => (fullView() ? setTableBodyContainerRef(el) : void 0)}
-          class={twMerge('flex flex-col', fullView() ? 'grow' : '')}
+          class={twMerge('relative flex flex-col', fullView() ? 'grow' : '')}
         >
           <Show
             when={!props.loading && !props.error}
             fallback={
-              <div class="px-6 py-4 text-center">
+              <div>
                 <Show when={props.loading}>
-                  <div class="flex items-center justify-center">
-                    <Spinner />
+                  <div
+                    class={twMerge('grid bg-white dark:bg-gray-800')}
+                    style={{
+                      'grid-template-columns': rowGridStyle(),
+                    }}
+                  >
+                    <Show when={props.rowSelection}>
+                      <div class="flex items-center pl-6">
+                        <Skeleton width={16} height={16} />
+                      </div>
+                    </Show>
+                    <For each={columns()}>
+                      {() => (
+                        <div class="px-6 py-5">
+                          <Skeleton width={100} height={10} />
+                        </div>
+                      )}
+                    </For>
                   </div>
                 </Show>
                 <Show when={props.error}>
@@ -408,26 +424,8 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
             }
           >
             <Show when={props.validating}>
-              <div
-                class={twMerge(
-                  'grid w-fit border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800',
-                )}
-                style={{
-                  'grid-template-columns': rowGridStyle(),
-                }}
-              >
-                <Show when={props.rowSelection}>
-                  <div class="flex items-center pl-6">
-                    <Skeleton width={16} height={16} />
-                  </div>
-                </Show>
-                <For each={columns()}>
-                  {() => (
-                    <div class="px-6 py-5">
-                      <Skeleton width={100} height={10} />
-                    </div>
-                  )}
-                </For>
+              <div class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60">
+                <Spinner />
               </div>
             </Show>
             <Show when={props.rowHeight && fullView() && tableBodyHeight()}>
@@ -444,10 +442,12 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
                 {List}
               </DynamicVirtualList>
             </Show>
-            <Show when={!fullView()}>
-              <For each={filteredData()} fallback={<NoItemsComponent />}>
-                {List}
-              </For>
+            <Show when={fullView() === false}>
+              <div>
+                <For each={filteredData()} fallback={<NoItemsComponent />}>
+                  {List}
+                </For>
+              </div>
             </Show>
           </Show>
         </div>
@@ -469,7 +469,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         </Show>
 
         {/* Table Footer */}
-        <Show when={props.footer ?? true}>
+        <Show when={props.expandable && !fullView() ? false : (props.footer ?? true)}>
           <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row">
             <div class="flex items-center gap-4">
               <Show when={props.perPageControl}>

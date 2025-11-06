@@ -1,4 +1,4 @@
-import { For, JSX, Show, createEffect } from 'solid-js';
+import { For, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
 import { createPresence } from '@solid-primitives/presence';
@@ -85,6 +85,8 @@ interface PanelProps {
 
 const Panel = (props: PanelProps) => {
   const isSearched = () => props.searched === props.panel.itemKey;
+  const [panelContentElement, setPanelContentElement] = createSignal<HTMLDivElement>();
+  const [panelElementHeight, setPanelElementHeight] = createSignal(0);
 
   createEffect(() => {
     if (isSearched()) {
@@ -103,6 +105,23 @@ const Panel = (props: PanelProps) => {
       transitionDuration: 200,
     },
   );
+
+  createEffect(() => {
+    if (panelContentElement()) {
+      requestAnimationFrame(() => {
+        setPanelElementHeight(panelContentElement()?.offsetHeight || 0);
+      });
+
+      const resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() =>
+          setPanelElementHeight(panelContentElement()?.offsetHeight || 0),
+        );
+      });
+      resizeObserver.observe(panelContentElement()!);
+
+      onCleanup(() => resizeObserver?.disconnect());
+    }
+  });
 
   return (
     <div
@@ -171,13 +190,13 @@ const Panel = (props: PanelProps) => {
             !props.simple && 'dark:bg-gray-900/50',
           )}
           style={{
-            height: isVisible()
-              ? `${(document.querySelector(`#item_content${props.panel.itemKey}>div`) as HTMLElement)?.offsetHeight}px`
-              : 0,
+            height: isVisible() ? `${panelElementHeight()}px` : 0,
             transition: 'height .2s ease-in-out',
           }}
         >
-          <div class="p-3">{props.panel.content}</div>
+          <div ref={setPanelContentElement} class="p-3">
+            {props.panel.content}
+          </div>
         </div>
       </Show>
     </div>

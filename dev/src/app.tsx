@@ -75,6 +75,13 @@ const items: SideBarItems[] = [
       },
     ],
   },
+  {
+    label: 'Home',
+    icon: SunIcon,
+    // isActive: true,
+    id: 'home',
+    onClick: () => alert('Home clicked'),
+  },
 ];
 
 const SelectWithSearchDemo = () => {
@@ -814,7 +821,7 @@ const App: Component = () => {
           />
         </div>
           {/* <VList /> */}
-          <div class='p-12 text-sm max-w-sm'>
+          <div class='p-12 text-sm'>
             <Accordion
                 simple={false}
                 panels={[
@@ -835,8 +842,9 @@ Key features include advanced processing capabilities, and an intuitive user int
           <DataTable
             data={data()}
             loading={false}
-            validating={true}
+            validating={false}
               error={null}
+              // errorMessage={'Cool'}
               defaultColumns={['id', 'name', 'email', 'role']}
             columns={columns}
             rowSelection={true}

@@ -82,13 +82,14 @@ export default function MultiSelect(props: MultiSelectProps) {
           <TextInput
             ref={setInputRef}
             title={getDisplayValue()}
-            readOnly={true}
             disabled={props.disabled}
             value={local.displayValue ?? getDisplayValue()}
             placeholder={props.placeholder}
             class="w-full"
+            required={local.required}
             onKeyDown={handleKeyDown}
             style={{
+              'caret-color': 'transparent',
               'padding-right': '36px',
               cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
               ...(typeof local.style === 'object' && local.style !== null
@@ -136,7 +137,7 @@ export default function MultiSelect(props: MultiSelectProps) {
               placeholder={local.searchPlaceholder}
               onFocus={(e) => e.target.select()}
               class="w-full max-w-xs py-3 pl-2 text-sm outline-none"
-              onKeyDown={handleKeyDown}
+              onKeyDown={(e) => handleKeyDown(e, true)}
             />
             <Show when={searchKey() && !props.disabled && !props.isLoading}>
               <ClearContentButton
