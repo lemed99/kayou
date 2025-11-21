@@ -59,7 +59,7 @@ const sidebarTheme = {
       on: 'w-56',
     },
     inner:
-      'h-full overflow-y-auto overflow-x-hidden bg-blue-800/[.01] py-4 px-2 dark:bg-gray-800 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800',
+      'h-full overflow-y-auto overflow-x-hidden py-4 px-2 dark:bg-gray-800 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-500 dark:scrollbar-track-gray-800',
   },
   itemGroup:
     'mt-4 space-y-1 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 list-none',

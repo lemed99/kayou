@@ -10,7 +10,11 @@ export interface Mutation<TData, TArg> {
   data: Accessor<TData | undefined>;
   error: Accessor<Error | undefined>;
   isMutating: Accessor<boolean>;
-  trigger: (arg: TArg, options?: MutationTriggerOptions<TData, TArg>) => Promise<TData>;
+  trigger: (
+    arg: TArg,
+    urlArgs?: Record<string, string>,
+    options?: MutationTriggerOptions<TData, TArg>,
+  ) => Promise<TData>;
 }
 
 export interface MutationTriggerOptions<TData, TArg> {
@@ -19,7 +23,7 @@ export interface MutationTriggerOptions<TData, TArg> {
 }
 
 export interface MutationProps<TData, TArg> {
-  urlString: Accessor<string>;
+  urlString: string | Accessor<string>;
   options: MutationOptions<TData, TArg>;
 }
 
@@ -32,6 +36,7 @@ export function useMutation<TData = unknown, TArg = unknown>(
 
   const trigger = async (
     arg: TArg,
+    urlArgs?: Record<string, string>,
     options?: MutationTriggerOptions<TData, TArg>,
   ): Promise<TData> => {
     const fetcher = props.options.fetcher;
@@ -39,8 +44,20 @@ export function useMutation<TData = unknown, TArg = unknown>(
     setIsMutating(true);
     setError();
 
+    const urlString = () => {
+      let urlString: string;
+      if (typeof props.urlString === 'string') urlString = props.urlString;
+      else urlString = props.urlString();
+      if (urlArgs) {
+        Object.keys(urlArgs).forEach((key) => {
+          urlString = urlString.split(`{${key}}`).join(urlArgs[key]);
+        });
+      }
+      return urlString;
+    };
+
     try {
-      const data = await fetcher(props.urlString(), arg);
+      const data = await fetcher(urlString(), arg);
       setMutationData(() => data);
 
       options?.onSuccess?.(data, arg);

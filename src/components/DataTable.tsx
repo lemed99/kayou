@@ -11,6 +11,7 @@ import {
 
 import { twMerge } from 'tailwind-merge';
 
+import { getScrollableAncestor } from '../hooks/useFloating/utils';
 import {
   Columns03Icon,
   FilterFunnel01Icon,
@@ -93,6 +94,8 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
     if (props.data.length === 0) return false;
     return props.data.every((_, idx) => selectedRows().has(idx));
   });
+
+  const ancestor = () => getScrollableAncestor(tableRef() || null) || window;
 
   createEffect(() => {
     setColumns(
@@ -458,7 +461,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         >
           <div
             onClick={() => {
-              setPageScroll(window.scrollY);
+              setPageScroll((ancestor() as Element).scrollTop);
               setFullView(true);
             }}
             class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700"
@@ -514,7 +517,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         onClose={() => {
           setFullView(false);
           setHasScrolled(false);
-          window.scroll(0, pageScroll());
+          ancestor().scroll(0, pageScroll());
         }}
       >
         <Table />

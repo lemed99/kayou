@@ -11,6 +11,8 @@ export interface PanelData {
   title: JSX.Element;
   content: JSX.Element;
   class?: string;
+  titleClass?: string;
+  contentClass?: string;
 }
 
 export interface AccordionProps {
@@ -21,6 +23,8 @@ export interface AccordionProps {
   simple?: boolean;
   itemDetails?: Record<string, boolean>;
   setItemDetails?: (state: Record<string, boolean>) => void;
+
+  class?: string;
 }
 
 const Accordion = (props: AccordionProps) => {
@@ -57,7 +61,7 @@ const Accordion = (props: AccordionProps) => {
   };
 
   return (
-    <div class="w-full">
+    <div class={twMerge('w-full', props.class)}>
       <For each={getPanels()}>
         {(panel) => (
           <Panel
@@ -128,6 +132,7 @@ const Panel = (props: PanelProps) => {
       class={twMerge(
         'border-b border-gray-300 dark:border-gray-700',
         !props.simple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
+        props.panel.class,
       )}
       id={`item${props.panel.itemKey}`}
     >
@@ -166,7 +171,7 @@ const Panel = (props: PanelProps) => {
           props.isOpen && !props.simple && 'bg-gray-100/60 dark:bg-gray-700',
           isSearched() &&
             (props.searchedClass ? props.searchedClass : 'bg-teal-200 dark:bg-teal-800'),
-          props.panel.class,
+          props.panel.titleClass,
         )}
       >
         <div class="flex w-full items-center">{props.panel.title}</div>
@@ -188,6 +193,7 @@ const Panel = (props: PanelProps) => {
           class={twMerge(
             'overflow-hidden border-t border-gray-300 dark:border-gray-700',
             !props.simple && 'dark:bg-gray-900/50',
+            props.panel.contentClass,
           )}
           style={{
             height: isVisible() ? `${panelElementHeight()}px` : 0,
