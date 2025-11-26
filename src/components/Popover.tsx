@@ -22,8 +22,8 @@ export interface PopoverProps {
   menu?: boolean; // used for sidebar menu
   position?: Placement;
   hidden?: boolean;
-  isClosed?: boolean;
-  setIsClosed?: (state: boolean) => void;
+  onClose?: () => void;
+  class?: string;
 }
 
 const Popover: ParentComponent<PopoverProps> = (props) => {
@@ -52,8 +52,15 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
 
   createEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (refs.floating() && !refs.floating()?.contains(event.target as Node)) {
+      if (
+        isMounted() &&
+        refs.floating() &&
+        !refs.floating()?.contains(event.target as Node) &&
+        refs.reference() &&
+        !(refs.reference() as HTMLElement)?.contains(event.target as Node)
+      ) {
         setIsPopoverVisible(false);
+        props.onClose?.();
       }
     };
 
@@ -62,16 +69,20 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
     onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
   });
 
-  const handleTogglePopover = () => {
-    setIsPopoverVisible(!isPopoverVisible());
-  };
+  onCleanup(() => {
+    if (isMounted()) {
+      props.onClose?.();
+    }
+  });
 
   return (
     <div class="relative flex grow">
       <div
         ref={refs.setReference}
         class="w-full"
-        onClick={() => (!merged.hidden && !merged.onHover ? handleTogglePopover() : null)}
+        onClick={() =>
+          !merged.hidden && !merged.onHover ? setIsPopoverVisible(true) : null
+        }
         onMouseEnter={() =>
           !merged.hidden && merged.onHover ? setIsPopoverVisible(true) : null
         }
@@ -101,7 +112,12 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
               !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
             }
           >
-            <div class="w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
+            <div
+              class={twMerge(
+                'w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none',
+                props.class,
+              )}
+            >
               {merged.content}
             </div>
           </div>

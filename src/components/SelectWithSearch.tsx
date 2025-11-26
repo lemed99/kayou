@@ -81,6 +81,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps) {
                 setFilteredOptions(local.options);
                 setHighlightedOption(null);
                 (searchRef() as HTMLElement)?.focus();
+                props.onSelect({ value: '', label: '' });
               }}
             />
           </Show>

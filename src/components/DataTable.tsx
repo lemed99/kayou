@@ -159,8 +159,8 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
     );
   });
 
-  let resizeObserver: ResizeObserver | undefined;
   createEffect(() => {
+    let resizeObserver: ResizeObserver | undefined;
     if (tableRef()) {
       resizeObserver = new ResizeObserver(() => {
         setTableWidth(tableRef()!.offsetWidth);
@@ -169,6 +169,7 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
       });
       resizeObserver.observe(tableRef()!);
     }
+    onCleanup(() => resizeObserver?.disconnect());
   });
 
   createEffect(() => {
@@ -186,8 +187,6 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
       onCleanup(() => clearTimeout(st));
     }
   });
-
-  onCleanup(() => resizeObserver?.disconnect());
 
   const List = (row: T, index: Accessor<number>) => (
     <div
@@ -456,19 +455,23 @@ export function DataTable<T extends Record<string, unknown>>(props: DataTablePro
         </div>
 
         {/* FullView trigger */}
-        <Show
-          when={props.expandable && props.data.length > defaultRowsCount() && !fullView()}
-        >
-          <div
-            onClick={() => {
-              setPageScroll((ancestor() as Element).scrollTop);
-              setFullView(true);
-            }}
-            class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700"
+        <Show when={!props.validating && !props.loading}>
+          <Show
+            when={
+              props.expandable && props.data.length > defaultRowsCount() && !fullView()
+            }
           >
-            <span>{props.seeMoreText}</span>
-            <Maximize01Icon class="size-3 transition-all group-hover:size-4" />
-          </div>
+            <div
+              onClick={() => {
+                setPageScroll((ancestor() as Element).scrollTop);
+                setFullView(true);
+              }}
+              class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700"
+            >
+              <span>{props.seeMoreText}</span>
+              <Maximize01Icon class="size-3 transition-all group-hover:size-4" />
+            </div>
+          </Show>
         </Show>
 
         {/* Table Footer */}

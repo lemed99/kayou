@@ -145,7 +145,6 @@ const useSelect = <T extends MergedSelectProps>(
       setHighlightedOption(filteredOptions()[0]);
     }
     if (type === 'selectWithSearch') {
-      setSelectedOption(null);
       if (!isOpen()) {
         setIsOpen(true);
         const container = optionsContainerRef();
