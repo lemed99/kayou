@@ -38,7 +38,7 @@ export const OptionLabel = (props: { option: Option; selectedOption: Option | nu
     {props.option.labelWrapper
       ? props.option.labelWrapper(props.option.label)
       : props.option.label}
-    <div class="ml-2.5 size-4">
+    <div class="ml-2.5">
       <Show when={props.selectedOption?.value === props.option.value}>
         <CheckIcon class="size-4" />
       </Show>

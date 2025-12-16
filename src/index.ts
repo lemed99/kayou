@@ -38,5 +38,5 @@ export type {
   SidebarProps,
 } from './components/Sidebar';
 
-export type { PanelData } from './components/Accordion';
+export type { AccordionProps, PanelData } from './components/Accordion';
 export type { DataTableColumnProps } from './components/DataTable';

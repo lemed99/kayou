@@ -70,8 +70,8 @@ export default function MultiSelect(props: MultiSelectProps) {
   const getDisplayValue = () => {
     if (selectedOptions().length === 0) return '';
     return selectedOptions()
-      .reverse()
       .map((o) => o.label)
+      .reverse()
       .join(' • ');
   };
 

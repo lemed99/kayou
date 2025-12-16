@@ -24,6 +24,7 @@ export interface PopoverProps {
   hidden?: boolean;
   onClose?: () => void;
   class?: string;
+  offset?: number;
 }
 
 const Popover: ParentComponent<PopoverProps> = (props) => {
@@ -47,25 +48,41 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
     get placement() {
       return merged.position || undefined;
     },
-    offset: merged.menu ? 0 : 8,
+    offset: merged.offset ?? (merged.menu ? 0 : 8),
   });
 
   createEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMounted() &&
-        refs.floating() &&
-        !refs.floating()?.contains(event.target as Node) &&
-        refs.reference() &&
-        !(refs.reference() as HTMLElement)?.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      const floatingEl = refs.floating();
+      const referenceEl = refs.reference();
+
+      if (merged.onHover && !floatingEl?.contains(target)) {
         setIsPopoverVisible(false);
         props.onClose?.();
       }
+
+      if (
+        !isMounted() ||
+        !floatingEl ||
+        !referenceEl ||
+        floatingEl?.contains(target) ||
+        referenceEl?.contains(target)
+      ) {
+        return;
+      }
+
+      if (
+        floatingEl?.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING
+      ) {
+        return;
+      }
+
+      setIsPopoverVisible(false);
+      props.onClose?.();
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-
     onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
   });
 

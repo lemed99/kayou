@@ -197,6 +197,7 @@ const TextInput = (props: TextInputProps) => {
               <button
                 type="button"
                 ref={local.upBtnRef}
+                onClick={() => inputRef?.focus()}
                 onMouseDown={(e) => local.onArrowUp?.(e)}
                 onMouseUp={(e) => local.onArrowUpMouseUp?.(e)}
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
@@ -208,6 +209,7 @@ const TextInput = (props: TextInputProps) => {
               <button
                 type="button"
                 ref={local.downBtnRef}
+                onClick={() => inputRef?.focus()}
                 onMouseDown={(e) => local.onArrowDown?.(e)}
                 onMouseUp={(e) => local.onArrowDownMouseUp?.(e)}
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}

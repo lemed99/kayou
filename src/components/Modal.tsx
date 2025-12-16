@@ -62,14 +62,10 @@ const Modal = (props: ModalProps) => {
     }
   });
 
-  const transitionStyle = () => {
-    return size() === 'screen'
-      ? {}
-      : {
-          transition: 'opacity .5s cubic-bezier(.32, .72, 0, 1)',
-          opacity: isVisible() ? '1' : '0',
-        };
-  };
+  const transitionStyle = () => ({
+    transition: 'opacity .5s cubic-bezier(.32, .72, 0, 1)',
+    opacity: isVisible() ? '1' : '0',
+  });
 
   return (
     <Show when={isMounted()}>

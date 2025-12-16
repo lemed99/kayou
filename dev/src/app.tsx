@@ -766,11 +766,15 @@ const App: Component = () => {
             <SelectWithSearchDemo />
               <DatePicker
                 // isLoading
-              type="single"
+                label="Cool"
+                helperText='Nice mohsbjh dhjhsjh'
+                required
+              type="range"
               locale="fr"
-              displayFormat="DD/MM/YYYY"
+                displayFormat="DD/MM/YYYY"
+                placeholder='DD/MM/YYYY- DD/MM/YYYY'
               value={{
-                multipleDates: ['2025-09-24', '2025-09-25', '2025-09-19'],
+                // multipleDates: ['2025-09-24', '2025-09-25', '2025-09-19'],
                 // date: '2024-06-01',
                 // endDate: '2025-09-30',
               }}

@@ -54,7 +54,7 @@ const NumberInput = (props: NumberInputProps) => {
 
   const nullable = createMemo(() => local.nullable ?? true);
   const precision = createMemo(() => local.precision ?? 3);
-  const showArrows = createMemo(() => local.showArrows ?? true);
+  const showArrows = createMemo(() => local.showArrows ?? false);
   const allowNegative = createMemo(() => local.allowNegativeValues ?? false);
   const inputType = createMemo(() => local.type ?? 'integer');
   const step = createMemo(() => {

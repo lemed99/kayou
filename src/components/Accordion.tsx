@@ -23,7 +23,6 @@ export interface AccordionProps {
   simple?: boolean;
   itemDetails?: Record<string, boolean>;
   setItemDetails?: (state: Record<string, boolean>) => void;
-
   class?: string;
 }
 
@@ -130,7 +129,7 @@ const Panel = (props: PanelProps) => {
   return (
     <div
       class={twMerge(
-        'border-b border-gray-300 dark:border-gray-700',
+        'border-b border-gray-200 dark:border-gray-700',
         !props.simple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
         props.panel.class,
       )}
@@ -191,13 +190,13 @@ const Panel = (props: PanelProps) => {
         <div
           id={`item_content${props.panel.itemKey}`}
           class={twMerge(
-            'overflow-hidden border-t border-gray-300 dark:border-gray-700',
+            'overflow-hidden border-t border-gray-200 dark:border-gray-700',
             !props.simple && 'dark:bg-gray-900/50',
             props.panel.contentClass,
           )}
           style={{
             height: isVisible() ? `${panelElementHeight()}px` : 0,
-            transition: 'height .2s ease-in-out',
+            transition: 'height .242s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
           <div ref={setPanelContentElement} class="p-3">

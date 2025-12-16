@@ -1,5 +1,6 @@
 import {
   For,
+  JSX,
   Match,
   Show,
   Switch,
@@ -25,13 +26,15 @@ import {
   parseDate,
   toISO,
 } from '../helpers/dates';
+import { ChevronDownButton, ClearContentButton } from '../helpers/selectUtils';
 import { Placement } from '../hooks/useFloating/types';
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, XCloseIcon } from '../icons';
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '../icons';
 import { useDatePicker, useFloating } from './../hooks';
-import Badge from './Badge';
 import Button from './Button';
+import HelperText from './HelperText';
+import Label from './Label';
 import NumberInput from './NumberInput';
-import Spinner from './Spinner';
+import TextInput from './TextInput';
 
 export interface DateValue {
   date?: string;
@@ -46,7 +49,7 @@ export interface DatePickerProps {
   type: 'single' | 'multiple' | 'range';
   displayFormat?: string;
   inputClass?: string;
-  containerClass?: string;
+  calendarClass?: string;
   locale: string;
   popoverPosition?: 'top' | 'bottom';
   disabled?: boolean;
@@ -54,6 +57,11 @@ export interface DatePickerProps {
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
+  label?: string;
+  helperText?: string;
+  required?: boolean;
+  style?: JSX.CSSProperties;
+  displayValue?: string;
 }
 
 export interface CalendarProps {
@@ -68,6 +76,7 @@ export interface CalendarProps {
   isDateDisabled: (date: Date) => boolean;
   minDate?: Date;
   maxDate?: Date;
+  calendarClass?: string;
 }
 
 const getSixWeeksMargedDaysInMonth = (date: Date): Date[] => {
@@ -164,7 +173,7 @@ const Calendar = (props: CalendarProps) => {
   const isToday = (date: Date) => isSameDay(date, new Date());
 
   return (
-    <div class="w-full md:w-[292px] md:min-w-[292px]">
+    <div class={twMerge('w-full md:w-[292px] md:min-w-[292px]', props.calendarClass)}>
       <div class="flex items-center space-x-1.5 rounded-md border border-gray-300 px-2 py-1.5 dark:border-gray-700">
         <Show when={!showMonthSelector() && !showYearSelector()}>
           <div class="flex-none">
@@ -340,6 +349,8 @@ const DatePicker = (props: DatePickerProps) => {
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [datesObjectValue, setDatesObjectValue] = createStore<DateValue>({});
 
+  const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
+
   const { locale } = useDatePicker();
 
   const type = () => props.type || 'single';
@@ -494,7 +505,8 @@ const DatePicker = (props: DatePickerProps) => {
           return '';
         return datesObjectValue.multipleDates
           .map((d) => formatDate(d, displayFormat()))
-          .join(',');
+          .reverse()
+          .join(' • ');
       case 'range':
         if (datesObjectValue.startDate && datesObjectValue.endDate) {
           return `${formatDate(datesObjectValue.startDate, displayFormat())} - ${formatDate(datesObjectValue.endDate, displayFormat())}`;
@@ -515,7 +527,7 @@ const DatePicker = (props: DatePickerProps) => {
 
   const { refs, floatingStyles, container } = useFloating({
     get placement() {
-      return `${props.popoverPosition}-start` as Placement;
+      return `${props.popoverPosition ?? 'bottom'}-start` as Placement;
     },
     isOpen: isMounted,
     offset: 4,
@@ -539,53 +551,57 @@ const DatePicker = (props: DatePickerProps) => {
   });
 
   return (
-    <div class={twMerge('relative w-full text-gray-700', props.containerClass || '')}>
-      <div
-        ref={refs.setReference}
-        tabIndex={0}
-        onMouseDown={handleInputClick}
-        class={twMerge(
-          'relative min-h-10 w-full cursor-text rounded-lg border border-gray-300 bg-gray-50 p-2.5 pr-9 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
-          props.inputClass || '',
-          props.disabled || props.isLoading
-            ? 'cursor-not-allowed opacity-50'
-            : 'focus:outline-2 focus:outline-offset-[-1px] focus:outline-blue-600 dark:focus:outline-blue-500',
-        )}
-      >
+    <div class={twMerge('relative w-full text-gray-700')}>
+      <Show when={props.label}>
+        <div class="mb-1 block">
+          <Label value={props.label} color="gray" />
+          <Show when={props.required}>
+            <span class="ml-0.5 font-medium text-red-500">*</span>
+          </Show>
+        </div>
+      </Show>
+      <div ref={refs.setReference} onClick={handleInputClick} class="relative w-full">
+        <TextInput
+          ref={setInputRef}
+          title={getDisplayValue()}
+          isLoading={props.isLoading}
+          disabled={props.disabled}
+          value={props.displayValue ?? getDisplayValue()}
+          placeholder={props.placeholder ?? displayFormat()}
+          class={twMerge('w-full', props.inputClass)}
+          required={props.required}
+          onKeyDown={(e) => e.preventDefault()}
+          style={{
+            'caret-color': 'transparent',
+            'padding-right': '36px',
+            cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
+            ...(typeof props.style === 'object' && props.style !== null
+              ? props.style
+              : {}),
+          }}
+        />
         <Show
-          when={!props.isLoading}
+          when={
+            !props.displayValue &&
+            getDisplayValue() &&
+            !props.disabled &&
+            !props.isLoading
+          }
           fallback={
-            <div class="pointer-events-none absolute inset-y-0 left-2.5 flex items-center">
-              <Spinner size="sm" color="gray" />
-            </div>
+            <ChevronDownButton
+              onFocus={() => {
+                (inputRef() as HTMLElement)?.focus();
+              }}
+              disabled={props.disabled || props.isLoading}
+            />
           }
         >
-          <Show
-            when={getDisplayValue()}
-            fallback={
-              <span class="text-gray-400">{props.placeholder || displayFormat()}</span>
-            }
-          >
-            <Show when={type() === 'multiple'} fallback={getDisplayValue()}>
-              <div class="flex flex-wrap gap-1">
-                <For each={getDisplayValue().split(',')}>
-                  {(date) => <Badge class="w-fit">{date}</Badge>}
-                </For>
-              </div>
-            </Show>
-          </Show>
-        </Show>
-        <Show when={getDisplayValue() && !props.disabled && !props.isLoading}>
-          <button
-            type="button"
-            onFocusIn={() => {
+          <ClearContentButton
+            onClick={() => {
               setDatesObjectValue(reconcile({}));
-              (refs.reference() as HTMLElement)?.focus();
+              (inputRef() as HTMLElement)?.focus();
             }}
-            class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none"
-          >
-            <XCloseIcon class="size-4" />
-          </button>
+          />
         </Show>
       </div>
 
@@ -617,9 +633,13 @@ const DatePicker = (props: DatePickerProps) => {
               isDateDisabled={isDateDisabled}
               minDate={minDate()}
               maxDate={maxDate()}
+              calendarClass={props.calendarClass}
             />
           </div>
         </Portal>
+      </Show>
+      <Show when={props.helperText}>
+        <HelperText content={props.helperText as string} color="gray" />
       </Show>
     </div>
   );

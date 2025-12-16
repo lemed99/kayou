@@ -47,7 +47,7 @@ const Textarea = (props: TextareaProps) => {
   const color = createMemo(() => local.color || 'gray');
 
   return (
-    <div>
+    <>
       <Show when={local.label}>
         <div class="mb-1 block">
           <Label value={local.label} color={color()} />
@@ -76,7 +76,7 @@ const Textarea = (props: TextareaProps) => {
       <Show when={local.helperText}>
         <HelperText content={local.helperText as string} color={color()} />
       </Show>
-    </div>
+    </>
   );
 };
 
