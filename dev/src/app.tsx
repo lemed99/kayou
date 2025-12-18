@@ -21,6 +21,7 @@ import {
   TextInput,
   ToggleSwitch,
   Tooltip,
+  UploadFile,
   VirtualGrid,
   VirtualList
 } from '../../src';
@@ -823,9 +824,11 @@ const App: Component = () => {
             label="Toggle me"
             onChange={setChecked}
           />
-        </div>
+          </div>
           {/* <VList /> */}
           <div class='p-12 text-sm'>
+            <UploadFile multiple={true} onChange={(file) => console.log(file)} />
+            <div class='my-8'/>
             <Accordion
                 simple={false}
                 panels={[

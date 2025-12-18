@@ -28,6 +28,7 @@ export { default as Textarea } from './components/Textarea';
 export { default as TextInput } from './components/TextInput';
 export { default as ToggleSwitch } from './components/ToggleSwitch';
 export { default as Tooltip } from './components/Tooltip';
+export { UploadFile } from './components/UploadFile';
 export { VirtualGrid } from './components/VirtualGrid';
 export { VirtualList } from './components/VirtualList';
 
