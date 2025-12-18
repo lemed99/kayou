@@ -827,7 +827,7 @@ const App: Component = () => {
           </div>
           {/* <VList /> */}
           <div class='p-12 text-sm'>
-            <UploadFile multiple={true} onChange={(file) => console.log(file)} />
+            <UploadFile maxSize={200} toastKey='success' dragDropText='Glisser deposer' chooseFileText='Choisir un fichier' onChange={(file) => console.log(file)} />
             <div class='my-8'/>
             <Accordion
                 simple={false}
