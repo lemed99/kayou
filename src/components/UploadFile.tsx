@@ -203,7 +203,7 @@ export const UploadFile = (props: {
             {(file, index) => (
               <div class="flex items-center justify-between gap-6 rounded border border-gray-200 bg-white px-4 py-2">
                 <div class="flex min-w-0 flex-1 items-center gap-3">
-                  <div class="flex-shrink-0 text-gray-500">
+                  <div class="shrink-0 text-gray-500">
                     <File04Icon strokeWidth={1} class="size-8" />
                   </div>
                   <div class="min-w-0 flex-1">
@@ -213,7 +213,7 @@ export const UploadFile = (props: {
                 </div>
                 <div
                   onClick={() => removeFile(index())}
-                  class="flex-shrink-0 cursor-pointer p-1 text-gray-500 transition-colors hover:text-red-700"
+                  class="shrink-0 cursor-pointer p-1 text-gray-500 transition-colors hover:text-red-700"
                 >
                   <XIcon />
                 </div>

@@ -17,7 +17,6 @@ import {
   getScrollableAncestor,
   getViewportRect,
   hasFixedAncestor,
-  parsePlacement,
 } from './utils';
 
 export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
@@ -95,9 +94,7 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
     let arrowSize = 0;
     if (renderArrow) {
       if (arrow()) {
-        arrowSize = ['top', 'bottom'].includes(parsePlacement(initialPlacement).side)
-          ? arrow()!.offsetHeight
-          : arrow()!.offsetWidth;
+        arrowSize = arrow()!.offsetHeight;
       }
     }
 
@@ -126,7 +123,6 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
           newPosition,
           floatDimensions,
           arrowDimensions,
-          initialPlacement,
           finalPlacement,
           arrowAlignment,
           arrowOffset,

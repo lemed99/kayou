@@ -19,19 +19,20 @@ export interface PopoverProps {
   content: JSX.Element;
   children: JSX.Element;
   onHover?: boolean;
-  menu?: boolean; // used for sidebar menu
   position?: Placement;
   hidden?: boolean;
   onClose?: () => void;
   class?: string;
   offset?: number;
+  floatingClass?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const Popover: ParentComponent<PopoverProps> = (props) => {
   const merged = defaultProps(
     {
       onHover: false,
-      menu: false,
       hidden: false,
     },
     props,
@@ -48,7 +49,14 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
     get placement() {
       return merged.position || undefined;
     },
-    offset: merged.offset ?? (merged.menu ? 0 : 8),
+    offset: merged.offset ?? 8,
+  });
+
+  createEffect(() => {
+    if (merged.hidden === true) {
+      setIsPopoverVisible(false);
+      props.onClose?.();
+    }
   });
 
   createEffect(() => {
@@ -57,7 +65,11 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
       const floatingEl = refs.floating();
       const referenceEl = refs.reference();
 
-      if (merged.onHover && !floatingEl?.contains(target)) {
+      if (
+        merged.onHover &&
+        !floatingEl?.contains(target) &&
+        !referenceEl?.contains(target)
+      ) {
         setIsPopoverVisible(false);
         props.onClose?.();
       }
@@ -100,12 +112,18 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
         onClick={() =>
           !merged.hidden && !merged.onHover ? setIsPopoverVisible(true) : null
         }
-        onMouseEnter={() =>
-          !merged.hidden && merged.onHover ? setIsPopoverVisible(true) : null
-        }
-        onMouseLeave={() =>
-          !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
-        }
+        onMouseEnter={() => {
+          if (!merged.hidden && merged.onHover) {
+            setIsPopoverVisible(true);
+            props.onMouseEnter?.();
+          }
+        }}
+        onMouseLeave={() => {
+          if (!merged.hidden && merged.onHover) {
+            setIsPopoverVisible(false);
+            props.onMouseLeave?.();
+          }
+        }}
       >
         {merged.children}
       </div>
@@ -113,7 +131,7 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
         <Portal mount={container()}>
           <div
             ref={refs.setFloating}
-            class={twMerge('z-50', merged.menu ? 'pl-4' : '')}
+            class={twMerge('z-50', merged.floatingClass)}
             style={{
               ...floatingStyles(),
               opacity: isVisible() ? '1' : '0',
@@ -122,12 +140,18 @@ const Popover: ParentComponent<PopoverProps> = (props) => {
               'transition-duration': '.2s',
               'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
             }}
-            onMouseEnter={() =>
-              !merged.hidden && merged.onHover ? setIsPopoverVisible(true) : null
-            }
-            onMouseLeave={() =>
-              !merged.hidden && merged.onHover ? setIsPopoverVisible(false) : null
-            }
+            onMouseEnter={() => {
+              if (!merged.hidden && merged.onHover) {
+                setIsPopoverVisible(true);
+                props.onMouseEnter?.();
+              }
+            }}
+            onMouseLeave={() => {
+              if (!merged.hidden && merged.onHover) {
+                setIsPopoverVisible(false);
+                props.onMouseLeave?.();
+              }
+            }}
           >
             <div
               class={twMerge(

@@ -10,9 +10,10 @@ import { Placement } from '../hooks/useFloating/types';
 import { useTheme } from '../hooks/useTheme';
 
 export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  placement?: 'top' | 'bottom';
+  placement?: 'top' | 'bottom' | 'right' | 'left';
   theme?: 'dark' | 'light' | 'auto';
   content: string | JSX.Element;
+  hidden?: boolean;
 }
 
 const theme = {
@@ -87,7 +88,7 @@ const Tooltip = (props: TooltipProps) => {
         {props.children}
       </div>
 
-      <Show when={isMounted()}>
+      <Show when={isMounted() && !props.hidden}>
         <Portal mount={container()}>
           <div
             ref={refs.setFloating}

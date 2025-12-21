@@ -26,20 +26,14 @@ export function getOppositeSide(side: Side): Side {
   return opposites[side];
 }
 
-export function getRotationAngle(initialSide: Side, finalSide: Side): number {
-  if (initialSide === finalSide) return 0;
-
+export function getRotationAngle(finalSide: Side): number {
   const sideToAngle: Record<Side, number> = {
     top: 0,
     right: 90,
     bottom: 180,
     left: 270,
   };
-
-  const initialAngle = sideToAngle[initialSide];
-  const finalAngle = sideToAngle[finalSide];
-
-  return finalAngle - initialAngle;
+  return sideToAngle[finalSide];
 }
 
 export function getElementRect(element: HTMLElement, container: HTMLElement): Rect {
@@ -279,21 +273,19 @@ export function computeArrowPosition(
   floatingPosition: FloatingPosition,
   floatingDimensions: Dimensions,
   arrowDimensions: Dimensions,
-  initialPlacement: Placement,
   finalPlacement: Placement,
   arrowAlignment: Alignment,
   arrowOffset: number,
 ): ArrowPosition {
   const { side: finalSide, alignment: floatingAlignment } =
     parsePlacement(finalPlacement);
-  const { side: initialSide } = parsePlacement(initialPlacement);
 
   if (arrowAlignment !== 'center') {
     arrowAlignment = floatingAlignment;
   }
 
   const arrowPosition: ArrowPosition = {};
-  const rotation = getRotationAngle(initialSide, finalSide);
+  const rotation = getRotationAngle(finalSide);
 
   switch (finalSide) {
     case 'top':
@@ -305,11 +297,11 @@ export function computeArrowPosition(
       arrowPosition.transformOrigin = 'center top';
       break;
     case 'left':
-      arrowPosition.left = floatingDimensions.width;
+      arrowPosition.left = floatingDimensions.width - arrowDimensions.height * 0.5;
       arrowPosition.transformOrigin = 'right center';
       break;
     case 'right':
-      arrowPosition.left = -arrowDimensions.width;
+      arrowPosition.left = -arrowDimensions.height * 1.5;
       arrowPosition.transformOrigin = 'left center';
       break;
   }

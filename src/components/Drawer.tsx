@@ -16,6 +16,8 @@ export interface DrawerProps
   height?: string;
   onClose: (event: MouseEvent) => void;
   roundedEdges?: boolean;
+  showHeader?: boolean;
+  bodyClass?: string;
 }
 
 const theme = {
@@ -32,7 +34,7 @@ const theme = {
     },
     base: 'fixed z-[91]',
     inner: {
-      base: 'relative bg-white w-full h-full dark:bg-gray-700',
+      base: 'relative bg-white w-full h-full dark:bg-gray-700 overflow-auto',
       positions: {
         top: 'rounded-b-lg',
         bottom: 'rounded-t-lg',
@@ -122,17 +124,21 @@ const Drawer = (props: DrawerProps) => {
               props.roundedEdges ? theme.content.inner.positions[position()] : '',
             )}
           >
-            <div class={twMerge(theme.header.base, theme.header.popup)}>
-              <button
-                aria-label="Close"
-                class={theme.header.close.base}
-                type="button"
-                onClick={(e) => props.onClose(e)}
-              >
-                <XCloseIcon class={theme.header.close.icon} />
-              </button>
+            <Show when={props.showHeader}>
+              <div class={twMerge(theme.header.base, theme.header.popup)}>
+                <button
+                  aria-label="Close"
+                  class={theme.header.close.base}
+                  type="button"
+                  onClick={(e) => props.onClose(e)}
+                >
+                  <XCloseIcon class={theme.header.close.icon} />
+                </button>
+              </div>
+            </Show>
+            <div class={twMerge(theme.body.base, theme.body.popup, props.bodyClass)}>
+              {props.children}
             </div>
-            <div class={twMerge(theme.body.base, theme.body.popup)}>{props.children}</div>
           </div>
         </div>
       </Portal>
