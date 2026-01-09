@@ -20,5 +20,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src", "vite.config.ts", "generate-icons.ts"],
-  "exclude": ["node_modules", "dist", "dev"]
+  "exclude": ["node_modules", "dist", "dev", "doc"]
 }

@@ -1,0 +1,75 @@
+{
+  "model": "claude-opus-4-5-20251101",
+  "effort": "medium",
+  "project": {
+    "name": "solidjs-ui-library",
+    "type": "library",
+    "framework": "solidjs",
+    "language": "typescript",
+    "description": "Enterprise-grade SolidJS UI component library"
+  },
+  "defaults": {
+    "testing": true,
+    "documentation": true,
+    "typeChecking": "strict",
+    "accessibility": true
+  },
+  "skills": {
+    "solidjs-component-auditor": {
+      "enabled": true,
+      "strictness": "high",
+      "autoFix": false,
+      "failOnCritical": true,
+      "weights": {
+        "typeSafety": 25,
+        "solidjsPractices": 25,
+        "apiDesign": 15,
+        "accessibility": 20,
+        "performance": 10,
+        "testingDocs": 5
+      }
+    },
+    "solidjs-doc-generator": {
+      "enabled": true,
+      "outputDir": "docs/components",
+      "template": "skills/solidjs-doc-generator/templates/component-doc.mdx",
+      "includeExamples": 7,
+      "includeTypeScript": true,
+      "includeAccessibility": true,
+      "codeBlockTheme": "github-dark"
+    },
+    "solidjs-component-fixer": {
+      "enabled": true,
+      "autoTest": true,
+      "createBackup": true,
+      "incrementalCommits": true,
+      "strictMode": true,
+      "fixPriority": ["critical", "high", "medium", "low"]
+    },
+    "landing-page-creator": {
+      "enabled": true,
+      "outputDir": "landing",
+      "framework": "solidjs",
+      "styling": "tailwind",
+      "includeLiveDemo": true
+    },
+    "mcp-server-builder": {
+      "enabled": true,
+      "outputDir": "mcp-server",
+      "serverName": "your-library-mcp",
+      "includeTools": ["list", "get", "generate", "validate", "search"]
+    }
+  },
+  "paths": {
+    "components": "src/components",
+    "docs": "docs",
+    "tests": "tests",
+    "examples": "examples"
+  },
+  "conventions": {
+    "componentNaming": "PascalCase",
+    "propNaming": "camelCase",
+    "booleanProps": "is/has/should/can prefix",
+    "eventHandlers": "on prefix"
+  }
+}

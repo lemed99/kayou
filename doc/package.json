@@ -1,0 +1,33 @@
+{
+  "name": "cool",
+  "version": "0.0.0",
+  "description": "A UI component library built with SolidJS",
+  "private": true,
+  "scripts": {
+    "start": "vite --host",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@tailwindcss/vite": "^4.0.7",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-solid": "^0.14.5",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^4.0.7",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^6.0.0",
+    "vite-plugin-pages": "^0.33.0",
+    "vite-plugin-solid": "^2.11.6"
+  },
+  "dependencies": {
+    "@formatjs/intl": "^3.1.6",
+    "@solidjs/router": "^0.15.3",
+    "solid-js": "^1.9.5",
+    "tailwind-merge": "^3.1.0"
+  }
+}
