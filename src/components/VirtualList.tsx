@@ -15,6 +15,10 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   setScrollPosition?: (scrollTop: number) => void;
   fallback?: JSX.Element;
   rowClass?: string;
+  id?: string;
+  role?: JSX.HTMLAttributes<HTMLDivElement>['role'];
+  'aria-multiselectable'?: boolean;
+  'aria-label'?: string;
 }) {
   const [ref, setRef] = createSignal<HTMLElement | undefined>();
   const [width, setWidth] = createSignal(0);
@@ -65,6 +69,10 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   return (
     <div
       ref={props.setContainerRef}
+      id={props.id}
+      role={props.role}
+      aria-multiselectable={props['aria-multiselectable']}
+      aria-label={props['aria-label']}
       style={{
         overflow: 'auto',
         height: `${Math.max(height(), virtual().containerHeight) + containerPadding() * 2}px`,

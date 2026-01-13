@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@mdx-js/rollup": "^3.1.1",
     "@tailwindcss/vite": "^4.0.7",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "eslint": "^9.33.0",
@@ -17,6 +18,9 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "solid-mdx": "^0.0.7",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.39.1",

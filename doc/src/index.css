@@ -88,3 +88,21 @@ html,
   font-family: inter, 'inter Fallback', system-ui;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
+
+/* Base dark mode styles */
+html {
+  background-color: theme('colors.white');
+  color: theme('colors.gray.900');
+}
+
+html.dark {
+  background-color: theme('colors.gray.950');
+  color: theme('colors.white');
+}
+
+/* Smooth color transitions */
+html,
+body,
+#root {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}

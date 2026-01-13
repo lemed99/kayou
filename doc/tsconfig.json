@@ -10,8 +10,10 @@
     "types": ["vite/client"],
     "noEmit": true,
     "isolatedModules": true,
-    "strict": true
-  },
-  "include": ["src", "vite.config.mts"],
-  "exclude": ["node_modules", "dist", "dev"]
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@lib/*": ["../src/*"]
+    }
+  }
 }

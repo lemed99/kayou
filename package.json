@@ -37,7 +37,11 @@
     "lint": "eslint '**/*.{ts,tsx}' --fix",
     "lint:ci": "eslint '**/*.{ts,tsx}' --max-warnings 0",
     "format": "prettier --check --ignore-path .prettierignore .",
-    "format:fix": "prettier --write --ignore-path .prettierignore ."
+    "format:fix": "prettier --write --ignore-path .prettierignore .",
+    "claude:init": "claude /project:init-project",
+    "claude:audit": "claude /project:audit-component",
+    "claude:docs": "claude /project:document-component",
+    "claude:fix": "claude /project:fix-component"
   },
   "publishConfig": {
     "registry": "https://gitlab.com/api/v4/projects/project_id/packages/npm/",

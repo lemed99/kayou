@@ -1,8 +1,8 @@
 ---
 name: solidjs-component-auditor
-version: 1.0.0
-description: Comprehensive auditing system for SolidJS components. Checks type safety, reactivity patterns, accessibility, performance, and documentation. Automatically activates when user mentions auditing, reviewing, or checking components.
-author: Your Library Team
+version: 2.0.0
+description: Comprehensive auditing system for SolidJS components. Performs deep analysis of type safety, reactivity patterns, accessibility, and performance. Generates actionable reports with prioritized fixes.
+author: @exowpee/the_rock
 tags: [solidjs, audit, typescript, accessibility, quality]
 ---
 
@@ -12,217 +12,231 @@ Enterprise-grade component auditing for SolidJS UI libraries.
 
 ## Activation Triggers
 
-This skill automatically activates when the user:
+This skill activates when the user:
 
 - Says "audit", "review", "check", or "analyze" followed by a component name
 - Asks "what's wrong with [component]"
 - Says "check the quality of [component]"
 - Mentions "component health" or "component status"
-- Uses phrases like "is [component] following best practices"
 
-## Core Functionality
+## Quick Start
 
-Performs comprehensive audits across 6 critical dimensions:
+```
+User: "Audit the Button component"
 
-### 1. Type Safety (Weight: 25%)
-
-- Validates TypeScript interfaces
-- Checks for `any` types
-- Verifies generic constraints
-- Validates event handler types
-- Checks ref types
-- Ensures return type declarations
-
-### 2. SolidJS Best Practices (Weight: 25%)
-
-- Detects prop destructuring (critical anti-pattern)
-- Validates signal usage
-- Checks memo usage
-- Verifies effect cleanup
-- Detects React patterns
-- Validates event handlers
-
-### 3. Component API Design (Weight: 15%)
-
-- Checks naming conventions
-- Validates prop consistency
-- Verifies class/classList support
-- Checks rest prop spreading
-- Validates required vs optional props
-
-### 4. Accessibility (Weight: 20%)
-
-- Validates ARIA attributes
-- Checks keyboard navigation
-- Verifies focus management
-- Validates screen reader support
-- Checks color contrast
-- Verifies reduced-motion support
-
-### 5. Performance (Weight: 10%)
-
-- Detects unnecessary reactivity
-- Checks memoization usage
-- Identifies memory leaks
-- Validates lazy loading
-
-### 6. Testing & Documentation (Weight: 5%)
-
-- Checks test existence
-- Validates test coverage
-- Checks documentation existence
-- Validates examples
+Claude:
+1. Reads src/components/Button.tsx
+2. Loads reference files from .claude/
+3. Performs 6-dimension analysis
+4. Generates report at .claude/audits/Button-YYYY-MM-DD.md
+5. Updates .claude/audits/MASTER_TRACKER.md
+```
 
 ## Audit Process
 
-### Phase 1: Component Discovery
+### Phase 1: Load Context
 
-1. Locate the component file
-2. Read the TypeScript source
-3. Identify all props, state, and effects
-4. Map component dependencies
+**Required Files (Load First):**
+```
+.claude/PROJECT_CONTEXT.md          # Project overview
+.claude/COMPONENT_CONVENTIONS.md    # Library patterns
+```
 
-### Phase 2: Static Analysis
+**Reference Files (Load as Needed):**
+```
+.claude/SOLIDJS_BEST_PRACTICES.md   # For SolidJS checks
+.claude/TYPESCRIPT_PATTERNS.md      # For type checks
+.claude/ACCESSIBILITY_STANDARDS.md  # For a11y checks
+.claude/ANTI_PATTERNS.md            # For pattern detection
+```
 
-1. Check for type safety
-2. Parse component AST
-3. Extract prop interfaces
-4. Identify patterns and anti-patterns
+**Skill References:**
+```
+skills/solidjs-component-auditor/reference/audit-criteria.md
+skills/solidjs-component-auditor/reference/accessibility-standards.md
+skills/solidjs-component-auditor/checklists/quick-audit.md
+```
 
-### Phase 3: Accessibility Check
+### Phase 2: Read Component
 
-1. Check for accessibility
-2. Check ARIA usage
-3. Validate keyboard support
-4. Check semantic HTML
+1. Read the component source file
+2. Extract:
+   - Props interface
+   - Signal/store usage
+   - Effects and their cleanup
+   - Event handlers
+   - ARIA attributes
+   - Class composition
 
-### Phase 4: Dependency Analysis
+### Phase 3: Analyze Each Dimension
 
-1. Analyze reactivity graph
-2. Identify unnecessary dependencies
-3. Check for circular dependencies
-4. Validate cleanup patterns
+#### 1. Type Safety (25 points)
 
-### Phase 5: Report Generation
+Check for:
+- [ ] Explicit props interface exists
+- [ ] No `any` types
+- [ ] Event handlers fully typed
+- [ ] Return type declared
+- [ ] Refs properly typed
+- [ ] Generics where appropriate
 
-1. Calculate scores for each dimension
-2. Identify all issues with severity
-3. Generate actionable recommendations
-4. Create detailed audit report
-5. Update master tracker
+**Detection Patterns:**
+```typescript
+// BAD: any type
+props: any
+onChange?: any
+data: any[]
 
-## Output Format
+// BAD: Missing return type
+function Component(props: Props) {
 
-Generate audit report at: `.claude/audits/[ComponentName]-[YYYY-MM-DD].md`
+// GOOD: Full types
+function Component(props: Props): JSX.Element {
+```
 
-````markdown
-# [ComponentName] Audit Report
+#### 2. SolidJS Practices (25 points)
 
-Generated: [Timestamp]
-Auditor: Claude (solidjs-component-auditor v1.0.0)
+Check for:
+- [ ] **No props destructuring** (Critical!)
+- [ ] Signals called with `()` in JSX
+- [ ] `createMemo` for computed values
+- [ ] `splitProps` for prop separation
+- [ ] `onCleanup` in effects with subscriptions
+- [ ] No React patterns
+
+**Detection Patterns:**
+```typescript
+// CRITICAL: Props destructuring
+function Component({ name, value }) // BAD
+function Component(props: Props)   // GOOD
+
+// Missing signal call
+const val = count; return <div>{val}</div>  // BAD
+return <div>{count()}</div>                  // GOOD
+
+// Effect without cleanup
+createEffect(() => {
+  window.addEventListener('resize', handler);
+  // Missing onCleanup!
+});
+```
+
+#### 3. API Design (15 points)
+
+Check for:
+- [ ] Uses `splitProps`
+- [ ] Spreads rest props
+- [ ] Supports `class` via twMerge
+- [ ] Consistent naming (isX, onY)
+- [ ] Sensible defaults
+
+#### 4. Accessibility (20 points)
+
+Check for:
+- [ ] Interactive elements keyboard accessible
+- [ ] Icon buttons have `aria-label`
+- [ ] Form inputs have labels
+- [ ] Modal has focus trap
+- [ ] Expandable has `aria-expanded`
+- [ ] Live regions for dynamic content
+
+**Reference:** `skills/solidjs-component-auditor/reference/accessibility-standards.md`
+
+#### 5. Performance (10 points)
+
+Check for:
+- [ ] `createMemo` for expensive operations
+- [ ] No memory leaks (cleanup present)
+- [ ] Virtualization for large lists
+- [ ] No inline object/function in JSX
+
+#### 6. Testing & Documentation (5 points)
+
+Check for:
+- [ ] Test file exists at `src/components/__tests__/[ComponentName].test.tsx`
+- [ ] JSDoc comments on props
+- [ ] Documentation page exists at `doc/src/pages/components/[component].tsx`
+
+### Phase 4: Generate Report
+
+**Output Location:** `.claude/audits/[ComponentName]-[YYYY-MM-DD].md`
+
+**Template:** `skills/solidjs-component-auditor/templates/audit-report.md`
+
+**Report Structure:**
+1. Executive Summary (2-3 sentences)
+2. Overall Score with breakdown
+3. Critical Issues (must fix)
+4. High Priority Issues
+5. Medium Priority Issues
+6. Low Priority Enhancements
+7. Positive Findings
+8. Fix Priority Order
+9. Test Plan
+
+### Phase 5: Update Tracker
+
+Update `.claude/audits/MASTER_TRACKER.md`:
+
+```markdown
+| Component | Last Audit | Score | Critical | High | Medium | Low | Status |
+|-----------|------------|-------|----------|------|--------|-----|--------|
+| Button    | 2024-01-15 | 72    | 2        | 3    | 5      | 2   | Needs work |
+```
+
+## Scoring Guide
+
+| Score | Rating | Meaning |
+|-------|--------|---------|
+| 90-100 | Excellent | Production ready, minimal changes |
+| 80-89 | Good | Minor improvements, ship with backlog |
+| 70-79 | Acceptable | Address high priority before release |
+| 60-69 | Needs Work | Significant issues, plan fixes |
+| <60 | Poor | Major refactor before use |
+
+## Issue Severity
+
+| Severity | Definition | Examples |
+|----------|------------|----------|
+| **Critical** | Breaks functionality or major a11y | Props destructuring, no keyboard access |
+| **High** | Significant problems | Missing types, no aria-label |
+| **Medium** | Code quality issues | Could use memo, missing JSDoc |
+| **Low** | Nice to have | Better naming, more examples |
+
+## Example Output
+
+```
+# Button Audit Report
+
+Generated: 2024-01-15 14:30
+Overall Score: 72/100
 
 ## Executive Summary
 
-[2-3 sentence overview of component health]
+The Button component has solid TypeScript types but critical reactivity
+issues due to props destructuring. Accessibility is incomplete - missing
+keyboard support for custom variants. Recommend immediate fix of
+reactivity before any production use.
 
-## Overall Score: [X/100]
+## Critical Issues
 
-### Dimension Scores
+### Issue 1: Props Destructured
 
-- ⚡ Type Safety: [X/25]
-- 🎯 SolidJS Practices: [X/25]
-- 🎨 API Design: [X/15]
-- ♿ Accessibility: [X/20]
-- 🚀 Performance: [X/10]
-- 📚 Testing/Docs: [X/5]
-
-## Critical Issues 🚨 (Block Release)
-
-[Issues that MUST be fixed before any release]
-
-### Issue 1: [Title]
-
-**Severity:** Critical
-**File:** `src/components/[Component].tsx`
-**Line:** [number]
-**Category:** [Type Safety | SolidJS | A11y | Performance]
-
-**Problem:**
-
-```typescript
-// Current implementation (BROKEN)
-[problematic code]
+**Line:** 15
+**Problem:** `function Button({ variant, size, onClick }) {`
+**Impact:** Component will not update when props change
+**Fix:** Use `props: ButtonProps` and access as `props.variant`
 ```
-
-**Why this is critical:**
-[Explanation of the impact]
-
-**Solution:**
-
-```typescript
-// Fixed implementation
-[corrected code]
-```
-
-**Implementation steps:**
-
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-**Estimated effort:** [X hours]
-**Related issues:** [List if any]
-
----
-
-## High Priority Issues ⚠️ (Fix Before v1.0)
-
-[Similar format for each issue]
-
-## Medium Priority Issues 📝 (Post v1.0)
-
-[Similar format for each issue]
-
-## Low Priority Enhancements 💡 (Future)
-
-[Similar format for each issue]
-
-## Positive Findings ✅
-
-[Things the component does well]
-
-## Related Components to Check
-
-[Components that might have similar issues]
-
-## Next Steps
-
-1. [Immediate action]
-2. [Short-term action]
-3. [Long-term consideration]
-
-## References Used
-
-- TypeScript Patterns: `.claude/TYPESCRIPT_PATTERNS.md`
-- SolidJS Patterns: `.claude/SOLIDJS_BEST_PRACTICES.md`
-- Accessibility Standards: `.claude/ACCESSIBILITY_STANDARDS.md`
-- API Conventions: `.claude/COMPONENT_CONVENTIONS.md`
-- Common mistakes: `.claude/ANTI_PATTERNS.md`
-````
-
-Also update: `.claude/audits/MASTER_TRACKER.md` with summary
 
 ## Configuration
 
-Set audit strictness in `.claude/config.json`:
+In `.claude/config.json`:
 
 ```json
 {
   "skills": {
     "solidjs-component-auditor": {
       "strictness": "high",
-      "autoFix": false,
-      "failOnCritical": true,
       "weights": {
         "typeSafety": 25,
         "solidjsPractices": 25,
@@ -230,37 +244,45 @@ Set audit strictness in `.claude/config.json`:
         "accessibility": 20,
         "performance": 10,
         "testingDocs": 5
-      }
+      },
+      "outputDir": ".claude/audits",
+      "updateTracker": true
     }
   }
 }
 ```
 
-## Reference Files (Load on Demand)
+## Files in This Skill
 
-These files provide detailed guidance and are loaded only when needed:
+```
+skills/solidjs-component-auditor/
+├── SKILL.md                           # This file
+├── reference/
+│   ├── audit-criteria.md              # Detailed scoring criteria
+│   └── accessibility-standards.md     # A11y patterns by component
+├── checklists/
+│   └── quick-audit.md                 # Rapid assessment checklist
+└── templates/
+    └── audit-report.md                # Report template
+```
 
-- **`.claude/TYPESCRIPT_PATTERNS.md`** - TypeScript best practices
-- **`.claude/SOLIDJS_BEST_PRACTICES.md`** - Official SolidJS patterns
-- **`.claude/ACCESSIBILITY_STANDARDS.md`** - WCAG and ARIA guidelines
-- **`.claude/COMPONENT_CONVENTIONS.md`** - Library-specific conventions
-- **`.claude/ANTI_PATTERNS.md`** - Common mistakes to avoid
+## Integration with Fixer
 
-## Example Usage
+After audit, user can say:
 
-**User:** "Audit the Button component"
+```
+"Fix the Button component"
+```
 
-**Claude:** "I'll run a comprehensive audit of the Button component. This will take a moment..."
+This triggers `solidjs-component-fixer` which:
+1. Reads the audit report
+2. Applies fixes in priority order
+3. Creates atomic commits
+4. Re-runs audit to verify
 
-[Runs audit]
+## Notes
 
-**Claude:** "Audit complete! The Button component scored 72/100. I found 2 critical issues, 3 high priority issues, and 5 medium priority issues. The main concerns are:
-
-1. **Critical:** Props are destructured, breaking reactivity
-2. **Critical:** Missing keyboard focus indicators
-3. **High:** No TypeScript types for onClick handler
-
-Would you like me to:
-a) Show you the full audit report
-b) Fix the critical issues immediately
-c) Explain each issue in detail"
+- Always load PROJECT_CONTEXT.md first for library conventions
+- Critical issues should block release
+- Update MASTER_TRACKER after every audit
+- Link related components that may have similar issues

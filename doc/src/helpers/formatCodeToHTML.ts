@@ -373,6 +373,7 @@ class CodeTokenizer {
 type Theme = {
   [key in TokenType]?: string;
 };
+
 const lightTheme: Theme = {
   [TokenType.Keyword]: '#e53ded',
   [TokenType.Comment]: '#266626',
@@ -388,7 +389,31 @@ const lightTheme: Theme = {
   [TokenType.Default]: '#333333',
 };
 
-function formatTokensToHTML(tokens: Token[][], theme: Theme): string {
+const darkTheme: Theme = {
+  [TokenType.Keyword]: '#c792ea',
+  [TokenType.Comment]: '#676e95',
+  [TokenType.String]: '#c3e88d',
+  [TokenType.Number]: '#f78c6c',
+  [TokenType.Operator]: '#89ddff',
+  [TokenType.Punctuation]: '#89ddff',
+  [TokenType.Identifier]: '#82aaff',
+  [TokenType.SolidJSFunction]: '#ffcb6b',
+  [TokenType.JSXTag]: '#f07178',
+  [TokenType.JSXAttribute]: '#ffcb6b',
+  [TokenType.JSXExpression]: '#82aaff',
+  [TokenType.Default]: '#eeffff',
+};
+
+const themes = {
+  light: lightTheme,
+  dark: darkTheme,
+};
+
+function formatTokensToHTML(
+  tokens: Token[][],
+  theme: Theme,
+  isDark: boolean,
+): string {
   let codeContent = '';
 
   tokens.forEach((line, index) => {
@@ -421,7 +446,8 @@ function formatTokensToHTML(tokens: Token[][], theme: Theme): string {
     }
   });
 
-  return `<pre class="whitespace-pre [tab-size:4] bg-gray-50 leading-relaxed p-4 overflow-auto text-sm"><code style="font-family: plexMono, 'plexMono Fallback';">${codeContent}</code></pre>`;
+  const bgClass = isDark ? 'bg-gray-900' : 'bg-gray-50';
+  return `<pre class="whitespace-pre [tab-size:4] ${bgClass} leading-relaxed p-4 overflow-auto text-sm"><code style="font-family: plexMono, 'plexMono Fallback';">${codeContent}</code></pre>`;
 }
 
 /**
@@ -436,8 +462,13 @@ function escapeHTML(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function formatCodeToHTML(code: string, theme: Theme = lightTheme) {
+export function formatCodeToHTML(
+  code: string,
+  themeMode: 'light' | 'dark' = 'light',
+): string {
   const tokenizer = new CodeTokenizer();
   const tokens = tokenizer.tokenize(code);
-  return formatTokensToHTML(tokens, theme);
+  const theme = themes[themeMode];
+  const isDark = themeMode === 'dark';
+  return formatTokensToHTML(tokens, theme, isDark);
 }

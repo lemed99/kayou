@@ -31,12 +31,12 @@
     },
     "solidjs-doc-generator": {
       "enabled": true,
-      "outputDir": "docs/components",
-      "template": "skills/solidjs-doc-generator/templates/component-doc.mdx",
-      "includeExamples": 7,
+      "outputDir": "doc/src/pages/components",
+      "format": "tsx",
+      "docPageComponent": "doc/src/components/DocPage.tsx",
+      "includeExamples": 5,
       "includeTypeScript": true,
-      "includeAccessibility": true,
-      "codeBlockTheme": "github-dark"
+      "includeAccessibility": true
     },
     "solidjs-component-fixer": {
       "enabled": true,
@@ -62,9 +62,10 @@
   },
   "paths": {
     "components": "src/components",
-    "docs": "docs",
-    "tests": "tests",
-    "examples": "examples"
+    "docSite": "doc",
+    "docPages": "doc/src/pages/components",
+    "tests": "src/components/__tests__",
+    "audits": ".claude/audits"
   },
   "conventions": {
     "componentNaming": "PascalCase",

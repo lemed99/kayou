@@ -5,6 +5,7 @@ import {
   Show,
   createEffect,
   createSignal,
+  createUniqueId,
   onCleanup,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
@@ -59,6 +60,9 @@ const useSelect = <T extends MergedSelectProps>(
     HTMLDivElement | undefined
   >();
   const [scrollTop, setScrollTop] = createSignal(0);
+
+  const listboxId = createUniqueId();
+  const searchInputId = createUniqueId();
 
   createEffect(() => {
     setFilteredOptions(props.options);
@@ -311,6 +315,31 @@ const useSelect = <T extends MergedSelectProps>(
       }
       return;
     }
+
+    if (key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+      return;
+    }
+
+    if (key === 'Home') {
+      e.preventDefault();
+      if (filteredOptions().length > 0) {
+        setHighlightedOption(filteredOptions()[0]);
+        scrollToHighlightedOption(0);
+      }
+      return;
+    }
+
+    if (key === 'End') {
+      e.preventDefault();
+      const lastIndex = filteredOptions().length - 1;
+      if (lastIndex >= 0) {
+        setHighlightedOption(filteredOptions()[lastIndex]);
+        scrollToHighlightedOption(lastIndex);
+      }
+      return;
+    }
   };
 
   const Layout = (layoutProps: {
@@ -356,6 +385,10 @@ const useSelect = <T extends MergedSelectProps>(
                   fallback={
                     <div
                       ref={setOptionsContainerRef}
+                      id={listboxId}
+                      role="listbox"
+                      aria-multiselectable={type === 'multiSelect' ? true : undefined}
+                      aria-label={props.label || 'Select options'}
                       class={optionsContainerClass}
                       onScroll={(e: Event) => {
                         const el = e.target as HTMLElement;
@@ -367,11 +400,9 @@ const useSelect = <T extends MergedSelectProps>(
                       <For
                         each={filteredOptions()}
                         fallback={
-                          props.noSearchResultPlaceholder ? (
-                            <div class="px-2 py-1.5 text-sm whitespace-nowrap">
-                              {props.noSearchResultPlaceholder}
-                            </div>
-                          ) : null
+                          <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                            {props.noSearchResultPlaceholder || 'No results found'}
+                          </div>
                         }
                       >
                         {layoutProps.optionsComponent}
@@ -386,14 +417,16 @@ const useSelect = <T extends MergedSelectProps>(
                     rowHeight={props.optionRowHeight!}
                     overscanCount={3}
                     setContainerRef={setOptionsContainerRef}
+                    id={listboxId}
+                    role="listbox"
+                    aria-multiselectable={type === 'multiSelect' ? true : undefined}
+                    aria-label={props.label || 'Select options'}
                     loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
                     setScrollPosition={setScrollTop}
                     fallback={
-                      props.noSearchResultPlaceholder ? (
-                        <div class="px-2 py-1.5 text-sm whitespace-nowrap">
-                          {props.noSearchResultPlaceholder}
-                        </div>
-                      ) : null
+                      <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                        {props.noSearchResultPlaceholder || 'No results found'}
+                      </div>
                     }
                   >
                     {layoutProps.optionsComponent}
@@ -405,7 +438,7 @@ const useSelect = <T extends MergedSelectProps>(
           </Show>
         </div>
         <Show when={props.helperText}>
-          <HelperText content={props.helperText as string} color={props.color} />
+          <HelperText content={props.helperText!} color={props.color} />
         </Show>
       </div>
     );
@@ -422,6 +455,9 @@ const useSelect = <T extends MergedSelectProps>(
     setHighlightedOption,
     filteredOptions,
     setFilteredOptions,
+    isOpen,
+    listboxId,
+    searchInputId,
     handleKeyDown,
     handleOptionClick,
     handleSearchChange,

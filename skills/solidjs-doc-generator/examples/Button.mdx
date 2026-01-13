@@ -1,0 +1,345 @@
+---
+title: Button
+description: Interactive button component with multiple variants, sizes, and states
+category: Forms
+---
+
+import { Button } from '@exowpee/the_rock'
+
+# Button
+
+A versatile button component for triggering actions. Supports multiple visual variants, sizes, and states including loading and disabled. Built with accessibility in mind with full keyboard support.
+
+## Installation
+
+```bash
+npm install @exowpee/the_rock
+```
+
+## Import
+
+```tsx
+import { Button } from '@exowpee/the_rock'
+```
+
+## Quick Start
+
+```tsx
+<Button onClick={() => console.log('Clicked!')}>
+  Click me
+</Button>
+```
+
+## Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `JSX.Element` | - | Yes | Button content |
+| `color` | `'info' \| 'gray' \| 'failure' \| 'success' \| 'warning'` | `'info'` | No | Color variant |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | No | Button size |
+| `pill` | `boolean` | `false` | No | Makes button pill-shaped |
+| `outline` | `boolean` | `false` | No | Outline style variant |
+| `isLoading` | `boolean` | `false` | No | Shows loading spinner |
+| `disabled` | `boolean` | `false` | No | Disables the button |
+| `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | No | HTML button type |
+| `class` | `string` | - | No | Additional CSS classes |
+| `onClick` | `(event: MouseEvent) => void` | - | No | Click handler |
+
+## Examples
+
+### Basic Usage
+
+The simplest button with default styling.
+
+```tsx
+<Button>Default Button</Button>
+```
+
+### Color Variants
+
+Different colors for different purposes.
+
+```tsx
+<div class="flex gap-2">
+  <Button color="info">Info</Button>
+  <Button color="gray">Gray</Button>
+  <Button color="failure">Failure</Button>
+  <Button color="success">Success</Button>
+  <Button color="warning">Warning</Button>
+</div>
+```
+
+### Sizes
+
+Five size options from extra small to extra large.
+
+```tsx
+<div class="flex items-center gap-2">
+  <Button size="xs">Extra Small</Button>
+  <Button size="sm">Small</Button>
+  <Button size="md">Medium</Button>
+  <Button size="lg">Large</Button>
+  <Button size="xl">Extra Large</Button>
+</div>
+```
+
+### Outline Variant
+
+Lighter visual weight with outline style.
+
+```tsx
+<div class="flex gap-2">
+  <Button outline color="info">Info Outline</Button>
+  <Button outline color="success">Success Outline</Button>
+  <Button outline color="failure">Failure Outline</Button>
+</div>
+```
+
+### Pill Shape
+
+Rounded pill-shaped buttons.
+
+```tsx
+<div class="flex gap-2">
+  <Button pill>Pill Button</Button>
+  <Button pill outline>Pill Outline</Button>
+</div>
+```
+
+### Loading State
+
+Show loading state during async operations.
+
+```tsx
+function AsyncButton() {
+  const [isLoading, setIsLoading] = createSignal(false)
+
+  const handleClick = async () => {
+    setIsLoading(true)
+    await saveData()
+    setIsLoading(false)
+  }
+
+  return (
+    <Button isLoading={isLoading()} onClick={handleClick}>
+      {isLoading() ? 'Saving...' : 'Save'}
+    </Button>
+  )
+}
+```
+
+### Disabled State
+
+Prevent interactions when disabled.
+
+```tsx
+<div class="flex gap-2">
+  <Button disabled>Disabled</Button>
+  <Button disabled outline>Disabled Outline</Button>
+</div>
+```
+
+### Form Submit Button
+
+Use with forms for submission.
+
+```tsx
+<form onSubmit={handleSubmit}>
+  <input type="text" name="email" />
+  <Button type="submit" color="success">
+    Submit Form
+  </Button>
+</form>
+```
+
+### With Icon
+
+Combine with icons for visual context.
+
+```tsx
+import { PlusIcon, TrashIcon } from '@exowpee/the_rock/icons'
+
+<div class="flex gap-2">
+  <Button>
+    <PlusIcon class="mr-2 size-4" />
+    Add Item
+  </Button>
+  <Button color="failure">
+    <TrashIcon class="mr-2 size-4" />
+    Delete
+  </Button>
+</div>
+```
+
+## Accessibility
+
+### Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Move focus to/from button |
+| `Enter` | Activate the button |
+| `Space` | Activate the button |
+
+### ARIA Attributes
+
+The button automatically manages:
+
+- Native `<button>` element provides implicit `role="button"`
+- `aria-disabled="true"` when disabled
+- `aria-busy="true"` when loading
+
+### Screen Reader Support
+
+- Button text is announced as the accessible name
+- Loading state announced as "button, loading"
+- Disabled state announced as "button, dimmed" or "button, unavailable"
+
+### Focus Indicator
+
+The button has a visible focus ring when focused via keyboard. The focus ring color matches the button variant.
+
+## Best Practices
+
+### Do
+
+- Use descriptive button text that indicates the action
+- Use `type="submit"` for form submission buttons
+- Show loading state during async operations
+- Use color variants to indicate purpose (success for positive, failure for destructive)
+
+### Don't
+
+- Don't use buttons for navigation (use links instead)
+- Don't use generic text like "Click here"
+- Don't disable buttons without explaining why
+- Don't rely on color alone to convey meaning
+
+## TypeScript
+
+### Props Interface
+
+```typescript
+import { JSX } from 'solid-js'
+
+type ButtonColor = 'info' | 'gray' | 'failure' | 'success' | 'warning'
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * Color variant of the button
+   * @default 'info'
+   */
+  color?: ButtonColor
+
+  /**
+   * Size of the button
+   * @default 'md'
+   */
+  size?: ButtonSize
+
+  /**
+   * Makes button pill-shaped with full rounded corners
+   * @default false
+   */
+  pill?: boolean
+
+  /**
+   * Uses outline style instead of filled
+   * @default false
+   */
+  outline?: boolean
+
+  /**
+   * Shows loading spinner and disables interactions
+   * @default false
+   */
+  isLoading?: boolean
+
+  /**
+   * Button content
+   */
+  children: JSX.Element
+}
+```
+
+### Usage with TypeScript
+
+```typescript
+import { Button, type ButtonProps } from '@exowpee/the_rock'
+
+// Type-safe props
+const buttonConfig: ButtonProps = {
+  color: 'success',
+  size: 'lg',
+  onClick: (e) => {
+    // e is typed as MouseEvent
+    console.log(e.clientX)
+  }
+}
+
+<Button {...buttonConfig}>Submit</Button>
+```
+
+## Styling
+
+### Custom Classes
+
+Apply additional Tailwind classes:
+
+```tsx
+<Button class="shadow-lg hover:shadow-xl transition-shadow">
+  Custom Shadow
+</Button>
+```
+
+### Theme Colors
+
+The button uses these Tailwind color classes by variant:
+
+| Variant | Background | Text |
+|---------|------------|------|
+| info | `bg-blue-700` | `text-white` |
+| gray | `bg-gray-200` | `text-gray-800` |
+| success | `bg-green-700` | `text-white` |
+| failure | `bg-red-700` | `text-white` |
+| warning | `bg-yellow-400` | `text-gray-900` |
+
+### Dark Mode
+
+The button automatically adjusts for dark mode using Tailwind's `dark:` variants.
+
+## Related Components
+
+- [IconButton](./IconButton) - Button with only an icon (no text)
+- [ButtonGroup](./ButtonGroup) - Group multiple buttons together
+- [Link](./Link) - For navigation instead of actions
+
+## Troubleshooting
+
+### Button not clickable
+
+**Problem:** Button appears but clicks don't work.
+
+**Solution:** Check if `disabled` is true, or if parent element has `pointer-events: none`. Also verify `onClick` handler is properly defined.
+
+### Loading spinner not showing
+
+**Problem:** `isLoading` is true but no spinner appears.
+
+**Solution:** Ensure the Spinner component is properly imported in the library. Check that `isLoading` is a signal accessor: `isLoading={isLoading()}` not `isLoading={isLoading}`.
+
+### Custom styles not applying
+
+**Problem:** Classes added via `class` prop don't work.
+
+**Solution:** The component uses `twMerge` for class composition. Your classes should override defaults. For more specificity, use `!important` modifier: `class="!bg-purple-500"`.
+
+### Type errors with onClick
+
+**Problem:** TypeScript error when using onClick handler.
+
+**Solution:** Ensure handler signature matches:
+```typescript
+onClick={(e: MouseEvent) => void}
+```

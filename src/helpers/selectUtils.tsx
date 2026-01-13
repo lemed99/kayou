@@ -40,7 +40,7 @@ export const OptionLabel = (props: { option: Option; selectedOption: Option | nu
       : props.option.label}
     <div class="ml-2.5">
       <Show when={props.selectedOption?.value === props.option.value}>
-        <CheckIcon class="size-4" />
+        <CheckIcon class="size-4" aria-hidden="true" />
       </Show>
     </div>
   </>
@@ -51,16 +51,17 @@ export const ClearContentButton = (props: {
   class?: string;
   disabled?: boolean;
 }) => {
-  const defalutClass =
+  const defaultClass =
     'absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50';
   return (
     <button
       type="button"
+      aria-label="Clear selection"
       disabled={props.disabled}
       onClick={(e: Event) => props.onClick(e)}
-      class={defalutClass || props.class}
+      class={twMerge(defaultClass, props.class)}
     >
-      <XCloseIcon class="size-4" />
+      <XCloseIcon class="size-4" aria-hidden="true" />
     </button>
   );
 };
@@ -71,10 +72,11 @@ export const ChevronDownButton = (props: {
 }) => (
   <button
     type="button"
+    aria-label="Open dropdown"
     disabled={props.disabled}
     onFocus={() => props.onFocus?.()}
     class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
   >
-    <ChevronDownIcon class="size-4" />
+    <ChevronDownIcon class="size-4" aria-hidden="true" />
   </button>
 );

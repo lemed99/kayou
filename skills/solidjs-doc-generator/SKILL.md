@@ -1,9 +1,9 @@
 ---
 name: solidjs-doc-generator
-version: 1.0.0
-description: Generates comprehensive MDX documentation for SolidJS components including props tables, interactive examples, accessibility guides, and TypeScript definitions. Automatically activates when user requests component documentation.
-author: Your Library Team
-tags: [solidjs, documentation, mdx, api-reference]
+version: 2.1.0
+description: Generates comprehensive TSX documentation pages for SolidJS components including props tables, interactive examples, accessibility guides, and TypeScript definitions.
+author: @exowpee/the_rock
+tags: [solidjs, documentation, tsx, api-reference]
 ---
 
 # SolidJS Documentation Generator
@@ -12,802 +12,383 @@ Professional documentation generator for enterprise UI libraries.
 
 ## Activation Triggers
 
-This skill automatically activates when the user:
+This skill activates when the user:
 
 - Says "document", "create docs for", or "generate documentation"
-- Asks "how do I document [component]"
-- Mentions "write the docs", "API reference", or "props table"
-- Says "create MDX file for [component]"
-- Asks about documentation structure or templates
+- Asks "write the docs for [component]"
+- Mentions "API reference" or "props table"
+- Says "create doc page for [component]"
+
+## Quick Start
+
+```
+User: "Document the Button component"
+
+Claude:
+1. Reads src/components/Button.tsx
+2. Extracts props interface and JSDoc
+3. Loads doc style guide and DocPage component
+4. Generates TSX documentation page with live examples
+5. Saves to doc/src/pages/components/button.tsx
+```
 
 ## Documentation Philosophy
 
 Every component doc should be:
 
-- **Comprehensive** - Covers all features and edge cases
+- **Comprehensive** - Covers all props, states, and edge cases
 - **Practical** - Shows real-world usage patterns
 - **Accessible** - Documents a11y features and keyboard support
 - **Type-safe** - Includes full TypeScript definitions
 - **Copy-pasteable** - All examples work out of the box
 
-## Standard Documentation Structure
+## Documentation Process
 
-All component documentation follows this template:
+### Phase 1: Analyze Component
 
-### 1. Frontmatter (Metadata)
+1. Read the component source file
+2. Extract from TypeScript:
+   - Props interface
+   - Type definitions
+   - Default values
+   - JSDoc comments
+3. Identify:
+   - Component category
+   - Related components
+   - State patterns (controlled/uncontrolled)
+
+### Phase 2: Load References
+
+**Required files:**
+```
+skills/solidjs-doc-generator/templates/component-doc.mdx
+skills/solidjs-doc-generator/reference/doc-style-guide.md
+```
+
+**Example reference:**
+```
+skills/solidjs-doc-generator/examples/Button.mdx
+```
+
+**Project context:**
+```
+.claude/PROJECT_CONTEXT.md
+.claude/COMPONENT_CONVENTIONS.md
+```
+
+### Phase 3: Generate Sections
+
+#### 1. Frontmatter
 
 ```yaml
 ---
 title: ComponentName
 description: Brief one-line description
 category: Forms | Layout | Data Display | Feedback | Navigation | Overlay
-keywords: [keyword1, keyword2, keyword3]
 ---
 ```
 
-### 2. Component Import
+#### 2. Overview
 
-```typescript
-import { ComponentName } from '@your-library/ComponentName';
+- 1-2 paragraphs explaining purpose
+- When to use this component
+- Key features
+
+#### 3. Installation & Import
+
+```tsx
+npm install @exowpee/the_rock
+import { ComponentName } from '@exowpee/the_rock'
 ```
 
-### 3. Overview (1-2 paragraphs)
+#### 4. Quick Start
 
-Explain what the component does and primary use cases.
+Simplest possible working example (3-5 lines max).
 
-### 4. Quick Start
+#### 5. Props Table
 
-Simplest possible example (3-5 lines max)
-
-### 5. Installation
-
-```bash
-npm install your-library
-```
-
-### 6. Props API Table
-
-Auto-generated table with all props
-
-### 7. Examples Section (5-7 examples)
-
-- Basic usage
-- All props demonstrated
-- Controlled vs uncontrolled
-- With event handlers
-- Composed with other components
-- Error/loading states
-- Advanced usage
-
-### 8. Accessibility
-
-- Keyboard navigation
-- ARIA attributes
-- Screen reader support
-- Focus management
-
-### 9. Best Practices
-
-Do's and Don'ts
-
-### 10. TypeScript
-
-Full type definitions
-
-### 11. Styling & Theming
-
-How to customize
-
-### 12. Related Components
-
-Links to similar components
-
-### 13. Troubleshooting
-
-Common issues and solutions
-
-## Documentation Generation Process
-
-### Step 1: Analyze Component Source
-
-Read the component TypeScript file and extract:
-
-- Component name and purpose
-- Props interface with all properties
-- JSDoc comments for each prop
-- Default values
-- Event handlers
-- Ref types
-- Generic type parameters (if any)
-
-### Step 2: Generate Props Table
-
-Create markdown table:
-
-```markdown
-## Props
-
-| Prop       | Type                     | Default   | Required | Description                |
-| ---------- | ------------------------ | --------- | -------- | -------------------------- |
-| variant    | 'primary' \| 'secondary' | 'primary' | No       | Visual style variant       |
-| size       | 'sm' \| 'md' \| 'lg'     | 'md'      | No       | Button size                |
-| isDisabled | boolean                  | false     | No       | Whether button is disabled |
-| onClick    | (e: MouseEvent) => void  | -         | No       | Click event handler        |
-| children   | JSX.Element              | -         | Yes      | Button content             |
-```
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
 
 **Rules:**
+- Required props first
+- TypeScript union syntax for types
+- Include all default values
+- Descriptions start with verbs
 
-- List props alphabetically OR by importance
-- Use TypeScript union syntax for types
-- Mark required props clearly
-- Include default values
-- Descriptions should be concise but complete
+#### 6. Examples (5-7 minimum)
 
-### Step 3: Create Code Examples
+Generate examples for:
+1. Basic usage
+2. All variants/colors
+3. All sizes
+4. States (disabled, loading, error)
+5. Event handling
+6. Controlled usage
+7. Composed with other components
 
-Generate 5-7 examples covering common use cases:
+**Example format:**
+```markdown
+### Example Title
 
-#### Example 1: Basic Usage (Simplest)
-
-```tsx
-<Button>Click me</Button>
-```
-
-#### Example 2: All Variants
-
-```tsx
-<Button variant="primary">Primary</Button>
-<Button variant="secondary">Secondary</Button>
-<Button variant="ghost">Ghost</Button>
-```
-
-#### Example 3: Different Sizes
+Brief description of what this shows.
 
 ```tsx
-<Button size="sm">Small</Button>
-<Button size="md">Medium</Button>
-<Button size="lg">Large</Button>
+<ComponentName prop="value">Content</ComponentName>
+```
 ```
 
-#### Example 4: With Icons
+#### 7. Accessibility
 
-```tsx
-<Button icon={<PlusIcon />}>Add Item</Button>
-```
+Document:
+- Keyboard navigation table
+- ARIA attributes
+- Screen reader behavior
+- Focus management
 
-#### Example 5: Disabled State
-
-```tsx
-<Button isDisabled>Cannot Click</Button>
-```
-
-#### Example 6: Loading State
-
-```tsx
-<Button isLoading>Saving...</Button>
-```
-
-#### Example 7: Event Handling
-
-```tsx
-function MyComponent() {
-  const handleClick = () => {
-    console.log('Button clicked!');
-  };
-
-  return <Button onClick={handleClick}>Click me</Button>;
-}
-```
-
-**Example Rules:**
-
-- Each example must be syntactically correct
-- Include all necessary imports
-- Use realistic variable names
-- Show actual use cases, not toy examples
-- Add comments for complex logic
-- Examples should be copy-pasteable
-
-### Step 4: Document Accessibility
-
-For each component, document:
-
-#### Keyboard Support
+#### 8. Best Practices
 
 ```markdown
-## Keyboard Interactions
+### Do
 
-| Key     | Action                     |
-| ------- | -------------------------- |
-| `Enter` | Activates the button       |
-| `Space` | Activates the button       |
-| `Tab`   | Moves focus to/from button |
+- Recommendation 1
+- Recommendation 2
+
+### Don't
+
+- Anti-pattern 1
+- Anti-pattern 2
 ```
 
-#### ARIA Attributes
+#### 9. TypeScript
 
-```markdown
-## ARIA Attributes
+- Full props interface with JSDoc
+- Usage example with type imports
+- Type-safe patterns
 
-- `role="button"` - Implicit on button element
-- `aria-disabled="true"` - When disabled
-- `aria-pressed="true/false"` - For toggle buttons
-```
+#### 10. Styling
 
-#### Screen Reader Support
+- Custom class support
+- CSS variables (if any)
+- Theme customization
 
-```markdown
-## Screen Reader
+#### 11. Related Components
 
-The button is announced as "Button name, button" by screen readers.
-When disabled, announced as "Button name, dimmed button" or "Button name, unavailable button".
-```
+Links to similar or complementary components.
 
-### Step 5: Write Best Practices
+#### 12. Troubleshooting
 
-```markdown
-## Best Practices
+Common problems and solutions.
 
-### ✅ Do
-
-- Use semantic `<button>` element (this component does)
-- Provide clear, descriptive button text
-- Use `isDisabled` instead of removing the button
-- Include loading states for async actions
-- Use appropriate variants for visual hierarchy
-
-### ❌ Don't
-
-- Don't use buttons for navigation (use Link instead)
-- Don't use generic text like "Click here"
-- Don't rely on color alone to convey meaning
-- Don't disable without explanation
-- Don't use onClick for form submission (use type="submit")
-```
-
-### Step 6: Include TypeScript Definitions
-
-`````markdown
-## TypeScript
-
-### Props Interface
-
-```typescript
-interface ButtonProps extends ComponentProps<'button'> {
-  /**
-   * Visual variant of the button
-   * @default 'primary'
-   */
-  variant?: 'primary' | 'secondary' | 'ghost';
-
-  /**
-   * Size of the button
-   * @default 'md'
-   */
-  size?: 'sm' | 'md' | 'lg';
-
-  /**
-   * Whether button is disabled
-   * @default false
-   */
-  isDisabled?: boolean;
-
-  /**
-   * Whether button is in loading state
-   * @default false
-   */
-  isLoading?: boolean;
-
-  /**
-   * Icon to display before button text
-   */
-  icon?: JSX.Element;
-
-  /**
-   * Click event handler
-   */
-  onClick?: (event: MouseEvent) => void;
-}
-```
-
-### Usage with TypeScript
-
-```typescript
-import { Button, type ButtonProps } from 'your-library'
-
-// Type-safe props
-const buttonProps: ButtonProps = {
-  variant: 'primary',
-  size: 'lg',
-  onClick: (e) => console.log(e)
-}
-
-<Button {...buttonProps}>Click</Button>
-
-// Type inference works
-<Button
-  variant="primary"  // ✅ Valid
-  size="xl"          // ❌ Type error: "xl" not in Size type
-  onClick={(e) => {
-    // e is typed as MouseEvent
-    console.log(e.clientX)
-  }}
->
-  Click
-</Button>
-```
-
-\```
-
-### Step 7: Add Styling Guide
-
-````markdown
-## Styling
-
-### CSS Classes
-
-The Button component accepts standard className and applies:
-
-- `btn` - Base button styles
-- `btn-{variant}` - Variant-specific styles
-- `btn-{size}` - Size-specific styles
-
-```tsx
-<Button class="custom-class">Button with custom class</Button>
-```
-
-### CSS Variables
-
-Customize using CSS variables:
-
-```css
-.btn {
-  --btn-primary-bg: #0066cc;
-  --btn-primary-color: #ffffff;
-  --btn-radius: 4px;
-  --btn-padding: 0.5rem 1rem;
-}
-```
-
-### Tailwind
-
-The component works with Tailwind:
-
-```tsx
-<Button class="bg-purple-500 hover:bg-purple-600">Purple Button</Button>
-```
-````
-
-### Step 8: Link Related Components
-
-```markdown
-## Related Components
-
-- [IconButton](./IconButton) - Button with only an icon
-- [ButtonGroup](./ButtonGroup) - Group multiple buttons
-- [Link](./Link) - For navigation instead of actions
-```
-
-### Step 9: Add Troubleshooting
-
-```markdown
-## Troubleshooting
-
-### Button not clickable
-
-**Problem:** Button appears but doesn't respond to clicks.
-
-**Solution:** Check if `isDisabled` is set to true, or if there's a CSS issue with `pointer-events`.
-
-### Loading state not showing
-
-**Problem:** `isLoading` prop doesn't show loading indicator.
-
-**Solution:** Ensure you've imported the Spinner component or customize via `loadingComponent` prop.
-
-### TypeScript errors with onClick
-
-**Problem:** Type error when assigning onClick handler.
-
-**Solution:** Ensure your handler signature matches `(event: MouseEvent) => void`.
-```
-
-## Output File Location
-
-Save generated documentation to: `docs/components/[ComponentName].mdx`
-
-## Quality Checks
+### Phase 4: Quality Check
 
 Before saving, verify:
-
 - [ ] All code examples are syntactically correct
-- [ ] All internal links work
-- [ ] Props table is complete and accurate
-- [ ] At least 5 practical examples included
-- [ ] Accessibility section is comprehensive
-- [ ] TypeScript types are accurate
-- [ ] No broken markdown syntax
-- [ ] Frontmatter metadata is correct
+- [ ] Props table matches actual component
+- [ ] At least 5 practical examples
+- [ ] Accessibility section complete
+- [ ] TypeScript types accurate
+- [ ] No markdown syntax errors
 
-## Supporting Files
+### Phase 5: Save and Index
 
-Reference these when needed:
+**Output location:** `doc/src/pages/components/[componentname].tsx` (lowercase)
 
-- `templates/component-doc.mdx` - Base template
-- `reference/doc-style-guide.md` - Writing standards
-- `reference/code-example-patterns.md` - Example formats
-- `examples/button-doc.mdx` - Reference documentation
+**Note:** The doc site uses file-based routing via `vite-plugin-pages`. The file name becomes the URL path.
 
-## Example Interaction
+**Update index:** Routes are auto-generated from the file structure.
 
-**User:** "Document the Button component"
+## Document Structure
 
-**Claude:** "I'll generate comprehensive documentation for the Button component. Let me analyze the source code first..."
+```markdown
+# ComponentName
 
-[Analyzes src/components/Button.tsx]
+[Overview - 1-2 paragraphs]
 
-**Claude:** "I've created complete documentation at `docs/components/Button.mdx` including:
+## Installation
+## Import
+## Quick Start
+## Props
+## Examples
+  ### Basic Usage
+  ### Variants
+  ### Sizes
+  ### States
+  ### Event Handling
+  ### Controlled
+  ### Composed
+## Accessibility
+  ### Keyboard Navigation
+  ### ARIA Attributes
+  ### Screen Reader Support
+## Best Practices
+  ### Do
+  ### Don't
+## TypeScript
+  ### Props Interface
+  ### Usage
+## Styling
+## Related Components
+## Troubleshooting
+```
 
-- Full props API reference (8 props)
-- 7 practical examples
-- Keyboard navigation guide
-- Accessibility documentation
-- TypeScript definitions
-- Styling customization guide
+## Example Output
 
-The documentation is ready for review. Would you like me to:
-a) Show you the generated file
-b) Document another component
-c) Create the documentation index page"
+See: `skills/solidjs-doc-generator/examples/Button.mdx`
+
+This example shows a complete documentation file for the Button component with all required sections.
+
+## Files in This Skill
+
+```
+skills/solidjs-doc-generator/
+├── SKILL.md                        # This file
+├── templates/
+│   └── component-doc.mdx           # MDX template
+├── reference/
+│   └── doc-style-guide.md          # Writing style guide
+└── examples/
+    └── Button.mdx                  # Complete example
+```
 
 ## Configuration
 
-Customize in `.claude/config.json`:
+In `.claude/config.json`:
 
 ```json
 {
   "skills": {
     "solidjs-doc-generator": {
-      "outputDir": "docs/components",
-      "template": "templates/component-doc.mdx",
-      "includeExamples": 7,
+      "outputDir": "doc/src/pages/components",
+      "format": "tsx",
+      "docPageComponent": "doc/src/components/DocPage.tsx",
+      "includeExamples": 5,
       "includeTypeScript": true,
-      "includeAccessibility": true,
-      "codeBlockTheme": "github-dark"
+      "includeAccessibility": true
     }
   }
 }
 ```
 
-## Notes
+## TSX Documentation Format
 
-- Always use **effort=high** for documentation generation
-- Verify all code examples actually compile
-- Check component source for JSDoc comments to include
-- Look at existing docs for consistency
-- Update component index after adding new docs
-`````
+The doc site uses a `DocPage` component that renders structured documentation. Each doc page is a TSX file that imports the component and renders it with `DocPage`.
 
----
-
-### **`skills/solidjs-doc-generator/templates/component-doc.mdx`**
-
-`````mdx
----
-title: { ComponentName }
-description: { One-line description of what this component does }
-category: { Forms | Layout | Data Display | Feedback | Navigation | Overlay }
-keywords: [{ keyword1 }, { keyword2 }, { keyword3 }]
----
-
-import { {ComponentName} } from '@your-library/{ComponentName}'
-
-# {ComponentName}
-
-{One to two paragraph overview explaining what the component does, when to use it, and its primary purpose. Be specific and practical.}
-
-## Installation
-
-```bash
-npm install your-library
-# or
-yarn add your-library
-# or
-pnpm add your-library
-```
-
-## Import
-
-```tsx
-import { {ComponentName} } from 'your-library'
-```
-
-## Quick Start
-
-```tsx
-<{ComponentName}>
-  {Simplest possible example}
-</{ComponentName}>
-```
-
-## Props
-
-| Prop       | Type   | Default   | Required | Description   |
-| ---------- | ------ | --------- | -------- | ------------- |
-| {propName} | {type} | {default} | {Yes/No} | {description} |
-
-## Examples
-
-### Basic Usage
-
-{Description of this example}
-
-```tsx
-{Code example}
-```
-
-### {Example Name}
-
-{Description}
-
-```tsx
-{Code example}
-```
-
-{... more examples ...}
-
-## Accessibility
-
-### Keyboard Navigation
-
-| Key   | Action   |
-| ----- | -------- |
-| {key} | {action} |
-
-### ARIA Attributes
-
-- `{aria-attribute}`: {description}
-
-### Screen Reader Support
-
-{How screen readers announce this component}
-
-### Focus Management
-
-{How focus works with this component}
-
-## Best Practices
-
-### ✅ Do
-
-- {Recommendation}
-- {Recommendation}
-- {Recommendation}
-
-### ❌ Don't
-
-- {Anti-pattern}
-- {Anti-pattern}
-- {Anti-pattern}
-
-## TypeScript
-
-### Props Interface
+### DocPage Props Structure
 
 ```typescript
-interface {ComponentName}Props {
-  {Full type definition}
+interface DocPageProps {
+  title: string;
+  description: string;
+  props: {
+    name: string;
+    type: string;
+    default: string;
+    description: string;
+  }[];
+  examples: {
+    title: string;
+    description?: string;
+    code: string;           // Code string for display
+    component: () => JSX.Element;  // Live component render
+  }[];
+  usage: string;  // Import and usage code block
 }
 ```
 
-### Usage Examples
-
-```typescript
-{TypeScript usage examples}
-```
-
-## Styling
-
-### CSS Classes
-
-{How to apply custom classes}
-
-### CSS Variables
-
-{Available CSS variables for customization}
-
-### Theming
-
-{How to theme this component}
-
-## Related Components
-
-- [{RelatedComponent}](./{RelatedComponent}) - {When to use it instead}
-
-## Troubleshooting
-
-### {Common Problem}
-
-**Problem:** {Description of problem}
-
-**Solution:** {How to solve it}
-
-## API Reference
-
-{Detailed API documentation if needed}
-`````
-
----
-
-### **`skills/solidjs-doc-generator/reference/doc-style-guide.md`**
-
-`````markdown
-# Documentation Style Guide
-
-## Writing Style
-
-### Voice and Tone
-
-- **Active voice**: "The button triggers..." not "The action is triggered by..."
-- **Present tense**: "The component renders..." not "The component will render..."
-- **Direct**: "Use this component for..." not "This component can be used for..."
-- **Helpful**: Explain WHY, not just WHAT
-
-### Sentence Structure
-
-- Keep sentences short and clear
-- One idea per sentence
-- Use bullet points for lists of 3+ items
-- Break long paragraphs into shorter ones
-
-### Technical Terms
-
-- Define technical terms on first use
-- Use consistent terminology throughout
-- Spell out acronyms: "ARIA (Accessible Rich Internet Applications)"
-
-## Code Examples
-
-### Example Quality
-
-- Must be syntactically correct and runnable
-- Use realistic variable names (`userData`, not `foo`)
-- Include necessary imports
-- Show actual use cases, not toy examples
-- Add comments for complex logic
-
-### Example Format
+### Example Doc Page
 
 ```tsx
-// ✅ Good example
-import { Button } from 'your-library';
+import { createSignal } from 'solid-js';
+import Button from '@lib/components/Button';
+import DocPage from '../../components/DocPage';
 
-function SubmitForm() {
-  const [isLoading, setIsLoading] = createSignal(false);
-
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    await submitData();
-    setIsLoading(false);
-  };
-
+export default function ButtonPage() {
   return (
-    <Button onClick={handleSubmit} isLoading={isLoading()}>
-      Submit
-    </Button>
+    <DocPage
+      title="Button"
+      description="A versatile button component..."
+      props={[
+        { name: 'color', type: '"info" | "success"', default: '"info"', description: 'Sets color' },
+      ]}
+      examples={[
+        {
+          title: 'Color Variants',
+          code: `<Button color="info">Info</Button>`,
+          component: () => <Button color="info">Info</Button>,
+        },
+      ]}
+      usage={`import { Button } from '@exowpee/the_rock';`}
+    />
   );
 }
 ```
 
-### Example Progression
+### Key Points
 
-1. **Basic** - Simplest usage (2-3 lines)
-2. **Common** - Most typical use case
-3. **Advanced** - Complex scenarios
-4. **Edge cases** - Error states, loading, empty
+- Import component via `@lib/` alias (maps to `../src/`)
+- Import DocPage from `../../components/DocPage`
+- Examples have both `code` (string) and `component` (function)
+- File name is lowercase: `button.tsx` not `Button.tsx`
 
-## Props Documentation
+## Example Interaction
 
-### Prop Descriptions
+**User:** "Document the DatePicker component"
 
-- Start with verb: "Determines...", "Controls...", "Handles..."
-- Be specific: Not "Button style" but "Visual variant affecting colors and borders"
-- Mention side effects: "Disables button and prevents onClick from firing"
+**Claude:** "I'll generate comprehensive documentation for DatePicker. Let me analyze the component..."
 
-### Type Notation
+[Reads `src/components/DatePicker.tsx`]
 
-- Use TypeScript syntax: `string | number`, not "string or number"
-- Show union types: `'sm' | 'md' | 'lg'`
-- Indicate optional: `prop?:` or mark as "No" in Required column
+**Claude:** "I've analyzed the DatePicker component. It has:
+- 15 props including value, onChange, type, locale
+- Supports single, multiple, and range selection
+- Uses Portal for calendar positioning
 
-## Accessibility Documentation
+Generating documentation..."
 
-### Required Sections
+[Creates documentation]
 
-1. **Keyboard Navigation** - Table of keys and actions
-2. **ARIA Attributes** - What's applied and why
-3. **Screen Reader** - How it's announced
-4. **Focus Management** - Where focus goes
+**Claude:** "Documentation created at `docs/components/DatePicker.mdx`:
 
-### Accessibility Writing
+- Full props API (15 props documented)
+- 7 examples including date range selection
+- Keyboard navigation guide
+- TypeScript definitions
+- Accessibility documentation
 
-- Use proper key names: `Enter`, not "enter" or "ENTER"
-- Explain why, not just what: "Tab moves focus to the next interactive element, allowing keyboard-only users to navigate"
-- Include testing tips: "Test with VoiceOver/NVDA/JAWS"
+Would you like me to:
+a) Show the generated file
+b) Document another component
+c) Update the docs index"
 
-## Common Mistakes to Avoid
+## Batch Documentation
 
-### ❌ Vague Descriptions
+For documenting multiple components:
 
-Bad: "A button component"
-Good: "An interactive button that triggers actions when clicked, with support for different visual styles, sizes, and states"
+```
+User: "Document all Form components"
 
-### ❌ Missing Context
+Claude:
+1. Finds all components in Forms category
+2. Documents each one
+3. Creates index page
+4. Reports summary
+```
 
-Bad: "Set to true to disable"
-Good: "When set to true, disables the button, prevents click events, and shows a dimmed visual state"
+## Integration with Auditor
 
-### ❌ Assuming Knowledge
+Documentation coverage is part of the audit score. After documenting:
 
-Bad: "Uses ARIA"
-Good: "Uses ARIA attributes like aria-disabled to communicate state to assistive technologies like screen readers"
+```
+User: "Audit Button again"
+```
 
-### ❌ Inconsistent Examples
+The Testing/Docs score should improve.
 
-Bad: Mixing different coding styles across examples
-Good: Use the same style, naming conventions, and patterns throughout
+## Notes
 
-## Formatting
-
-### Headers
-
-- Use ATX style: `# Header`, not underlines
-- One H1 per document (the component name)
-- H2 for major sections
-- H3 for subsections
-- Don't skip levels
-
-### Code Blocks
-
-- Always specify language: `tsx, not `
-- Use tsx for component examples
-- Use bash for terminal commands
-- Use css for styles
-
-### Links
-
-- Use relative links: `[Button](./Button)`, not full URLs
-- Link text should describe destination: "See the Button component" not "click here"
-- Check all links work
-
-### Lists
-
-- Use `-` for unordered lists
-- Use `1.` for ordered lists
-- Keep list items parallel in structure
-- Don't mix bullet styles
-
-## Length Guidelines
-
-- **Overview**: 1-2 paragraphs (100-200 words)
-- **Prop description**: 1-2 sentences
-- **Code example**: 5-30 lines
-- **Best practice item**: 1 sentence
-- **Troubleshooting solution**: 2-5 sentences
-
-## Quality Checklist
-
-Before marking documentation as complete:
-
-- [ ] All code examples run without errors
-- [ ] Props table is complete and accurate
-- [ ] At least 5 practical examples included
-- [ ] Accessibility fully documented
-- [ ] TypeScript types shown
-- [ ] Best practices included
-- [ ] Related components linked
-- [ ] No spelling/grammar errors
-- [ ] Consistent formatting
-- [ ] All links work
-`````
+- Always read component source first
+- Extract JSDoc comments for prop descriptions
+- Verify examples compile
+- Follow style guide strictly
+- Update component index after adding docs

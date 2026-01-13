@@ -1,0 +1,277 @@
+---
+title: {ComponentName}
+description: {Brief description of the component}
+category: {Forms | Layout | Data Display | Feedback | Navigation | Overlay}
+---
+
+import { {ComponentName} } from '@exowpee/the_rock'
+
+# {ComponentName}
+
+{One to two paragraph overview explaining what the component does, when to use it, and its primary purpose.}
+
+## Installation
+
+```bash
+npm install @exowpee/the_rock
+```
+
+## Import
+
+```tsx
+import { {ComponentName} } from '@exowpee/the_rock'
+```
+
+## Quick Start
+
+```tsx
+<{ComponentName}>
+  Basic usage example
+</{ComponentName}>
+```
+
+## Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `variant` | `'default' \| 'primary'` | `'default'` | No | Visual style variant |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | No | Component size |
+| `isDisabled` | `boolean` | `false` | No | Disables the component |
+| `isLoading` | `boolean` | `false` | No | Shows loading state |
+| `class` | `string` | - | No | Additional CSS classes |
+| `children` | `JSX.Element` | - | Yes | Component content |
+
+## Examples
+
+### Basic Usage
+
+The simplest way to use the component.
+
+```tsx
+<{ComponentName}>Content</{ComponentName}>
+```
+
+### Variants
+
+Different visual styles available.
+
+```tsx
+<{ComponentName} variant="default">Default</{ComponentName}>
+<{ComponentName} variant="primary">Primary</{ComponentName}>
+```
+
+### Sizes
+
+Available size options.
+
+```tsx
+<{ComponentName} size="sm">Small</{ComponentName}>
+<{ComponentName} size="md">Medium</{ComponentName}>
+<{ComponentName} size="lg">Large</{ComponentName}>
+```
+
+### States
+
+Different component states.
+
+```tsx
+{/* Disabled state */}
+<{ComponentName} isDisabled>Disabled</{ComponentName}>
+
+{/* Loading state */}
+<{ComponentName} isLoading>Loading...</{ComponentName}>
+```
+
+### With Event Handlers
+
+Handle user interactions.
+
+```tsx
+function Example() {
+  const handleClick = () => {
+    console.log('Clicked!')
+  }
+
+  return (
+    <{ComponentName} onClick={handleClick}>
+      Click me
+    </{ComponentName}>
+  )
+}
+```
+
+### Controlled Component
+
+For controlled usage with state.
+
+```tsx
+function ControlledExample() {
+  const [value, setValue] = createSignal('')
+
+  return (
+    <{ComponentName}
+      value={value()}
+      onChange={setValue}
+    />
+  )
+}
+```
+
+### Composed with Other Components
+
+Using with other library components.
+
+```tsx
+<Card>
+  <{ComponentName} variant="primary">
+    Action
+  </{ComponentName}>
+</Card>
+```
+
+## Accessibility
+
+### Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Move focus to/from component |
+| `Enter` | Activate the component |
+| `Space` | Activate the component |
+| `Escape` | Close/cancel (if applicable) |
+
+### ARIA Attributes
+
+The component automatically applies:
+
+- `role` - Semantic role when needed
+- `aria-disabled` - When `isDisabled` is true
+- `aria-busy` - When `isLoading` is true
+
+### Screen Reader Support
+
+The component is announced as "{component type}" by screen readers. State changes are announced automatically.
+
+## Best Practices
+
+### Do
+
+- Use semantic props like `isDisabled` instead of custom styling
+- Provide clear, descriptive content
+- Use appropriate variants for visual hierarchy
+- Handle loading states for async operations
+
+### Don't
+
+- Don't use for purposes other than intended
+- Don't rely on color alone for meaning
+- Don't disable without providing explanation
+- Don't forget to handle error states
+
+## TypeScript
+
+### Props Interface
+
+```typescript
+interface {ComponentName}Props {
+  /**
+   * Visual variant of the component
+   * @default 'default'
+   */
+  variant?: 'default' | 'primary'
+
+  /**
+   * Size of the component
+   * @default 'md'
+   */
+  size?: 'sm' | 'md' | 'lg'
+
+  /**
+   * Whether component is disabled
+   * @default false
+   */
+  isDisabled?: boolean
+
+  /**
+   * Whether component is in loading state
+   * @default false
+   */
+  isLoading?: boolean
+
+  /**
+   * Additional CSS classes
+   */
+  class?: string
+
+  /**
+   * Component content
+   */
+  children: JSX.Element
+}
+```
+
+### Usage with TypeScript
+
+```typescript
+import { {ComponentName}, type {ComponentName}Props } from '@exowpee/the_rock'
+
+// Type-safe usage
+const props: {ComponentName}Props = {
+  variant: 'primary',
+  size: 'lg',
+}
+
+<{ComponentName} {...props}>Content</{ComponentName}>
+```
+
+## Styling
+
+### Custom Classes
+
+Apply custom Tailwind classes:
+
+```tsx
+<{ComponentName} class="bg-purple-500 hover:bg-purple-600">
+  Custom styled
+</{ComponentName}>
+```
+
+### CSS Variables
+
+Customize via CSS variables (if supported):
+
+```css
+.custom-theme {
+  --component-bg: #purple;
+  --component-text: white;
+}
+```
+
+## Related Components
+
+- [{RelatedComponent1}](./{RelatedComponent1}) - {Brief description}
+- [{RelatedComponent2}](./{RelatedComponent2}) - {Brief description}
+
+## Troubleshooting
+
+### Component not responding to clicks
+
+**Problem:** Component appears but doesn't respond to interactions.
+
+**Solution:** Check if `isDisabled` is true or if there's CSS blocking pointer events.
+
+### Styles not applying
+
+**Problem:** Custom classes don't seem to work.
+
+**Solution:** The component uses `twMerge` for class composition. Make sure your classes have higher specificity if needed.
+
+### TypeScript errors
+
+**Problem:** Type errors when using the component.
+
+**Solution:** Import the props type and ensure your props match the interface:
+
+```typescript
+import type { {ComponentName}Props } from '@exowpee/the_rock'
+```

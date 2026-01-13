@@ -1,4 +1,4 @@
-import { JSX, Show, createSignal, splitProps } from 'solid-js';
+import { JSX, Show, createMemo, createSignal, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -15,21 +15,44 @@ interface Option {
 }
 
 export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
+  /** Array of options to display in the dropdown */
   options: Option[];
+
+  /** Callback fired when selection changes */
   onMultiSelect: (options?: Option[]) => void;
+
+  /** When true, clears all selected values */
   clearValues?: boolean;
-  values: string[];
+
+  /** Array of currently selected option values */
+  values?: string[];
+
+  /** Height in pixels for each option row (enables virtualization for large lists) */
   optionRowHeight?: number;
+
+  /** Enable search/filter functionality in dropdown */
   withSearch?: boolean;
+
+  /** Custom display value to show in the input (overrides computed value) */
   displayValue?: string;
+
+  /** Message shown when search yields no results */
   noSearchResultPlaceholder?: string;
+
+  /** Placeholder text for the search input */
   searchPlaceholder?: string;
+
+  /** Custom element to render at the bottom of the dropdown */
   cta?: JSX.Element;
+
+  /** Whether lazy loading is currently in progress */
   isLazyLoading?: boolean;
+
+  /** Callback fired when user scrolls near the bottom of the list */
   onLazyLoad?: (scrollProgress: number) => void;
 }
 
-export default function MultiSelect(props: MultiSelectProps) {
+export default function MultiSelect(props: MultiSelectProps): JSX.Element {
   const [local, otherProps] = splitProps(props, [
     'options',
     'onMultiSelect',
@@ -65,15 +88,19 @@ export default function MultiSelect(props: MultiSelectProps) {
     setSelectedOptions,
     setSearchKey,
     setSearchRef,
+    isOpen,
+    listboxId,
+    searchInputId,
   } = useSelect(local, 'multiSelect');
 
-  const getDisplayValue = () => {
-    if (selectedOptions().length === 0) return '';
-    return selectedOptions()
+  const displayValue = createMemo(() => {
+    const selected = selectedOptions();
+    if (selected.length === 0) return '';
+    return selected
       .map((o) => o.label)
       .reverse()
       .join(' • ');
-  };
+  });
 
   return (
     <Layout
@@ -81,13 +108,17 @@ export default function MultiSelect(props: MultiSelectProps) {
         <>
           <TextInput
             ref={setInputRef}
-            title={getDisplayValue()}
+            title={displayValue()}
             disabled={props.disabled}
-            value={local.displayValue ?? getDisplayValue()}
+            value={local.displayValue ?? displayValue()}
             placeholder={props.placeholder}
             class="w-full"
             required={local.required}
             onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded={isOpen()}
+            aria-controls={listboxId}
             style={{
               'caret-color': 'transparent',
               'padding-right': '36px',
@@ -101,7 +132,7 @@ export default function MultiSelect(props: MultiSelectProps) {
           <Show
             when={
               !local.displayValue &&
-              getDisplayValue() &&
+              displayValue() &&
               !props.disabled &&
               !props.isLoading
             }
@@ -129,15 +160,21 @@ export default function MultiSelect(props: MultiSelectProps) {
       preOptionsComponent={
         <Show when={local.withSearch === true}>
           <div class="relative flex items-center border-b border-gray-200 px-3 dark:border-gray-600">
-            <SearchRefractionIcon class="size-4 text-gray-400" />
+            <SearchRefractionIcon class="size-4 text-gray-400" aria-hidden="true" />
+            <label for={searchInputId} class="sr-only">
+              Search options
+            </label>
             <input
+              id={searchInputId}
               ref={setSearchRef}
               value={searchKey()}
               onInput={handleSearchChange}
               placeholder={local.searchPlaceholder}
               onFocus={(e) => e.target.select()}
-              class="w-full max-w-xs py-3 pl-2 text-sm outline-none"
+              class="w-full max-w-xs bg-transparent py-3 pl-2 text-sm outline-none dark:text-white"
               onKeyDown={(e) => handleKeyDown(e, true)}
+              aria-label="Search options"
+              aria-controls={listboxId}
             />
             <Show when={searchKey() && !props.disabled && !props.isLoading}>
               <ClearContentButton
@@ -155,9 +192,13 @@ export default function MultiSelect(props: MultiSelectProps) {
       }
       optionsComponent={(option) => (
         <div
+          role="option"
+          aria-selected={selectedOptions().some((o) => o.value === option.value)}
           class={twMerge(
             'flex cursor-pointer items-center text-sm whitespace-nowrap',
-            highlightedOption()?.value == option.value ? 'rounded bg-blue-50' : '',
+            highlightedOption()?.value == option.value
+              ? 'rounded bg-blue-50 dark:bg-gray-600'
+              : '',
           )}
           onMouseEnter={() => setHighlightedOption(option)}
         >

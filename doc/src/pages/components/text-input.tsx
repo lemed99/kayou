@@ -1,0 +1,221 @@
+import { createSignal } from 'solid-js';
+
+import TextInput from '@lib/components/TextInput';
+import DocPage from '../../components/DocPage';
+
+export default function TextInputPage() {
+  return (
+    <DocPage
+      title="TextInput"
+      description="A flexible text input component with support for labels, helper text, icons, addons, and validation states. Built with accessibility in mind, including proper ARIA attributes and keyboard support."
+      props={[
+        {
+          name: 'sizing',
+          type: '"xs" | "sm" | "md"',
+          default: '"md"',
+          description: 'Input size variant',
+        },
+        {
+          name: 'color',
+          type: '"gray" | "info" | "failure" | "warning" | "success"',
+          default: '"gray"',
+          description: 'Color variant for styling and validation states',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          default: '-',
+          description: 'Label text displayed above the input',
+        },
+        {
+          name: 'helperText',
+          type: 'string',
+          default: '-',
+          description: 'Helper text displayed below the input',
+        },
+        {
+          name: 'icon',
+          type: '(props: { class: string }) => JSX.Element',
+          default: '-',
+          description: 'Icon component rendered inside the input',
+        },
+        {
+          name: 'addon',
+          type: 'JSX.Element',
+          default: '-',
+          description: 'Addon element displayed before the input',
+        },
+        {
+          name: 'isLoading',
+          type: 'boolean',
+          default: 'false',
+          description: 'Shows loading spinner and disables input',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disables the input',
+        },
+        {
+          name: 'required',
+          type: 'boolean',
+          default: 'false',
+          description: 'Marks the input as required with visual indicator',
+        },
+        {
+          name: 'showArrows',
+          type: 'boolean',
+          default: 'false',
+          description: 'Shows increment/decrement arrow buttons',
+        },
+        {
+          name: 'fitContent',
+          type: 'boolean',
+          default: 'false',
+          description: 'Adjusts input width to fit content',
+        },
+      ]}
+      examples={[
+        {
+          title: 'Basic Input',
+          description: 'Simple text input with placeholder.',
+          code: `<TextInput placeholder="Enter your name" />`,
+          component: () => <TextInput placeholder="Enter your name" />,
+        },
+        {
+          title: 'With Label and Helper Text',
+          description: 'Input with label above and helper text below.',
+          code: `<TextInput
+  label="Email Address"
+  placeholder="you@example.com"
+  helperText="We'll never share your email."
+/>`,
+          component: () => (
+            <TextInput
+              label="Email Address"
+              placeholder="you@example.com"
+              helperText="We'll never share your email."
+            />
+          ),
+        },
+        {
+          title: 'Size Variants',
+          description: 'Three size options for different contexts.',
+          code: `<TextInput sizing="xs" placeholder="Extra Small" />
+<TextInput sizing="sm" placeholder="Small" />
+<TextInput sizing="md" placeholder="Medium" />`,
+          component: () => (
+            <>
+              <TextInput sizing="xs" placeholder="Extra Small" />
+              <TextInput sizing="sm" placeholder="Small" />
+              <TextInput sizing="md" placeholder="Medium" />
+            </>
+          ),
+        },
+        {
+          title: 'Validation States',
+          description: 'Color variants to indicate validation status.',
+          code: `<TextInput color="success" label="Success" value="Valid input" />
+<TextInput color="failure" label="Error" value="Invalid input" helperText="Please check this field" />
+<TextInput color="warning" label="Warning" value="Needs attention" />`,
+          component: () => (
+            <>
+              <TextInput color="success" label="Success" value="Valid input" />
+              <TextInput
+                color="failure"
+                label="Error"
+                value="Invalid input"
+                helperText="Please check this field"
+              />
+              <TextInput color="warning" label="Warning" value="Needs attention" />
+            </>
+          ),
+        },
+        {
+          title: 'With Addon',
+          description: 'Input with a prefix addon for context.',
+          code: `<TextInput addon="https://" placeholder="example.com" />
+<TextInput addon="$" placeholder="0.00" />`,
+          component: () => (
+            <>
+              <TextInput addon="https://" placeholder="example.com" />
+              <TextInput addon="$" placeholder="0.00" />
+            </>
+          ),
+        },
+        {
+          title: 'Loading State',
+          description: 'Shows a spinner while loading.',
+          code: `<TextInput isLoading placeholder="Loading..." />`,
+          component: () => <TextInput isLoading placeholder="Loading..." />,
+        },
+        {
+          title: 'Disabled State',
+          description: 'Input that cannot be interacted with.',
+          code: `<TextInput disabled value="Disabled input" />`,
+          component: () => <TextInput disabled value="Disabled input" />,
+        },
+        {
+          title: 'Required Field',
+          description: 'Input marked as required with visual indicator.',
+          code: `<TextInput label="Username" required placeholder="Required field" />`,
+          component: () => (
+            <TextInput label="Username" required placeholder="Required field" />
+          ),
+        },
+        {
+          title: 'Controlled Input',
+          description: 'Interactive example with controlled state.',
+          code: `const [value, setValue] = createSignal('');
+
+<TextInput
+  label="Controlled Input"
+  value={value()}
+  onInput={(e) => setValue(e.currentTarget.value)}
+  helperText={\`You typed: \${value()}\`}
+/>`,
+          component: () => {
+            const [value, setValue] = createSignal('');
+            return (
+              <TextInput
+                label="Controlled Input"
+                value={value()}
+                onInput={(e) => setValue(e.currentTarget.value)}
+                helperText={`You typed: ${value()}`}
+              />
+            );
+          },
+        },
+      ]}
+      usage={`import { TextInput } from '@exowpee/the_rock';
+
+// Basic usage
+<TextInput placeholder="Enter text" />
+
+// With label and helper text
+<TextInput
+  label="Email"
+  placeholder="you@example.com"
+  helperText="We'll never share your email."
+/>
+
+// Validation state
+<TextInput
+  color="failure"
+  label="Password"
+  helperText="Password must be at least 8 characters"
+/>
+
+// With addon
+<TextInput addon="https://" placeholder="example.com" />
+
+// Controlled input
+const [value, setValue] = createSignal('');
+<TextInput
+  value={value()}
+  onInput={(e) => setValue(e.currentTarget.value)}
+/>`}
+    />
+  );
+}

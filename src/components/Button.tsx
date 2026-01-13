@@ -4,6 +4,9 @@ import { twMerge } from 'tailwind-merge';
 
 import Spinner from './Spinner';
 
+/**
+ * Color variants for the Button component.
+ */
 export type ButtonColor =
   | 'gray'
   | 'dark'
@@ -13,11 +16,27 @@ export type ButtonColor =
   | 'success'
   | 'warning'
   | 'blue';
-type ButtonSize = 'xs' | 'sm' | 'md';
+
+/**
+ * Size variants for the Button component.
+ */
+export type ButtonSize = 'xs' | 'sm' | 'md';
 
 export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * The color variant of the button.
+   * @default 'info'
+   */
   color?: ButtonColor;
+  /**
+   * The size of the button.
+   * @default 'md'
+   */
   size?: ButtonSize;
+  /**
+   * Shows a loading spinner and disables interactions.
+   * @default false
+   */
   isLoading?: boolean;
 }
 
@@ -45,7 +64,7 @@ const theme = {
   },
 };
 
-const Button = (props: ButtonProps) => {
+const Button = (props: ButtonProps): JSX.Element => {
   const [local, buttonProps] = splitProps(props, [
     'children',
     'type',
@@ -71,6 +90,7 @@ const Button = (props: ButtonProps) => {
         local.disabled ? 'opacity-50' : '',
       )}
       disabled={disabled()}
+      aria-busy={local.isLoading}
       {...buttonProps}
     >
       <div class={twMerge('relative', theme.size[size()])}>

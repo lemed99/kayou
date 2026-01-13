@@ -1,4 +1,12 @@
-import { For, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  JSX,
+  onCleanup,
+  Show,
+} from 'solid-js';
 import { createStore } from 'solid-js/store';
 
 import { createPresence } from '@solid-primitives/presence';
@@ -6,70 +14,116 @@ import { twMerge } from 'tailwind-merge';
 
 import { ChevronRightIcon } from '../icons';
 
+/**
+ * Data structure for each accordion panel.
+ */
 export interface PanelData {
+  /** Unique identifier for the panel */
   itemKey: string;
+  /** Content displayed in the panel header */
   title: JSX.Element;
+  /** Content displayed when the panel is expanded */
   content: JSX.Element;
+  /** Additional CSS classes for the panel container */
   class?: string;
+  /** Additional CSS classes for the panel header */
   titleClass?: string;
+  /** Additional CSS classes for the panel content */
   contentClass?: string;
 }
 
 export interface AccordionProps {
-  children?: JSX.Element;
+  /**
+   * Array of panel data to render.
+   */
   panels?: PanelData[];
-  searched?: string;
-  searchedClass?: string;
-  simple?: boolean;
-  itemDetails?: Record<string, boolean>;
-  setItemDetails?: (state: Record<string, boolean>) => void;
+  /**
+   * Key of the panel to highlight/scroll to.
+   */
+  highlightedKey?: string;
+  /**
+   * CSS class applied to highlighted panel header.
+   * @default 'bg-teal-200 dark:bg-teal-800'
+   */
+  highlightedClass?: string;
+  /**
+   * When true, renders a simpler style without borders and backgrounds.
+   * @default true
+   */
+  isSimple?: boolean;
+  /**
+   * Controlled state: map of panel keys to open state.
+   */
+  openPanels?: Record<string, boolean>;
+  /**
+   * Callback when panel open state changes (controlled mode).
+   */
+  onOpenChange?: (state: Record<string, boolean>) => void;
+  /**
+   * Additional CSS classes for the accordion container.
+   */
   class?: string;
+
+  // Legacy prop names (deprecated, use new names above)
+  /** @deprecated Use `highlightedKey` instead */
+  searched?: string;
+  /** @deprecated Use `highlightedClass` instead */
+  searchedClass?: string;
+  /** @deprecated Use `isSimple` instead */
+  simple?: boolean;
+  /** @deprecated Use `openPanels` instead */
+  itemDetails?: Record<string, boolean>;
+  /** @deprecated Use `onOpenChange` instead */
+  setItemDetails?: (state: Record<string, boolean>) => void;
 }
 
-const Accordion = (props: AccordionProps) => {
-  const [internalItemDetails, setInternalItemDetails] = createStore<
+const Accordion = (props: AccordionProps): JSX.Element => {
+  const [internalOpenPanels, setInternalOpenPanels] = createStore<
     Record<string, boolean>
   >({});
 
-  const isControlled = () =>
-    props.itemDetails !== undefined && props.setItemDetails !== undefined;
+  // Support both new and legacy prop names
+  const getOpenPanelsState = () => props.openPanels ?? props.itemDetails;
+  const getOnOpenChange = () => props.onOpenChange ?? props.setItemDetails;
+  const getHighlightedKey = () => props.highlightedKey ?? props.searched;
+  const getHighlightedClass = () => props.highlightedClass ?? props.searchedClass;
+  const getIsSimple = () => props.isSimple ?? props.simple ?? true;
 
-  const getOpenState = (itemKey: string) => {
+  const isControlled = createMemo(
+    () => getOpenPanelsState() !== undefined && getOnOpenChange() !== undefined,
+  );
+
+  const panels = createMemo(() => props.panels ?? []);
+
+  const getOpenState = (itemKey: string): boolean => {
     if (isControlled()) {
-      return props.itemDetails?.[itemKey] || false;
+      return getOpenPanelsState()?.[itemKey] ?? false;
     }
-    return internalItemDetails[itemKey] || false;
+    return internalOpenPanels[itemKey] ?? false;
   };
 
-  const togglePanel = (itemKey: string) => {
-    if (isControlled() && props.setItemDetails) {
-      const newState = { ...props.itemDetails };
+  const togglePanel = (itemKey: string): void => {
+    const onOpenChange = getOnOpenChange();
+    if (isControlled() && onOpenChange) {
+      const newState = { ...getOpenPanelsState() };
       newState[itemKey] = !getOpenState(itemKey);
-      props.setItemDetails(newState);
+      onOpenChange(newState);
     } else {
-      setInternalItemDetails(itemKey, (prev) => !prev);
+      setInternalOpenPanels(itemKey, (prev) => !prev);
     }
-  };
-
-  const getPanels = () => {
-    if (props.panels && props.panels.length > 0) {
-      return props.panels;
-    }
-
-    return [];
   };
 
   return (
     <div class={twMerge('w-full', props.class)}>
-      <For each={getPanels()}>
+      <For each={panels()}>
         {(panel) => (
           <Panel
             panel={panel}
             isOpen={getOpenState(panel.itemKey)}
             toggle={() => togglePanel(panel.itemKey)}
-            simple={props.simple ?? true}
-            searched={props.searched}
-            searchedClass={props.searchedClass}
+            isSimple={getIsSimple()}
+            highlightedKey={getHighlightedKey()}
+            highlightedClass={getHighlightedClass()}
           />
         )}
       </For>
@@ -81,20 +135,24 @@ interface PanelProps {
   panel: PanelData;
   isOpen: boolean;
   toggle: () => void;
-  simple: boolean;
-  searched?: string;
-  searchedClass?: string;
+  isSimple: boolean;
+  highlightedKey?: string;
+  highlightedClass?: string;
 }
 
-const Panel = (props: PanelProps) => {
-  const isSearched = () => props.searched === props.panel.itemKey;
+const Panel = (props: PanelProps): JSX.Element => {
+  const isHighlighted = createMemo(() => props.highlightedKey === props.panel.itemKey);
   const [panelContentElement, setPanelContentElement] = createSignal<HTMLDivElement>();
   const [panelElementHeight, setPanelElementHeight] = createSignal(0);
 
+  // IDs for ARIA relationships (derived signals to maintain reactivity)
+  const triggerId = () => `accordion-trigger-${props.panel.itemKey}`;
+  const panelId = () => `accordion-panel-${props.panel.itemKey}`;
+  const itemId = () => `accordion-item-${props.panel.itemKey}`;
+
   createEffect(() => {
-    if (isSearched()) {
-      const elementId = `item_title${props.panel.itemKey}`;
-      const element = document.getElementById(elementId);
+    if (isHighlighted()) {
+      const element = document.getElementById(triggerId());
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
         setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
@@ -112,12 +170,12 @@ const Panel = (props: PanelProps) => {
   createEffect(() => {
     if (panelContentElement()) {
       requestAnimationFrame(() => {
-        setPanelElementHeight(panelContentElement()?.offsetHeight || 0);
+        setPanelElementHeight(panelContentElement()?.offsetHeight ?? 0);
       });
 
       const resizeObserver = new ResizeObserver(() => {
         requestAnimationFrame(() =>
-          setPanelElementHeight(panelContentElement()?.offsetHeight || 0),
+          setPanelElementHeight(panelContentElement()?.offsetHeight ?? 0),
         );
       });
       resizeObserver.observe(panelContentElement()!);
@@ -126,33 +184,36 @@ const Panel = (props: PanelProps) => {
     }
   });
 
+  const handleKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      props.toggle();
+    }
+  };
+
   return (
     <div
       class={twMerge(
         'border-b border-gray-200 dark:border-gray-700',
-        !props.simple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
+        !props.isSimple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
         props.panel.class,
       )}
-      id={`item${props.panel.itemKey}`}
+      id={itemId()}
     >
-      {!props.simple && (
+      {!props.isSimple && (
         <style>
           {`
-            #item${props.panel.itemKey}:first-child > div#item_title${
-              props.panel.itemKey
-            } {
+            #${itemId()}:first-child > button#${triggerId()} {
               border-top-right-radius: 7px;
               border-top-left-radius: 7px;
             }
-            #item${props.panel.itemKey}:last-child > div#item_content${
-              props.panel.itemKey
-            } {
+            #${itemId()}:last-child > div#${panelId()} {
               border-bottom-right-radius: 7px;
               border-bottom-left-radius: 7px;
             }
             ${
               !props.isOpen
-                ? `#item${props.panel.itemKey}:last-child > div#item_title${props.panel.itemKey} {
+                ? `#${itemId()}:last-child > button#${triggerId()} {
               border-bottom-right-radius: 7px;
               border-bottom-left-radius: 7px;
             }`
@@ -162,40 +223,46 @@ const Panel = (props: PanelProps) => {
         </style>
       )}
 
-      <div
-        id={`item_title${props.panel.itemKey}`}
+      <button
+        type="button"
+        id={triggerId()}
         onClick={() => props.toggle()}
+        onKeyDown={handleKeyDown}
+        aria-expanded={props.isOpen}
+        aria-controls={panelId()}
         class={twMerge(
-          'flex w-full cursor-pointer items-center justify-between p-3 transition-all duration-200',
-          props.isOpen && !props.simple && 'bg-gray-100/60 dark:bg-gray-700',
-          isSearched() &&
-            (props.searchedClass ? props.searchedClass : 'bg-teal-200 dark:bg-teal-800'),
+          'flex w-full cursor-pointer items-center justify-between p-3 text-left transition-all duration-200',
+          props.isOpen && !props.isSimple && 'bg-gray-100/60 dark:bg-gray-700',
+          isHighlighted() &&
+            (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
           props.panel.titleClass,
         )}
       >
-        <div class="flex w-full items-center">{props.panel.title}</div>
+        <span class="flex w-full items-center">{props.panel.title}</span>
         <Show when={props.panel.content}>
-          <div>
+          <span aria-hidden="true">
             <ChevronRightIcon
               class={twMerge(
                 'size-3 transition-all duration-200',
                 props.isOpen ? 'rotate-90' : '',
               )}
             />
-          </div>
+          </span>
         </Show>
-      </div>
+      </button>
 
       <Show when={isMounted()}>
         <div
-          id={`item_content${props.panel.itemKey}`}
+          id={panelId()}
+          role="region"
+          aria-labelledby={triggerId()}
           class={twMerge(
             'overflow-hidden border-t border-gray-200 dark:border-gray-700',
-            !props.simple && 'dark:bg-gray-900/50',
+            !props.isSimple && 'dark:bg-gray-900/50',
             props.panel.contentClass,
           )}
           style={{
-            height: isVisible() ? `${panelElementHeight()}px` : 0,
+            height: isVisible() ? `${panelElementHeight()}px` : '0px',
             transition: 'height .242s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >

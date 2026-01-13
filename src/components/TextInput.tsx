@@ -1,4 +1,4 @@
-import { JSX, Show, createEffect, createMemo, splitProps } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createUniqueId, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -8,22 +8,42 @@ import Label from './Label';
 import Spinner from './Spinner';
 
 export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+  /** Input size variant. Defaults to 'md'. */
   sizing?: 'xs' | 'sm' | 'md';
+  /** Helper text displayed below the input. */
   helperText?: string;
+  /** Label text displayed above the input. */
   label?: string;
+  /** Addon element displayed before the input. */
   addon?: JSX.Element;
+  /** Icon component rendered inside the input. */
   icon?: (props: { class: string }) => JSX.Element;
+  /** Color variant for styling and validation states. Defaults to 'gray'. */
   color?: 'gray' | 'info' | 'failure' | 'warning' | 'success';
+  /** Show increment/decrement arrow buttons. Defaults to false. */
   showArrows?: boolean;
+  /** Adjust input width to fit content. Defaults to false. */
   fitContent?: boolean;
+  /** Callback when increment arrow is pressed. */
   onArrowUp?: (event: MouseEvent) => void;
+  /** Callback when decrement arrow is pressed. */
   onArrowDown?: (event: MouseEvent) => void;
+  /** Callback when increment arrow is released. */
   onArrowUpMouseUp?: (event: MouseEvent) => void;
+  /** Callback when decrement arrow is released. */
   onArrowDownMouseUp?: (event: MouseEvent) => void;
+  /** Ref callback for the increment button. */
   upBtnRef?: (el: HTMLButtonElement) => void;
+  /** Ref callback for the decrement button. */
   downBtnRef?: (el: HTMLButtonElement) => void;
+  /** Show loading spinner and disable input. Defaults to false. */
   isLoading?: boolean;
+  /** Additional CSS class for the input element. */
   inputClass?: string;
+  /** Accessible label for the increment arrow button. Defaults to 'Increase value'. */
+  arrowUpLabel?: string;
+  /** Accessible label for the decrement arrow button. Defaults to 'Decrease value'. */
+  arrowDownLabel?: string;
 }
 
 const theme = {
@@ -78,7 +98,7 @@ const theme = {
   },
 };
 
-const TextInput = (props: TextInputProps) => {
+const TextInput = (props: TextInputProps): JSX.Element => {
   const [local, inputProps] = splitProps(props, [
     'color',
     'class',
@@ -101,12 +121,24 @@ const TextInput = (props: TextInputProps) => {
     'value',
     'placeholder',
     'inputClass',
+    'arrowUpLabel',
+    'arrowDownLabel',
+    'id',
   ]);
+
+  // Generate unique IDs for accessibility associations
+  const uniqueId = createUniqueId();
+  const inputId = createMemo(() => local.id || `textinput-${uniqueId}`);
+  const helperId = createMemo(() => (local.helperText ? `${inputId()}-helper` : undefined));
 
   const color = createMemo(() => local.color || 'gray');
   const sizing = createMemo(() => local.sizing || 'md');
   const showArrows = createMemo(() => local.showArrows || false);
   const fitContent = createMemo(() => local.fitContent || false);
+
+  // Determine ARIA attributes based on state
+  const ariaInvalid = createMemo(() => (color() === 'failure' ? true : undefined));
+  const ariaBusy = createMemo(() => (local.isLoading ? true : undefined));
 
   let inputRef: HTMLInputElement | undefined;
 
@@ -122,20 +154,22 @@ const TextInput = (props: TextInputProps) => {
   createEffect(() => {
     if (!fitContent() || !inputRef) return;
     if ('fieldSizing' in inputRef.style) {
-      inputRef.style.fieldSizing = 'content';
+      (inputRef.style as Record<string, string>).fieldSizing = 'content';
       return;
     }
 
     const updateWidth = () => {
-      const value = (props.value || inputRef!.placeholder) as string;
+      if (!inputRef) return;
+      const value = String(local.value ?? inputRef.placeholder ?? '');
       const span = document.createElement('span');
+      const computedStyle = window.getComputedStyle(inputRef);
       span.style.cssText = `
         position: absolute;
         visibility: hidden;
         white-space: pre;
-        font-size: ${window.getComputedStyle(inputRef!).fontSize};
-        padding: ${window.getComputedStyle(inputRef!).padding};
-        border: ${window.getComputedStyle(inputRef!).border};
+        font-size: ${computedStyle.fontSize};
+        padding: ${computedStyle.padding};
+        border: ${computedStyle.border};
       `;
       span.textContent = value;
       document.body.appendChild(span);
@@ -143,7 +177,7 @@ const TextInput = (props: TextInputProps) => {
       const width = parseFloat(window.getComputedStyle(span).width);
       document.body.removeChild(span);
 
-      inputRef!.style.width = `${Math.max(width, 25)}px`;
+      inputRef.style.width = `${Math.max(width, 25)}px`;
     };
 
     updateWidth();
@@ -151,9 +185,9 @@ const TextInput = (props: TextInputProps) => {
 
   return (
     <div class="w-full">
-      <Show when={props.label}>
+      <Show when={local.label}>
         <div class="mb-1 block">
-          <Label value={props.label} color={color()} />
+          <Label for={inputId()} value={local.label} color={color()} />
           <Show when={props.required}>
             <span class="ml-0.5 font-medium text-red-500">*</span>
           </Show>
@@ -176,6 +210,7 @@ const TextInput = (props: TextInputProps) => {
           </Show>
 
           <input
+            id={inputId()}
             class={twMerge(
               theme.field.input.base,
               theme.field.input.colors[color()],
@@ -189,6 +224,9 @@ const TextInput = (props: TextInputProps) => {
             disabled={local.disabled || local.isLoading}
             placeholder={local.isLoading ? '' : local.placeholder}
             value={local.isLoading ? '' : local.value}
+            aria-invalid={ariaInvalid()}
+            aria-busy={ariaBusy()}
+            aria-describedby={helperId()}
             {...inputProps}
           />
 
@@ -203,8 +241,9 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
                 tabIndex={-1}
                 disabled={local.disabled || local.isLoading}
+                aria-label={local.arrowUpLabel || 'Increase value'}
               >
-                <ChevronUpIcon class="size-2.5" />
+                <ChevronUpIcon class="size-2.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -215,8 +254,9 @@ const TextInput = (props: TextInputProps) => {
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}
                 tabIndex={-1}
                 disabled={local.disabled || local.isLoading}
+                aria-label={local.arrowDownLabel || 'Decrease value'}
               >
-                <ChevronDownIcon class="size-2.5" />
+                <ChevronDownIcon class="size-2.5" aria-hidden="true" />
               </button>
             </div>
           </Show>
@@ -224,7 +264,7 @@ const TextInput = (props: TextInputProps) => {
       </div>
 
       <Show when={local.helperText}>
-        <HelperText content={local.helperText as string} color={color()} />
+        <HelperText id={helperId()} content={local.helperText!} color={color()} />
       </Show>
     </div>
   );
