@@ -11,54 +11,102 @@ import {
 
 import {
   CustomResourceContext,
-  PendingEntry,
+  CustomResourceContextValue,
   ResourceOptions,
 } from '../context/CustomResourceContext';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
 
+/** Maximum random jitter added to retry delays to prevent thundering herd (in ms) */
+const RETRY_JITTER_MAX = 500;
+
+/**
+ * Return type for the useCustomResource hook.
+ * Contains reactive accessors for data state and control methods.
+ * @template T - The type of data being fetched
+ */
 export interface CustomResource<T> {
+  /** Accessor for the fetched data, undefined until loaded */
   data: Accessor<T | undefined>;
-  error: Accessor<unknown>;
+  /** Accessor for any fetch error, null when no error */
+  error: Accessor<Error | null>;
+  /** True during initial load (false when using SWR with cached data) */
   loading: Accessor<boolean>;
+  /** True when revalidating in background (SWR pattern) */
   validating: Accessor<boolean>;
+  /** Current resource state: "unresolved" | "pending" | "ready" | "errored" | "refreshing" */
   state: Accessor<Resource<T>['state']>;
+  /** Latest successful data, persists through errors */
   latest: Accessor<T | undefined>;
+  /** Manually trigger a refetch, resets retry attempts */
   refetch: () => void;
+  /** True if current data came from cache */
   fromCache: Accessor<boolean>;
+  /** HTTP status code of the error response, if applicable */
   errorStatus: Accessor<number | undefined>;
+  /** Manually set error status (useful for custom error handling) */
   setErrorStatus: (status: number | undefined) => void;
+  /** Current retry attempt count (0-based) */
   attempts: Accessor<number>;
 }
 
-export interface CustomResourceContextProps<T> {
-  options: ResourceOptions<T>;
-  pendingRequests: Map<string, PendingEntry<T>>;
-  refreshData: Accessor<Record<string, boolean>> | null;
-  baseUrl: string;
-}
-
+/**
+ * Configuration props for the useCustomResource hook.
+ * @template T - The type of data being fetched
+ */
 export interface CustomResourceProps<T> {
+  /** Reactive accessor returning the URL to fetch. Changes trigger a new fetch. */
   urlString: Accessor<string>;
+  /** Per-resource options that override context defaults */
   options?: ResourceOptions<T>;
+  /** Key for coordinated refresh via context.refreshData */
   refreshKey?: string;
+  /** Reactive condition that must be true for fetch to execute */
   condition?: Accessor<boolean>;
+  /** When true, bypasses cache and forces fresh fetch */
   forceRefresh?: Accessor<boolean>;
+  /** Whether to check IndexedDB cache. Default: true */
   pullFromCache?: boolean;
+  /** Enable stale-while-revalidate pattern. Default: true */
   swr?: boolean;
 }
 
+/**
+ * Custom resource hook implementing SWR pattern with caching and retry logic.
+ *
+ * Features:
+ * - Stale-while-revalidate (SWR) caching pattern
+ * - Automatic retries with exponential backoff
+ * - Request deduplication
+ * - IndexedDB persistence
+ * - Conditional fetching
+ *
+ * @template T - The type of data being fetched
+ * @param props - Hook configuration options
+ * @returns CustomResource object with data accessors and control methods
+ *
+ * @example
+ * ```tsx
+ * const { data, loading, error, refetch } = useCustomResource<User>({
+ *   urlString: () => `/api/users/${userId()}`,
+ *   condition: () => !!userId(),
+ *   refreshKey: 'user',
+ * });
+ * ```
+ */
 export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResource<T> {
-  const [error, setError] = createSignal<unknown>(null);
+  const [error, setError] = createSignal<Error | null>(null);
   const [fromCache, setFromCache] = createSignal(false);
-  const [errorStatus, setErrorStatus] = createSignal<number>();
+  const [errorStatus, setErrorStatus] = createSignal<number | undefined>(undefined);
   const [attempts, setAttempts] = createSignal(0);
-  const [resourceData, setResourceData] = createSignal<T>();
+  const [resourceData, setResourceData] = createSignal<T | undefined>(undefined);
   const [validating, setValidating] = createSignal(false);
 
   const pullFromCache = createMemo(() => props.pullFromCache ?? true);
   const swr = createMemo(() => props.swr ?? true);
 
-  const context = useContext(CustomResourceContext) as CustomResourceContextProps<T>;
+  const context = useContext(CustomResourceContext) as
+    | CustomResourceContextValue<T>
+    | undefined;
   if (!context) {
     throw new Error('useCustomResource must be used within a CustomResourceProvider');
   }
@@ -254,10 +302,11 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     ) {
       const currentAttempts = attempts();
       if (currentAttempts < mergedOptions.retryCount!) {
+        // Calculate delay with exponential backoff and random jitter
+        const baseDelay = mergedOptions.retryDelay ?? 2000;
         const delay = mergedOptions.exponentialBackoff
-          ? (mergedOptions.retryDelay ?? 2000) * Math.pow(2, currentAttempts) +
-            Math.random() * 500
-          : (mergedOptions.retryDelay ?? 2000);
+          ? baseDelay * Math.pow(2, currentAttempts) + Math.random() * RETRY_JITTER_MAX
+          : baseDelay;
 
         const newAttempts = currentAttempts + 1;
         setAttempts(newAttempts);
@@ -274,8 +323,12 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   createEffect(() => {
     if (resource.error) {
-      setError(resource.error);
-      mergedOptions.onError?.(resource.error);
+      const err =
+        resource.error instanceof Error
+          ? resource.error
+          : new Error(String(resource.error));
+      setError(err);
+      mergedOptions.onError?.(err);
       setValidating(false);
     }
   });

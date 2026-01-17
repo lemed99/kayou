@@ -10,6 +10,8 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   children: (item: T[number], index: Accessor<number>) => U;
   setContainerRef?: (el: HTMLElement) => void;
   containerWidth?: string | number;
+  /** Minimum width for the container */
+  minWidth?: number;
   containerPadding?: number;
   loading?: JSX.Element;
   setScrollPosition?: (scrollTop: number) => void;
@@ -20,9 +22,9 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   'aria-multiselectable'?: boolean;
   'aria-label'?: string;
 }) {
-  const [ref, setRef] = createSignal<HTMLElement | undefined>();
-  const [width, setWidth] = createSignal(0);
-  const [height, setHeight] = createSignal(0);
+  const [contentRef, setContentRef] = createSignal<HTMLElement | undefined>();
+  const [contentWidth, setContentWidth] = createSignal(0);
+
   const [virtual, onScroll] = useVirtualList({
     get items() {
       return props.items;
@@ -41,19 +43,23 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     },
   });
 
-  let observer: ResizeObserver;
+  let resizeObserver: ResizeObserver | undefined;
 
   onMount(() => {
-    if (!ref()) return;
-    observer = new ResizeObserver(() => {
-      setWidth(ref()!.offsetWidth);
-      setHeight(ref()!.offsetHeight);
+    const el = contentRef();
+    if (!el) return;
+
+    resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setContentWidth(entry.target.scrollWidth);
+      }
     });
-    observer.observe(ref()!);
+    resizeObserver.observe(el);
   });
 
   onCleanup(() => {
-    if (observer) observer.disconnect();
+    resizeObserver?.disconnect();
   });
 
   const containerPadding = () => props.containerPadding ?? 4;
@@ -61,9 +67,8 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     if (props.containerWidth) {
       if (typeof props.containerWidth === 'number') return `${props.containerWidth}px`;
       if (typeof props.containerWidth === 'string') return props.containerWidth;
-    } else {
-      return `${width() + containerPadding() * 2}px`;
     }
+    return `${contentWidth() + containerPadding() * 2}px`;
   };
 
   return (
@@ -75,32 +80,42 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
       aria-label={props['aria-label']}
       style={{
         overflow: 'auto',
-        height: `${Math.max(height(), virtual().containerHeight) + containerPadding() * 2}px`,
+        height: `${virtual().containerHeight + containerPadding() * 2}px`,
         'max-height': `${props.rootHeight}px`,
         padding: `${containerPadding()}px`,
         width: containerWidth(),
         'box-sizing': 'border-box',
+        'min-width': props.minWidth ? `${props.minWidth}px` : undefined,
       }}
       onScroll={onScroll}
     >
       <div
         style={{
           position: 'relative',
-          height: `${Math.max(height(), virtual().containerHeight)}px`,
+          height: `${virtual().containerHeight}px`,
           width: '100%',
         }}
       >
         <div
-          ref={setRef}
+          ref={setContentRef}
           style={{
             position: 'absolute',
             top: `${virtual().viewerTop}px`,
             width: props.containerWidth ? containerWidth() : 'auto',
+            'min-width': props.minWidth
+              ? `${props.minWidth - containerPadding() * 2}px`
+              : undefined,
           }}
         >
           <For each={virtual().visibleItems} fallback={props.fallback}>
             {(item, i) => (
-              <div class={props.rowClass}>
+              <div
+                class={props.rowClass}
+                style={{
+                  height: `${props.rowHeight}px`,
+                  overflow: 'hidden',
+                }}
+              >
                 {props.children(item, () => virtual().startIndex + i())}
               </div>
             )}

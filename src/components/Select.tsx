@@ -4,20 +4,36 @@ import { ChevronDownButton, OptionLabel, optionClass } from '../helpers/selectUt
 import useSelect from '../hooks/useSelect';
 import TextInput, { TextInputProps } from './TextInput';
 
-interface Option {
+/**
+ * Option item for the Select component.
+ */
+export interface SelectOption {
+  /** Unique value for the option. */
   value: string;
+  /** Display label for the option. */
   label: string;
+  /** Optional custom label renderer. */
   labelWrapper?: (label: string) => JSX.Element;
 }
 
+/**
+ * Props for the Select component.
+ */
 export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
-  options: Option[];
-  onSelect: (option?: Option) => void;
+  /** Array of options to display in the dropdown. */
+  options: SelectOption[];
+  /** Callback fired when an option is selected. */
+  onSelect: (option?: SelectOption) => void;
+  /** Currently selected value. */
   value?: string;
+  /** Height of each option row in pixels. */
   optionRowHeight?: number;
 }
 
-export default function Select(props: SelectProps) {
+/**
+ * Select dropdown component for single option selection.
+ */
+export default function Select(props: SelectProps): JSX.Element {
   const [local, otherProps] = splitProps(props, [
     'options',
     'onSelect',

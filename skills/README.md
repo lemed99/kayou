@@ -6,23 +6,23 @@ This directory contains Claude skills for component library development.
 
 ### Core Development Skills
 
-| Skill | Purpose | Trigger |
-|-------|---------|---------|
-| `solidjs-component-auditor` | Audit components for quality issues | "audit [component]" |
-| `solidjs-component-fixer` | Fix issues found in audits | "fix [component]" |
-| `solidjs-doc-generator` | Generate MDX documentation | "document [component]" |
+| Skill                       | Purpose                             | Trigger                |
+| --------------------------- | ----------------------------------- | ---------------------- |
+| `solidjs-component-auditor` | Audit components for quality issues | "audit [component]"    |
+| `solidjs-component-fixer`   | Fix issues found in audits          | "fix [component]"      |
+| `solidjs-doc-generator`     | Generate MDX documentation          | "document [component]" |
 
 ### Project Skills
 
-| Skill | Purpose | Trigger |
-|-------|---------|---------|
+| Skill                  | Purpose                       | Trigger               |
+| ---------------------- | ----------------------------- | --------------------- |
 | `landing-page-creator` | Create marketing landing page | "create landing page" |
-| `mcp-server-builder` | Build MCP server for AI tools | "create MCP server" |
+| `mcp-server-builder`   | Build MCP server for AI tools | "create MCP server"   |
 
 ### Workflow Skills
 
-| Skill | Purpose | Trigger |
-|-------|---------|---------|
+| Skill             | Purpose                            | Trigger             |
+| ----------------- | ---------------------------------- | ------------------- |
 | `commit-and-push` | Smart commit with changelog update | "commit", "/commit" |
 
 ## Skill Directory Structure
@@ -55,6 +55,7 @@ User: "/project:init-project"
 ```
 
 This creates:
+
 - `.claude/PROJECT_CONTEXT.md`
 - `.claude/SOLIDJS_BEST_PRACTICES.md`
 - `.claude/TYPESCRIPT_PATTERNS.md`
@@ -70,6 +71,7 @@ User: "Audit the Button component"
 ```
 
 Claude will:
+
 1. Read the component source
 2. Analyze across 6 dimensions
 3. Generate report at `.claude/audits/Button-YYYY-MM-DD.md`
@@ -82,6 +84,7 @@ User: "Fix the Button component"
 ```
 
 Claude will:
+
 1. Read the audit report
 2. Apply fixes in priority order
 3. Create atomic commits
@@ -94,6 +97,7 @@ User: "Document the Button component"
 ```
 
 Claude will:
+
 1. Analyze the component
 2. Generate MDX documentation
 3. Save to `docs/components/Button.mdx`

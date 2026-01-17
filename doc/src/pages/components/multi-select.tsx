@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
 import MultiSelect from '@lib/components/MultiSelect';
+
 import DocPage from '../../components/DocPage';
 
 const sampleOptions = [
@@ -19,13 +20,85 @@ const countryOptions = [
   { value: 'de', label: 'Germany' },
   { value: 'fr', label: 'France' },
   { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'us', label: 'United States' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'jp', label: 'Japan rwerwe rer wer. wer wer ewr. ew r we rw' },
 ];
 
 export default function MultiSelectPage() {
   return (
     <DocPage
       title="MultiSelect"
-      description="A dropdown component for selecting multiple options from a list. Features search functionality, keyboard navigation, virtualization for large lists, and customizable display values. Built on top of TextInput with full accessibility support."
+      description="A dropdown component for selecting multiple options from a list, essential for tagging, categorization, and multi-choice forms. MultiSelect handles the complexity of multi-selection including visual state management, displaying selected items, and removing selections. The component features optional search functionality for filtering long lists, keyboard navigation for accessibility, virtualization for handling large option sets performantly, and customizable display values to show selection summaries like '3 items selected'. Built on TextInput with full ARIA listbox semantics for screen reader compatibility."
+      keyConcepts={[
+        {
+          term: 'Selection Display',
+          explanation:
+            'By default, selected option labels are concatenated. Use displayValue to show custom text like "N items selected" for cleaner presentation with many selections.',
+        },
+        {
+          term: 'Search Mode',
+          explanation:
+            'Enable withSearch to add a filter input in the dropdown. Essential for option lists longer than 10-15 items where scrolling becomes tedious.',
+        },
+        {
+          term: 'Controlled Values',
+          explanation:
+            'The values prop accepts an array of selected option values (not objects). This controlled approach makes it easy to sync with form state and validate selections.',
+        },
+        {
+          term: 'Clear All',
+          explanation:
+            'Set clearValues to true to programmatically clear all selections. Useful for form reset buttons or "Clear all" actions.',
+        },
+      ]}
+      value="Multi-select fields enable complex categorization and filtering that would otherwise require multiple form submissions. They are critical for admin interfaces, content management, and any scenario where users need to assign multiple attributes or tags efficiently."
       props={[
         {
           name: 'options',
@@ -159,6 +232,7 @@ export default function MultiSelectPage() {
                 withSearch
                 searchPlaceholder="Search countries..."
                 placeholder="Select countries"
+                optionRowHeight={32}
               />
             );
           },
@@ -329,6 +403,20 @@ const [selected, setSelected] = createSignal([]);
   displayValue={\`\${selectedValues.length} selected\`}
   onMultiSelect={handleSelect}
 />`}
+      relatedHooks={[
+        {
+          name: 'useSelect',
+          path: '/hooks/use-select',
+          description:
+            'Core selection logic including keyboard navigation, option filtering, and multi-select handling.',
+        },
+        {
+          name: 'useFloating',
+          path: '/hooks/use-floating',
+          description:
+            'Positioning engine for the dropdown menu, handling placement and viewport boundaries.',
+        },
+      ]}
     />
   );
 }

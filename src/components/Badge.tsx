@@ -2,9 +2,30 @@ import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * Color variants for the Badge component.
+ */
+export type BadgeColor = 'gray' | 'failure' | 'warning' | 'success' | 'dark' | 'default';
+
+/**
+ * Size variants for the Badge component.
+ */
+export type BadgeSize = 'xs' | 'sm';
+
+/**
+ * Props for the Badge component.
+ */
 export interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  color?: 'gray' | 'failure' | 'warning' | 'success' | 'dark' | 'default';
-  size?: 'xs' | 'sm';
+  /**
+   * The color variant of the badge.
+   * @default 'default'
+   */
+  color?: BadgeColor;
+  /**
+   * The size of the badge.
+   * @default 'xs'
+   */
+  size?: BadgeSize;
 }
 
 const theme = {
@@ -30,7 +51,10 @@ const theme = {
   },
 };
 
-const Badge = (props: BadgeProps) => {
+/**
+ * Badge component for displaying small status indicators or labels.
+ */
+const Badge = (props: BadgeProps): JSX.Element => {
   const [local, otherProps] = splitProps(props, ['color', 'size', 'class', 'children']);
 
   const color = createMemo(() => local.color || 'default');

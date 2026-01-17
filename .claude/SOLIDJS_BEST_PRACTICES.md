@@ -97,10 +97,12 @@ function Panel(props: { itemKey: string }) {
 ```
 
 **When to use each:**
+
 - **Derived signal `() =>`**: Simple concatenation, property access, cheap operations
 - **`createMemo`**: Expensive computation, filtering arrays, complex transformations
 
 **ESLint warning you'll see if you forget:**
+
 > "The reactive variable 'props.x' should be used within JSX, a tracked scope (like createEffect), or inside an event handler function, or else changes will be ignored"
 
 ### 4. createEffect for Side Effects
@@ -238,12 +240,12 @@ const [name, setName] = createSignal('');
 const [state, setState] = createStore({
   user: { name: '', email: '' },
   items: [],
-  settings: { theme: 'light' }
+  settings: { theme: 'light' },
 });
 
 // Updating nested store values
 setState('user', 'name', 'John');
-setState('items', items => [...items, newItem]);
+setState('items', (items) => [...items, newItem]);
 setState('settings', { theme: 'dark' }); // Merge update
 ```
 

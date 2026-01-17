@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
 import SelectWithSearch from '@lib/components/SelectWithSearch';
+
 import DocPage from '../../components/DocPage';
 
 const frameworkOptions = [
@@ -36,7 +37,44 @@ export default function SelectWithSearchPage() {
   return (
     <DocPage
       title="SelectWithSearch"
-      description="A searchable dropdown component for selecting a single option. Features real-time filtering, keyboard navigation, virtualization for large lists, and full ARIA combobox accessibility. Ideal for selecting from large datasets."
+      description="A searchable dropdown component optimized for selecting a single option from large datasets. Unlike basic selects that require scrolling through all options, SelectWithSearch lets users type to filter results instantly, making it practical for lists of hundreds or thousands of items. The component features real-time filtering as users type, full keyboard navigation (arrow keys, Enter, Escape), optional virtualization for handling massive datasets without performance degradation, and a custom CTA slot for actions like 'Add new item'. Built with ARIA combobox semantics for screen reader compatibility."
+      keyConcepts={[
+        {
+          term: 'Type-to-Filter',
+          explanation:
+            'Users can type to narrow down options instantly. The filter is case-insensitive and matches against the label text, making it easy to find items in large lists.',
+        },
+        {
+          term: 'Auto-Fill Mode',
+          explanation:
+            'When autoFillSearchKey is true, selecting an option fills the input with that label. This is useful when users need to see their selection clearly after choosing.',
+        },
+        {
+          term: 'Virtualization',
+          explanation:
+            'Set optionRowHeight to enable virtualization, which renders only visible options. Essential for lists with hundreds of items to maintain smooth scrolling.',
+        },
+        {
+          term: 'Lazy Loading',
+          explanation:
+            'The onLazyLoad callback fires during scroll, enabling infinite scroll patterns where more options are fetched as users scroll down.',
+        },
+      ]}
+      value="Searchable selects dramatically improve form completion rates for fields with many options (countries, products, users). The type-to-filter pattern matches user expectations from modern autocomplete experiences, reducing time to find and select the right option from seconds to milliseconds."
+      relatedHooks={[
+        {
+          name: 'useSelect',
+          path: '/hooks/use-select',
+          description:
+            'Core selection logic including keyboard navigation, option filtering, and dropdown state management.',
+        },
+        {
+          name: 'useFloating',
+          path: '/hooks/use-floating',
+          description:
+            'Positioning engine for the dropdown menu, handling placement and viewport boundaries.',
+        },
+      ]}
       props={[
         {
           name: 'options',
@@ -153,7 +191,9 @@ export default function SelectWithSearchPage() {
   placeholder="Search frameworks..."
 />`,
           component: () => {
-            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(null);
+            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
+              null,
+            );
             return (
               <SelectWithSearch
                 options={frameworkOptions}
@@ -180,6 +220,7 @@ export default function SelectWithSearchPage() {
                 onSelect={(opt) => setSelected(opt || null)}
                 autoFillSearchKey
                 placeholder="Search countries..."
+                optionRowHeight={32}
               />
             );
           },
@@ -220,7 +261,9 @@ export default function SelectWithSearchPage() {
   placeholder="Search frameworks..."
 />`,
           component: () => {
-            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(null);
+            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
+              null,
+            );
             return (
               <SelectWithSearch
                 options={frameworkOptions}
@@ -282,14 +325,18 @@ export default function SelectWithSearchPage() {
   placeholder="Search countries..."
 />`,
           component: () => {
-            const [selected, setSelected] = createSignal<(typeof countryOptions)[0] | null>(null);
+            const [selected, setSelected] = createSignal<
+              (typeof countryOptions)[0] | null
+            >(null);
             return (
               <SelectWithSearch
                 options={countryOptions}
                 onSelect={(opt) => setSelected(opt || null)}
                 autoFillSearchKey
                 label="Country"
-                helperText={selected() ? `Selected: ${selected()!.label}` : 'No selection'}
+                helperText={
+                  selected() ? `Selected: ${selected()!.label}` : 'No selection'
+                }
                 placeholder="Search countries..."
               />
             );
@@ -317,7 +364,7 @@ export default function SelectWithSearchPage() {
                 placeholder="Search users..."
                 cta={
                   <button
-                    class="w-full p-2 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-200"
+                    class="w-full border-t border-gray-200 p-2 text-sm text-blue-600 hover:bg-blue-50"
                     onClick={() => alert('Add new user clicked')}
                   >
                     + Add new user
@@ -339,7 +386,9 @@ export default function SelectWithSearchPage() {
   autoFillSearchKey
 />`,
           component: () => {
-            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(null);
+            const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
+              null,
+            );
             return (
               <SelectWithSearch
                 options={frameworkOptions}

@@ -409,11 +409,7 @@ const themes = {
   dark: darkTheme,
 };
 
-function formatTokensToHTML(
-  tokens: Token[][],
-  theme: Theme,
-  isDark: boolean,
-): string {
+function formatTokensToHTML(tokens: Token[][], theme: Theme, isDark: boolean): string {
   let codeContent = '';
 
   tokens.forEach((line, index) => {

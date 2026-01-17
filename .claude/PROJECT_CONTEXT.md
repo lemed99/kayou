@@ -27,80 +27,81 @@ Test Coverage: 0%
 
 ## Component Inventory
 
-| Component | Category | Props Count | Tests | Docs | Status |
-|-----------|----------|-------------|-------|------|--------|
-| Accordion | Display | 7 | - | - | Needs audit |
-| Alert | Feedback | ~5 | - | - | Needs audit |
-| Badge | Display | ~4 | - | - | Needs audit |
-| Breadcrumb | Navigation | ~3 | - | - | Needs audit |
-| Button | Forms | 5 | - | - | Needs audit |
-| Checkbox | Forms | ~6 | - | - | Needs audit |
-| DataTable | Data Display | 17 | - | - | Needs audit |
-| DatePicker | Forms | 15 | - | - | Needs audit |
-| Drawer | Overlay | ~8 | - | - | Needs audit |
-| DynamicVirtualList | Performance | ~10 | - | - | Needs audit |
-| HelperText | Forms | ~3 | - | - | Needs audit |
-| IconWrapper | Display | ~3 | - | - | Needs audit |
-| Label | Forms | ~3 | - | - | Needs audit |
-| Modal | Overlay | 6 | - | - | Needs audit |
-| MultiSelect | Forms | ~12 | - | - | Needs audit |
-| NumberInput | Forms | ~10 | - | - | Needs audit |
-| Pagination | Navigation | ~5 | - | - | Needs audit |
-| Popover | Overlay | ~8 | - | - | Needs audit |
-| Select | Forms | 5 | - | - | Needs audit |
-| SelectWithSearch | Forms | ~8 | - | - | Needs audit |
-| Sidebar | Navigation | ~10 | - | - | Needs audit |
-| Skeleton | Feedback | ~4 | - | - | Needs audit |
-| Spinner | Feedback | ~3 | - | - | Needs audit |
-| Textarea | Forms | ~8 | - | - | Needs audit |
-| TextInput | Forms | 18 | - | - | Needs audit |
-| ToggleSwitch | Forms | ~6 | - | - | Needs audit |
-| Tooltip | Overlay | 5 | - | - | Needs audit |
-| UploadFile | Forms | ~8 | - | - | Needs audit |
-| VirtualGrid | Performance | ~8 | - | - | Needs audit |
-| VirtualList | Performance | ~8 | - | - | Needs audit |
+| Component          | Category     | Props Count | Tests | Docs | Status      |
+| ------------------ | ------------ | ----------- | ----- | ---- | ----------- |
+| Accordion          | Display      | 7           | -     | -    | Needs audit |
+| Alert              | Feedback     | ~5          | -     | -    | Needs audit |
+| Badge              | Display      | ~4          | -     | -    | Needs audit |
+| Breadcrumb         | Navigation   | ~3          | -     | -    | Needs audit |
+| Button             | Forms        | 5           | -     | -    | Needs audit |
+| Checkbox           | Forms        | ~6          | -     | -    | Needs audit |
+| DataTable          | Data Display | 17          | -     | -    | Needs audit |
+| DatePicker         | Forms        | 15          | -     | -    | Needs audit |
+| Drawer             | Overlay      | ~8          | -     | -    | Needs audit |
+| DynamicVirtualList | Performance  | ~10         | -     | -    | Needs audit |
+| HelperText         | Forms        | ~3          | -     | -    | Needs audit |
+| IconWrapper        | Display      | ~3          | -     | -    | Needs audit |
+| Label              | Forms        | ~3          | -     | -    | Needs audit |
+| Modal              | Overlay      | 6           | -     | -    | Needs audit |
+| MultiSelect        | Forms        | ~12         | -     | -    | Needs audit |
+| NumberInput        | Forms        | ~10         | -     | -    | Needs audit |
+| Pagination         | Navigation   | ~5          | -     | -    | Needs audit |
+| Popover            | Overlay      | ~8          | -     | -    | Needs audit |
+| Select             | Forms        | 5           | -     | -    | Needs audit |
+| SelectWithSearch   | Forms        | ~8          | -     | -    | Needs audit |
+| Sidebar            | Navigation   | ~10         | -     | -    | Needs audit |
+| Skeleton           | Feedback     | ~4          | -     | -    | Needs audit |
+| Spinner            | Feedback     | ~3          | -     | -    | Needs audit |
+| Textarea           | Forms        | ~8          | -     | -    | Needs audit |
+| TextInput          | Forms        | 18          | -     | -    | Needs audit |
+| ToggleSwitch       | Forms        | ~6          | -     | -    | Needs audit |
+| Tooltip            | Overlay      | 5           | -     | -    | Needs audit |
+| UploadFile         | Forms        | ~8          | -     | -    | Needs audit |
+| VirtualGrid        | Performance  | ~8          | -     | -    | Needs audit |
+| VirtualList        | Performance  | ~8          | -     | -    | Needs audit |
 
 ### Charts Components
 
-| Component | Category | Status |
-|-----------|----------|--------|
-| LineChart | Charts | Needs audit |
-| CartesianGrid | Charts | Needs audit |
-| Line | Charts | Needs audit |
-| XAxis | Charts | Needs audit |
-| YAxis | Charts | Needs audit |
-| LineChartTooltip | Charts | Needs audit |
-| PieChart | Charts | Needs audit |
-| Pie | Charts | Needs audit |
-| Sector | Charts | Needs audit |
-| ResponsiveContainer | Charts | Needs audit |
+| Component           | Category | Status      |
+| ------------------- | -------- | ----------- |
+| LineChart           | Charts   | Needs audit |
+| CartesianGrid       | Charts   | Needs audit |
+| Line                | Charts   | Needs audit |
+| XAxis               | Charts   | Needs audit |
+| YAxis               | Charts   | Needs audit |
+| LineChartTooltip    | Charts   | Needs audit |
+| PieChart            | Charts   | Needs audit |
+| Pie                 | Charts   | Needs audit |
+| Sector              | Charts   | Needs audit |
+| ResponsiveContainer | Charts   | Needs audit |
 
 **Legend:**
+
 - - = Not available/Not checked
 
 ## Hooks Inventory
 
-| Hook | Purpose | Status |
-|------|---------|--------|
-| useCustomResource | Custom resource loading | Needs audit |
-| useDatePicker | DatePicker state management | Needs audit |
-| useDynamicVirtualList | Dynamic virtual list logic | Needs audit |
-| useFloating | Floating UI positioning | Needs audit |
-| useIntl | Internationalization | Needs audit |
-| useMutation | Data mutation handling | Needs audit |
-| useTheme | Theme management | Needs audit |
-| useToast | Toast notifications | Needs audit |
-| useVirtualList | Virtual list logic | Needs audit |
+| Hook                  | Purpose                     | Status      |
+| --------------------- | --------------------------- | ----------- |
+| useCustomResource     | Custom resource loading     | Needs audit |
+| useDatePicker         | DatePicker state management | Needs audit |
+| useDynamicVirtualList | Dynamic virtual list logic  | Needs audit |
+| useFloating           | Floating UI positioning     | Needs audit |
+| useIntl               | Internationalization        | Needs audit |
+| useMutation           | Data mutation handling      | Needs audit |
+| useTheme              | Theme management            | Needs audit |
+| useToast              | Toast notifications         | Needs audit |
+| useVirtualList        | Virtual list logic          | Needs audit |
 
 ## Context Providers
 
-| Provider | Purpose | Status |
-|----------|---------|--------|
-| CustomResourceProvider | Custom resource context | Needs audit |
-| DatePickerProvider | DatePicker configuration | Needs audit |
-| IntlProvider | Internationalization | Needs audit |
-| ThemeProvider | Theme management | Needs audit |
-| ToastProvider | Toast notifications | Needs audit |
+| Provider               | Purpose                  | Status      |
+| ---------------------- | ------------------------ | ----------- |
+| CustomResourceProvider | Custom resource context  | Needs audit |
+| DatePickerProvider     | DatePicker configuration | Needs audit |
+| IntlProvider           | Internationalization     | Needs audit |
+| ThemeProvider          | Theme management         | Needs audit |
+| ToastProvider          | Toast notifications      | Needs audit |
 
 ## Architecture Notes
 
@@ -130,6 +131,7 @@ Test Coverage: 0%
 ### Floating UI Pattern
 
 Custom `useFloating` hook for:
+
 - Tooltips
 - Popovers
 - Select dropdowns
@@ -270,3 +272,9 @@ export { ... } from './icons'
 - Follow existing theme object pattern for styling
 - Animation uses `@solid-primitives/presence` for enter/exit transitions
 - Floating elements use custom `useFloating` hook with Portal
+- **IMPORTANT:** Always run `npx eslint <file>` after editing any `.ts` or `.tsx` file to verify the fix passes lint checks
+- **CRITICAL:** When fixing `solid/reactivity` ESLint warnings:
+  - NEVER use `eslint-disable` comments to silence warnings
+  - In `onMount` (one-time setup): capturing values in variables is fine since it runs once
+  - In signal initializers or objects that persist: use getter patterns (`get prop() { return props.value; }`) to preserve reactivity
+  - Always understand the context - is this one-time setup or should it react to changes?

@@ -357,10 +357,10 @@ function UserList(props) {
 ```typescript
 // BAD - Inconsistent naming
 interface Props {
-  isOpen: boolean;    // is prefix
-  loading: boolean;   // no prefix
-  hasError: boolean;  // has prefix
-  disabled: boolean;  // no prefix
+  isOpen: boolean; // is prefix
+  loading: boolean; // no prefix
+  hasError: boolean; // has prefix
+  disabled: boolean; // no prefix
 }
 
 // GOOD - Consistent naming
@@ -513,7 +513,7 @@ function Component(props) {
 export default Button;
 
 // Others use named export
-export function DataTable() { }
+export function DataTable() {}
 
 // Recommendation: Be consistent within the project
 ```

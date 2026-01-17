@@ -11,6 +11,7 @@
 ### Tracked Scopes
 
 Reactive values are tracked in these contexts:
+
 - JSX expressions: `<div>{count()}</div>`
 - `createEffect` callbacks
 - `createMemo` callbacks
@@ -20,6 +21,7 @@ Reactive values are tracked in these contexts:
 ### Untracked Scopes
 
 These do NOT track reactive dependencies:
+
 - Component function body (top-level)
 - Regular variable assignments
 - `setTimeout`/`setInterval` callbacks
@@ -216,7 +218,7 @@ const fullName = () => `${props.firstName} ${props.lastName}`;
 
 // Expensive computation - use createMemo
 const sortedItems = createMemo(() =>
-  [...props.items].sort((a, b) => a.name.localeCompare(b.name))
+  [...props.items].sort((a, b) => a.name.localeCompare(b.name)),
 );
 ```
 
@@ -224,11 +226,11 @@ const sortedItems = createMemo(() =>
 
 Signal intent when capturing values:
 
-| Prefix | Meaning |
-|--------|---------|
+| Prefix    | Meaning                              |
+| --------- | ------------------------------------ |
 | `initial` | Intentionally captured once at mount |
-| `default` | Provides default, may be overridden |
-| No prefix | Should be reactive, check for bugs |
+| `default` | Provides default, may be overridden  |
+| No prefix | Should be reactive, check for bugs   |
 
 ### 3. Wrap Event Handlers
 
@@ -288,11 +290,11 @@ The `eslint-plugin-solid` package includes a `solid/reactivity` rule that catche
 
 ### Common Warnings
 
-| Warning | Meaning |
-|---------|---------|
+| Warning                                                                                                  | Meaning                                        |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | "The reactive variable 'props.x' should be used within JSX, a tracked scope, or inside an event handler" | You're accessing props outside a tracked scope |
-| "The reactive variable 'signal()' is being called outside a tracked scope" | Signal accessed in component body |
-| "Destructuring props breaks reactivity" | Don't destructure the props parameter |
+| "The reactive variable 'signal()' is being called outside a tracked scope"                               | Signal accessed in component body              |
+| "Destructuring props breaks reactivity"                                                                  | Don't destructure the props parameter          |
 
 ---
 
@@ -351,6 +353,7 @@ createEffect(() => {
 ### 2. Verify Tracked Scope
 
 If a value doesn't update, check:
+
 - Is it accessed in JSX, createEffect, or createMemo?
 - Is it stored in a variable first?
 - Is the prop destructured?

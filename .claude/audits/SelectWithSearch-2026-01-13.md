@@ -9,23 +9,25 @@ SelectWithSearch is a searchable dropdown component built on a shared `useSelect
 
 ## Score Breakdown
 
-| Dimension | Score | Max | Notes |
-|-----------|-------|-----|-------|
-| Type Safety | 19 | 25 | Missing return type, type assertions |
-| SolidJS Practices | 22 | 25 | Good patterns, inconsistent prop access |
-| API Design | 12 | 15 | Required prop could have default |
-| Accessibility | 10 | 20 | Missing combobox ARIA pattern |
-| Performance | 8 | 10 | Good virtualization |
-| Testing & Docs | 0 | 5 | None exist |
-| **Total** | **71** | **100** | |
+| Dimension         | Score  | Max     | Notes                                   |
+| ----------------- | ------ | ------- | --------------------------------------- |
+| Type Safety       | 19     | 25      | Missing return type, type assertions    |
+| SolidJS Practices | 22     | 25      | Good patterns, inconsistent prop access |
+| API Design        | 12     | 15      | Required prop could have default        |
+| Accessibility     | 10     | 20      | Missing combobox ARIA pattern           |
+| Performance       | 8      | 10      | Good virtualization                     |
+| Testing & Docs    | 0      | 5       | None exist                              |
+| **Total**         | **71** | **100** |                                         |
 
 ## Critical Issues
 
 ### Issue 1: Options missing role="option"
+
 **Location:** `SelectWithSearch.tsx:91-97`, `useSelect.tsx:400-411`
 **Problem:** Option items are rendered as plain `<div>` without `role="option"`
 **Impact:** Screen readers don't recognize items as selectable options
 **Fix:**
+
 ```tsx
 <div
   role="option"
@@ -38,10 +40,12 @@ SelectWithSearch is a searchable dropdown component built on a shared `useSelect
 ```
 
 ### Issue 2: Input missing combobox ARIA attributes
+
 **Location:** `SelectWithSearch.tsx:60-74`
 **Problem:** Input lacks `role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`
 **Impact:** Screen readers don't understand this is a combobox or which option is highlighted
 **Fix:**
+
 ```tsx
 <TextInput
   role="combobox"
@@ -57,17 +61,20 @@ SelectWithSearch is a searchable dropdown component built on a shared `useSelect
 ## High Priority Issues
 
 ### Issue 3: No explicit return type
+
 **Line:** 22
 **Problem:** `export default function SelectWithSearch(props: SelectWithSearchProps)`
 **Fix:** `export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Element`
 
 ### Issue 4: Inconsistent prop access
+
 **Lines:** 64, 76
 **Problem:** Accesses `props.placeholder`, `props.disabled`, `props.isLoading` directly instead of through splitProps
 **Impact:** May cause unnecessary re-renders if those props change
 **Fix:** Add these to local splitProps or use consistently
 
 ### Issue 5: Type assertions for refs
+
 **Lines:** 83 in SelectWithSearch, 178/192 in useSelect
 **Problem:** `(searchRef() as HTMLElement)?.focus()`
 **Fix:** Type signal properly: `createSignal<HTMLInputElement | null>(null)`
@@ -75,16 +82,19 @@ SelectWithSearch is a searchable dropdown component built on a shared `useSelect
 ## Medium Priority Issues
 
 ### Issue 6: Missing JSDoc on props
+
 **Lines:** 8-20
 **Problem:** Props interface lacks documentation
 **Fix:** Add JSDoc comments to all props
 
 ### Issue 7: Required prop without default
+
 **Line:** 16
 **Problem:** `noSearchResultPlaceholder: string` is required
 **Suggestion:** Make optional with default: `noSearchResultPlaceholder?: string` and default to "No results found"
 
 ### Issue 8: helperText type assertion in useSelect
+
 **Line:** 445 in useSelect.tsx
 **Problem:** `props.helperText as string`
 **Fix:** Use non-null assertion since it's inside Show: `props.helperText!`
@@ -92,17 +102,21 @@ SelectWithSearch is a searchable dropdown component built on a shared `useSelect
 ## Low Priority Issues
 
 ### Issue 9: No test file
+
 **Expected:** `src/components/__tests__/SelectWithSearch.test.tsx`
 
 ### Issue 10: No documentation page
+
 **Expected:** `doc/src/pages/components/selectwithsearch.tsx`
 
 ### Issue 11: Label not associated with input
+
 **Location:** useSelect.tsx:353-360
 **Problem:** Label uses value prop but no `for`/`id` association with input
 **Note:** This would require passing the searchInputId to the TextInput
 
 ### Issue 12: Option highlight on focus vs hover conflict
+
 **Problem:** Options highlight on mouseEnter but keyboard navigation also sets highlight
 **Minor:** Could cause visual confusion but works functionally
 
@@ -177,11 +191,13 @@ describe('SelectWithSearch', () => {
 ## Architecture Notes
 
 The component uses a shared `useSelect` hook that powers:
+
 - `Select` - Simple dropdown
 - `SelectWithSearch` - Searchable dropdown (this component)
 - `MultiSelect` - Multi-selection dropdown
 
 Fixes to the hook will benefit all three components. The ARIA fixes should be implemented in:
+
 1. `useSelect.tsx` - For listbox, options in Layout
 2. `SelectWithSearch.tsx` - For input combobox attributes
 
@@ -194,4 +210,4 @@ Fixes to the hook will benefit all three components. The ARIA fixes should be im
 
 ---
 
-*Audit performed using solidjs-component-auditor skill v2.0.0*
+_Audit performed using solidjs-component-auditor skill v2.0.0_

@@ -41,12 +41,28 @@ export interface XAxisProps {
   stroke?: string;
 }
 
+/**
+ * Props for the LineChart component.
+ */
 export type LineChartProps = ParentProps<{
+  /** Base width of the chart in pixels. */
   width: number;
+  /** Base height of the chart in pixels. */
   height: number;
+  /** Array of data points to plot. */
   data: readonly Record<string, unknown>[];
+  /** Responsive width override. */
   rwidth?: number;
+  /** Responsive height override. */
   rheight?: number;
+  /** Accessible label for the chart (for screen readers). */
+  ariaLabel?: string;
+  /** ID of element that describes the chart. */
+  ariaDescribedBy?: string;
+  /** Title displayed in SVG for accessibility. */
+  title?: string;
+  /** Description displayed in SVG for accessibility. */
+  description?: string;
 }>;
 
 export interface YAxisProps {
@@ -85,11 +101,26 @@ export interface PieChartContextType {
   height: Accessor<number>;
 }
 
+/**
+ * Props for the PieChart component.
+ */
 export type PieChartProps = ParentProps<{
+  /** Base width of the chart in pixels. */
   width: number;
+  /** Base height of the chart in pixels. */
   height: number;
+  /** Responsive width override. */
   rwidth?: number;
+  /** Responsive height override. */
   rheight?: number;
+  /** Accessible label for the chart (for screen readers). */
+  ariaLabel?: string;
+  /** ID of element that describes the chart. */
+  ariaDescribedBy?: string;
+  /** Title displayed in SVG for accessibility. */
+  title?: string;
+  /** Description displayed in SVG for accessibility. */
+  description?: string;
 }>;
 
 export type ActiveSector = SectorProps &
@@ -100,14 +131,26 @@ export type ActiveSector = SectorProps &
   };
 
 export interface PieProps {
+  /** Array of data objects to display. */
   data: Record<string, unknown>[];
+  /** Key in data objects containing the numeric value. */
   dataKey: keyof Record<string, unknown>;
+  /** Key in data objects containing the label/name (for accessibility). */
+  labelKey?: string;
+  /** X coordinate of the center (number or percentage string like "50%"). */
   cx: number | string;
+  /** Y coordinate of the center (number or percentage string like "50%"). */
   cy: number | string;
+  /** Inner radius for donut charts (0 for pie). */
   innerRadius: number;
+  /** Outer radius of the chart. */
   outerRadius: number;
+  /** Fill color for segments. */
   fill: string;
+  /** Custom render function for the active/highlighted segment. */
   activeShape?: (props: ActiveSector) => JSX.Element;
+  /** Callback when a segment is selected via click or keyboard. */
+  onSegmentSelect?: (data: Record<string, unknown>, index: number) => void;
 }
 
 export interface SectorProps extends DefaultArcObject {

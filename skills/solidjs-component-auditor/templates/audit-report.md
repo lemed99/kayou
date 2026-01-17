@@ -16,16 +16,17 @@
 
 ### Dimension Breakdown
 
-| Dimension | Score | Weight | Weighted |
-|-----------|-------|--------|----------|
-| Type Safety | [X]/25 | 25% | [X] |
-| SolidJS Practices | [X]/25 | 25% | [X] |
-| API Design | [X]/15 | 15% | [X] |
-| Accessibility | [X]/20 | 20% | [X] |
-| Performance | [X]/10 | 10% | [X] |
-| Testing/Docs | [X]/5 | 5% | [X] |
+| Dimension         | Score  | Weight | Weighted |
+| ----------------- | ------ | ------ | -------- |
+| Type Safety       | [X]/25 | 25%    | [X]      |
+| SolidJS Practices | [X]/25 | 25%    | [X]      |
+| API Design        | [X]/15 | 15%    | [X]      |
+| Accessibility     | [X]/20 | 20%    | [X]      |
+| Performance       | [X]/10 | 10%    | [X]      |
+| Testing/Docs      | [X]/5  | 5%     | [X]      |
 
 ### Score Interpretation
+
 - 90-100: Excellent - Production ready
 - 80-89: Good - Minor improvements needed
 - 70-79: Acceptable - Several issues to address
@@ -43,6 +44,7 @@
 **Line(s):** [X-Y]
 
 **Current Code:**
+
 ```typescript
 // Line X
 [problematic code snippet]
@@ -52,12 +54,14 @@
 [Detailed explanation of why this is critical and its impact]
 
 **Solution:**
+
 ```typescript
 // Fixed code
 [corrected code snippet]
 ```
 
 **Implementation Steps:**
+
 1. [Step 1]
 2. [Step 2]
 3. [Step 3]
@@ -81,14 +85,16 @@
 **Line(s):** [X-Y]
 
 **Current Code:**
+
 ```typescript
-[code]
+[code];
 ```
 
 **Problem:**
 [Explanation]
 
 **Solution:**
+
 ```typescript
 [fixed code]
 ```
@@ -127,10 +133,10 @@ Things this component does well:
 
 Components that may have similar issues or patterns:
 
-| Component | Likely Issues | Priority |
-|-----------|---------------|----------|
-| [ComponentA] | [Issue type] | [High/Medium] |
-| [ComponentB] | [Issue type] | [High/Medium] |
+| Component    | Likely Issues | Priority      |
+| ------------ | ------------- | ------------- |
+| [ComponentA] | [Issue type]  | [High/Medium] |
+| [ComponentB] | [Issue type]  | [High/Medium] |
 
 ---
 

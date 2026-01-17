@@ -4,13 +4,28 @@ import Button from './Button';
 import NumberInput from './NumberInput';
 import Tooltip from './Tooltip';
 
+/**
+ * Props for the Pagination component.
+ */
 export interface PaginationProps {
+  /**
+   * Total number of pages.
+   */
   total: number;
+  /**
+   * Current page number (1-indexed).
+   */
   page: number;
+  /**
+   * Callback fired when the page changes.
+   */
   onChange: (page: number) => void;
 }
 
-const Pagination: Component<PaginationProps> = (props) => {
+/**
+ * Pagination component for navigating between pages.
+ */
+const Pagination: Component<PaginationProps> = (props): JSX.Element => {
   const [pageValue, setPageValue] = createSignal(1);
 
   createEffect(() => setPageValue(props.page));
@@ -20,21 +35,23 @@ const Pagination: Component<PaginationProps> = (props) => {
     setPageValue(page);
   };
 
-  const NavigationButton = (props: {
+  const NavigationButton = (navProps: {
     onClick: () => void;
     disabled: boolean;
     content: JSX.Element;
     tooltip: string;
+    ariaLabel: string;
   }) => (
-    <Tooltip content={props.tooltip} theme="auto">
+    <Tooltip content={navProps.tooltip} theme="auto">
       <Button
         color="light"
-        onClick={props.onClick}
-        disabled={props.disabled}
+        onClick={navProps.onClick}
+        disabled={navProps.disabled}
         class="w-8"
         size="xs"
+        aria-label={navProps.ariaLabel}
       >
-        {props.content}
+        {navProps.content}
       </Button>
     </Tooltip>
   );
@@ -61,30 +78,34 @@ const Pagination: Component<PaginationProps> = (props) => {
         />
         <p class="text-nowrap">sur {props.total}</p>
       </div>
-      <nav class="flex items-center gap-1">
+      <nav aria-label="Pagination" class="flex items-center gap-1">
         <NavigationButton
           onClick={() => setPage(1)}
           disabled={props.page === 1}
           content="«"
           tooltip="Page 1"
+          ariaLabel="Go to first page"
         />
         <NavigationButton
           onClick={() => setPage(Math.max(1, props.page - 1))}
           disabled={props.page === 1}
           content="‹"
           tooltip={`Page ${Math.max(1, props.page - 1)}`}
+          ariaLabel="Go to previous page"
         />
         <NavigationButton
           onClick={() => setPage(Math.min(props.total, props.page + 1))}
           disabled={props.page === props.total}
           content="›"
           tooltip={`Page ${Math.min(props.total, props.page + 1)}`}
+          ariaLabel="Go to next page"
         />
         <NavigationButton
           onClick={() => setPage(props.total)}
           disabled={props.page === props.total}
           content="»"
           tooltip={`Page ${props.total}`}
+          ariaLabel="Go to last page"
         />
       </nav>
     </div>

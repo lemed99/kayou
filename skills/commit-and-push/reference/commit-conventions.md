@@ -14,18 +14,18 @@ Reference for writing consistent, meaningful commit messages.
 
 ## Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feat` | New feature | `feat(Button): add icon support` |
-| `fix` | Bug fix | `fix(Modal): prevent scroll when open` |
-| `refactor` | Code restructuring | `refactor(theme): consolidate tokens` |
-| `docs` | Documentation | `docs(README): add installation guide` |
-| `style` | Formatting only | `style: apply prettier formatting` |
-| `test` | Test changes | `test(Button): add unit tests` |
-| `chore` | Maintenance | `chore: update dependencies` |
-| `perf` | Performance | `perf(List): virtualize long lists` |
-| `build` | Build system | `build: update vite config` |
-| `ci` | CI changes | `ci: add github actions` |
+| Type       | Description        | Example                                |
+| ---------- | ------------------ | -------------------------------------- |
+| `feat`     | New feature        | `feat(Button): add icon support`       |
+| `fix`      | Bug fix            | `fix(Modal): prevent scroll when open` |
+| `refactor` | Code restructuring | `refactor(theme): consolidate tokens`  |
+| `docs`     | Documentation      | `docs(README): add installation guide` |
+| `style`    | Formatting only    | `style: apply prettier formatting`     |
+| `test`     | Test changes       | `test(Button): add unit tests`         |
+| `chore`    | Maintenance        | `chore: update dependencies`           |
+| `perf`     | Performance        | `perf(List): virtualize long lists`    |
+| `build`    | Build system       | `build: update vite config`            |
+| `ci`       | CI changes         | `ci: add github actions`               |
 
 ## Scope
 
@@ -45,6 +45,7 @@ The scope should identify what is being changed:
 5. **Be specific** - "fix button hover" not "fix bug"
 
 ### Good Examples
+
 ```
 feat(Input): add validation support
 fix(Modal): prevent body scroll when open
@@ -52,6 +53,7 @@ refactor(theme): use CSS variables for colors
 ```
 
 ### Bad Examples
+
 ```
 Fixed the bug                    # Vague, past tense
 feat(Input): Added validation.   # Past tense, period
@@ -63,12 +65,14 @@ Update                           # No type, too vague
 The body explains **what** and **why**, not **how**.
 
 **Structure:**
+
 - List significant changes with bullet points
 - Group related changes together
 - Keep lines under 72 characters
 - Leave blank line between subject and body
 
 **Example:**
+
 ```
 feat(Accordion): add keyboard navigation
 
@@ -83,16 +87,19 @@ Implements WAI-ARIA Accordion pattern.
 ## Footer
 
 **Co-Author (required for AI-assisted commits):**
+
 ```
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **Breaking changes:**
+
 ```
 BREAKING CHANGE: removed `size` prop, use `variant` instead
 ```
 
 **Issue references:**
+
 ```
 Closes #123
 Fixes #456
@@ -121,6 +128,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ## Commit Frequency
 
 ### One Commit Per Logical Change
+
 ```
 Good:
 commit 1: feat(Button): add loading state
@@ -132,6 +140,7 @@ commit 1: feat(Button): add loading state, fix disabled styling, add tests
 ```
 
 ### Batch Related Micro-Changes
+
 ```
 Good:
 commit 1: style: format all components

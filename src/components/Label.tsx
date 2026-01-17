@@ -2,11 +2,24 @@ import { JSX, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-type LabelColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
+/**
+ * Color variants for the Label component.
+ */
+export type LabelColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
+/**
+ * Props for the Label component.
+ */
 export interface LabelProps
   extends Omit<JSX.LabelHTMLAttributes<HTMLLabelElement>, 'color'> {
+  /**
+   * Color variant of the label.
+   * @default 'gray'
+   */
   color?: LabelColor;
+  /**
+   * Text value to display in the label.
+   */
   value?: string;
   children?: JSX.Element;
 }
@@ -23,7 +36,10 @@ const theme = {
   },
 };
 
-const Label = (props: LabelProps) => {
+/**
+ * Label component for form field labels.
+ */
+const Label = (props: LabelProps): JSX.Element => {
   const [local, labelProps] = splitProps(props, ['color', 'class', 'value', 'children']);
 
   const color = createMemo(() => local.color || 'gray');

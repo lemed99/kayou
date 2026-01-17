@@ -16,16 +16,17 @@ The MultiSelect component has solid SolidJS patterns and good code organization 
 
 ### Dimension Breakdown
 
-| Dimension | Score | Weight | Weighted |
-|-----------|-------|--------|----------|
-| Type Safety | 20/25 | 25% | 20 |
-| SolidJS Practices | 23/25 | 25% | 23 |
-| API Design | 11/15 | 15% | 11 |
-| Accessibility | 2/20 | 20% | 2 |
-| Performance | 10/10 | 10% | 10 |
-| Testing/Docs | 0/5 | 5% | 0 |
+| Dimension         | Score | Weight | Weighted |
+| ----------------- | ----- | ------ | -------- |
+| Type Safety       | 20/25 | 25%    | 20       |
+| SolidJS Practices | 23/25 | 25%    | 23       |
+| API Design        | 11/15 | 15%    | 11       |
+| Accessibility     | 2/20  | 20%    | 2        |
+| Performance       | 10/10 | 10%    | 10       |
+| Testing/Docs      | 0/5   | 5%     | 0        |
 
 ### Score Interpretation
+
 **Needs Work** - Significant issues must be addressed before release. The accessibility score alone makes this component unsuitable for production without fixes.
 
 ---
@@ -39,6 +40,7 @@ The MultiSelect component has solid SolidJS patterns and good code organization 
 **Line(s):** 156-172 (MultiSelect), 336-405 (useSelect Layout)
 
 **Current Code:**
+
 ```typescript
 // Options container has no role
 <div ref={setOptionsContainerRef} class={optionsContainerClass}>
@@ -55,6 +57,7 @@ The MultiSelect component has solid SolidJS patterns and good code organization 
 
 **Problem:**
 The dropdown lacks all required ARIA attributes for a multi-select listbox:
+
 - No `role="listbox"` on the options container
 - No `role="option"` on each option
 - No `aria-selected` to indicate selected state
@@ -63,6 +66,7 @@ The dropdown lacks all required ARIA attributes for a multi-select listbox:
 Screen reader users cannot understand this is a selectable list or which items are selected.
 
 **Solution:**
+
 ```typescript
 // Options container
 <div
@@ -92,6 +96,7 @@ Screen reader users cannot understand this is a selectable list or which items a
 **Line(s):** 82-100
 
 **Current Code:**
+
 ```typescript
 <TextInput
   ref={setInputRef}
@@ -104,6 +109,7 @@ Screen reader users cannot understand this is a selectable list or which items a
 
 **Problem:**
 The trigger input doesn't communicate its expandable nature:
+
 - Missing `role="combobox"`
 - Missing `aria-haspopup="listbox"`
 - Missing `aria-expanded` to indicate open/closed state
@@ -111,6 +117,7 @@ The trigger input doesn't communicate its expandable nature:
 
 **Solution:**
 The TextInput needs to pass through ARIA props, or use a wrapper:
+
 ```typescript
 <TextInput
   ref={setInputRef}
@@ -133,6 +140,7 @@ The TextInput needs to pass through ARIA props, or use a wrapper:
 **Line(s):** 245-314 (useSelect handleKeyDown)
 
 **Current Code:**
+
 ```typescript
 const handleKeyDown = (e, copy = false) => {
   const { key } = e;
@@ -147,6 +155,7 @@ const handleKeyDown = (e, copy = false) => {
 Users cannot close the dropdown with the Escape key, which is a standard expected behavior for all dropdowns and required by WCAG.
 
 **Solution:**
+
 ```typescript
 if (key === 'Escape') {
   e.preventDefault();
@@ -167,6 +176,7 @@ if (key === 'Escape') {
 **Line(s):** selectUtils.tsx:49-66, 68-80
 
 **Current Code:**
+
 ```typescript
 export const ClearContentButton = (props) => {
   return (
@@ -187,6 +197,7 @@ export const ChevronDownButton = (props) => (
 Screen readers will announce these as unlabeled buttons. Users won't know what action they perform.
 
 **Solution:**
+
 ```typescript
 <button type="button" aria-label="Clear selection" ...>
   <XCloseIcon class="size-4" aria-hidden="true" />
@@ -210,6 +221,7 @@ Screen readers will announce these as unlabeled buttons. Users won't know what a
 **Line:** 32
 
 **Current Code:**
+
 ```typescript
 export default function MultiSelect(props: MultiSelectProps) {
 ```
@@ -218,6 +230,7 @@ export default function MultiSelect(props: MultiSelectProps) {
 Missing explicit return type. While TypeScript infers `JSX.Element`, explicit return types improve code clarity and catch errors earlier.
 
 **Solution:**
+
 ```typescript
 export default function MultiSelect(props: MultiSelectProps): JSX.Element {
 ```
@@ -233,6 +246,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
 **Line(s):** 133-141
 
 **Current Code:**
+
 ```typescript
 <input
   ref={setSearchRef}
@@ -247,6 +261,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
 The search input has no associated label. Screen readers will not announce what this input is for. Placeholder is not a substitute for a label.
 
 **Solution:**
+
 ```typescript
 <label class="sr-only" for="multiselect-search">Search options</label>
 <input
@@ -268,6 +283,7 @@ The search input has no associated label. Screen readers will not announce what 
 **Line:** 21
 
 **Current Code:**
+
 ```typescript
 export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
   options: Option[];
@@ -282,6 +298,7 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
 
 **Solution:**
 Make `values` optional with a default:
+
 ```typescript
 values?: string[];
 
@@ -303,6 +320,7 @@ const values = () => local.values ?? [];
 Standard listbox keyboard navigation includes Home/End keys to jump to first/last option. Currently only Arrow keys are supported.
 
 **Solution:**
+
 ```typescript
 if (key === 'Home') {
   e.preventDefault();
@@ -333,6 +351,7 @@ if (key === 'End') {
 **Line(s):** 70-76
 
 **Current Code:**
+
 ```typescript
 const getDisplayValue = () => {
   if (selectedOptions().length === 0) return '';
@@ -347,11 +366,15 @@ const getDisplayValue = () => {
 This function recalculates on every access. While not expensive for small selections, it creates intermediate arrays. Should use `createMemo` for consistency with SolidJS patterns.
 
 **Solution:**
+
 ```typescript
 const displayValue = createMemo(() => {
   const selected = selectedOptions();
   if (selected.length === 0) return '';
-  return selected.map((o) => o.label).reverse().join(' • ');
+  return selected
+    .map((o) => o.label)
+    .reverse()
+    .join(' • ');
 });
 ```
 
@@ -366,6 +389,7 @@ const displayValue = createMemo(() => {
 **Description:** The `MultiSelectProps` interface lacks JSDoc comments documenting each prop's purpose and defaults. Props like `optionRowHeight`, `isLazyLoading`, `displayValue`, and `cta` are not self-explanatory.
 
 **Solution:**
+
 ```typescript
 export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
   /** Array of options to display in the dropdown */
@@ -395,6 +419,7 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
 **Category:** Testing/Docs
 
 **Description:** No test file exists for the MultiSelect component. Tests should cover:
+
 - Rendering with options
 - Single and multiple selection
 - Search/filter functionality
@@ -412,6 +437,7 @@ export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect'> {
 **Category:** Testing/Docs
 
 **Description:** No documentation page exists in `doc/src/pages/components/`. A documentation page should include:
+
 - Props table with descriptions
 - Basic usage example
 - Search functionality example
@@ -451,12 +477,12 @@ Things this component does well:
 
 Components that may have similar issues:
 
-| Component | Likely Issues | Priority |
-|-----------|---------------|----------|
-| Select | Same ARIA issues, missing listbox pattern | Critical |
-| SelectWithSearch | Same ARIA issues | Critical |
-| ClearContentButton | Missing aria-label (shared) | Critical |
-| ChevronDownButton | Missing aria-label (shared) | Critical |
+| Component          | Likely Issues                             | Priority |
+| ------------------ | ----------------------------------------- | -------- |
+| Select             | Same ARIA issues, missing listbox pattern | Critical |
+| SelectWithSearch   | Same ARIA issues                          | Critical |
+| ClearContentButton | Missing aria-label (shared)               | Critical |
+| ChevronDownButton  | Missing aria-label (shared)               | Critical |
 
 ---
 
@@ -506,20 +532,20 @@ After fixes, verify:
 
 Specific ARIA fixes required:
 
-| Element | Attribute | Value |
-|---------|-----------|-------|
-| Trigger input | `role` | `"combobox"` |
-| Trigger input | `aria-haspopup` | `"listbox"` |
-| Trigger input | `aria-expanded` | `isOpen()` |
-| Trigger input | `aria-controls` | `"listbox-id"` |
-| Options container | `role` | `"listbox"` |
-| Options container | `aria-multiselectable` | `"true"` |
-| Options container | `id` | `"listbox-id"` |
-| Each option | `role` | `"option"` |
-| Each option | `aria-selected` | `isSelected` |
-| Clear button | `aria-label` | `"Clear all selections"` |
-| Chevron button | `aria-label` | `"Open dropdown"` |
-| Search input | `aria-label` | `"Search options"` |
+| Element           | Attribute              | Value                    |
+| ----------------- | ---------------------- | ------------------------ |
+| Trigger input     | `role`                 | `"combobox"`             |
+| Trigger input     | `aria-haspopup`        | `"listbox"`              |
+| Trigger input     | `aria-expanded`        | `isOpen()`               |
+| Trigger input     | `aria-controls`        | `"listbox-id"`           |
+| Options container | `role`                 | `"listbox"`              |
+| Options container | `aria-multiselectable` | `"true"`                 |
+| Options container | `id`                   | `"listbox-id"`           |
+| Each option       | `role`                 | `"option"`               |
+| Each option       | `aria-selected`        | `isSelected`             |
+| Clear button      | `aria-label`           | `"Clear all selections"` |
+| Chevron button    | `aria-label`           | `"Open dropdown"`        |
+| Search input      | `aria-label`           | `"Search options"`       |
 
 ---
 
@@ -548,32 +574,32 @@ shared_hook: useSelect.tsx (316 lines)
 
 ## Post-Audit Fixes Applied
 
-| Issue | Status | Date | Files Modified |
-|-------|--------|------|----------------|
-| Missing listbox ARIA pattern | ✅ Fixed | 2026-01-13 | useSelect.tsx, VirtualList.tsx |
-| Missing combobox ARIA on trigger | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Missing Escape key handling | ✅ Fixed | 2026-01-13 | useSelect.tsx |
-| Missing Home/End key support | ✅ Fixed | 2026-01-13 | useSelect.tsx |
-| Icon buttons missing aria-label | ✅ Fixed | 2026-01-13 | selectUtils.tsx |
-| Missing return type | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Search input missing label | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| `values` prop should have default | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Missing createMemo for displayValue | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Missing JSDoc comments | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Missing role="option" on options | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| Missing aria-selected on options | ✅ Fixed | 2026-01-13 | MultiSelect.tsx |
-| No test file | ⏳ Pending | - | - |
-| No documentation | ⏳ Pending | - | - |
+| Issue                               | Status     | Date       | Files Modified                 |
+| ----------------------------------- | ---------- | ---------- | ------------------------------ |
+| Missing listbox ARIA pattern        | ✅ Fixed   | 2026-01-13 | useSelect.tsx, VirtualList.tsx |
+| Missing combobox ARIA on trigger    | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Missing Escape key handling         | ✅ Fixed   | 2026-01-13 | useSelect.tsx                  |
+| Missing Home/End key support        | ✅ Fixed   | 2026-01-13 | useSelect.tsx                  |
+| Icon buttons missing aria-label     | ✅ Fixed   | 2026-01-13 | selectUtils.tsx                |
+| Missing return type                 | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Search input missing label          | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| `values` prop should have default   | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Missing createMemo for displayValue | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Missing JSDoc comments              | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Missing role="option" on options    | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| Missing aria-selected on options    | ✅ Fixed   | 2026-01-13 | MultiSelect.tsx                |
+| No test file                        | ⏳ Pending | -          | -                              |
+| No documentation                    | ⏳ Pending | -          | -                              |
 
 ### Revised Score After Fixes: ~85/100
 
-| Dimension | Before | After |
-|-----------|--------|-------|
-| Type Safety | 20/25 | 25/25 |
-| SolidJS Practices | 23/25 | 25/25 |
-| API Design | 11/15 | 14/15 |
-| Accessibility | 2/20 | 18/20 |
-| Performance | 10/10 | 10/10 |
-| Testing/Docs | 0/5 | 0/5 |
+| Dimension         | Before | After |
+| ----------------- | ------ | ----- |
+| Type Safety       | 20/25  | 25/25 |
+| SolidJS Practices | 23/25  | 25/25 |
+| API Design        | 11/15  | 14/15 |
+| Accessibility     | 2/20   | 18/20 |
+| Performance       | 10/10  | 10/10 |
+| Testing/Docs      | 0/5    | 0/5   |
 
 **Note:** Testing/Docs score remains at 0/5 as tests and documentation still need to be created.

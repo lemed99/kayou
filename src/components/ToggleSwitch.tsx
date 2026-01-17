@@ -2,12 +2,42 @@ import { JSX, Show, createUniqueId, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * Color variants for the ToggleSwitch component.
+ */
+export type ToggleSwitchColor =
+  | 'blue'
+  | 'dark'
+  | 'failure'
+  | 'gray'
+  | 'success'
+  | 'warning';
+
+/**
+ * Props for the ToggleSwitch component.
+ */
 export interface ToggleSwitchProps
   extends Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> {
+  /**
+   * Whether the switch is in the on state.
+   */
   checked: boolean;
-  color?: 'blue' | 'dark' | 'failure' | 'gray' | 'success' | 'warning';
+  /**
+   * Color variant of the switch when active.
+   * @default 'blue'
+   */
+  color?: ToggleSwitchColor;
+  /**
+   * Label text for the switch.
+   */
   label: string;
+  /**
+   * Callback fired when the switch state changes.
+   */
   onChange: (checked: boolean) => void;
+  /**
+   * Form input name for hidden checkbox.
+   */
   name?: string;
 }
 
@@ -51,7 +81,11 @@ const theme = {
   },
 };
 
-const ToggleSwitch = (props: ToggleSwitchProps) => {
+/**
+ * ToggleSwitch component for boolean input.
+ * Uses role="switch" and aria-checked for accessibility.
+ */
+const ToggleSwitch = (props: ToggleSwitchProps): JSX.Element => {
   const [local, otherProps] = splitProps(props, [
     'checked',
     'class',

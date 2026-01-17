@@ -34,6 +34,7 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
     renderArrow = false,
     arrowAlignment = 'center',
     arrowOffset = 0,
+    arrowInset = 0,
   } = options;
 
   const [currentPlacement, setCurrentPlacement] =
@@ -126,6 +127,7 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
           finalPlacement,
           arrowAlignment,
           arrowOffset,
+          arrowInset,
         );
         setArrowPosition(newArrowPosition);
       } else {

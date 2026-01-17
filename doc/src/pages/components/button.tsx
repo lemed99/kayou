@@ -7,7 +7,25 @@ export default function ButtonPage() {
   return (
     <DocPage
       title="Button"
-      description="A versatile button component for triggering actions and submitting forms. Supports eight color variants, three sizes, and built-in loading state with spinner overlay. Built with accessibility in mind, including keyboard support and screen reader announcements via aria-busy."
+      description="A versatile button component for triggering actions and submitting forms. Buttons are the primary interactive elements in any interface, used for everything from form submissions to navigation actions. This component supports eight color variants for visual hierarchy, three sizes for different contexts, and a built-in loading state with spinner overlay that prevents double-submissions. Built with accessibility in mind, including keyboard support and screen reader announcements via aria-busy during loading states."
+      keyConcepts={[
+        {
+          term: 'Color Variants',
+          explanation:
+            'Eight colors establish visual hierarchy. Use "info" or "blue" for primary actions, "gray" or "light" for secondary, and semantic colors (success, warning, failure) for contextual actions.',
+        },
+        {
+          term: 'Loading State',
+          explanation:
+            'When isLoading is true, a spinner overlay appears and the button becomes non-interactive. This prevents accidental double-clicks during async operations.',
+        },
+        {
+          term: 'Button Types',
+          explanation:
+            'The type prop controls form behavior: "submit" triggers form submission, "reset" clears forms, and "button" (default) prevents form submission.',
+        },
+      ]}
+      value="Consistent button styling establishes clear interaction patterns. Users learn to recognize primary vs secondary actions, understand loading feedback, and trust that disabled buttons won't respond. This predictability reduces errors and increases confidence in the interface."
       props={[
         {
           name: 'children',
@@ -55,7 +73,8 @@ export default function ButtonPage() {
       examples={[
         {
           title: 'Color Variants',
-          description: 'Eight color variants for different purposes and visual hierarchy.',
+          description:
+            'Eight color variants for different purposes and visual hierarchy.',
           code: `<Button color="info">Info</Button>
 <Button color="gray">Gray</Button>
 <Button color="dark">Dark</Button>
@@ -93,25 +112,31 @@ export default function ButtonPage() {
         },
         {
           title: 'Loading State',
-          description: 'Shows a spinner overlay during async operations. The button is automatically disabled.',
+          description:
+            'Shows a spinner overlay during async operations. The button is automatically disabled.',
           code: `<Button isLoading={true}>Saving...</Button>
 <Button isLoading={true} color="success">Processing</Button>`,
           component: () => (
             <>
               <Button isLoading={true}>Saving...</Button>
-              <Button isLoading={true} color="success">Processing</Button>
+              <Button isLoading={true} color="success">
+                Processing
+              </Button>
             </>
           ),
         },
         {
           title: 'Disabled State',
-          description: 'Prevents user interaction when the button should not be clickable.',
+          description:
+            'Prevents user interaction when the button should not be clickable.',
           code: `<Button disabled>Disabled</Button>
 <Button disabled color="success">Disabled Success</Button>`,
           component: () => (
             <>
               <Button disabled>Disabled</Button>
-              <Button disabled color="success">Disabled Success</Button>
+              <Button disabled color="success">
+                Disabled Success
+              </Button>
             </>
           ),
         },

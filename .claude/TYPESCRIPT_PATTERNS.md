@@ -90,7 +90,7 @@ interface SelectProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onSelect
 ### Basic Signals
 
 ```typescript
-import { createSignal, Accessor, Setter } from 'solid-js';
+import { Accessor, Setter, createSignal } from 'solid-js';
 
 // Implicit typing
 const [count, setCount] = createSignal(0); // Signal<number>
@@ -101,7 +101,9 @@ const [user, setUser] = createSignal<User | null>(null);
 const [items, setItems] = createSignal<Item[]>([]);
 
 // Union types
-const [status, setStatus] = createSignal<'idle' | 'loading' | 'success' | 'error'>('idle');
+const [status, setStatus] = createSignal<'idle' | 'loading' | 'success' | 'error'>(
+  'idle',
+);
 ```
 
 ### Signal Types for Props
@@ -121,7 +123,7 @@ interface ContextValue {
 ## Store Typing
 
 ```typescript
-import { createStore, SetStoreFunction } from 'solid-js/store';
+import { SetStoreFunction, createStore } from 'solid-js/store';
 
 interface AppState {
   user: {
@@ -428,10 +430,10 @@ export default defineConfig({
 
 ### Why Both Are Required
 
-| Config | Purpose | Error if Missing |
-|--------|---------|------------------|
-| `vite.config.ts` | Runtime module resolution during build/dev | `Module not found` at runtime |
-| `tsconfig.json` | TypeScript type checking and IDE intellisense | Red squiggles, type errors |
+| Config           | Purpose                                       | Error if Missing              |
+| ---------------- | --------------------------------------------- | ----------------------------- |
+| `vite.config.ts` | Runtime module resolution during build/dev    | `Module not found` at runtime |
+| `tsconfig.json`  | TypeScript type checking and IDE intellisense | Red squiggles, type errors    |
 
 ### Common Alias Patterns
 

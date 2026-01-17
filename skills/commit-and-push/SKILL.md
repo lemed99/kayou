@@ -38,6 +38,7 @@ Claude:
 ### Phase 1: Analyze Changes
 
 **Gather information:**
+
 ```bash
 # Check current branch
 git branch --show-current
@@ -54,6 +55,7 @@ git log --oneline -10
 ```
 
 **Categorize changes by:**
+
 - New files added
 - Files modified
 - Files deleted
@@ -72,6 +74,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **Types:**
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `refactor` - Code refactoring
@@ -81,6 +84,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - `chore` - Maintenance tasks
 
 **Rules for commit messages:**
+
 1. Subject line max 72 characters
 2. Use imperative mood ("add" not "added")
 3. List all significant changes in body
@@ -101,19 +105,24 @@ All notable changes to this project are documented here.
 ## [Unreleased]
 
 ### Added
+
 - New feature X
 
 ### Changed
+
 - Modified behavior Y
 
 ### Fixed
+
 - Bug fix Z
 
 ### Removed
+
 - Deprecated feature W
 ```
 
 **Categories:**
+
 - `Added` - New features
 - `Changed` - Changes to existing functionality
 - `Deprecated` - Soon-to-be removed features
@@ -122,6 +131,7 @@ All notable changes to this project are documented here.
 - `Security` - Security fixes
 
 **If CHANGELOG.md doesn't exist:**
+
 1. Create it with proper header
 2. Add current changes under [Unreleased]
 
@@ -148,6 +158,7 @@ git push -u origin <branch>
 ## Commit Message Examples
 
 ### Single Feature
+
 ```
 feat(Button): add loading state
 
@@ -159,6 +170,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 ### Multiple Changes
+
 ```
 feat(components): add Modal and Tooltip components
 
@@ -171,6 +183,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 ### Bug Fixes
+
 ```
 fix(Accordion): resolve keyboard navigation issues
 
@@ -182,6 +195,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 ### Refactoring
+
 ```
 refactor(theme): consolidate color tokens
 
@@ -193,6 +207,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 ### Mixed Changes
+
 ```
 feat(Input): add validation support with fixes
 
@@ -219,15 +234,18 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 **Claude:** "Found the following changes:
 
 **Modified files:**
+
 - `src/components/Button.tsx` - Added loading state
 - `src/components/Input.tsx` - Fixed validation styling
 
 **New files:**
+
 - `src/components/Modal.tsx` - New modal component
 
 I'll create a commit with these changes and update the changelog.
 
 **Commit message:**
+
 ```
 feat(components): add Modal and improve Button/Input
 
@@ -242,14 +260,17 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **CHANGELOG.md updated:**
+
 ```markdown
 ## [Unreleased]
 
 ### Added
+
 - Modal component with focus trap and keyboard support
 - Button loading state with spinner
 
 ### Fixed
+
 - Input validation styling in dark mode
 ```
 
@@ -276,6 +297,7 @@ In `.claude/config.json`:
 ```
 
 **Options:**
+
 - `autoPush` - Automatically push after commit (default: true)
 - `updateChangelog` - Update CHANGELOG.md (default: true)
 - `changelogPath` - Path to changelog file (default: "CHANGELOG.md")
@@ -294,16 +316,19 @@ In `.claude/config.json`:
 ### Edge Cases
 
 **No changes to commit:**
+
 ```
 "No changes detected. Working directory is clean."
 ```
 
 **Untracked files only:**
+
 ```
 "Found new files. Should I include them in the commit? [Y/n]"
 ```
 
 **Large number of changes:**
+
 ```
 "Found 50+ changed files. Would you like to:
 1. Commit all together

@@ -32,7 +32,7 @@ export interface NumberInputProps extends ExtendedTextInputProps {
   arrowUpLabel?: string;
   /** Accessible label for decrement button. Defaults to 'Decrease value'. */
   arrowDownLabel?: string;
-  /** Delay in ms before processing value after user stops typing. Defaults to 2000. Set to 0 to disable. */
+  /** Delay in ms before processing value after user stops typing. Defaults to 1000. Set to 0 to disable. */
   debounceDelay?: number;
 }
 
@@ -105,7 +105,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     }
     return local.step;
   });
-  const debounceDelay = createMemo(() => local.debounceDelay ?? 2000);
+  const debounceDelay = createMemo(() => local.debounceDelay ?? 1000);
 
   let inputRef: HTMLInputElement | undefined;
   let upBtnRef: HTMLButtonElement | undefined;
@@ -223,12 +223,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     }
   });
 
-  const onBlur = (
-    _e: FocusEvent & {
-      currentTarget: HTMLInputElement;
-      target: HTMLInputElement;
-    },
-  ) => {
+  const onBlur = () => {
     // Clear any pending debounce - we'll process immediately on blur
     clearDebounce();
     processValue();
@@ -239,7 +234,9 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     setButtonActive(upBtnRef, true);
 
     const min = minValue();
-    const currentVal = parseFloat(inputRef.value || (min !== undefined ? String(min) : '0'));
+    const currentVal = parseFloat(
+      inputRef.value || (min !== undefined ? String(min) : '0'),
+    );
     let newVal: number;
 
     if (!isValidNumber(currentVal, nullable(), allowNegative())) {
@@ -268,7 +265,9 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     setButtonActive(downBtnRef, true);
 
     const min = minValue();
-    const currentVal = parseFloat(inputRef.value || (min !== undefined ? String(min) : '0'));
+    const currentVal = parseFloat(
+      inputRef.value || (min !== undefined ? String(min) : '0'),
+    );
 
     if (!isValidNumber(currentVal, nullable(), allowNegative())) {
       const fallback = allowNegative() ? -step() : null;

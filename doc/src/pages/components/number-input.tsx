@@ -7,7 +7,25 @@ export default function NumberInputPage() {
   return (
     <DocPage
       title="NumberInput"
-      description="A specialized input component for numeric values with support for integers and floats, min/max constraints, step increments, and arrow buttons. Features debounced value processing, keyboard navigation, and proper validation."
+      description="A specialized input component optimized for numeric data entry. Unlike generic text inputs, NumberInput understands numbers—it supports integers and floating-point values, enforces min/max constraints, respects step increments, and provides optional arrow buttons for quick adjustments. The component features intelligent debounced value processing that auto-formats and validates after 2 seconds of inactivity, preventing premature validation errors while typing. It includes full clipboard support (Ctrl/Cmd+C/V/X), keyboard navigation (Arrow Up/Down to increment/decrement), and typed callbacks that return actual numbers rather than strings."
+      keyConcepts={[
+        {
+          term: 'Debounced Processing',
+          explanation:
+            'Values are processed and formatted after 2 seconds of inactivity (configurable via debounceDelay). This allows users to type freely without interruption, then see their input validated and formatted. Set debounceDelay to 0 for blur-only processing.',
+        },
+        {
+          term: 'Typed Callbacks',
+          explanation:
+            'The onValueChange callback returns number | null, not strings. This eliminates parsing logic in parent components and ensures type safety for numeric operations.',
+        },
+        {
+          term: 'Constraint Enforcement',
+          explanation:
+            'Min/max values are enforced on blur and through arrow buttons. The step prop controls increment/decrement amounts. For floats, precision controls decimal places.',
+        },
+      ]}
+      value="Numeric inputs are critical for financial data, quantities, measurements, and configuration values. Proper number handling prevents data corruption (leading zeros, invalid characters), ensures consistent precision for calculations, and provides a superior UX with keyboard shortcuts and smart validation timing."
       props={[
         {
           name: 'type',
@@ -67,7 +85,8 @@ export default function NumberInputPage() {
           name: 'debounceDelay',
           type: 'number',
           default: '2000',
-          description: 'Delay in ms before processing value after typing. Set to 0 to disable.',
+          description:
+            'Delay in ms before processing value after typing. Set to 0 to disable.',
         },
         {
           name: 'label',
@@ -210,6 +229,69 @@ export default function NumberInputPage() {
             />
           ),
         },
+        {
+          title: 'Debounced Value Processing',
+          description:
+            'Value is automatically processed after 2 seconds of inactivity. Type and wait to see the value format and emit.',
+          code: `const [value, setValue] = createSignal<number | null>(null);
+const [lastUpdate, setLastUpdate] = createSignal('');
+
+<NumberInput
+  type="float"
+  precision={2}
+  label="Debounced Input"
+  onValueChange={(v) => {
+    setValue(v);
+    setLastUpdate(new Date().toLocaleTimeString());
+  }}
+  helperText={\`Value: \${value()} | Last update: \${lastUpdate()}\`}
+/>`,
+          component: () => {
+            const [value, setValue] = createSignal<number | null>(null);
+            const [lastUpdate, setLastUpdate] = createSignal('');
+            return (
+              <NumberInput
+                type="float"
+                precision={2}
+                label="Debounced Input"
+                onValueChange={(v) => {
+                  setValue(v);
+                  setLastUpdate(new Date().toLocaleTimeString());
+                }}
+                helperText={`Value: ${value()} | Last update: ${lastUpdate()}`}
+              />
+            );
+          },
+        },
+        {
+          title: 'Custom Debounce Delay',
+          description: 'Set a custom delay (1 second) or disable debounce entirely.',
+          code: `<NumberInput
+  debounceDelay={1000}
+  label="1 Second Delay"
+  helperText="Processes after 1s of inactivity"
+/>
+
+<NumberInput
+  debounceDelay={0}
+  label="No Debounce"
+  helperText="Only processes on blur"
+/>`,
+          component: () => (
+            <div class="flex flex-col gap-4">
+              <NumberInput
+                debounceDelay={1000}
+                label="1 Second Delay"
+                helperText="Processes after 1s of inactivity"
+              />
+              <NumberInput
+                debounceDelay={0}
+                label="No Debounce"
+                helperText="Only processes on blur"
+              />
+            </div>
+          ),
+        },
       ]}
       usage={`import { NumberInput } from '@exowpee/the_rock';
 
@@ -243,7 +325,16 @@ const [quantity, setQuantity] = createSignal<number | null>(null);
 <NumberInput
   allowNegativeValues
   label="Temperature (°C)"
-/>`}
+/>
+
+// Custom debounce delay (1 second)
+<NumberInput
+  debounceDelay={1000}
+  onValueChange={(v) => console.log('Value:', v)}
+/>
+
+// Disable debounce (process only on blur)
+<NumberInput debounceDelay={0} />`}
     />
   );
 }

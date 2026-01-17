@@ -37,12 +37,14 @@ Claude:
 ### Phase 1: Load Context
 
 **Required Files (Load First):**
+
 ```
 .claude/PROJECT_CONTEXT.md          # Project overview
 .claude/COMPONENT_CONVENTIONS.md    # Library patterns
 ```
 
 **Reference Files (Load as Needed):**
+
 ```
 .claude/SOLIDJS_BEST_PRACTICES.md   # For SolidJS checks
 .claude/TYPESCRIPT_PATTERNS.md      # For type checks
@@ -51,6 +53,7 @@ Claude:
 ```
 
 **Skill References:**
+
 ```
 skills/solidjs-component-auditor/reference/audit-criteria.md
 skills/solidjs-component-auditor/reference/accessibility-standards.md
@@ -73,6 +76,7 @@ skills/solidjs-component-auditor/checklists/quick-audit.md
 #### 1. Type Safety (25 points)
 
 Check for:
+
 - [ ] Explicit props interface exists
 - [ ] No `any` types
 - [ ] Event handlers fully typed
@@ -81,6 +85,7 @@ Check for:
 - [ ] Generics where appropriate
 
 **Detection Patterns:**
+
 ```typescript
 // BAD: any type
 props: any
@@ -97,6 +102,7 @@ function Component(props: Props): JSX.Element {
 #### 2. SolidJS Practices (25 points)
 
 Check for:
+
 - [ ] **No props destructuring** (Critical!)
 - [ ] Signals called with `()` in JSX
 - [ ] `createMemo` for computed values
@@ -105,6 +111,7 @@ Check for:
 - [ ] No React patterns
 
 **Detection Patterns:**
+
 ```typescript
 // CRITICAL: Props destructuring
 function Component({ name, value }) // BAD
@@ -124,6 +131,7 @@ createEffect(() => {
 #### 3. API Design (15 points)
 
 Check for:
+
 - [ ] Uses `splitProps`
 - [ ] Spreads rest props
 - [ ] Supports `class` via twMerge
@@ -133,6 +141,7 @@ Check for:
 #### 4. Accessibility (20 points)
 
 Check for:
+
 - [ ] Interactive elements keyboard accessible
 - [ ] Icon buttons have `aria-label`
 - [ ] Form inputs have labels
@@ -145,6 +154,7 @@ Check for:
 #### 5. Performance (10 points)
 
 Check for:
+
 - [ ] `createMemo` for expensive operations
 - [ ] No memory leaks (cleanup present)
 - [ ] Virtualization for large lists
@@ -153,6 +163,7 @@ Check for:
 #### 6. Testing & Documentation (5 points)
 
 Check for:
+
 - [ ] Test file exists at `src/components/__tests__/[ComponentName].test.tsx`
 - [ ] JSDoc comments on props
 - [ ] Documentation page exists at `doc/src/pages/components/[component].tsx`
@@ -164,6 +175,7 @@ Check for:
 **Template:** `skills/solidjs-component-auditor/templates/audit-report.md`
 
 **Report Structure:**
+
 1. Executive Summary (2-3 sentences)
 2. Overall Score with breakdown
 3. Critical Issues (must fix)
@@ -179,29 +191,29 @@ Check for:
 Update `.claude/audits/MASTER_TRACKER.md`:
 
 ```markdown
-| Component | Last Audit | Score | Critical | High | Medium | Low | Status |
-|-----------|------------|-------|----------|------|--------|-----|--------|
+| Component | Last Audit | Score | Critical | High | Medium | Low | Status     |
+| --------- | ---------- | ----- | -------- | ---- | ------ | --- | ---------- |
 | Button    | 2024-01-15 | 72    | 2        | 3    | 5      | 2   | Needs work |
 ```
 
 ## Scoring Guide
 
-| Score | Rating | Meaning |
-|-------|--------|---------|
-| 90-100 | Excellent | Production ready, minimal changes |
-| 80-89 | Good | Minor improvements, ship with backlog |
-| 70-79 | Acceptable | Address high priority before release |
-| 60-69 | Needs Work | Significant issues, plan fixes |
-| <60 | Poor | Major refactor before use |
+| Score  | Rating     | Meaning                               |
+| ------ | ---------- | ------------------------------------- |
+| 90-100 | Excellent  | Production ready, minimal changes     |
+| 80-89  | Good       | Minor improvements, ship with backlog |
+| 70-79  | Acceptable | Address high priority before release  |
+| 60-69  | Needs Work | Significant issues, plan fixes        |
+| <60    | Poor       | Major refactor before use             |
 
 ## Issue Severity
 
-| Severity | Definition | Examples |
-|----------|------------|----------|
+| Severity     | Definition                         | Examples                                |
+| ------------ | ---------------------------------- | --------------------------------------- |
 | **Critical** | Breaks functionality or major a11y | Props destructuring, no keyboard access |
-| **High** | Significant problems | Missing types, no aria-label |
-| **Medium** | Code quality issues | Could use memo, missing JSDoc |
-| **Low** | Nice to have | Better naming, more examples |
+| **High**     | Significant problems               | Missing types, no aria-label            |
+| **Medium**   | Code quality issues                | Could use memo, missing JSDoc           |
+| **Low**      | Nice to have                       | Better naming, more examples            |
 
 ## Example Output
 
@@ -275,6 +287,7 @@ After audit, user can say:
 ```
 
 This triggers `solidjs-component-fixer` which:
+
 1. Reads the audit report
 2. Applies fixes in priority order
 3. Creates atomic commits

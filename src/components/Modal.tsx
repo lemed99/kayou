@@ -7,11 +7,39 @@ import { twMerge } from 'tailwind-merge';
 import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
 import { XCloseIcon } from '../icons';
 
+/**
+ * Size variants for the Modal component.
+ */
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'screen';
+
+/**
+ * Position options for the Modal component.
+ */
+export type ModalPosition = 'top-center' | 'center';
+
+/**
+ * Props for the Modal component.
+ */
 export interface ModalProps
   extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
+  /**
+   * Whether the modal is visible.
+   * @default false
+   */
   show?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'screen';
-  position?: 'top-center' | 'center';
+  /**
+   * Size variant of the modal.
+   * @default 'md'
+   */
+  size?: ModalSize;
+  /**
+   * Position of the modal on screen.
+   * @default 'top-center'
+   */
+  position?: ModalPosition;
+  /**
+   * Callback fired when the modal is closed.
+   */
   onClose: (event: MouseEvent) => void;
   children: JSX.Element;
 }
@@ -47,7 +75,11 @@ const theme = {
   },
 };
 
-const Modal = (props: ModalProps) => {
+/**
+ * Modal dialog component with backdrop and close button.
+ * Uses role="dialog" and aria-modal for accessibility.
+ */
+const Modal = (props: ModalProps): JSX.Element => {
   const size = createMemo(() => props.size || 'md');
   const position = createMemo(() => props.position || 'top-center');
   const [modalEl, setModalEl] = createSignal<HTMLDivElement | undefined>();
@@ -85,6 +117,8 @@ const Modal = (props: ModalProps) => {
         >
           <div
             ref={setModalEl}
+            role="dialog"
+            aria-modal="true"
             class={twMerge(theme.content.inner, theme.content.sizes[size()])}
             onClick={(e) => e.stopPropagation()}
           >

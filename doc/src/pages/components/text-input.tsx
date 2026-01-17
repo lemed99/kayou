@@ -7,7 +7,25 @@ export default function TextInputPage() {
   return (
     <DocPage
       title="TextInput"
-      description="A flexible text input component with support for labels, helper text, icons, addons, and validation states. Built with accessibility in mind, including proper ARIA attributes and keyboard support."
+      description="A flexible text input component that serves as the foundation for form data entry. It provides a complete input experience with labels for identification, helper text for guidance, icons for visual context, and addons for prefixes like currency symbols or domain names. The component supports five validation states with corresponding colors for immediate feedback, loading states for async validation, and proper ARIA attributes ensuring screen readers announce labels, errors, and requirements correctly."
+      keyConcepts={[
+        {
+          term: 'Validation States',
+          explanation:
+            'The color prop indicates validation status: gray (neutral), success (valid), warning (caution), failure (error). Each state has distinct styling and can be paired with helperText for explanations.',
+        },
+        {
+          term: 'Icons and Addons',
+          explanation:
+            'Icons appear inside the input for visual hints (search, email). Addons are external elements like "https://" prefixes or currency symbols that provide context without being part of the input value.',
+        },
+        {
+          term: 'Accessibility',
+          explanation:
+            'Labels are properly associated via htmlFor, helper text is linked with aria-describedby, and required fields are announced to screen readers.',
+        },
+      ]}
+      value="Text inputs are the most common form elements. Consistent styling, clear validation feedback, and proper accessibility ensure users can complete forms efficiently and confidently, reducing abandonment rates and support requests."
       props={[
         {
           name: 'sizing',

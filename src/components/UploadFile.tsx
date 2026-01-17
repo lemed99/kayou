@@ -3,20 +3,40 @@ import { For, JSX, Show, createSignal } from 'solid-js';
 import { useToast } from '../hooks';
 import { File04Icon, HandIcon, Upload01Icon, XIcon } from '../icons';
 
-export const UploadFile = (props: {
+/**
+ * Props for the UploadFile component.
+ */
+export interface UploadFileProps {
+  /** Callback fired when files are selected or dropped. */
   onChange: (file: File | FileList) => void;
+  /** Whether multiple files can be selected. @default false */
   multiple?: boolean;
+  /** Accepted file types (e.g., 'image/*,.pdf'). */
   accept?: string;
+  /** Maximum file size in bytes. */
   maxSize?: number;
+  /** Maximum number of files allowed. */
   maxLength?: number;
+  /** Text for the drag and drop area. */
   dragDropText: string;
+  /** Text for the file chooser button. */
   chooseFileText: string;
+  /** Helper text displayed below the upload area. */
   helperText?: string;
+  /** Error message when max length is exceeded. */
   maxLengthError?: string;
+  /** Function to generate error message for files exceeding max size. */
   maxSizeError?: (file: File) => string;
+  /** Function to generate error message for invalid file types. */
   fileTypeError?: (file: File) => string;
+  /** Toast notification key for errors. @default 'error' */
   toastKey?: string;
-}) => {
+}
+
+/**
+ * UploadFile component for file uploads via drag-and-drop or file picker.
+ */
+export const UploadFile = (props: UploadFileProps): JSX.Element => {
   const toast = useToast();
 
   const [dragActive, setDragActive] = createSignal(false);
@@ -211,12 +231,14 @@ export const UploadFile = (props: {
                     <p class="text-xs text-gray-500">{formatFileSize(file.size)}</p>
                   </div>
                 </div>
-                <div
+                <button
+                  type="button"
                   onClick={() => removeFile(index())}
+                  aria-label={`Remove ${file.name}`}
                   class="shrink-0 cursor-pointer p-1 text-gray-500 transition-colors hover:text-red-700"
                 >
                   <XIcon />
-                </div>
+                </button>
               </div>
             )}
           </For>

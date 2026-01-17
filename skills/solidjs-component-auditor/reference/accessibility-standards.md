@@ -3,6 +3,7 @@
 ## Quick Reference by Component
 
 ### Button
+
 ```tsx
 // Standard button - no extra ARIA needed
 <button type="button" onClick={handler}>
@@ -34,15 +35,12 @@
 ```
 
 ### Modal/Dialog
+
 ```tsx
 <Show when={isOpen()}>
   <Portal>
     {/* Backdrop */}
-    <div
-      class="backdrop"
-      aria-hidden="true"
-      onClick={onClose}
-    />
+    <div class="backdrop" aria-hidden="true" onClick={onClose} />
 
     {/* Dialog */}
     <div
@@ -66,12 +64,14 @@
 ```
 
 **Requirements:**
+
 - Focus trapped inside when open
 - ESC key closes
 - Focus returns to trigger on close
 - Background has `aria-hidden="true"`
 
 ### Select/Combobox
+
 ```tsx
 <div class="select-container">
   <label id="select-label">Choose option</label>
@@ -90,11 +90,7 @@
   </button>
 
   <Show when={isOpen()}>
-    <ul
-      id="select-listbox"
-      role="listbox"
-      aria-labelledby="select-label"
-    >
+    <ul id="select-listbox" role="listbox" aria-labelledby="select-label">
       <For each={options}>
         {(option, index) => (
           <li
@@ -117,6 +113,7 @@
 ```
 
 **Keyboard:**
+
 - `Enter/Space`: Open dropdown, select option
 - `ArrowDown/Up`: Navigate options
 - `Escape`: Close dropdown
@@ -124,6 +121,7 @@
 - Type character: Jump to matching
 
 ### Accordion
+
 ```tsx
 <div class="accordion">
   <For each={panels}>
@@ -137,10 +135,7 @@
             onClick={() => toggle(panel.id)}
           >
             {panel.title}
-            <ChevronIcon
-              aria-hidden="true"
-              class={isOpen(panel.id) ? 'rotate-90' : ''}
-            />
+            <ChevronIcon aria-hidden="true" class={isOpen(panel.id) ? 'rotate-90' : ''} />
           </button>
         </h3>
 
@@ -159,6 +154,7 @@
 ```
 
 ### Tabs
+
 ```tsx
 <div class="tabs">
   <div role="tablist" aria-label="Content sections">
@@ -196,17 +192,21 @@
 ```
 
 **Keyboard:**
+
 - `ArrowLeft/Right`: Navigate tabs
 - `Home/End`: First/last tab
 - `Enter/Space`: Activate tab (if using manual activation)
 
 ### Form Input
+
 ```tsx
 <div class="form-field">
   <label for={inputId}>
     {label}
     <Show when={required}>
-      <span aria-hidden="true" class="text-red-500">*</span>
+      <span aria-hidden="true" class="text-red-500">
+        *
+      </span>
     </Show>
   </label>
 
@@ -216,10 +216,9 @@
     aria-required={required}
     aria-invalid={hasError()}
     aria-describedby={
-      [
-        helperText && `${inputId}-helper`,
-        hasError() && `${inputId}-error`,
-      ].filter(Boolean).join(' ') || undefined
+      [helperText && `${inputId}-helper`, hasError() && `${inputId}-error`]
+        .filter(Boolean)
+        .join(' ') || undefined
     }
     value={value()}
     onInput={handleInput}
@@ -232,11 +231,7 @@
   </Show>
 
   <Show when={hasError()}>
-    <span
-      id={`${inputId}-error`}
-      class="error-text"
-      role="alert"
-    >
+    <span id={`${inputId}-error`} class="error-text" role="alert">
       {errorMessage()}
     </span>
   </Show>
@@ -244,6 +239,7 @@
 ```
 
 ### Checkbox
+
 ```tsx
 <div class="checkbox-wrapper">
   <input
@@ -264,6 +260,7 @@
 ```
 
 ### Tooltip
+
 ```tsx
 <>
   <button
@@ -279,12 +276,7 @@
 
   <Show when={isVisible()}>
     <Portal>
-      <div
-        id={tooltipId}
-        role="tooltip"
-        ref={setTooltipRef}
-        style={floatingStyles()}
-      >
+      <div id={tooltipId} role="tooltip" ref={setTooltipRef} style={floatingStyles()}>
         {content}
       </div>
     </Portal>
@@ -293,6 +285,7 @@
 ```
 
 ### Alert/Toast
+
 ```tsx
 // Assertive - for errors, requires immediate attention
 <div role="alert" aria-live="assertive">
@@ -308,6 +301,7 @@
 ```
 
 ### DataTable
+
 ```tsx
 <table role="grid" aria-label={tableLabel}>
   <thead>
@@ -325,11 +319,7 @@
 
       <For each={columns}>
         {(column) => (
-          <th
-            role="columnheader"
-            scope="col"
-            aria-sort={getSortDirection(column.key)}
-          >
+          <th role="columnheader" scope="col" aria-sort={getSortDirection(column.key)}>
             <Show when={column.sortable} fallback={column.label}>
               <button onClick={() => sort(column.key)}>
                 {column.label}
@@ -345,10 +335,7 @@
   <tbody>
     <For each={rows}>
       {(row, rowIndex) => (
-        <tr
-          role="row"
-          aria-selected={isSelected(rowIndex())}
-        >
+        <tr role="row" aria-selected={isSelected(rowIndex())}>
           <Show when={selectable}>
             <td role="gridcell">
               <input
@@ -375,6 +362,7 @@
 ```
 
 ### Pagination
+
 ```tsx
 <nav aria-label="Pagination navigation">
   <ul class="pagination">
@@ -420,6 +408,7 @@
 ## Focus Management Utilities
 
 ### Focus Trap
+
 ```typescript
 function createFocusTrap(containerRef: Accessor<HTMLElement | undefined>) {
   createEffect(() => {
@@ -430,8 +419,9 @@ function createFocusTrap(containerRef: Accessor<HTMLElement | undefined>) {
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
     const focusableElements = () =>
-      Array.from(container.querySelectorAll<HTMLElement>(focusableSelector))
-        .filter(el => !el.hasAttribute('disabled'));
+      Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (el) => !el.hasAttribute('disabled'),
+      );
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -461,6 +451,7 @@ function createFocusTrap(containerRef: Accessor<HTMLElement | undefined>) {
 ```
 
 ### Return Focus
+
 ```typescript
 function createReturnFocus() {
   let previousElement: HTMLElement | null = null;
@@ -480,12 +471,12 @@ function createReturnFocus() {
 
 ## Color Contrast Quick Reference
 
-| Text Type | Minimum Ratio | Example Use |
-|-----------|---------------|-------------|
-| Normal text (< 18pt) | 4.5:1 | Body text, labels |
-| Large text (≥ 18pt or 14pt bold) | 3:1 | Headings |
-| UI components | 3:1 | Buttons, inputs, icons |
-| Decorative | None | Backgrounds, borders |
+| Text Type                        | Minimum Ratio | Example Use            |
+| -------------------------------- | ------------- | ---------------------- |
+| Normal text (< 18pt)             | 4.5:1         | Body text, labels      |
+| Large text (≥ 18pt or 14pt bold) | 3:1           | Headings               |
+| UI components                    | 3:1           | Buttons, inputs, icons |
+| Decorative                       | None          | Backgrounds, borders   |
 
 ### Tailwind Classes That May Fail
 

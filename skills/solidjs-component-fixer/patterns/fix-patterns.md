@@ -7,6 +7,7 @@ Quick copy-paste patterns for common fixes.
 ### Add Props Interface
 
 **Before:**
+
 ```typescript
 function Component(props) {
   return <div>{props.value}</div>
@@ -14,6 +15,7 @@ function Component(props) {
 ```
 
 **After:**
+
 ```typescript
 import { JSX } from 'solid-js'
 
@@ -32,43 +34,47 @@ function Component(props: ComponentProps): JSX.Element {
 ### Replace `any` Type
 
 **Before:**
+
 ```typescript
 interface Props {
-  data: any
-  onChange: any
-  options: any[]
+  data: any;
+  onChange: any;
+  options: any[];
 }
 ```
 
 **After:**
+
 ```typescript
 interface DataItem {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface Props {
-  data: DataItem | null
-  onChange: (value: DataItem) => void
-  options: DataItem[]
+  data: DataItem | null;
+  onChange: (value: DataItem) => void;
+  options: DataItem[];
 }
 ```
 
 ### Type Event Handlers
 
 **Before:**
+
 ```typescript
 interface Props {
-  onClick?: Function
-  onChange?: (e: any) => void
+  onClick?: Function;
+  onChange?: (e: any) => void;
 }
 ```
 
 **After:**
+
 ```typescript
 interface Props {
-  onClick?: (event: MouseEvent) => void
-  onChange?: (value: string, event: InputEvent) => void
+  onClick?: (event: MouseEvent) => void;
+  onChange?: (value: string, event: InputEvent) => void;
 }
 ```
 
@@ -77,6 +83,7 @@ interface Props {
 ### Fix Props Destructuring (CRITICAL)
 
 **Before:**
+
 ```typescript
 function Button({ variant, size, onClick, disabled, children }) {
   return (
@@ -92,6 +99,7 @@ function Button({ variant, size, onClick, disabled, children }) {
 ```
 
 **After:**
+
 ```typescript
 function Button(props: ButtonProps): JSX.Element {
   return (
@@ -109,6 +117,7 @@ function Button(props: ButtonProps): JSX.Element {
 ### Add splitProps
 
 **Before:**
+
 ```typescript
 function Input(props: InputProps) {
   return (
@@ -127,6 +136,7 @@ function Input(props: InputProps) {
 ```
 
 **After:**
+
 ```typescript
 import { splitProps } from 'solid-js'
 
@@ -156,6 +166,7 @@ function Input(props: InputProps): JSX.Element {
 ### Add createMemo for Defaults
 
 **Before:**
+
 ```typescript
 function Component(props: Props) {
   const variant = props.variant || 'default'
@@ -166,6 +177,7 @@ function Component(props: Props) {
 ```
 
 **After:**
+
 ```typescript
 import { createMemo } from 'solid-js'
 
@@ -180,30 +192,33 @@ function Component(props: Props): JSX.Element {
 ### Add Effect Cleanup
 
 **Before:**
+
 ```typescript
 createEffect(() => {
-  const handler = () => console.log('resize')
-  window.addEventListener('resize', handler)
-})
+  const handler = () => console.log('resize');
+  window.addEventListener('resize', handler);
+});
 ```
 
 **After:**
+
 ```typescript
-import { createEffect, onCleanup } from 'solid-js'
+import { createEffect, onCleanup } from 'solid-js';
 
 createEffect(() => {
-  const handler = () => console.log('resize')
-  window.addEventListener('resize', handler)
+  const handler = () => console.log('resize');
+  window.addEventListener('resize', handler);
 
   onCleanup(() => {
-    window.removeEventListener('resize', handler)
-  })
-})
+    window.removeEventListener('resize', handler);
+  });
+});
 ```
 
 ### Replace Effect with Memo (Derived State)
 
 **Before:**
+
 ```typescript
 function Component() {
   const [items, setItems] = createSignal([])
@@ -218,6 +233,7 @@ function Component() {
 ```
 
 **After:**
+
 ```typescript
 function Component(): JSX.Element {
   const [items, setItems] = createSignal([])
@@ -233,6 +249,7 @@ function Component(): JSX.Element {
 ### Add aria-label to Icon Button
 
 **Before:**
+
 ```typescript
 <button onClick={onClose}>
   <XIcon />
@@ -240,6 +257,7 @@ function Component(): JSX.Element {
 ```
 
 **After:**
+
 ```typescript
 <button
   onClick={onClose}
@@ -252,6 +270,7 @@ function Component(): JSX.Element {
 ### Add Keyboard Support
 
 **Before:**
+
 ```typescript
 <div
   class="option"
@@ -262,6 +281,7 @@ function Component(): JSX.Element {
 ```
 
 **After:**
+
 ```typescript
 <div
   role="option"
@@ -283,6 +303,7 @@ function Component(): JSX.Element {
 ### Add Form Label Association
 
 **Before:**
+
 ```typescript
 <div>
   <span>Email</span>
@@ -291,6 +312,7 @@ function Component(): JSX.Element {
 ```
 
 **After:**
+
 ```typescript
 <div>
   <label for="email-input">Email</label>
@@ -310,6 +332,7 @@ function Component(): JSX.Element {
 ### Add aria-expanded
 
 **Before:**
+
 ```typescript
 <button onClick={toggle}>
   {isOpen() ? 'Collapse' : 'Expand'}
@@ -320,6 +343,7 @@ function Component(): JSX.Element {
 ```
 
 **After:**
+
 ```typescript
 <button
   aria-expanded={isOpen()}
@@ -342,6 +366,7 @@ function Component(): JSX.Element {
 ### Add Focus Trap to Modal
 
 **Before:**
+
 ```typescript
 function Modal(props: ModalProps) {
   return (
@@ -357,6 +382,7 @@ function Modal(props: ModalProps) {
 ```
 
 **After:**
+
 ```typescript
 function Modal(props: ModalProps): JSX.Element {
   const [modalRef, setModalRef] = createSignal<HTMLDivElement>()
@@ -416,6 +442,7 @@ function Modal(props: ModalProps): JSX.Element {
 ### Add Rest Props Spreading
 
 **Before:**
+
 ```typescript
 function Card(props: CardProps) {
   return (
@@ -427,6 +454,7 @@ function Card(props: CardProps) {
 ```
 
 **After:**
+
 ```typescript
 function Card(props: CardProps): JSX.Element {
   const [local, others] = splitProps(props, ['children', 'class'])
@@ -442,11 +470,13 @@ function Card(props: CardProps): JSX.Element {
 ### Add twMerge for Class Composition
 
 **Before:**
+
 ```typescript
 <button class={`${theme.base} ${props.class}`}>
 ```
 
 **After:**
+
 ```typescript
 import { twMerge } from 'tailwind-merge'
 
@@ -458,6 +488,7 @@ import { twMerge } from 'tailwind-merge'
 ### Add createMemo for Expensive Computation
 
 **Before:**
+
 ```typescript
 function UserList(props: { users: User[] }) {
   const [filter, setFilter] = createSignal('')
@@ -476,6 +507,7 @@ function UserList(props: { users: User[] }) {
 ```
 
 **After:**
+
 ```typescript
 function UserList(props: { users: User[] }): JSX.Element {
   const [filter, setFilter] = createSignal('')
@@ -497,25 +529,27 @@ function UserList(props: { users: User[] }): JSX.Element {
 ### Batch Multiple Signal Updates
 
 **Before:**
+
 ```typescript
 function handleSubmit(data: FormData) {
-  setName(data.name)
-  setEmail(data.email)
-  setPhone(data.phone)
-  setStatus('submitted')
+  setName(data.name);
+  setEmail(data.email);
+  setPhone(data.phone);
+  setStatus('submitted');
 }
 ```
 
 **After:**
+
 ```typescript
-import { batch } from 'solid-js'
+import { batch } from 'solid-js';
 
 function handleSubmit(data: FormData) {
   batch(() => {
-    setName(data.name)
-    setEmail(data.email)
-    setPhone(data.phone)
-    setStatus('submitted')
-  })
+    setName(data.name);
+    setEmail(data.email);
+    setPhone(data.phone);
+    setStatus('submitted');
+  });
 }
 ```

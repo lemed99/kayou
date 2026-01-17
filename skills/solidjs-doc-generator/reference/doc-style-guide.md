@@ -44,9 +44,9 @@
 ## Props Table Format
 
 ```markdown
-| Prop | Type | Default | Required | Description |
-|------|------|---------|----------|-------------|
-| `propName` | `type` | `default` | Yes/No | Description |
+| Prop       | Type   | Default   | Required | Description |
+| ---------- | ------ | --------- | -------- | ----------- |
+| `propName` | `type` | `default` | Yes/No   | Description |
 ```
 
 ### Rules
@@ -104,22 +104,25 @@
 
 ### Code Block Format
 
-```tsx
+````tsx
 // Always specify language
 ```tsx
 <Button>Click me</Button>
-```
+````
 
 // For bash commands
+
 ```bash
 npm install package
 ```
 
 // For type definitions
+
 ```typescript
-interface Props { }
+interface Props {}
 ```
-```
+
+````
 
 ### Inline vs Block Code
 
@@ -149,11 +152,12 @@ Use code blocks for:
 |-----|--------|
 | `Tab` | Move focus |
 | `Enter` | Activate |
-```
+````
 
 ### Key Names
 
 Use these exact names:
+
 - `Tab`
 - `Enter`
 - `Space`
@@ -202,7 +206,7 @@ interface Props {
    * Brief description
    * @default 'default-value'
    */
-  propName?: Type
+  propName?: Type;
 }
 ```
 
@@ -250,17 +254,17 @@ interface Props {
 
 - **Bold** for important terms
 - `Code` for code-related items
-- *Italic* sparingly for emphasis
+- _Italic_ sparingly for emphasis
 
 ## Length Guidelines
 
-| Section | Length |
-|---------|--------|
-| Overview | 50-150 words |
-| Quick Start | 3-5 lines of code |
-| Prop description | 5-15 words |
-| Example | 5-30 lines of code |
-| Best practice item | 5-20 words |
+| Section            | Length             |
+| ------------------ | ------------------ |
+| Overview           | 50-150 words       |
+| Quick Start        | 3-5 lines of code  |
+| Prop description   | 5-15 words         |
+| Example            | 5-30 lines of code |
+| Best practice item | 5-20 words         |
 
 ## Quality Checklist
 

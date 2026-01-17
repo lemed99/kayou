@@ -2,13 +2,27 @@ import { JSX } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * Props for the IconWrapper component.
+ */
 export interface IconProps {
+  /**
+   * SVG stroke width.
+   * @default 1.5
+   */
   strokeWidth?: number;
   class?: string;
 }
 
-export const IconWrapper = (props: IconProps & { children: JSX.Element }) => (
+/**
+ * IconWrapper component for wrapping SVG icon paths.
+ * Decorative by default (aria-hidden="true").
+ */
+export const IconWrapper = (
+  props: IconProps & { children: JSX.Element },
+): JSX.Element => (
   <svg
+    aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

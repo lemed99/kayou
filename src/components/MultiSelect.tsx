@@ -131,10 +131,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
           />
           <Show
             when={
-              !local.displayValue &&
-              displayValue() &&
-              !props.disabled &&
-              !props.isLoading
+              !local.displayValue && displayValue() && !props.disabled && !props.isLoading
             }
             fallback={
               <ChevronDownButton
@@ -159,7 +156,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
       }
       preOptionsComponent={
         <Show when={local.withSearch === true}>
-          <div class="relative flex items-center border-b border-gray-200 px-3 dark:border-gray-600">
+          <div class="relative flex min-w-[210px] items-center border-b border-gray-200 px-3 dark:border-gray-600">
             <SearchRefractionIcon class="size-4 text-gray-400" aria-hidden="true" />
             <label for={searchInputId} class="sr-only">
               Search options

@@ -48,11 +48,13 @@ All fixes must be:
 ### Phase 1: Load Audit Report
 
 **Check for existing report:**
+
 ```
 .claude/audits/[ComponentName]-YYYY-MM-DD.md
 ```
 
 **If no report exists:**
+
 1. Inform user no audit found
 2. Offer to run quick audit first
 3. Generate minimal report for fixes
@@ -60,12 +62,14 @@ All fixes must be:
 ### Phase 2: Group and Prioritize Issues
 
 Group issues by category:
+
 1. **Critical** - Fix immediately (blocks release)
 2. **High** - Fix before release
 3. **Medium** - Post-release backlog
 4. **Low** - Future enhancement
 
 Within each priority, order by:
+
 1. Type Safety (enables IDE assistance)
 2. SolidJS Patterns (fixes reactivity)
 3. Accessibility (user impact)
@@ -84,6 +88,7 @@ Within each priority, order by:
 ### Phase 4: Verify and Report
 
 After all fixes:
+
 1. Run full type check
 2. Run tests if available
 3. Re-run audit to verify score improved
@@ -94,10 +99,12 @@ After all fixes:
 ### 1. Type Safety Fixes
 
 **Files needed:**
+
 - `.claude/TYPESCRIPT_PATTERNS.md`
 - `skills/solidjs-component-fixer/patterns/fix-patterns.md`
 
 **Common fixes:**
+
 ```typescript
 // Add props interface
 interface ComponentProps {
@@ -117,10 +124,12 @@ data: DataType  // not: any
 ### 2. SolidJS Reactivity Fixes
 
 **Files needed:**
+
 - `.claude/SOLIDJS_BEST_PRACTICES.md`
 - `skills/solidjs-component-fixer/patterns/fix-patterns.md`
 
 **Common fixes:**
+
 ```typescript
 // Fix props destructuring (CRITICAL)
 function Component(props: Props) {  // not: { prop1, prop2 }
@@ -141,10 +150,12 @@ createEffect(() => {
 ### 3. Accessibility Fixes
 
 **Files needed:**
+
 - `.claude/ACCESSIBILITY_STANDARDS.md`
 - `skills/solidjs-component-auditor/reference/accessibility-standards.md`
 
 **Common fixes:**
+
 ```typescript
 // Add aria-label to icon buttons
 <button aria-label="Close">
@@ -166,9 +177,11 @@ onKeyDown={(e) => {
 ### 4. API Design Fixes
 
 **Files needed:**
+
 - `.claude/COMPONENT_CONVENTIONS.md`
 
 **Common fixes:**
+
 ```typescript
 // Spread rest props
 const [local, others] = splitProps(props, ['custom'])
@@ -243,6 +256,7 @@ git checkout -- src/components/ComponentName.tsx
 [Reads `.claude/audits/Modal-2024-01-15.md`]
 
 **Claude:** "Found audit report with 5 issues:
+
 - 2 Critical: Props destructuring, missing focus trap
 - 2 High: Missing aria-modal, no ESC key handler
 - 1 Medium: Could use createMemo
@@ -250,6 +264,7 @@ git checkout -- src/components/ComponentName.tsx
 I'll fix them in order. Starting with critical issues...
 
 **Fix 1/5: Type Safety**
+
 - Adding explicit props interface
 - Typing event handlers
 
@@ -260,6 +275,7 @@ I'll fix them in order. Starting with critical issues...
 ✓ Committed: `fix(Modal): add TypeScript types`
 
 **Fix 2/5: Props Destructuring (CRITICAL)**
+
 - Changing from destructured to props object
 
 [Shows diff]
@@ -285,11 +301,13 @@ skills/solidjs-component-fixer/
 ## Integration with Auditor
 
 **After fixing, re-audit:**
+
 ```
 User: "Audit Button again"
 ```
 
 Expected result:
+
 - Score should improve
 - Fixed issues no longer appear
 - May reveal new issues

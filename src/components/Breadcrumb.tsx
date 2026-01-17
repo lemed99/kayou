@@ -1,18 +1,40 @@
-import { JSX, createMemo, splitProps } from 'solid-js';
+import { Component, JSX, ValidComponent, createMemo, splitProps } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 
 import { twMerge } from 'tailwind-merge';
 
 import { ChevronRightIcon } from '../icons';
 
+/**
+ * Props for the Breadcrumb component.
+ */
 export interface BreadcrumbProps extends JSX.HTMLAttributes<HTMLElement> {
   children?: JSX.Element;
 }
 
+/**
+ * Props for individual breadcrumb items.
+ */
 export interface BreadcrumbItemProps
   extends Omit<JSX.LiHTMLAttributes<HTMLLIElement>, 'ref'> {
+  /**
+   * URL for the breadcrumb link. If not provided, renders as text.
+   */
   href?: string;
   children?: JSX.Element;
   ref?: HTMLLIElement;
+  /**
+   * Whether this item represents the current page.
+   * @default false
+   */
+  isCurrent?: boolean;
+  /**
+   * Custom component to render the link (e.g., Router's Link component).
+   * @default 'a'
+   */
+  as?:
+    | ValidComponent
+    | Component<{ href?: string; class?: string; children?: JSX.Element }>;
 }
 
 const theme = {
@@ -24,25 +46,52 @@ const theme = {
   },
 };
 
-const Breadcrumb = (props: BreadcrumbProps) => {
+/**
+ * Breadcrumb navigation component for showing page hierarchy.
+ */
+const Breadcrumb = (props: BreadcrumbProps): JSX.Element => {
   const [local, navProps] = splitProps(props, ['children', 'class']);
 
   return (
-    <nav class={twMerge(local.class)} {...navProps}>
+    <nav aria-label="Breadcrumb" class={twMerge(local.class)} {...navProps}>
       <ol class="flex items-center">{local.children}</ol>
     </nav>
   );
 };
 
-const BreadcrumbItem = (props: BreadcrumbItemProps) => {
-  const [local, liProps] = splitProps(props, ['children', 'class', 'href', 'ref']);
+/**
+ * Individual breadcrumb item component.
+ */
+const BreadcrumbItem = (props: BreadcrumbItemProps): JSX.Element => {
+  const [local, liProps] = splitProps(props, [
+    'children',
+    'class',
+    'href',
+    'ref',
+    'isCurrent',
+    'as',
+  ]);
 
   const isLink = createMemo(() => typeof local.href !== 'undefined');
+  const LinkComponent = createMemo(() => local.as || 'a');
 
   return (
     <li class={twMerge(theme.base, local.class)} ref={local.ref} {...liProps}>
-      <ChevronRightIcon class={theme.chevron} />
-      <span class={theme.href[isLink() ? 'on' : 'off']}>{local.children}</span>
+      <ChevronRightIcon class={theme.chevron} aria-hidden="true" />
+      {isLink() ? (
+        <Dynamic
+          component={LinkComponent()}
+          href={local.href}
+          class={theme.href.on}
+          aria-current={local.isCurrent ? 'page' : undefined}
+        >
+          {local.children}
+        </Dynamic>
+      ) : (
+        <span class={theme.href.off} aria-current={local.isCurrent ? 'page' : undefined}>
+          {local.children}
+        </span>
+      )}
     </li>
   );
 };

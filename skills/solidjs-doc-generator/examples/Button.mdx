@@ -4,7 +4,7 @@ description: Interactive button component with multiple variants, sizes, and sta
 category: Forms
 ---
 
-import { Button } from '@exowpee/the_rock'
+import { Button } from '@exowpee/the_rock';
 
 # Button
 
@@ -19,31 +19,29 @@ npm install @exowpee/the_rock
 ## Import
 
 ```tsx
-import { Button } from '@exowpee/the_rock'
+import { Button } from '@exowpee/the_rock';
 ```
 
 ## Quick Start
 
 ```tsx
-<Button onClick={() => console.log('Clicked!')}>
-  Click me
-</Button>
+<Button onClick={() => console.log('Clicked!')}>Click me</Button>
 ```
 
 ## Props
 
-| Prop | Type | Default | Required | Description |
-|------|------|---------|----------|-------------|
-| `children` | `JSX.Element` | - | Yes | Button content |
-| `color` | `'info' \| 'gray' \| 'failure' \| 'success' \| 'warning'` | `'info'` | No | Color variant |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | No | Button size |
-| `pill` | `boolean` | `false` | No | Makes button pill-shaped |
-| `outline` | `boolean` | `false` | No | Outline style variant |
-| `isLoading` | `boolean` | `false` | No | Shows loading spinner |
-| `disabled` | `boolean` | `false` | No | Disables the button |
-| `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | No | HTML button type |
-| `class` | `string` | - | No | Additional CSS classes |
-| `onClick` | `(event: MouseEvent) => void` | - | No | Click handler |
+| Prop        | Type                                                      | Default    | Required | Description              |
+| ----------- | --------------------------------------------------------- | ---------- | -------- | ------------------------ |
+| `children`  | `JSX.Element`                                             | -          | Yes      | Button content           |
+| `color`     | `'info' \| 'gray' \| 'failure' \| 'success' \| 'warning'` | `'info'`   | No       | Color variant            |
+| `size`      | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'`                    | `'md'`     | No       | Button size              |
+| `pill`      | `boolean`                                                 | `false`    | No       | Makes button pill-shaped |
+| `outline`   | `boolean`                                                 | `false`    | No       | Outline style variant    |
+| `isLoading` | `boolean`                                                 | `false`    | No       | Shows loading spinner    |
+| `disabled`  | `boolean`                                                 | `false`    | No       | Disables the button      |
+| `type`      | `'button' \| 'submit' \| 'reset'`                         | `'button'` | No       | HTML button type         |
+| `class`     | `string`                                                  | -          | No       | Additional CSS classes   |
+| `onClick`   | `(event: MouseEvent) => void`                             | -          | No       | Click handler            |
 
 ## Examples
 
@@ -89,9 +87,15 @@ Lighter visual weight with outline style.
 
 ```tsx
 <div class="flex gap-2">
-  <Button outline color="info">Info Outline</Button>
-  <Button outline color="success">Success Outline</Button>
-  <Button outline color="failure">Failure Outline</Button>
+  <Button outline color="info">
+    Info Outline
+  </Button>
+  <Button outline color="success">
+    Success Outline
+  </Button>
+  <Button outline color="failure">
+    Failure Outline
+  </Button>
 </div>
 ```
 
@@ -102,7 +106,9 @@ Rounded pill-shaped buttons.
 ```tsx
 <div class="flex gap-2">
   <Button pill>Pill Button</Button>
-  <Button pill outline>Pill Outline</Button>
+  <Button pill outline>
+    Pill Outline
+  </Button>
 </div>
 ```
 
@@ -112,19 +118,19 @@ Show loading state during async operations.
 
 ```tsx
 function AsyncButton() {
-  const [isLoading, setIsLoading] = createSignal(false)
+  const [isLoading, setIsLoading] = createSignal(false);
 
   const handleClick = async () => {
-    setIsLoading(true)
-    await saveData()
-    setIsLoading(false)
-  }
+    setIsLoading(true);
+    await saveData();
+    setIsLoading(false);
+  };
 
   return (
     <Button isLoading={isLoading()} onClick={handleClick}>
       {isLoading() ? 'Saving...' : 'Save'}
     </Button>
-  )
+  );
 }
 ```
 
@@ -135,7 +141,9 @@ Prevent interactions when disabled.
 ```tsx
 <div class="flex gap-2">
   <Button disabled>Disabled</Button>
-  <Button disabled outline>Disabled Outline</Button>
+  <Button disabled outline>
+    Disabled Outline
+  </Button>
 </div>
 ```
 
@@ -157,7 +165,7 @@ Use with forms for submission.
 Combine with icons for visual context.
 
 ```tsx
-import { PlusIcon, TrashIcon } from '@exowpee/the_rock/icons'
+import { PlusIcon, TrashIcon } from '@exowpee/the_rock/icons';
 
 <div class="flex gap-2">
   <Button>
@@ -168,18 +176,18 @@ import { PlusIcon, TrashIcon } from '@exowpee/the_rock/icons'
     <TrashIcon class="mr-2 size-4" />
     Delete
   </Button>
-</div>
+</div>;
 ```
 
 ## Accessibility
 
 ### Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
-| `Tab` | Move focus to/from button |
-| `Enter` | Activate the button |
-| `Space` | Activate the button |
+| Key     | Action                    |
+| ------- | ------------------------- |
+| `Tab`   | Move focus to/from button |
+| `Enter` | Activate the button       |
+| `Space` | Activate the button       |
 
 ### ARIA Attributes
 
@@ -220,46 +228,46 @@ The button has a visible focus ring when focused via keyboard. The focus ring co
 ### Props Interface
 
 ```typescript
-import { JSX } from 'solid-js'
+import { JSX } from 'solid-js';
 
-type ButtonColor = 'info' | 'gray' | 'failure' | 'success' | 'warning'
-type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+type ButtonColor = 'info' | 'gray' | 'failure' | 'success' | 'warning';
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Color variant of the button
    * @default 'info'
    */
-  color?: ButtonColor
+  color?: ButtonColor;
 
   /**
    * Size of the button
    * @default 'md'
    */
-  size?: ButtonSize
+  size?: ButtonSize;
 
   /**
    * Makes button pill-shaped with full rounded corners
    * @default false
    */
-  pill?: boolean
+  pill?: boolean;
 
   /**
    * Uses outline style instead of filled
    * @default false
    */
-  outline?: boolean
+  outline?: boolean;
 
   /**
    * Shows loading spinner and disables interactions
    * @default false
    */
-  isLoading?: boolean
+  isLoading?: boolean;
 
   /**
    * Button content
    */
-  children: JSX.Element
+  children: JSX.Element;
 }
 ```
 
@@ -288,21 +296,19 @@ const buttonConfig: ButtonProps = {
 Apply additional Tailwind classes:
 
 ```tsx
-<Button class="shadow-lg hover:shadow-xl transition-shadow">
-  Custom Shadow
-</Button>
+<Button class="shadow-lg transition-shadow hover:shadow-xl">Custom Shadow</Button>
 ```
 
 ### Theme Colors
 
 The button uses these Tailwind color classes by variant:
 
-| Variant | Background | Text |
-|---------|------------|------|
-| info | `bg-blue-700` | `text-white` |
-| gray | `bg-gray-200` | `text-gray-800` |
-| success | `bg-green-700` | `text-white` |
-| failure | `bg-red-700` | `text-white` |
+| Variant | Background      | Text            |
+| ------- | --------------- | --------------- |
+| info    | `bg-blue-700`   | `text-white`    |
+| gray    | `bg-gray-200`   | `text-gray-800` |
+| success | `bg-green-700`  | `text-white`    |
+| failure | `bg-red-700`    | `text-white`    |
 | warning | `bg-yellow-400` | `text-gray-900` |
 
 ### Dark Mode
@@ -340,6 +346,7 @@ The button automatically adjusts for dark mode using Tailwind's `dark:` variants
 **Problem:** TypeScript error when using onClick handler.
 
 **Solution:** Ensure handler signature matches:
+
 ```typescript
 onClick={(e: MouseEvent) => void}
 ```

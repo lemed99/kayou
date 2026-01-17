@@ -1,11 +1,23 @@
-import { For, Show, createMemo, onMount } from 'solid-js';
+import { For, JSX, Show, createMemo, onMount } from 'solid-js';
 
 import { curveMonotoneX, line } from 'd3-shape';
 
 import { LineProps } from '../types';
 import { useChart } from './ChartContext';
 
-export function Line(props: LineProps) {
+/**
+ * Line renders a single data series as a curved line in a LineChart.
+ * Multiple Line components can be used to display multiple series.
+ *
+ * @example
+ * <LineChart data={data} width={400} height={300}>
+ *   <XAxis dataKey="month" />
+ *   <YAxis />
+ *   <Line dataKey="revenue" stroke="#8884d8" dot />
+ *   <Line dataKey="profit" stroke="#82ca9d" />
+ * </LineChart>
+ */
+export function Line(props: LineProps): JSX.Element {
   const chart = useChart();
   onMount(() => chart.registerLine(props.dataKey));
 
@@ -49,24 +61,21 @@ export function Line(props: LineProps) {
           )}
         </For>
       </Show>
-      <Show when={chart.activeIndex() !== null}>
-        {(() => {
-          const activeIndex = chart.activeIndex()!;
-          return (
-            <For each={points().filter((p) => p.x === activeIndex.x)}>
-              {(p) => (
-                <circle
-                  cx={activeIndex.x}
-                  cy={p.y}
-                  r={3}
-                  fill="white"
-                  stroke={props.stroke ?? 'currentColor'}
-                  stroke-width={1}
-                />
-              )}
-            </For>
-          );
-        })()}
+      <Show when={chart.activeIndex()}>
+        {(activeIndex) => (
+          <For each={points().filter((p) => p.x === activeIndex().x)}>
+            {(p) => (
+              <circle
+                cx={activeIndex().x}
+                cy={p.y}
+                r={3}
+                fill="white"
+                stroke={props.stroke ?? 'currentColor'}
+                stroke-width={1}
+              />
+            )}
+          </For>
+        )}
       </Show>
     </g>
   );

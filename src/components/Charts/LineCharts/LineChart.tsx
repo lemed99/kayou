@@ -15,7 +15,27 @@ import { pointer } from 'd3-selection';
 import { LineChartProps } from '../types';
 import { ChartContext } from './ChartContext';
 
-export function LineChart(allProps: LineChartProps) {
+/**
+ * LineChart component for rendering line charts with D3.
+ * Supports multiple data series, tooltips, and interactive hover states.
+ *
+ * @example
+ * <LineChart
+ *   data={salesData}
+ *   width={600}
+ *   height={400}
+ *   ariaLabel="Monthly sales data"
+ *   title="Sales Chart"
+ * >
+ *   <XAxis dataKey="month" />
+ *   <YAxis />
+ *   <CartesianGrid />
+ *   <Line dataKey="revenue" stroke="#8884d8" />
+ *   <Line dataKey="profit" stroke="#82ca9d" />
+ *   <LineChartTooltip />
+ * </LineChart>
+ */
+export function LineChart(allProps: LineChartProps): JSX.Element {
   const [props] = splitProps(allProps, [
     'width',
     'height',
@@ -23,6 +43,10 @@ export function LineChart(allProps: LineChartProps) {
     'children',
     'rwidth',
     'rheight',
+    'ariaLabel',
+    'ariaDescribedBy',
+    'title',
+    'description',
   ]);
 
   const [yAxisBBox, setYAxisBBox] = createSignal<DOMRect | null>(null);
@@ -130,6 +154,9 @@ export function LineChart(allProps: LineChartProps) {
   }
 
   const tooltipId = createUniqueId();
+  const titleId = createUniqueId();
+  const descId = createUniqueId();
+  let tooltipRef: HTMLDivElement | undefined;
   const [boxDimensions, setBoxDimensions] = createSignal<{
     width: number;
     height: number;
@@ -139,12 +166,9 @@ export function LineChart(allProps: LineChartProps) {
   });
 
   createEffect(() => {
-    if (activeIndex()) {
-      const box = document.getElementById(tooltipId);
-      if (box) {
-        const { width, height } = box.getBoundingClientRect();
-        setBoxDimensions({ width, height });
-      }
+    if (activeIndex() && tooltipRef) {
+      const { width, height } = tooltipRef.getBoundingClientRect();
+      setBoxDimensions({ width, height });
     }
   });
 
@@ -175,11 +199,23 @@ export function LineChart(allProps: LineChartProps) {
       <svg
         width={width()}
         height={height()}
+        role="img"
+        aria-label={props.ariaLabel ?? 'Line chart'}
+        aria-labelledby={props.title ? titleId : undefined}
+        aria-describedby={
+          props.ariaDescribedBy ?? (props.description ? descId : undefined)
+        }
         style={{ overflow: 'visible', width: '100%', height: '100%' }}
         onMouseMove={onMouseMove}
         onMouseLeave={() => setActiveIndex(null)}
         viewBox={`0 0 ${width()} ${height()}`}
       >
+        <Show when={props.title}>
+          <title id={titleId}>{props.title}</title>
+        </Show>
+        <Show when={props.description}>
+          <desc id={descId}>{props.description}</desc>
+        </Show>
         <ChartContext.Provider
           value={{
             get data() {
@@ -209,7 +245,10 @@ export function LineChart(allProps: LineChartProps) {
       </svg>
       <Show when={activeIndex() !== null}>
         <div
+          ref={tooltipRef}
           id={tooltipId}
+          role="tooltip"
+          aria-live="polite"
           class="pointer-events-none absolute w-fit p-1.5 duration-300 ease-out"
           style={{
             left: boxPos().x + 'px',

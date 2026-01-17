@@ -6,13 +6,33 @@ import HelperText from './HelperText';
 import Label from './Label';
 import Spinner from './Spinner';
 
-type TextareaColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
+/**
+ * Color variants for the Textarea component.
+ */
+export type TextareaColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
+/**
+ * Props for the Textarea component.
+ */
 export interface TextareaProps
   extends Omit<JSX.TextareaHTMLAttributes<HTMLTextAreaElement>, 'color'> {
+  /**
+   * Helper text displayed below the textarea.
+   */
   helperText?: string;
+  /**
+   * Label displayed above the textarea.
+   */
   label?: string;
+  /**
+   * Color variant of the textarea.
+   * @default 'gray'
+   */
   color?: TextareaColor;
+  /**
+   * Whether the textarea is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
 }
 
@@ -30,7 +50,10 @@ const theme = {
   },
 };
 
-const Textarea = (props: TextareaProps) => {
+/**
+ * Textarea component for multi-line text input.
+ */
+const Textarea = (props: TextareaProps): JSX.Element => {
   const [local, textareaProps] = splitProps(props, [
     'color',
     'class',
@@ -47,7 +70,7 @@ const Textarea = (props: TextareaProps) => {
   const color = createMemo(() => local.color || 'gray');
 
   return (
-    <>
+    <div>
       <Show when={local.label}>
         <div class="mb-1 block">
           <Label value={local.label} color={color()} />
@@ -76,7 +99,7 @@ const Textarea = (props: TextareaProps) => {
       <Show when={local.helperText}>
         <HelperText content={local.helperText as string} color={color()} />
       </Show>
-    </>
+    </div>
   );
 };
 

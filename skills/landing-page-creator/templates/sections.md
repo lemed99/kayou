@@ -18,6 +18,7 @@ Quick reference for landing page sections.
 **Purpose:** Eye-catching introduction with CTA
 
 **Elements:**
+
 - Gradient background with animated blobs
 - Large headline with gradient text
 - Subtitle explaining value proposition
@@ -27,6 +28,7 @@ Quick reference for landing page sections.
 - Quick stats (components, downloads, stars)
 
 **Code skeleton:**
+
 ```tsx
 <section class="hero">
   <div class="background" />
@@ -48,11 +50,13 @@ Quick reference for landing page sections.
 **Purpose:** Key benefits in grid format
 
 **Elements:**
+
 - Section title
 - 6-8 feature cards
 - Icon, title, description per card
 
 **Common features:**
+
 1. Type-Safe (TypeScript)
 2. Accessible (WCAG compliant)
 3. Performant (SolidJS reactivity)
@@ -61,13 +65,12 @@ Quick reference for landing page sections.
 6. Enterprise Ready
 
 **Code skeleton:**
+
 ```tsx
 <section class="features">
   <h2>Built for Modern Development</h2>
   <div class="grid">
-    <For each={features}>
-      {(f) => <FeatureCard icon={f.icon} title={f.title} />}
-    </For>
+    <For each={features}>{(f) => <FeatureCard icon={f.icon} title={f.title} />}</For>
   </div>
 </section>
 ```
@@ -77,12 +80,14 @@ Quick reference for landing page sections.
 **Purpose:** Interactive component browser
 
 **Elements:**
+
 - Search input
 - Category filters
 - Component cards with live preview
 - Code snippets
 
 **Code skeleton:**
+
 ```tsx
 <section class="showcase">
   <h2>Explore Components</h2>
@@ -93,9 +98,7 @@ Quick reference for landing page sections.
     </For>
   </div>
   <div class="grid">
-    <For each={filteredComponents()}>
-      {(comp) => <ComponentCard component={comp} />}
-    </For>
+    <For each={filteredComponents()}>{(comp) => <ComponentCard component={comp} />}</For>
   </div>
 </section>
 ```
@@ -105,12 +108,14 @@ Quick reference for landing page sections.
 **Purpose:** Interactive code playground
 
 **Elements:**
+
 - Code editor (Monaco or textarea)
 - Live preview panel
 - Run button
 - Error display
 
 **Code skeleton:**
+
 ```tsx
 <section class="live-demo">
   <h2>Try It Live</h2>
@@ -119,9 +124,7 @@ Quick reference for landing page sections.
       <textarea value={code()} onInput={setCode} />
       <Button onClick={runCode}>Run</Button>
     </div>
-    <div class="preview">
-      {output()}
-    </div>
+    <div class="preview">{output()}</div>
   </div>
 </section>
 ```
@@ -131,12 +134,14 @@ Quick reference for landing page sections.
 **Purpose:** Social proof with numbers
 
 **Elements:**
+
 - Download count
 - GitHub stars
 - Component count
 - Contributors (optional)
 
 **Code skeleton:**
+
 ```tsx
 <section class="stats">
   <div class="stat">
@@ -155,11 +160,13 @@ Quick reference for landing page sections.
 **Purpose:** Fast onboarding guide
 
 **Elements:**
+
 - Installation commands
 - Basic usage example
 - Next steps links
 
 **Code skeleton:**
+
 ```tsx
 <section class="quick-start">
   <h2>Get Started in 30 Seconds</h2>
@@ -170,11 +177,13 @@ Quick reference for landing page sections.
     </div>
     <div class="step">
       <h3>2. Import</h3>
-      <code>import {"{"} Button {"}"}</code>
+      <code>
+        import {'{'} Button {'}'}
+      </code>
     </div>
     <div class="step">
       <h3>3. Use</h3>
-      <code>{"<Button>Click</Button>"}</code>
+      <code>{'<Button>Click</Button>'}</code>
     </div>
   </div>
 </section>
@@ -185,12 +194,14 @@ Quick reference for landing page sections.
 **Purpose:** Links and legal
 
 **Elements:**
+
 - Navigation links
 - Social links
 - Copyright
 - License info
 
 **Columns:**
+
 - Documentation
 - Community
 - Resources
@@ -199,6 +210,7 @@ Quick reference for landing page sections.
 ## Design Tokens
 
 ### Colors (Tailwind)
+
 ```
 Primary: blue-600
 Secondary: purple-600
@@ -208,6 +220,7 @@ Background: white (dark: gray-900)
 ```
 
 ### Spacing
+
 ```
 Section padding: py-24
 Container max: max-w-7xl
@@ -215,12 +228,20 @@ Grid gap: gap-8
 ```
 
 ### Animation
+
 ```css
 /* Blob animation */
 @keyframes blob {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
 }
 
 /* Transitions */

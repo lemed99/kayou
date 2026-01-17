@@ -4,12 +4,37 @@ import { twMerge } from 'tailwind-merge';
 
 import Label from './Label';
 
+/**
+ * Color variants for the Checkbox component.
+ */
+export type CheckboxColor = 'blue' | 'dark';
+
+/**
+ * Props for the Checkbox component.
+ */
 export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+  /**
+   * Label text or element for the checkbox.
+   */
   label?: JSX.Element;
+  /**
+   * Position of the label relative to the checkbox.
+   * @default 'right'
+   */
   labelPosition?: 'left' | 'right';
+  /**
+   * Additional CSS classes for the label wrapper.
+   */
   labelClass?: string;
+  /**
+   * Additional CSS classes for the label text span.
+   */
   labelSpanClass?: string;
-  color?: 'blue' | 'dark';
+  /**
+   * Color variant for the checked state.
+   * @default 'blue'
+   */
+  color?: CheckboxColor;
 }
 
 const textInputTheme = {
@@ -27,7 +52,10 @@ const checked = (color: CheckboxProps['color']) => `
   checked:bg-no-repeat 
 `;
 
-const Checkbox = (props: CheckboxProps) => {
+/**
+ * Checkbox component with label support.
+ */
+const Checkbox = (props: CheckboxProps): JSX.Element => {
   const [local, inputProps] = splitProps(props, [
     'label',
     'labelPosition',
@@ -47,18 +75,18 @@ const Checkbox = (props: CheckboxProps) => {
         local.labelClass,
         inputProps.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
       )}
-      id={id}
+      for={id}
     >
       <Show when={local.label && labelPosition() === 'left'}>
         <span
-          class={twMerge('pr-2 text-gray-700 dark:text-gray-300', props.labelSpanClass)}
+          class={twMerge('pr-2 text-gray-700 dark:text-gray-300', local.labelSpanClass)}
         >
           {local.label}
         </span>
       </Show>
       <input
         {...inputProps}
-        name={id}
+        id={id}
         class={twMerge(
           textInputTheme.base,
           checked(local.color || 'blue'),
@@ -68,7 +96,7 @@ const Checkbox = (props: CheckboxProps) => {
       />
       <Show when={local.label && labelPosition() === 'right'}>
         <span
-          class={twMerge('pl-2 text-gray-700 dark:text-gray-300', props.labelSpanClass)}
+          class={twMerge('pl-2 text-gray-700 dark:text-gray-300', local.labelSpanClass)}
         >
           {local.label}
         </span>

@@ -23,7 +23,7 @@ Always use `class` strategy for manual control (recommended over `media` for use
 module.exports = {
   darkMode: 'class', // or 'selector' in Tailwind v4
   // ...
-}
+};
 ```
 
 ### 2. Apply Dark Class to Root Element
@@ -34,6 +34,7 @@ document.documentElement.classList.toggle('dark');
 ```
 
 **Why `<html>` not `<body>`?**
+
 - Ensures `dark:` variants work everywhere including portals
 - Background colors extend to full viewport
 - Consistent behavior with scroll areas
@@ -47,9 +48,7 @@ document.documentElement.classList.toggle('dark');
 Best for simple, one-off styling:
 
 ```tsx
-<div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-  Content
-</div>
+<div class="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">Content</div>
 ```
 
 ### Pattern 2: Theme Objects (Recommended for Components)
@@ -107,16 +106,16 @@ Best for complex themes or runtime customization:
 
 ### Recommended Color Mappings
 
-| Element | Light Mode | Dark Mode |
-|---------|------------|-----------|
-| **Background (primary)** | `white` | `gray-900` |
-| **Background (secondary)** | `gray-50` | `gray-800` |
-| **Background (tertiary)** | `gray-100` | `gray-700` |
-| **Text (primary)** | `gray-900` | `white` |
-| **Text (secondary)** | `gray-700` | `gray-300` |
-| **Text (muted)** | `gray-500` | `gray-400` |
-| **Border (default)** | `gray-200` | `gray-700` |
-| **Border (strong)** | `gray-300` | `gray-600` |
+| Element                    | Light Mode | Dark Mode  |
+| -------------------------- | ---------- | ---------- |
+| **Background (primary)**   | `white`    | `gray-900` |
+| **Background (secondary)** | `gray-50`  | `gray-800` |
+| **Background (tertiary)**  | `gray-100` | `gray-700` |
+| **Text (primary)**         | `gray-900` | `white`    |
+| **Text (secondary)**       | `gray-700` | `gray-300` |
+| **Text (muted)**           | `gray-500` | `gray-400` |
+| **Border (default)**       | `gray-200` | `gray-700` |
+| **Border (strong)**        | `gray-300` | `gray-600` |
 
 ### Accent Colors
 
@@ -124,16 +123,16 @@ Keep accent colors consistent but adjust for contrast:
 
 ```typescript
 // Primary action buttons
-'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
+'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600';
 
 // Success states
-'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
 
 // Error states
-'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
 
 // Warning states
-'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
 ```
 
 ---
@@ -143,7 +142,7 @@ Keep accent colors consistent but adjust for contrast:
 ### JavaScript Implementation (SolidJS)
 
 ```typescript
-import { createSignal, createEffect, onMount } from 'solid-js';
+import { createEffect, createSignal, onMount } from 'solid-js';
 
 function useTheme() {
   const [isDark, setIsDark] = createSignal(false);
@@ -174,7 +173,7 @@ function useTheme() {
 ### React Implementation
 
 ```typescript
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function useTheme() {
   const [isDark, setIsDark] = useState(false);
@@ -207,7 +206,7 @@ Add this script to `<head>` before any CSS loads:
 
 ```html
 <script>
-  (function() {
+  (function () {
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (stored === 'dark' || (!stored && prefersDark)) {
@@ -227,11 +226,13 @@ When you need an isolated theme context (e.g., preview component):
 
 ```tsx
 // Global theme is dark, but preview needs to show light mode
-<div class="dark"> {/* Global */}
-  <div class=""> {/* Reset to light for preview */}
-    <div class="bg-white text-gray-900">
-      Preview content (always light)
-    </div>
+<div class="dark">
+  {' '}
+  {/* Global */}
+  <div class="">
+    {' '}
+    {/* Reset to light for preview */}
+    <div class="bg-white text-gray-900">Preview content (always light)</div>
   </div>
 </div>
 ```
@@ -242,9 +243,7 @@ When you need an isolated theme context (e.g., preview component):
 function ThemePreview(props: { forceDark?: boolean; children: JSX.Element }) {
   return (
     <div class={props.forceDark ? 'dark' : ''}>
-      <div class="bg-white dark:bg-gray-800">
-        {props.children}
-      </div>
+      <div class="bg-white dark:bg-gray-800">{props.children}</div>
     </div>
   );
 }
@@ -318,6 +317,7 @@ darkMode: 'class',
 ### 5. Not Testing Both Modes
 
 Always verify:
+
 - Text contrast meets WCAG AA (4.5:1 for normal text)
 - Interactive elements are visible
 - Focus states are clear
@@ -337,6 +337,7 @@ Always verify:
 ### Testing Contrast
 
 Use browser DevTools or tools like:
+
 - WebAIM Contrast Checker
 - Lighthouse accessibility audit
 - axe DevTools extension

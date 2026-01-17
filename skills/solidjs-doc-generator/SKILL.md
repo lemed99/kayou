@@ -60,17 +60,20 @@ Every component doc should be:
 ### Phase 2: Load References
 
 **Required files:**
+
 ```
 skills/solidjs-doc-generator/templates/component-doc.mdx
 skills/solidjs-doc-generator/reference/doc-style-guide.md
 ```
 
 **Example reference:**
+
 ```
 skills/solidjs-doc-generator/examples/Button.mdx
 ```
 
 **Project context:**
+
 ```
 .claude/PROJECT_CONTEXT.md
 .claude/COMPONENT_CONVENTIONS.md
@@ -108,9 +111,10 @@ Simplest possible working example (3-5 lines max).
 #### 5. Props Table
 
 | Prop | Type | Default | Required | Description |
-|------|------|---------|----------|-------------|
+| ---- | ---- | ------- | -------- | ----------- |
 
 **Rules:**
+
 - Required props first
 - TypeScript union syntax for types
 - Include all default values
@@ -119,6 +123,7 @@ Simplest possible working example (3-5 lines max).
 #### 6. Examples (5-7 minimum)
 
 Generate examples for:
+
 1. Basic usage
 2. All variants/colors
 3. All sizes
@@ -128,7 +133,8 @@ Generate examples for:
 7. Composed with other components
 
 **Example format:**
-```markdown
+
+````markdown
 ### Example Title
 
 Brief description of what this shows.
@@ -136,7 +142,9 @@ Brief description of what this shows.
 ```tsx
 <ComponentName prop="value">Content</ComponentName>
 ```
-```
+````
+
+````
 
 #### 7. Accessibility
 
@@ -158,7 +166,7 @@ Document:
 
 - Anti-pattern 1
 - Anti-pattern 2
-```
+````
 
 #### 9. TypeScript
 
@@ -183,6 +191,7 @@ Common problems and solutions.
 ### Phase 4: Quality Check
 
 Before saving, verify:
+
 - [ ] All code examples are syntactically correct
 - [ ] Props table matches actual component
 - [ ] At least 5 practical examples
@@ -206,29 +215,53 @@ Before saving, verify:
 [Overview - 1-2 paragraphs]
 
 ## Installation
+
 ## Import
+
 ## Quick Start
+
 ## Props
+
 ## Examples
-  ### Basic Usage
-  ### Variants
-  ### Sizes
-  ### States
-  ### Event Handling
-  ### Controlled
-  ### Composed
+
+### Basic Usage
+
+### Variants
+
+### Sizes
+
+### States
+
+### Event Handling
+
+### Controlled
+
+### Composed
+
 ## Accessibility
-  ### Keyboard Navigation
-  ### ARIA Attributes
-  ### Screen Reader Support
+
+### Keyboard Navigation
+
+### ARIA Attributes
+
+### Screen Reader Support
+
 ## Best Practices
-  ### Do
-  ### Don't
+
+### Do
+
+### Don't
+
 ## TypeScript
-  ### Props Interface
-  ### Usage
+
+### Props Interface
+
+### Usage
+
 ## Styling
+
 ## Related Components
+
 ## Troubleshooting
 ```
 
@@ -289,10 +322,10 @@ interface DocPageProps {
   examples: {
     title: string;
     description?: string;
-    code: string;           // Code string for display
-    component: () => JSX.Element;  // Live component render
+    code: string; // Code string for display
+    component: () => JSX.Element; // Live component render
   }[];
-  usage: string;  // Import and usage code block
+  usage: string; // Import and usage code block
 }
 ```
 
@@ -300,7 +333,9 @@ interface DocPageProps {
 
 ```tsx
 import { createSignal } from 'solid-js';
+
 import Button from '@lib/components/Button';
+
 import DocPage from '../../components/DocPage';
 
 export default function ButtonPage() {
@@ -309,7 +344,12 @@ export default function ButtonPage() {
       title="Button"
       description="A versatile button component..."
       props={[
-        { name: 'color', type: '"info" | "success"', default: '"info"', description: 'Sets color' },
+        {
+          name: 'color',
+          type: '"info" | "success"',
+          default: '"info"',
+          description: 'Sets color',
+        },
       ]}
       examples={[
         {
@@ -340,6 +380,7 @@ export default function ButtonPage() {
 [Reads `src/components/DatePicker.tsx`]
 
 **Claude:** "I've analyzed the DatePicker component. It has:
+
 - 15 props including value, onChange, type, locale
 - Supports single, multiple, and range selection
 - Uses Portal for calendar positioning

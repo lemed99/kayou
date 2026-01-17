@@ -134,8 +134,8 @@ export default ComponentName;
 
 ```typescript
 // Component props - always ends with Props
-interface ButtonProps { }
-interface ModalProps { }
+interface ButtonProps {}
+interface ModalProps {}
 
 // Event handler props - use on prefix
 interface Props {
@@ -158,10 +158,10 @@ interface Props {
 
 ```typescript
 const theme = {
-  base: '',           // Base styles always present
-  color: {},          // Color variants
-  size: {},           // Size variants
-  state: {},          // State-based styles (disabled, active, etc.)
+  base: '', // Base styles always present
+  color: {}, // Color variants
+  size: {}, // Size variants
+  state: {}, // State-based styles (disabled, active, etc.)
   // Component-specific groups
   input: {},
   label: {},
@@ -180,10 +180,10 @@ interface Props {
   options: Option[];
 
   // Optional with sensible defaults
-  color?: 'gray' | 'info';     // Default: 'gray'
-  size?: 'sm' | 'md' | 'lg';   // Default: 'md'
-  disabled?: boolean;          // Default: false
-  placeholder?: string;        // Default: undefined
+  color?: 'gray' | 'info'; // Default: 'gray'
+  size?: 'sm' | 'md' | 'lg'; // Default: 'md'
+  disabled?: boolean; // Default: false
+  placeholder?: string; // Default: undefined
 }
 ```
 
@@ -313,14 +313,9 @@ export type { DataTableColumnProps } from './DataTable';
 
 ```typescript
 // index.ts
-export type {
-  ButtonProps,
-  ButtonColor,
-} from './Button';
+export type { ButtonProps, ButtonColor } from './Button';
 
-export type {
-  ModalProps,
-} from './Modal';
+export type { ModalProps } from './Modal';
 ```
 
 ## State Management Patterns
@@ -354,11 +349,9 @@ interface Props {
 function Component(props: Props) {
   const isControlled = () => props.value !== undefined;
 
-  const [internalValue, setInternalValue] = createSignal(
-    props.defaultValue ?? ''
-  );
+  const [internalValue, setInternalValue] = createSignal(props.defaultValue ?? '');
 
-  const value = () => isControlled() ? props.value! : internalValue();
+  const value = () => (isControlled() ? props.value! : internalValue());
 
   const handleChange = (newValue: string) => {
     if (!isControlled()) {
@@ -438,7 +431,7 @@ const transitionStyle = () => ({
 
 ### JSDoc Comments
 
-```typescript
+````typescript
 /**
  * A customizable button component with loading state support.
  *
@@ -462,4 +455,4 @@ export interface ButtonProps {
    */
   isLoading?: boolean;
 }
-```
+````

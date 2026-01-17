@@ -32,42 +32,83 @@ import Spinner from './Spinner';
 import Tooltip from './Tooltip';
 import { VirtualList } from './VirtualList';
 
-interface DataTableProps<T> {
-  data: T[];
-  loading: boolean;
-  validating?: boolean;
-  defaultColumns?: string[];
-  defaultRowsCount?: number;
-  columns: DataTableColumnProps<T>[];
-  pageTotal?: number;
-  rowSelection?: boolean;
-  error: unknown;
-  onPageChange?: (page: number) => void;
-  searchBar?: boolean;
-  configureColumns?: boolean;
-  expandable?: boolean;
-  filters?: JSX.Element;
-  perPageControl?: boolean;
-  rowHeight?: number;
-  estimatedRowHeight?: number;
-  errorMessage: string;
-  noDataMessage: string;
-  seeMoreText: string;
-  filtersText: string;
-  elementsPerPageText: string;
-  selectedElementsText: (count: number, total: number) => string;
-  footer?: boolean;
-}
-
+/**
+ * Column configuration for the DataTable component.
+ */
 export interface DataTableColumnProps<T> {
+  /** Column header label. */
   label: string;
+  /** Key to access the column data from row objects. */
   key: string;
+  /** Custom render function for cell content. */
   render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
+  /** Column width as percentage of table width. */
   width: number;
+  /** Tooltip text for the column header. */
   tooltip?: string;
 }
 
-export function DataTable<T extends Record<string, unknown>>(props: DataTableProps<T>) {
+/**
+ * Props for the DataTable component.
+ */
+export interface DataTableProps<T> {
+  /** Array of data rows to display. */
+  data: T[];
+  /** Whether the table is in a loading state. */
+  loading: boolean;
+  /** Whether the table is validating/refreshing data. */
+  validating?: boolean;
+  /** Default visible column keys. */
+  defaultColumns?: string[];
+  /** Default number of rows to show when not expanded. @default 5 */
+  defaultRowsCount?: number;
+  /** Column configurations. */
+  columns: DataTableColumnProps<T>[];
+  /** Total number of pages for pagination. */
+  pageTotal?: number;
+  /** Whether row selection is enabled. */
+  rowSelection?: boolean;
+  /** Error state for the table. */
+  error: unknown;
+  /** Callback fired when page changes. */
+  onPageChange?: (page: number) => void;
+  /** Whether to show the search bar. */
+  searchBar?: boolean;
+  /** Whether to allow column configuration. */
+  configureColumns?: boolean;
+  /** Whether the table can be expanded to full view. */
+  expandable?: boolean;
+  /** Custom filter components. */
+  filters?: JSX.Element;
+  /** Whether to show per-page control. */
+  perPageControl?: boolean;
+  /** Fixed row height for virtualization. */
+  rowHeight?: number;
+  /** Estimated row height for dynamic virtualization. */
+  estimatedRowHeight?: number;
+  /** Message to display on error. */
+  errorMessage: string;
+  /** Message to display when no data. */
+  noDataMessage: string;
+  /** Text for the "see more" expand button. */
+  seeMoreText: string;
+  /** Text label for filters section. */
+  filtersText: string;
+  /** Text label for elements per page control. */
+  elementsPerPageText: string;
+  /** Function to format selected elements text. */
+  selectedElementsText: (count: number, total: number) => string;
+  /** Whether to show the footer. @default true */
+  footer?: boolean;
+}
+
+/**
+ * DataTable component for displaying tabular data with virtualization,
+ * pagination, sorting, filtering, and row selection.
+ */
+export function DataTable<T extends Record<string, unknown>>(
+  props: DataTableProps<T>,
+): JSX.Element {
   const [searchKey, setSearchKey] = createSignal('');
   const [selectedRows, setSelectedRows] = createSignal<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = createSignal(1);

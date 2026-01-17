@@ -17,8 +17,13 @@ import { formatCodeToHTML } from '../helpers/formatCodeToHTML';
 // Move sections outside component to avoid recreation
 const SECTIONS = [
   { id: 'description', title: 'Description' },
+  { id: 'key-concepts', title: 'Key Concepts' },
+  { id: 'value', title: 'Value' },
+  { id: 'related-hooks', title: 'Related Hooks' },
+  { id: 'related-contexts', title: 'Related Contexts' },
   { id: 'usage', title: 'Usage' },
   { id: 'props', title: 'Props' },
+  { id: 'sub-components', title: 'Sub-components' },
   { id: 'examples', title: 'Examples' },
 ] as const;
 
@@ -53,40 +58,111 @@ interface ExampleDefinition {
   component: () => JSX.Element;
 }
 
+interface RelatedItemDefinition {
+  name: string;
+  path: string;
+  description: string;
+}
+
+interface KeyConceptDefinition {
+  term: string;
+  explanation: string;
+}
+
+interface SubComponentPropDefinition {
+  name: string;
+  type: string;
+  default: string;
+  description: string;
+  required?: boolean;
+}
+
+interface SubComponentDefinition {
+  name: string;
+  description: string;
+  props: SubComponentPropDefinition[];
+}
+
 interface DocPageProps {
   title: string;
+  /** Combined description and overview of the component */
   description: string;
+  /** Key terms and concepts to understand */
+  keyConcepts?: KeyConceptDefinition[];
+  /** Why this component matters */
+  value?: string;
+  /** Hooks that this component uses internally */
+  relatedHooks?: RelatedItemDefinition[];
+  /** Contexts that this component uses or requires */
+  relatedContexts?: RelatedItemDefinition[];
   props?: PropDefinition[];
+  /** Sub-components for compound component patterns */
+  subComponents?: SubComponentDefinition[];
   examples?: ExampleDefinition[];
   usage?: string;
 }
 
 export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
-  const [hash, setHash] = createSignal('');
+  const [visibleSections, setVisibleSections] = createSignal<Set<string>>(new Set());
   const [elementCache, setElementCache] = createSignal<Map<string, HTMLElement>>(
     new Map(),
   );
 
-  // Initialize hash on mount (SSR-safe)
+  // Initialize from hash on mount (SSR-safe)
   onMount(() => {
-    setHash(window.location.hash.slice(1));
+    const initialHash = window.location.hash.slice(1);
+    if (initialHash) {
+      setVisibleSections(new Set([initialHash]));
+    }
   });
 
   // Memoize props array for stable reference - moved before element caching to be accessible
   const propsArray = createMemo(() => props.props ?? []);
+  const subComponentsArray = createMemo(() => props.subComponents ?? []);
   const examplesArray = createMemo(() => props.examples ?? []);
+  const relatedHooksArray = createMemo(() => props.relatedHooks ?? []);
+  const relatedContextsArray = createMemo(() => props.relatedContexts ?? []);
+
+  // Filter sections to only show those with content
+  const visibleSectionsConfig = createMemo(() => {
+    return SECTIONS.filter((section) => {
+      switch (section.id) {
+        case 'description':
+          return true; // Always show
+        case 'key-concepts':
+          return props.keyConcepts && props.keyConcepts.length > 0;
+        case 'value':
+          return !!props.value;
+        case 'related-hooks':
+          return relatedHooksArray().length > 0;
+        case 'related-contexts':
+          return relatedContextsArray().length > 0;
+        case 'usage':
+          return !!props.usage;
+        case 'props':
+          return propsArray().length > 0;
+        case 'sub-components':
+          return subComponentsArray().length > 0;
+        case 'examples':
+          return examplesArray().length > 0;
+        default:
+          return true;
+      }
+    });
+  });
 
   // Cache element references - use createEffect to track examplesArray changes
   // Use queueMicrotask to ensure DOM has rendered before querying elements
   createEffect(() => {
     // Access examplesArray() in tracked scope to trigger re-caching on change
     const examples = examplesArray();
+    const sections = visibleSectionsConfig();
 
     queueMicrotask(() => {
       const cache = new Map<string, HTMLElement>();
 
       // Cache section elements
-      for (const section of SECTIONS) {
+      for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) cache.set(section.id, el);
       }
@@ -110,48 +186,40 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
     // Capture reactive values in tracked scope (createEffect)
     // These will be fresh each time the effect re-runs
     const examples = examplesArray();
+    const sections = visibleSectionsConfig();
     const allIds = [
-      ...SECTIONS.map((s) => s.id),
+      ...sections.map((s) => s.id),
       ...examples.map((e) => getExampleId(e.title)),
     ];
 
     const handleScroll = throttle(() => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = document.documentElement.scrollTop;
-      const clientHeight = document.documentElement.clientHeight;
-
-      // Skip if at bottom of page
-      if (scrollHeight - scrollTop - clientHeight < 1) return;
-
-      let bestElement: string | null = null;
-      let bestDistanceFromTop = Infinity;
+      const newVisibleSections = new Set<string>();
+      const headerOffset = 56; // Header height offset
 
       for (const id of allIds) {
         const element = cache.get(id);
         if (!element) continue;
 
         const rect = element.getBoundingClientRect();
-        const elementTop = rect.top;
-        const elementBottom = rect.bottom - 56; // Header height offset
+        const elementTop = rect.top - headerOffset;
+        const elementBottom = rect.bottom;
 
-        const isVisible = elementBottom > 0 && elementTop < window.innerHeight;
+        // Element is visible if any part of it is in the viewport
+        const isVisible = elementBottom > headerOffset && elementTop < window.innerHeight;
 
         if (isVisible) {
-          const distanceFromTop = elementBottom;
-          if (distanceFromTop > 0 && distanceFromTop < bestDistanceFromTop) {
-            bestDistanceFromTop = distanceFromTop;
-            bestElement = id;
-            break;
-          }
+          newVisibleSections.add(id);
         }
       }
 
-      // Use untrack to read hash without creating a dependency
-      // We don't want the effect to re-run when hash changes (would be circular)
-      const currentHash = untrack(hash);
-      if (bestElement && bestElement !== currentHash) {
-        setHash(bestElement);
-        history.replaceState(null, '', `#${bestElement}`);
+      // Only update if the visible sections have changed
+      const currentVisible = untrack(visibleSections);
+      const hasChanged =
+        newVisibleSections.size !== currentVisible.size ||
+        [...newVisibleSections].some((id) => !currentVisible.has(id));
+
+      if (hasChanged) {
+        setVisibleSections(newVisibleSections);
       }
     }, 100); // Throttle to 100ms
 
@@ -169,8 +237,127 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
 
         <section id="description" class="mb-8 scroll-mt-20">
           <h2 class="mb-4 text-2xl font-medium">Description</h2>
-          <p class="text-gray-700 dark:text-gray-300">{props.description}</p>
+          <p class="leading-relaxed text-gray-700 dark:text-gray-300">
+            {props.description}
+          </p>
         </section>
+
+        <Show when={props.keyConcepts && props.keyConcepts.length > 0}>
+          <section id="key-concepts" class="mb-8 scroll-mt-20">
+            <h2 class="mb-4 text-2xl font-medium">Key Concepts</h2>
+            <dl class="space-y-4">
+              <For each={props.keyConcepts}>
+                {(concept) => (
+                  <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                    <dt class="font-semibold text-gray-900 dark:text-white">
+                      {concept.term}
+                    </dt>
+                    <dd class="mt-1 text-gray-600 dark:text-gray-400">
+                      {concept.explanation}
+                    </dd>
+                  </div>
+                )}
+              </For>
+            </dl>
+          </section>
+        </Show>
+
+        <Show when={props.value}>
+          <section id="value" class="mb-8 scroll-mt-20">
+            <h2 class="mb-4 text-2xl font-medium">Value</h2>
+            <div class="rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4 dark:border-blue-400 dark:bg-blue-900/20">
+              <p class="leading-relaxed text-gray-700 dark:text-gray-300">
+                {props.value}
+              </p>
+            </div>
+          </section>
+        </Show>
+
+        <Show when={relatedHooksArray().length > 0}>
+          <section id="related-hooks" class="mb-8 scroll-mt-20">
+            <h2 class="mb-4 text-2xl font-medium">Related Hooks</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300">
+              This component uses the following hooks internally:
+            </p>
+            <div class="space-y-3">
+              <For each={relatedHooksArray()}>
+                {(hook) => (
+                  <a
+                    href={hook.path}
+                    class="flex items-start gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50 dark:border-gray-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/20"
+                  >
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                      <svg
+                        class="size-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="font-medium text-gray-900 dark:text-white">
+                        {hook.name}
+                      </h3>
+                      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {hook.description}
+                      </p>
+                    </div>
+                  </a>
+                )}
+              </For>
+            </div>
+          </section>
+        </Show>
+
+        <Show when={relatedContextsArray().length > 0}>
+          <section id="related-contexts" class="mb-8 scroll-mt-20">
+            <h2 class="mb-4 text-2xl font-medium">Related Contexts</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300">
+              This component uses the following contexts:
+            </p>
+            <div class="space-y-3">
+              <For each={relatedContextsArray()}>
+                {(context) => (
+                  <a
+                    href={context.path}
+                    class="flex items-start gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50/50 dark:border-gray-700 dark:hover:border-purple-600 dark:hover:bg-purple-900/20"
+                  >
+                    <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                      <svg
+                        class="size-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="font-medium text-gray-900 dark:text-white">
+                        {context.name}
+                      </h3>
+                      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {context.description}
+                      </p>
+                    </div>
+                  </a>
+                )}
+              </For>
+            </div>
+          </section>
+        </Show>
 
         <Show when={props.usage}>
           <section id="usage" class="mb-8 scroll-mt-20">
@@ -196,10 +383,10 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                       Type
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Default
+                      Description
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                      Description
+                      Default
                     </th>
                   </tr>
                 </thead>
@@ -225,19 +412,86 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                             {prop.type}
                           </code>
                         </td>
+                        <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          {prop.description}
+                        </td>
                         <td class="px-6 py-4 text-xs whitespace-nowrap">
                           <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-gray-700 dark:bg-gray-800/50 dark:text-green-400">
                             {prop.default}
                           </code>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {prop.description}
                         </td>
                       </tr>
                     )}
                   </For>
                 </tbody>
               </table>
+            </div>
+          </section>
+        </Show>
+
+        <Show when={subComponentsArray().length > 0}>
+          <section id="sub-components" class="mb-8 scroll-mt-20">
+            <h2 class="mb-4 text-2xl font-medium">Sub-components</h2>
+            <div class="space-y-8">
+              <For each={subComponentsArray()}>
+                {(component) => (
+                  <div>
+                    <h3 class="mb-2 text-xl font-medium">{component.name}</h3>
+                    <p class="mb-4 text-gray-600 dark:text-gray-400">
+                      {component.description}
+                    </p>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                          <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                              Prop
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                              Type
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                              Description
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                              Default
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+                          <For each={component.props}>
+                            {(prop) => (
+                              <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                  <span class="flex items-center gap-2">
+                                    {prop.name}
+                                    <Show when={prop.required}>
+                                      <span class="text-xs text-red-500">*</span>
+                                    </Show>
+                                  </span>
+                                </td>
+                                <td class="px-6 py-4 text-xs whitespace-nowrap">
+                                  <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-gray-700 dark:bg-gray-800/50 dark:text-blue-400">
+                                    {prop.type}
+                                  </code>
+                                </td>
+                                <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                  {prop.description}
+                                </td>
+                                <td class="px-6 py-4 text-xs whitespace-nowrap">
+                                  <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-gray-700 dark:bg-gray-800/50 dark:text-green-400">
+                                    {prop.default}
+                                  </code>
+                                </td>
+                              </tr>
+                            )}
+                          </For>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </For>
             </div>
           </section>
         </Show>
@@ -273,12 +527,13 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
               On this page
             </h3>
             <ul class="flex flex-col gap-2 border-l border-[color-mix(in_oklab,_var(--color-gray-950),white_90%)] dark:border-[color-mix(in_oklab,_var(--color-gray-950),white_20%)]">
-              <For each={SECTIONS}>
+              <For each={visibleSectionsConfig()}>
                 {(section) => (
                   <li class="-ml-px flex flex-col items-start gap-2">
                     <a
-                      aria-current={section.id === hash() ? 'location' : undefined}
-                      onClick={() => setHash(section.id)}
+                      aria-current={
+                        visibleSections().has(section.id) ? 'location' : undefined
+                      }
                       href={`#${section.id}`}
                       class="inline-block border-l border-transparent pl-5 text-base/8 text-gray-600 hover:border-gray-950/25 hover:text-gray-950 aria-[current]:border-gray-950 aria-[current]:font-semibold aria-[current]:text-gray-950 sm:pl-4 sm:text-sm/6 dark:text-gray-300 dark:hover:border-white/25 dark:hover:text-white dark:aria-[current]:border-white dark:aria-[current]:text-white"
                     >
@@ -294,9 +549,10 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                               <li class="-ml-px flex flex-col items-start gap-2">
                                 <a
                                   aria-current={
-                                    exampleId() === hash() ? 'location' : undefined
+                                    visibleSections().has(exampleId())
+                                      ? 'location'
+                                      : undefined
                                   }
-                                  onClick={() => setHash(exampleId())}
                                   href={`#${exampleId()}`}
                                   class="inline-block border-l border-transparent pl-8 text-base/8 text-gray-600 hover:border-gray-950/25 hover:text-gray-950 aria-[current]:border-gray-950 aria-[current]:font-semibold aria-[current]:text-gray-950 sm:pl-7.5 sm:text-sm/6 dark:text-gray-300 dark:hover:border-white/25 dark:hover:text-white dark:aria-[current]:border-white dark:aria-[current]:text-white"
                                 >
@@ -487,7 +743,9 @@ export function Example(props: ExampleProps): JSX.Element {
             type="button"
             onClick={togglePreview}
             class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 p-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            aria-label={isPreviewDark() ? 'Preview in light mode' : 'Preview in dark mode'}
+            aria-label={
+              isPreviewDark() ? 'Preview in light mode' : 'Preview in dark mode'
+            }
             title={isPreviewDark() ? 'Preview in light mode' : 'Preview in dark mode'}
           >
             <Show
@@ -538,7 +796,9 @@ export function Example(props: ExampleProps): JSX.Element {
       <div class={isPreviewDark() ? 'dark' : ''}>
         <div
           class="px-4 py-6"
-          style={{ "background-color": isPreviewDark() ? 'rgb(31 41 55)' : 'rgb(255 255 255)' }}
+          style={{
+            'background-color': isPreviewDark() ? 'rgb(31 41 55)' : 'rgb(255 255 255)',
+          }}
         >
           <Show when={props.description}>
             <p

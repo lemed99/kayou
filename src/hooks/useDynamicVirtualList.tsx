@@ -1,4 +1,11 @@
-import { Accessor, createMemo, createSignal, onCleanup } from 'solid-js';
+import {
+  Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  on,
+  onCleanup,
+} from 'solid-js';
 
 type DynamicVirtualListConfig<T extends readonly unknown[]> = {
   items: Accessor<T>;
@@ -7,6 +14,15 @@ type DynamicVirtualListConfig<T extends readonly unknown[]> = {
   overscanCount: number;
   setScrollPosition?: (scrollTop: number) => void;
   setAverageRowHeight?: (height: number) => void;
+};
+
+type DynamicVirtualListResult<T extends readonly unknown[]> = {
+  containerHeight: number;
+  viewerTop: number;
+  visibleItems: T[number][];
+  startIndex: number;
+  endIndex: number;
+  totalItems: number;
 };
 
 export function useDynamicVirtualList<T extends readonly unknown[]>({
@@ -20,36 +36,76 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
   const [scrollTop, setScrollTop] = createSignal(0);
   const [sizeMapVersion, setSizeMapVersion] = createSignal(0);
   const sizeMap = new Map<number, number>();
-  const observerMap = new Map<number, ResizeObserver>();
+  const observerMap = new Map<number, { observer: ResizeObserver; index: number }>();
+  let previousItemsLength = 0;
 
   const cleanupObserver = (index: number) => {
-    const observer = observerMap.get(index);
-    if (observer) {
-      observer.disconnect();
+    const entry = observerMap.get(index);
+    if (entry) {
+      entry.observer.disconnect();
       observerMap.delete(index);
     }
   };
 
+  // Clean up stale entries when items are removed
+  createEffect(
+    on(items, (currentItems) => {
+      const currentLength = currentItems.length;
+
+      // If items were removed, clean up stale entries
+      if (currentLength < previousItemsLength) {
+        for (let i = currentLength; i < previousItemsLength; i++) {
+          cleanupObserver(i);
+          sizeMap.delete(i);
+        }
+        setSizeMapVersion((v) => v + 1);
+      }
+
+      previousItemsLength = currentLength;
+    }),
+  );
+
   const registerSize = (index: Accessor<number>, el: HTMLElement) => {
     if (!el) return;
-    // const elHeight = sizeMap.get(index());
-    // if (elHeight) return; // Some elements might change after being registered. Better to just reevaluate their height each time
+
+    const capturedIndex = index();
+
+    // Clean up any existing observer for this index to prevent memory leaks
+    cleanupObserver(capturedIndex);
+
     const observer = new ResizeObserver(() => {
-      sizeMap.set(index(), el.offsetHeight);
-      setSizeMapVersion((v) => v + 1);
+      // Only update if element is still connected to DOM
+      if (!el.isConnected) return;
+
+      const currentLength = items().length;
+      if (capturedIndex >= currentLength) return;
+
+      const newHeight = el.offsetHeight;
+      const currentHeight = sizeMap.get(capturedIndex);
+
+      // Only update if height actually changed to prevent infinite loops
+      if (currentHeight !== newHeight) {
+        sizeMap.set(capturedIndex, newHeight);
+        setSizeMapVersion((v) => v + 1);
+      }
     });
     observer.observe(el);
-    observerMap.set(index(), observer);
+    observerMap.set(capturedIndex, { observer, index: capturedIndex });
   };
 
   const getAverageRowHeight = createMemo(() => {
     sizeMapVersion(); // called to trigger reactivity
 
     if (sizeMap.size === 0) return undefined;
-    const averageHeight =
-      [...sizeMap.values()].reduce((acc, v) => acc + v, 0) / sizeMap.size;
-    setAverageRowHeight?.(averageHeight);
-    return averageHeight;
+    return [...sizeMap.values()].reduce((acc, v) => acc + v, 0) / sizeMap.size;
+  });
+
+  // Report average height changes via effect (side effects must not be in memos)
+  createEffect(() => {
+    const avgHeight = getAverageRowHeight();
+    if (avgHeight !== undefined) {
+      setAverageRowHeight?.(avgHeight);
+    }
   });
 
   const getPrefixHeights = createMemo(() => {
@@ -67,15 +123,29 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     return { offsets, total };
   });
 
-  const virtual = createMemo(() => {
+  const virtual = createMemo((): DynamicVirtualListResult<T> => {
+    const itemList = items();
     const { offsets, total } = getPrefixHeights();
+
+    // Handle empty array edge case
+    if (itemList.length === 0) {
+      return {
+        containerHeight: 0,
+        viewerTop: 0,
+        visibleItems: [] as T[number][],
+        startIndex: 0,
+        endIndex: 0,
+        totalItems: 0,
+      };
+    }
 
     const st = scrollTop();
     const rh = rootHeight;
     const ov = overscanCount;
 
+    // Binary search to find the first visible item
     let start = 0;
-    let end = items().length - 1;
+    let end = itemList.length - 1;
     while (start < end) {
       const mid = Math.floor((start + end) / 2);
       if (offsets[mid] < st) start = mid + 1;
@@ -84,23 +154,29 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     const firstIdx = Math.max(0, start - ov);
 
     let lastIdx = firstIdx;
-    while (lastIdx < items().length && offsets[lastIdx] < st + rh) {
+    while (lastIdx < itemList.length && offsets[lastIdx] < st + rh) {
       lastIdx++;
     }
-    lastIdx = Math.min(items().length, lastIdx + ov);
-
-    observerMap.forEach((_, index) => {
-      if (index < firstIdx || index >= lastIdx) {
-        cleanupObserver(index);
-      }
-    });
+    lastIdx = Math.min(itemList.length, lastIdx + ov);
 
     return {
       containerHeight: total,
       viewerTop: offsets[firstIdx] ?? 0,
-      visibleItems: items().slice(firstIdx, lastIdx) as unknown as T,
+      visibleItems: itemList.slice(firstIdx, lastIdx) as T[number][],
       startIndex: firstIdx,
+      endIndex: lastIdx,
+      totalItems: itemList.length,
     };
+  });
+
+  // Clean up observers outside visible range (side effect in effect, not memo)
+  createEffect(() => {
+    const { startIndex, endIndex } = virtual();
+    observerMap.forEach((_, index) => {
+      if (index < startIndex || index >= endIndex) {
+        cleanupObserver(index);
+      }
+    });
   });
 
   const handleScroll = (e: Event) => {
@@ -111,11 +187,22 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     }
   };
 
+  const scrollToIndex = (index: number, behavior: ScrollBehavior = 'auto') => {
+    const itemList = items();
+    if (itemList.length === 0) {
+      return { scrollTop: 0, behavior };
+    }
+    const clampedIndex = Math.max(0, Math.min(index, itemList.length - 1));
+    const { offsets } = getPrefixHeights();
+    const targetScrollTop = offsets[clampedIndex] ?? 0;
+    return { scrollTop: targetScrollTop, behavior };
+  };
+
   onCleanup(() => {
-    observerMap.forEach((observer) => observer.disconnect());
+    observerMap.forEach((entry) => entry.observer.disconnect());
     observerMap.clear();
     sizeMap.clear();
   });
 
-  return [virtual, handleScroll, registerSize] as const;
+  return [virtual, handleScroll, registerSize, scrollToIndex] as const;
 }

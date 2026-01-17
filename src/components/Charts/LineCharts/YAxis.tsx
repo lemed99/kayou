@@ -1,9 +1,38 @@
-import { For, createEffect, createMemo, createSignal, onMount } from 'solid-js';
+import { For, JSX, createEffect, createMemo, createSignal, onMount } from 'solid-js';
 
 import { YAxisProps } from '../types';
 import { useChart } from './ChartContext';
 
-export function YAxis(props: YAxisProps) {
+// Vertical offset for tick labels based on position
+const TOP_TICK_OFFSET = 0;
+const MIDDLE_TICK_OFFSET = 4;
+const BOTTOM_TICK_OFFSET = 8;
+
+/**
+ * Returns the vertical offset (dy) for a tick label based on its position.
+ * - First tick (top): align bottom of text with line
+ * - Last tick (bottom): align top of text with line
+ * - Middle ticks: center vertically
+ */
+const getTickDy = (index: number, total: number): number => {
+  if (index === total - 1) return BOTTOM_TICK_OFFSET;
+  if (index === 0) return TOP_TICK_OFFSET;
+  return MIDDLE_TICK_OFFSET;
+};
+
+/**
+ * YAxis renders the vertical axis for a LineChart.
+ * Automatically calculates scale and tick positions based on data.
+ *
+ * @example
+ * <LineChart data={data} width={400} height={300}>
+ *   <XAxis dataKey="month" />
+ *   <YAxis tickFormatter={(v) => `$${v}`} />
+ *   <Line dataKey="sales" />
+ * </LineChart>
+ */
+export function YAxis(props: YAxisProps): JSX.Element {
+  let axisRef: SVGGElement | undefined;
   const chart = useChart();
   const ticks = createMemo<number[]>(() => {
     let t = chart.yScale().ticks();
@@ -13,9 +42,8 @@ export function YAxis(props: YAxisProps) {
   const [axisBBox, setAxisBBox] = createSignal<DOMRect | null>(null);
 
   onMount(() => {
-    const g: SVGGElement | null = document.querySelector('.y-axis');
-    if (g) {
-      const bbox = g.getBBox();
+    if (axisRef) {
+      const bbox = axisRef.getBBox();
       setAxisBBox(bbox);
       chart.setYAxisBBox(bbox);
     }
@@ -26,7 +54,7 @@ export function YAxis(props: YAxisProps) {
   });
 
   return (
-    <g class="y-axis">
+    <g ref={axisRef} aria-hidden="true">
       <line
         x1={axisBBox()?.width ?? 0}
         x2={axisBBox()?.width ?? 0}
@@ -45,7 +73,7 @@ export function YAxis(props: YAxisProps) {
               />
               <text
                 x={(axisBBox()?.width ?? 0) - 9}
-                dy={i() === ticks().length - 1 ? 8 : i() === 0 ? 0 : 4}
+                dy={getTickDy(i(), ticks().length)}
                 text-anchor="end"
                 font-size="10"
                 fill="#666"

@@ -16,16 +16,17 @@ The Accordion component has **critical accessibility violations** that make it u
 
 ### Dimension Breakdown
 
-| Dimension | Score | Weight | Weighted |
-|-----------|-------|--------|----------|
-| Type Safety | 20/25 | 25% | 20 |
-| SolidJS Practices | 20/25 | 25% | 20 |
-| API Design | 10/15 | 15% | 10 |
-| Accessibility | 5/20 | 20% | 5 |
-| Performance | 8/10 | 10% | 8 |
-| Testing/Docs | 0/5 | 5% | 0 |
+| Dimension         | Score | Weight | Weighted |
+| ----------------- | ----- | ------ | -------- |
+| Type Safety       | 20/25 | 25%    | 20       |
+| SolidJS Practices | 20/25 | 25%    | 20       |
+| API Design        | 10/15 | 15%    | 10       |
+| Accessibility     | 5/20  | 20%    | 5        |
+| Performance       | 8/10  | 10%    | 8        |
+| Testing/Docs      | 0/5   | 5%     | 0        |
 
 ### Score Interpretation
+
 **Needs Work** - Significant issues must be addressed before release. Critical accessibility problems.
 
 ---
@@ -39,6 +40,7 @@ The Accordion component has **critical accessibility violations** that make it u
 **Line(s):** 165-187
 
 **Current Code:**
+
 ```typescript
 <div
   id={`item_title${props.panel.itemKey}`}
@@ -49,12 +51,14 @@ The Accordion component has **critical accessibility violations** that make it u
 
 **Problem:**
 The panel header is a `<div>` with only `onClick`. This means:
+
 - Cannot be focused with Tab key
 - Cannot be activated with Enter/Space
 - Screen readers don't announce it as interactive
 - Violates WCAG 2.1.1 (Keyboard) and 4.1.2 (Name, Role, Value)
 
 **Solution:**
+
 ```typescript
 <button
   type="button"
@@ -84,6 +88,7 @@ The panel header is a `<div>` with only `onClick`. This means:
 
 **Problem:**
 The component lacks essential ARIA attributes for accordions:
+
 - No `aria-expanded` on trigger
 - No `aria-controls` linking trigger to content
 - No `aria-labelledby` on content panel
@@ -91,6 +96,7 @@ The component lacks essential ARIA attributes for accordions:
 
 **Solution:**
 Add proper ARIA pattern:
+
 ```typescript
 // Trigger
 <button
@@ -121,12 +127,14 @@ Add proper ARIA pattern:
 **Line(s):** 29, 89
 
 **Current Code:**
+
 ```typescript
 const Accordion = (props: AccordionProps) => {
 const Panel = (props: PanelProps) => {
 ```
 
 **Solution:**
+
 ```typescript
 const Accordion = (props: AccordionProps): JSX.Element => {
 const Panel = (props: PanelProps): JSX.Element => {
@@ -143,6 +151,7 @@ const Panel = (props: PanelProps): JSX.Element => {
 **Line(s):** 34-42, 54-60
 
 **Current Code:**
+
 ```typescript
 const isControlled = () =>
   props.itemDetails !== undefined && props.setItemDetails !== undefined;
@@ -156,9 +165,10 @@ const getPanels = () => { ... };
 These helper functions are recreated on every render. `isControlled` and `getPanels` should be memoized since they depend on props.
 
 **Solution:**
+
 ```typescript
-const isControlled = createMemo(() =>
-  props.itemDetails !== undefined && props.setItemDetails !== undefined
+const isControlled = createMemo(
+  () => props.itemDetails !== undefined && props.setItemDetails !== undefined,
 );
 
 const panels = createMemo(() => props.panels ?? []);
@@ -177,6 +187,7 @@ const panels = createMemo(() => props.panels ?? []);
 **Line:** 23
 
 **Current Code:**
+
 ```typescript
 simple?: boolean;
 ```
@@ -185,6 +196,7 @@ simple?: boolean;
 Boolean prop `simple` doesn't follow the `is/has` naming convention used elsewhere in the library.
 
 **Solution:**
+
 ```typescript
 isSimple?: boolean;
 ```
@@ -202,6 +214,7 @@ isSimple?: boolean;
 **Line:** 19
 
 **Current Code:**
+
 ```typescript
 export interface AccordionProps {
   children?: JSX.Element;  // Never used
@@ -213,6 +226,7 @@ The `children` prop is defined but never used. This is confusing for consumers.
 
 **Solution:**
 Either remove it or implement support for declarative panel children:
+
 ```typescript
 // Option A: Remove
 export interface AccordionProps {
@@ -236,6 +250,7 @@ export interface AccordionProps {
 **Line(s):** 21-25
 
 **Current Code:**
+
 ```typescript
 searched?: string;
 searchedClass?: string;
@@ -244,10 +259,12 @@ setItemDetails?: (state: Record<string, boolean>) => void;
 ```
 
 **Problem:**
+
 - `searched` is unclear - better named `highlightedKey` or `activeItemKey`
 - `itemDetails`/`setItemDetails` is verbose - could be `openPanels`/`onOpenChange`
 
 **Solution:**
+
 ```typescript
 highlightedKey?: string;
 highlightedClass?: string;
@@ -267,12 +284,14 @@ onOpenChange?: (state: Record<string, boolean>) => void;
 
 **Problem:**
 Each panel injects a `<style>` tag for border-radius styling. This:
+
 - Creates DOM bloat
 - Could cause FOUC (flash of unstyled content)
 - Is harder to debug
 
 **Solution:**
 Use Tailwind classes with `first:` and `last:` variants, or use CSS-in-JS properly:
+
 ```typescript
 // Use Tailwind pseudo-selectors
 class={twMerge(
@@ -300,6 +319,7 @@ class={twMerge(
 **Category:** Testing/Docs
 
 **Description:** No test file exists. Tests should cover:
+
 - Panel expand/collapse
 - Controlled mode
 - Uncontrolled mode
@@ -318,6 +338,7 @@ class={twMerge(
 **Description:** ~~No documentation page at `doc/src/pages/components/accordion.tsx`.~~
 
 **Resolution:** Documentation page created at `doc/src/pages/components/accordion.tsx` with:
+
 - Full props table
 - 5 interactive examples (basic, styled, controlled, highlighted, custom styling)
 - Usage code snippets
@@ -353,11 +374,11 @@ Things this component does well:
 
 Components that may have similar issues:
 
-| Component | Likely Issues | Priority |
-|-----------|---------------|----------|
-| Modal | Check keyboard trap, focus management | High |
-| Drawer | Check keyboard trap, ARIA | High |
-| Popover | Check focus management | Medium |
+| Component | Likely Issues                         | Priority |
+| --------- | ------------------------------------- | -------- |
+| Modal     | Check keyboard trap, focus management | High     |
+| Drawer    | Check keyboard trap, ARIA             | High     |
+| Popover   | Check focus management                | Medium   |
 
 ---
 
@@ -437,24 +458,24 @@ internal_components: Panel
 
 ## Post-Audit Fixes Applied
 
-| Issue | Status | Date |
-|-------|--------|------|
-| No keyboard accessibility | ✅ Fixed (div → button) | 2026-01-13 |
-| Missing ARIA attributes | ✅ Fixed (aria-expanded, aria-controls, aria-labelledby, role) | 2026-01-13 |
-| Missing return types | ✅ Fixed | 2026-01-13 |
-| Functions not memoized | ✅ Fixed (createMemo for isControlled, panels) | 2026-01-13 |
-| Boolean prop naming | ✅ Fixed (simple → isSimple) | 2026-01-13 |
-| Unused children prop | ✅ Removed | 2026-01-13 |
-| Missing JSDoc | ✅ Fixed | 2026-01-13 |
-| Confusing prop names | ✅ Fixed (with backwards compatibility) | 2026-01-13 |
-| No documentation page | ✅ Fixed | 2026-01-13 |
+| Issue                     | Status                                                         | Date       |
+| ------------------------- | -------------------------------------------------------------- | ---------- |
+| No keyboard accessibility | ✅ Fixed (div → button)                                        | 2026-01-13 |
+| Missing ARIA attributes   | ✅ Fixed (aria-expanded, aria-controls, aria-labelledby, role) | 2026-01-13 |
+| Missing return types      | ✅ Fixed                                                       | 2026-01-13 |
+| Functions not memoized    | ✅ Fixed (createMemo for isControlled, panels)                 | 2026-01-13 |
+| Boolean prop naming       | ✅ Fixed (simple → isSimple)                                   | 2026-01-13 |
+| Unused children prop      | ✅ Removed                                                     | 2026-01-13 |
+| Missing JSDoc             | ✅ Fixed                                                       | 2026-01-13 |
+| Confusing prop names      | ✅ Fixed (with backwards compatibility)                        | 2026-01-13 |
+| No documentation page     | ✅ Fixed                                                       | 2026-01-13 |
 
 ### New Props (with legacy support)
 
-| Old Name | New Name | Notes |
-|----------|----------|-------|
-| `searched` | `highlightedKey` | Legacy still works |
-| `searchedClass` | `highlightedClass` | Legacy still works |
-| `simple` | `isSimple` | Legacy still works |
-| `itemDetails` | `openPanels` | Legacy still works |
-| `setItemDetails` | `onOpenChange` | Legacy still works |
+| Old Name         | New Name           | Notes              |
+| ---------------- | ------------------ | ------------------ |
+| `searched`       | `highlightedKey`   | Legacy still works |
+| `searchedClass`  | `highlightedClass` | Legacy still works |
+| `simple`         | `isSimple`         | Legacy still works |
+| `itemDetails`    | `openPanels`       | Legacy still works |
+| `setItemDetails` | `onOpenChange`     | Legacy still works |

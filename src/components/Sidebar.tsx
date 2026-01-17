@@ -18,45 +18,93 @@ import { ChevronRightIcon, LayoutLeftIcon } from '../icons';
 import Popover from './Popover';
 import Tooltip from './Tooltip';
 
-export interface SideBarItems {
+/**
+ * Configuration for a sidebar navigation item.
+ */
+export interface SidebarItem {
+  /** Label text or element for the item. */
   label: JSX.Element;
+  /** Optional icon component. */
   icon?: (props: { class: string }) => JSX.Element;
+  /** Navigation path/URL. */
   path?: string;
+  /** Additional CSS classes. */
   class?: string;
+  /** Whether this item is currently active. */
   isActive?: boolean;
+  /** Unique identifier for the item. */
   id: string;
+  /** Click handler for the item. */
   onClick?: (event: MouseEvent) => void;
-  children?: SideBarItems[] | undefined;
+  /** Nested child items for collapsible sections. */
+  children?: SidebarItem[] | undefined;
 }
 
+/**
+ * @deprecated Use SidebarItem instead. This alias exists for backwards compatibility.
+ */
+export type SideBarItems = SidebarItem;
+
+/**
+ * Props for the Sidebar component.
+ */
 export interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
+  /** Additional CSS classes for the inner container. */
   innerClass?: string;
-  items?: SideBarItems[];
+  /** Array of navigation items. */
+  items?: SidebarItem[];
+  /** Whether the sidebar is in mobile mode. */
   isMobile: boolean;
+  /** Content to render in the sidebar header. */
   children?: JSX.Element;
+  /** Whether the sidebar is expanded. */
   isSidebarOpen?: boolean;
+  /** Setter function for sidebar open state. */
   setIsSidebarOpen?: Setter<boolean>;
 }
 
-export interface SidebarItemProps extends JSX.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface SidebarItemProps {
+  /** Optional icon component. */
   icon?: (props: { class: string }) => JSX.Element;
+  /** Accessible label for the item. */
   label?: string;
+  /** Whether this item is currently active. */
   isActive?: boolean;
+  /** Unique identifier for the item. */
   id: string;
+  /** Content to render inside the item. */
   children?: JSX.Element;
+  /** Whether to show only the icon (collapsed state). */
   showItemIconOnly?: boolean;
+  /** Navigation URL - renders as link when provided. */
+  href?: string;
+  /** Click handler. */
+  onClick?: (event: MouseEvent) => void;
+  /** Additional CSS classes. */
+  class?: string;
 }
 
-export interface SidebarCollapseProps extends JSX.HTMLAttributes<HTMLButtonElement> {
+export interface SidebarCollapseProps {
+  /** Optional icon component. */
   icon?: (props: { class: string }) => JSX.Element;
+  /** Label content for the collapse button. */
   label?: JSX.Element;
+  /** Whether the collapse section is expanded. */
   isItemCollapsed?: boolean;
+  /** Callback to toggle the collapsed state. */
   setIsItemCollapsed?: (state: boolean) => void;
+  /** Whether this item is currently active. */
   isActive?: boolean;
+  /** Unique identifier for the collapse section. */
   id: string;
+  /** Child items to render when expanded. */
   children?: JSX.Element;
+  /** Whether to show only the icon (collapsed sidebar state). */
   showItemIconOnly?: boolean;
+  /** ID of the currently hovered item. */
   hoveredItem?: string;
+  /** Additional CSS classes. */
+  class?: string;
 }
 
 const sidebarTheme = {
@@ -110,7 +158,10 @@ const sidebarCollapseTheme = {
   },
 };
 
-const Sidebar = (props: SidebarProps) => {
+/**
+ * Sidebar navigation component with collapsible sections.
+ */
+const Sidebar = (props: SidebarProps): JSX.Element => {
   const [isItemCollapsed, setIsItemCollapsed] = createStore<Record<string, boolean>>({});
   const [hoveredItem, setHoveredItem] = createSignal('');
   const [local, otherProps] = splitProps(props, [
@@ -123,7 +174,7 @@ const Sidebar = (props: SidebarProps) => {
 
   const items = createMemo(() => local.items ?? []);
 
-  const isPopoverHidden = (mn: SideBarItems) => {
+  const isPopoverHidden = (mn: SidebarItem) => {
     return local.isMobile ? true : !!isItemCollapsed?.[mn.id];
   };
 
@@ -141,21 +192,21 @@ const Sidebar = (props: SidebarProps) => {
             <div class="mb-2 flex h-12 items-center justify-between px-2.5">
               <Show when={isSidebarOpen()}>{local.children}</Show>
               <Show when={props.setIsSidebarOpen}>
-                <div
-                  class={twMerge(
-                    'text-gray-500',
-                    isSidebarOpen() ? 'cursor-w-resize' : 'cursor-e-resize',
-                  )}
+                <button
+                  type="button"
+                  aria-label={isSidebarOpen() ? 'Collapse sidebar' : 'Expand sidebar'}
+                  aria-expanded={isSidebarOpen()}
+                  class={twMerge(isSidebarOpen() ? 'cursor-w-resize' : 'cursor-e-resize')}
                   onClick={() => {
                     props.setIsSidebarOpen?.(!isSidebarOpen());
                   }}
                 >
                   <LayoutLeftIcon class="size-4.5" />
-                </div>
+                </button>
               </Show>
             </div>
           </Show>
-          <ul class={sidebarTheme.itemGroup}>
+          <ul class={sidebarTheme.itemGroup} role="menu">
             <For each={items()}>
               {(mn) => (
                 <div>
@@ -165,16 +216,17 @@ const Sidebar = (props: SidebarProps) => {
                       content={mn.label}
                       placement="right"
                     >
-                      <SidebarItem
+                      <SidebarItemComponent
                         icon={mn.icon}
                         onClick={mn.onClick}
+                        href={mn.path}
                         class={mn.class}
                         isActive={mn.isActive}
                         id={mn.id}
                         showItemIconOnly={!isSidebarOpen()}
                       >
                         {mn.label}
-                      </SidebarItem>
+                      </SidebarItemComponent>
                     </Tooltip>
                   </Show>
                   <Show when={mn.children}>
@@ -191,11 +243,12 @@ const Sidebar = (props: SidebarProps) => {
                               {mn.label}
                             </div>
                           </Show>
-                          <div class="space-y-1 px-1.5 py-2">
+                          <ul class="list-none space-y-1 px-1.5 py-2" role="menu">
                             <For each={mn.children}>
                               {(sb) => (
-                                <SidebarItem
+                                <SidebarItemComponent
                                   onClick={sb.onClick}
+                                  href={sb.path}
                                   class={
                                     sb.isActive
                                       ? ''
@@ -205,10 +258,10 @@ const Sidebar = (props: SidebarProps) => {
                                   id={sb.id}
                                 >
                                   {sb.label}
-                                </SidebarItem>
+                                </SidebarItemComponent>
                               )}
                             </For>
-                          </div>
+                          </ul>
                         </div>
                       }
                       onMouseEnter={() => setHoveredItem(mn.id)}
@@ -229,14 +282,15 @@ const Sidebar = (props: SidebarProps) => {
                         <Show when={isSidebarOpen()}>
                           <For each={mn.children}>
                             {(sb) => (
-                              <SidebarItem
+                              <SidebarItemComponent
                                 onClick={sb.onClick}
+                                href={sb.path}
                                 class={sb.class}
                                 isActive={sb.isActive}
                                 id={sb.id}
                               >
                                 {sb.label}
-                              </SidebarItem>
+                              </SidebarItemComponent>
                             )}
                           </For>
                         </Show>
@@ -253,72 +307,81 @@ const Sidebar = (props: SidebarProps) => {
   );
 };
 
-const SidebarItem = (props: SidebarItemProps) => {
-  const [local, otherProps] = splitProps(props, [
-    'children',
-    'class',
-    'isActive',
-    'icon',
-    'id',
-    'showItemIconOnly',
-  ]);
+const SidebarItemComponent = (props: SidebarItemProps) => {
+  const itemContent = () => (
+    <>
+      <Show when={props.isActive && !props.showItemIconOnly}>
+        <div class="absolute left-1 mr-0.5 h-5 w-[3px] rounded-full bg-blue-800 dark:bg-blue-300" />
+      </Show>
+      <Show when={props.icon}>
+        {props.icon?.({
+          class: twMerge(
+            sidebarItemTheme.item.icon.base,
+            props.isActive
+              ? 'text-blue-800 dark:text-blue-300'
+              : 'text-gray-900 dark:text-white',
+          ),
+        })}
+      </Show>
+      <span
+        id={`sidebar-item-${props.id}`}
+        class={twMerge(
+          sidebarItemTheme.item.content.base,
+          props.showItemIconOnly ? 'ml-0 w-0' : 'ml-3 w-[180px]',
+        )}
+      >
+        {props.children}
+      </span>
+    </>
+  );
+
+  const commonClass = () =>
+    twMerge(
+      props.class,
+      sidebarItemTheme.item.base,
+      props.isActive ? sidebarItemTheme.item.active : sidebarItemTheme.item.inactive,
+    );
+
+  const title = () => (typeof props.children === 'string' ? props.children : undefined);
 
   return (
-    <li id={local.id} class="list-none">
-      <a
-        title={typeof local.children === 'string' ? local.children : undefined}
-        class={twMerge(
-          local.class,
-          sidebarItemTheme.item.base,
-          local.isActive ? sidebarItemTheme.item.active : sidebarItemTheme.item.inactive,
-        )}
-        {...otherProps}
+    <li id={props.id} class="list-none" role="none">
+      <Show
+        when={props.href}
+        fallback={
+          <button
+            type="button"
+            title={title()}
+            class={twMerge(commonClass(), 'w-full text-left')}
+            onClick={(e) => props.onClick?.(e)}
+            role="menuitem"
+          >
+            {itemContent()}
+          </button>
+        }
       >
-        <Show when={local.isActive && !local.showItemIconOnly}>
-          <div class="absolute left-1 mr-0.5 h-5 w-[3px] rounded-full bg-blue-800 dark:bg-blue-300" />
-        </Show>
-        <Show when={local.icon}>
-          {local.icon?.({
-            class: twMerge(
-              sidebarItemTheme.item.icon.base,
-              local.isActive
-                ? 'text-blue-800 dark:text-blue-300'
-                : 'text-gray-900 dark:text-white',
-            ),
-          })}
-        </Show>
-        <span
-          id={`sidebar-item-${local.id}`}
-          class={twMerge(
-            sidebarItemTheme.item.content.base,
-            local.showItemIconOnly ? 'ml-0 w-0' : 'ml-3 w-[180px]',
-          )}
+        <a
+          href={props.href}
+          title={title()}
+          class={commonClass()}
+          onClick={(e) => props.onClick?.(e)}
+          role="menuitem"
         >
-          {local.children}
-        </span>
-      </a>
+          {itemContent()}
+        </a>
+      </Show>
     </li>
   );
 };
 
 const SidebarCollapse = (props: SidebarCollapseProps) => {
-  const [local, otherProps] = splitProps(props, [
-    'children',
-    'class',
-    'isItemCollapsed',
-    'setIsItemCollapsed',
-    'id',
-    'isActive',
-    'icon',
-    'label',
-    'showItemIconOnly',
-    'hoveredItem',
-  ]);
   const [collapsedContentElement, setCollapsedContentElement] =
     createSignal<HTMLDivElement>();
   const [collapsedElementHeight, setCollapsedElementHeight] = createSignal(0);
 
-  const { isVisible, isMounted } = createPresence(() => local.isItemCollapsed, {
+  const collapseListId = () => `sidebar-collapse-list-${props.id}`;
+
+  const { isVisible, isMounted } = createPresence(() => props.isItemCollapsed, {
     transitionDuration: 200,
   });
 
@@ -340,31 +403,32 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
   });
 
   return (
-    <li id={`sidebar-collapse-${local.id}`} class="list-none">
+    <li id={`sidebar-collapse-${props.id}`} class="list-none" role="none">
       <button
-        onClick={() => local.setIsItemCollapsed?.(!local.isItemCollapsed)}
+        onClick={() => props.setIsItemCollapsed?.(!props.isItemCollapsed)}
         type="button"
+        aria-expanded={props.isItemCollapsed}
+        aria-controls={collapseListId()}
         class={twMerge(
           sidebarCollapseTheme.collapse.button,
-          local.isActive && !local.isItemCollapsed
+          props.isActive && !props.isItemCollapsed
             ? sidebarCollapseTheme.item.active
             : sidebarCollapseTheme.item.inactive,
-          local.hoveredItem === local.id ? 'bg-gray-100' : '',
-          local.class,
+          props.hoveredItem === props.id ? 'bg-gray-100' : '',
+          props.class,
         )}
-        {...otherProps}
       >
-        <Show when={local.isActive && !local.isItemCollapsed && !local.showItemIconOnly}>
+        <Show when={props.isActive && !props.isItemCollapsed && !props.showItemIconOnly}>
           <div class="absolute left-1 mr-0.5 h-5 w-[3px] rounded-full bg-blue-800 dark:bg-blue-300" />
         </Show>
-        <Show when={local.icon}>
-          {local.icon?.({
+        <Show when={props.icon}>
+          {props.icon?.({
             class: twMerge(
               sidebarCollapseTheme.collapse.icon.base,
               sidebarCollapseTheme.collapse.icon.open[
-                local.isItemCollapsed ? 'on' : 'off'
+                props.isItemCollapsed ? 'on' : 'off'
               ],
-              local.isActive && !local.isItemCollapsed
+              props.isActive && !props.isItemCollapsed
                 ? 'text-blue-800 dark:text-blue-300'
                 : 'text-gray-900 dark:text-white',
             ),
@@ -373,19 +437,20 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
         <div
           class={twMerge(
             'flex items-center overflow-hidden transition-all duration-100',
-            local.showItemIconOnly ? 'ml-0 w-0' : 'ml-3 w-[180px]',
+            props.showItemIconOnly ? 'ml-0 w-0' : 'ml-3 w-[180px]',
           )}
         >
           <span
             class={twMerge(sidebarCollapseTheme.collapse.label.base, 'min-w-[168px]')}
           >
-            {local.label}
+            {props.label}
           </span>
           <div>
             <ChevronRightIcon
+              aria-hidden="true"
               class={twMerge(
                 sidebarCollapseTheme.collapse.label.icon,
-                local.isItemCollapsed ? 'rotate-90' : '',
+                props.isItemCollapsed ? 'rotate-90' : '',
               )}
             />
           </div>
@@ -393,6 +458,8 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
       </button>
       <Show when={isMounted()}>
         <ul
+          id={collapseListId()}
+          role="menu"
           class={twMerge(
             sidebarCollapseTheme.collapse.list,
             sidebarCollapseTheme.item.collapsed.insideCollapse,
@@ -404,7 +471,7 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
           }}
         >
           <div ref={setCollapsedContentElement} class="space-y-1">
-            {local.children}
+            {props.children}
           </div>
         </ul>
       </Show>

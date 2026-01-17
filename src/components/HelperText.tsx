@@ -2,12 +2,25 @@ import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-type HelperTextColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
+/**
+ * Color variants for the HelperText component.
+ */
+export type HelperTextColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 
+/**
+ * Props for the HelperText component.
+ */
 export interface HelperTextProps
   extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
+  /**
+   * The helper text content to display.
+   */
   content: string;
   class?: string;
+  /**
+   * Color variant of the helper text.
+   * @default 'gray'
+   */
   color?: HelperTextColor;
 }
 
@@ -22,7 +35,10 @@ const helperTextTheme = {
   },
 };
 
-const HelperText = (props: HelperTextProps) => {
+/**
+ * HelperText component for displaying form field hints or error messages.
+ */
+const HelperText = (props: HelperTextProps): JSX.Element => {
   const [local, otherProps] = splitProps(props, ['color', 'class', 'content']);
   const color = createMemo(() => local.color || 'gray');
 
@@ -38,7 +54,7 @@ const HelperText = (props: HelperTextProps) => {
         )}
         {...otherProps}
       >
-        {props.content}
+        {local.content}
       </span>
     </Show>
   );

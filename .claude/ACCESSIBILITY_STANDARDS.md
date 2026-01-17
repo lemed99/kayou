@@ -61,6 +61,7 @@
 ```
 
 **Requirements:**
+
 - Focus trapped inside modal when open
 - ESC key closes modal
 - Focus returns to trigger element on close
@@ -82,18 +83,10 @@
   </button>
 
   <Show when={isOpen()}>
-    <ul
-      id="select-listbox"
-      role="listbox"
-      aria-labelledby="select-label"
-    >
+    <ul id="select-listbox" role="listbox" aria-labelledby="select-label">
       <For each={options}>
         {(option) => (
-          <li
-            role="option"
-            aria-selected={isSelected(option)}
-            tabIndex={-1}
-          >
+          <li role="option" aria-selected={isSelected(option)} tabIndex={-1}>
             {option.label}
           </li>
         )}
@@ -104,6 +97,7 @@
 ```
 
 **Keyboard Navigation:**
+
 - Arrow Up/Down: Navigate options
 - Enter/Space: Select option
 - Escape: Close dropdown
@@ -115,11 +109,7 @@
 ```tsx
 <div>
   <h3>
-    <button
-      aria-expanded={isOpen()}
-      aria-controls={`panel-${id}`}
-      id={`header-${id}`}
-    >
+    <button aria-expanded={isOpen()} aria-controls={`panel-${id}`} id={`header-${id}`}>
       Accordion Header
     </button>
   </h3>
@@ -224,10 +214,7 @@
 <nav aria-label="Pagination">
   <ul>
     <li>
-      <button
-        aria-label="Previous page"
-        disabled={currentPage() === 1}
-      >
+      <button aria-label="Previous page" disabled={currentPage() === 1}>
         Previous
       </button>
     </li>
@@ -244,10 +231,7 @@
       )}
     </For>
     <li>
-      <button
-        aria-label="Next page"
-        disabled={currentPage() === totalPages()}
-      >
+      <button aria-label="Next page" disabled={currentPage() === totalPages()}>
         Next
       </button>
     </li>
@@ -316,7 +300,7 @@ function useFocusTrap(containerRef: Accessor<HTMLElement | undefined>) {
     if (!container) return;
 
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
 
     const firstElement = focusableElements[0] as HTMLElement;
@@ -368,11 +352,11 @@ function useReturnFocus() {
 
 ### Text Contrast Ratios
 
-| Text Type | Minimum Ratio | Example |
-|-----------|---------------|---------|
-| Normal text | 4.5:1 | Body text, labels |
-| Large text (18pt+) | 3:1 | Headings |
-| UI components | 3:1 | Buttons, inputs |
+| Text Type          | Minimum Ratio | Example           |
+| ------------------ | ------------- | ----------------- |
+| Normal text        | 4.5:1         | Body text, labels |
+| Large text (18pt+) | 3:1           | Headings          |
+| UI components      | 3:1           | Buttons, inputs   |
 
 ### Common Issues in This Codebase
 

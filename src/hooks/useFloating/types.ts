@@ -50,6 +50,7 @@ export interface UseFloatingOptions {
   renderArrow?: boolean;
   arrowAlignment?: Alignment;
   arrowOffset?: number;
+  arrowInset?: number;
 }
 
 export interface UseFloatingReturn {

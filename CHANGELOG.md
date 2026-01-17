@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - **commit-and-push skill** - Smart commit workflow with changelog updates
 - **Component documentation pages** - Added docs for Accordion, Button, TextInput, NumberInput, MultiSelect, SelectWithSearch
 - **NumberInput `onValueChange` prop** - Returns typed `number | null` instead of string
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Audit system** - Component audit tracker and reports in `.claude/audits/`
 
 ### Changed
+
 - **TextInput** - Added `aria-invalid`, `aria-busy`, `aria-describedby` for accessibility
 - **NumberInput** - Fixed unsafe type assertions, added safe min/max accessors
 - **SelectWithSearch** - Options now have `role="option"` and `aria-selected`
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Accordion** - Improved keyboard navigation and ARIA attributes
 
 ### Fixed
+
 - TextInput label now properly associated with input via `for`/`id`
 - TextInput shows `aria-invalid="true"` when `color="failure"`
 - NumberInput clamps values correctly with typed accessors

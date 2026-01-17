@@ -4,9 +4,38 @@ import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
 
+/**
+ * Color variants for the Spinner component.
+ */
+export type SpinnerColor =
+  | 'gray'
+  | 'dark'
+  | 'failure'
+  | 'info'
+  | 'light'
+  | 'success'
+  | 'warning'
+  | 'blue';
+
+/**
+ * Size variants for the Spinner component.
+ */
+export type SpinnerSize = 'xs' | 'sm' | 'md';
+
+/**
+ * Props for the Spinner component.
+ */
 export interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
-  color?: 'gray' | 'dark' | 'failure' | 'info' | 'light' | 'success' | 'warning' | 'blue';
-  size?: 'xs' | 'sm' | 'md';
+  /**
+   * Color variant of the spinner.
+   * @default 'info'
+   */
+  color?: SpinnerColor;
+  /**
+   * Size of the spinner.
+   * @default 'sm'
+   */
+  size?: SpinnerSize;
 }
 
 const theme = {
@@ -28,12 +57,17 @@ const theme = {
   },
 };
 
-const Spinner = (props: SpinnerProps) => {
+/**
+ * Spinner component for loading indicators.
+ * Includes screen reader text for accessibility.
+ */
+const Spinner = (props: SpinnerProps): JSX.Element => {
   const merged = defaultProps({ color: 'info', size: 'sm' }, props);
 
   return (
     <span role="status" class="flex items-center justify-center">
       <svg
+        aria-hidden="true"
         fill="none"
         viewBox="0 0 100 100"
         class={twMerge(
@@ -52,6 +86,7 @@ const Spinner = (props: SpinnerProps) => {
           fill="currentFill"
         />
       </svg>
+      <span class="sr-only">Loading...</span>
     </span>
   );
 };

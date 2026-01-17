@@ -8,6 +8,14 @@ type VirtualListConfig<T extends readonly unknown[]> = {
   setScrollPosition?: (scrollTop: number) => void;
 };
 
+type VirtualListResult<T extends readonly unknown[]> = {
+  containerHeight: number;
+  viewerTop: number;
+  visibleItems: T[number][];
+  startIndex: number;
+  totalItems: number;
+};
+
 export function useVirtualList<T extends readonly unknown[]>({
   items,
   rootHeight,
@@ -17,22 +25,22 @@ export function useVirtualList<T extends readonly unknown[]>({
 }: VirtualListConfig<T>) {
   const [scrollTop, setScrollTop] = createSignal(0);
 
-  const virtual = createMemo(() => {
-    const getFirstIdx = () =>
-      Math.max(0, Math.floor(scrollTop() / rowHeight) - overscanCount);
+  const virtual = createMemo((): VirtualListResult<T> => {
+    const itemList = items();
+    const firstIdx = Math.max(0, Math.floor(scrollTop() / rowHeight) - overscanCount);
+    const lastIdx = Math.min(
+      itemList.length,
+      Math.floor(scrollTop() / rowHeight) +
+        Math.ceil(rootHeight / rowHeight) +
+        overscanCount,
+    );
 
-    const getLastIdx = () =>
-      Math.min(
-        items().length,
-        Math.floor(scrollTop() / rowHeight) +
-          Math.ceil(rootHeight / rowHeight) +
-          overscanCount,
-      );
     return {
-      containerHeight: items().length * rowHeight,
-      viewerTop: getFirstIdx() * rowHeight,
-      visibleItems: items().slice(getFirstIdx(), getLastIdx()) as unknown as T,
-      startIndex: getFirstIdx(),
+      containerHeight: itemList.length * rowHeight,
+      viewerTop: firstIdx * rowHeight,
+      visibleItems: itemList.slice(firstIdx, lastIdx) as T[number][],
+      startIndex: firstIdx,
+      totalItems: itemList.length,
     };
   });
 
@@ -44,5 +52,11 @@ export function useVirtualList<T extends readonly unknown[]>({
     }
   };
 
-  return [virtual, handleScroll] as const;
+  const scrollToIndex = (index: number, behavior: ScrollBehavior = 'auto') => {
+    const clampedIndex = Math.max(0, Math.min(index, items().length - 1));
+    const targetScrollTop = clampedIndex * rowHeight;
+    return { scrollTop: targetScrollTop, behavior };
+  };
+
+  return [virtual, handleScroll, scrollToIndex] as const;
 }

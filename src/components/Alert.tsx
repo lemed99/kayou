@@ -2,9 +2,27 @@ import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * Color variants for the Alert component.
+ */
+export type AlertColor = 'info' | 'failure' | 'success' | 'warning' | 'dark';
+
+/**
+ * Props for the Alert component.
+ */
 export interface AlertProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  color?: 'info' | 'failure' | 'success' | 'warning' | 'dark';
+  /**
+   * The color variant of the alert.
+   * @default 'info'
+   */
+  color?: AlertColor;
+  /**
+   * Optional icon to display in the alert.
+   */
   icon?: (props: { class: string }) => JSX.Element;
+  /**
+   * Additional content to display below the main alert message.
+   */
   additionalContent?: JSX.Element;
 }
 
@@ -24,7 +42,11 @@ const theme = {
   rounded: 'rounded-lg',
 };
 
-const Alert = (props: AlertProps) => {
+/**
+ * Alert component for displaying important messages to users.
+ * Uses role="alert" for screen reader accessibility.
+ */
+const Alert = (props: AlertProps): JSX.Element => {
   const [local, otherProps] = splitProps(props, [
     'color',
     'icon',
@@ -37,6 +59,7 @@ const Alert = (props: AlertProps) => {
 
   return (
     <div
+      role="alert"
       class={twMerge(theme.base, theme.color[color()], theme.rounded, local.class)}
       {...otherProps}
     >

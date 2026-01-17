@@ -1,9 +1,21 @@
-import { For, Show, createMemo } from 'solid-js';
+import { For, JSX, Show, createMemo } from 'solid-js';
 
 import { CartesianGridProps } from '../types';
 import { useChart } from './ChartContext';
 
-export function CartesianGrid(props: CartesianGridProps) {
+/**
+ * CartesianGrid renders horizontal and/or vertical grid lines for a LineChart.
+ * Decorative component that improves readability of data values.
+ *
+ * @example
+ * <LineChart data={data} width={400} height={300}>
+ *   <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+ *   <XAxis dataKey="month" />
+ *   <YAxis />
+ *   <Line dataKey="sales" />
+ * </LineChart>
+ */
+export function CartesianGrid(props: CartesianGridProps): JSX.Element {
   const chart = useChart();
 
   const xTicks = createMemo<number[]>(() => {
@@ -21,7 +33,7 @@ export function CartesianGrid(props: CartesianGridProps) {
   const strokeDasharray = createMemo(() => props.strokeDasharray ?? '3 3');
 
   return (
-    <g>
+    <g aria-hidden="true">
       <Show when={props.horizontal !== false}>
         <g>
           <For each={yTicks()}>

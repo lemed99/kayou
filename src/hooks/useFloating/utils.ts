@@ -276,6 +276,7 @@ export function computeArrowPosition(
   finalPlacement: Placement,
   arrowAlignment: Alignment,
   arrowOffset: number,
+  arrowInset: number,
 ): ArrowPosition {
   const { side: finalSide, alignment: floatingAlignment } =
     parsePlacement(finalPlacement);
@@ -289,19 +290,20 @@ export function computeArrowPosition(
 
   switch (finalSide) {
     case 'top':
-      arrowPosition.top = floatingDimensions.height;
+      arrowPosition.top = floatingDimensions.height - arrowInset;
       arrowPosition.transformOrigin = 'center bottom';
       break;
     case 'bottom':
-      arrowPosition.top = -arrowDimensions.height;
+      arrowPosition.top = -arrowDimensions.height + arrowInset;
       arrowPosition.transformOrigin = 'center top';
       break;
     case 'left':
-      arrowPosition.left = floatingDimensions.width - arrowDimensions.height * 0.5;
+      arrowPosition.left =
+        floatingDimensions.width - arrowDimensions.height * 0.5 - arrowInset;
       arrowPosition.transformOrigin = 'right center';
       break;
     case 'right':
-      arrowPosition.left = -arrowDimensions.height * 1.5;
+      arrowPosition.left = -arrowDimensions.height * 1.5 + arrowInset;
       arrowPosition.transformOrigin = 'left center';
       break;
   }

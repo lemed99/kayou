@@ -1,4 +1,11 @@
-import { JSX, Show, createEffect, createMemo, createUniqueId, splitProps } from 'solid-js';
+import {
+  JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createUniqueId,
+  splitProps,
+} from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -129,7 +136,9 @@ const TextInput = (props: TextInputProps): JSX.Element => {
   // Generate unique IDs for accessibility associations
   const uniqueId = createUniqueId();
   const inputId = createMemo(() => local.id || `textinput-${uniqueId}`);
-  const helperId = createMemo(() => (local.helperText ? `${inputId()}-helper` : undefined));
+  const helperId = createMemo(() =>
+    local.helperText ? `${inputId()}-helper` : undefined,
+  );
 
   const color = createMemo(() => local.color || 'gray');
   const sizing = createMemo(() => local.sizing || 'md');

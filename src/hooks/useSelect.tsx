@@ -417,6 +417,7 @@ const useSelect = <T extends MergedSelectProps>(
                     rowHeight={props.optionRowHeight!}
                     overscanCount={3}
                     setContainerRef={setOptionsContainerRef}
+                    minWidth={props.withSearch ? 210 : undefined}
                     id={listboxId}
                     role="listbox"
                     aria-multiselectable={type === 'multiSelect' ? true : undefined}

@@ -7,7 +7,7 @@
     <title>Component Library</title>
     <!-- Prevent flash of unstyled content (FOUC) -->
     <script>
-      (function() {
+      (function () {
         const stored = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (stored === 'dark' || (!stored && prefersDark)) {
@@ -16,7 +16,7 @@
       })();
     </script>
   </head>
-  <body class="text-sm bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
+  <body class="bg-white text-sm text-gray-900 dark:bg-gray-950 dark:text-white">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 

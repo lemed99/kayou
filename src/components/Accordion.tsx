@@ -1,11 +1,11 @@
 import {
+  For,
+  JSX,
+  Show,
   createEffect,
   createMemo,
   createSignal,
-  For,
-  JSX,
   onCleanup,
-  Show,
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
@@ -233,8 +233,7 @@ const Panel = (props: PanelProps): JSX.Element => {
         class={twMerge(
           'flex w-full cursor-pointer items-center justify-between p-3 text-left transition-all duration-200',
           props.isOpen && !props.isSimple && 'bg-gray-100/60 dark:bg-gray-700',
-          isHighlighted() &&
-            (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
+          isHighlighted() && (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
           props.panel.titleClass,
         )}
       >
