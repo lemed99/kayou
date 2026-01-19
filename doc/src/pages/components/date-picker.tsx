@@ -1,7 +1,8 @@
 import { createSignal } from 'solid-js';
 
-import DatePicker, { DateValue } from '@lib/components/DatePicker';
-import { DatePickerProvider } from '@lib/context/DatePickerContext';
+import type { DateValue } from '@exowpee/solidly-pro';
+import { DatePicker, DatePickerProvider } from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 export default function DatePickerPage() {
@@ -9,7 +10,7 @@ export default function DatePickerPage() {
     <DatePickerProvider locale="en-US">
       <DocPage
         title="DatePicker"
-        description="A flexible date picker component with calendar popup supporting single date, multiple dates, and date range selection. It renders an input field that opens a calendar popup when clicked. The calendar supports full keyboard navigation, allowing users to move between days with arrow keys, jump between months, and select dates with Enter. The component respects locale settings for day/month names and date formatting, making it suitable for international applications. It uses the floating UI engine to position the calendar optimally within the viewport. Features min/max date constraints and accessibility support. Must be wrapped in a DatePickerProvider for context."
+        description="Calendar input supporting single, multiple, and range selection with locale-aware formatting. Requires DatePickerProvider."
         keyConcepts={[
           {
             term: 'Selection Type',
@@ -31,8 +32,17 @@ export default function DatePickerPage() {
             explanation:
               'The value type varies by selection mode: { date } for single, { startDate, endDate } for range, and { multipleDates } for multiple selection.',
           },
+          {
+            term: 'Time Selection',
+            explanation:
+              'Enable showTime prop (single mode only) to add hour/minute/second selectors using dropdowns. Click "Confirm" to apply the selection. The DateValue will include hour, minute, and second properties.',
+          },
+          {
+            term: 'Shortcuts',
+            explanation:
+              'Enable showShortcuts to display quick selection buttons (Today, Yesterday, This Week, etc.) on the left side. Customize shortcuts via provider or per-instance.',
+          },
         ]}
-        value="Date selection is critical in many workflows: scheduling, reporting, compliance tracking, and data filtering all depend on accurate date handling. This DatePicker provides a polished, accessible experience that works across locales and respects business rules via min/max constraints. The range selection mode is particularly valuable for reporting dashboards where users frequently filter data by time periods."
         props={[
           {
             name: 'type',
@@ -145,6 +155,44 @@ export default function DatePickerPage() {
             type: 'JSX.CSSProperties',
             default: '-',
             description: 'Custom inline styles for the input.',
+          },
+          {
+            name: 'showTime',
+            type: 'boolean',
+            default: 'false',
+            description:
+              'Show time picker alongside the calendar. Only works with single type.',
+          },
+          {
+            name: 'timeFormat',
+            type: '"12h" | "24h"',
+            default: '"24h"',
+            description: 'Time format for the time picker display.',
+          },
+          {
+            name: 'minuteStep',
+            type: 'number',
+            default: '1',
+            description: 'Minute step increment for the time picker.',
+          },
+          {
+            name: 'secondStep',
+            type: 'number',
+            default: '1',
+            description: 'Second step increment for the time picker.',
+          },
+          {
+            name: 'showShortcuts',
+            type: 'boolean',
+            default: 'false',
+            description: 'Show shortcuts panel on the left side of the calendar.',
+          },
+          {
+            name: 'shortcuts',
+            type: 'DatePickerShortcut[]',
+            default: 'Provider shortcuts',
+            description:
+              'Custom shortcuts for this instance. Overrides provider shortcuts.',
           },
         ]}
         examples={[
@@ -393,8 +441,155 @@ const [message, setMessage] = createSignal('');
               );
             },
           },
+          {
+            title: 'Date with Time Selection',
+            description:
+              'Enable time picker to select date, hour, minute, and second. Click "Confirm" to apply.',
+            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Appointment"
+  showTime
+  value={dateTime()}
+  onChange={setDateTime}
+  helperText="Select date and click Confirm"
+/>`,
+            component: () => {
+              const [dateTime, setDateTime] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Appointment"
+                  showTime
+                  value={dateTime()}
+                  onChange={setDateTime}
+                  helperText="Select date and click Confirm"
+                />
+              );
+            },
+          },
+          {
+            title: '12-Hour Time Format',
+            description: 'Use 12-hour format with AM/PM selector.',
+            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Meeting Time"
+  showTime
+  timeFormat="12h"
+  value={dateTime()}
+  onChange={setDateTime}
+/>`,
+            component: () => {
+              const [dateTime, setDateTime] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Meeting Time"
+                  showTime
+                  timeFormat="12h"
+                  value={dateTime()}
+                  onChange={setDateTime}
+                />
+              );
+            },
+          },
+          {
+            title: 'Time with Custom Steps',
+            description: 'Set minute and second increments for the time picker.',
+            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Slot Booking"
+  showTime
+  minuteStep={15}
+  secondStep={15}
+  value={dateTime()}
+  onChange={setDateTime}
+  helperText="15-minute and 15-second intervals"
+/>`,
+            component: () => {
+              const [dateTime, setDateTime] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Slot Booking"
+                  showTime
+                  minuteStep={15}
+                  secondStep={15}
+                  value={dateTime()}
+                  onChange={setDateTime}
+                  helperText="15-minute and 15-second intervals"
+                />
+              );
+            },
+          },
+          {
+            title: 'With Shortcuts (Single)',
+            description:
+              'Quick selection buttons for common dates like Today and Yesterday.',
+            code: `const [date, setDate] = createSignal<DateValue>({});
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Quick Select"
+  showShortcuts
+  value={date()}
+  onChange={setDate}
+/>`,
+            component: () => {
+              const [date, setDate] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Quick Select"
+                  showShortcuts
+                  value={date()}
+                  onChange={setDate}
+                />
+              );
+            },
+          },
+          {
+            title: 'With Shortcuts (Range)',
+            description: 'Quick selection for date ranges like This Week, Last Month.',
+            code: `const [range, setRange] = createSignal<DateValue>({});
+
+<DatePicker
+  type="range"
+  locale="en-US"
+  label="Report Period"
+  showShortcuts
+  value={range()}
+  onChange={setRange}
+/>`,
+            component: () => {
+              const [range, setRange] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="range"
+                  locale="en-US"
+                  label="Report Period"
+                  showShortcuts
+                  value={range()}
+                  onChange={setRange}
+                />
+              );
+            },
+          },
         ]}
-        usage={`import { DatePicker, DatePickerProvider } from '@exowpee/the_rock';
+        usage={`import { DatePicker, DatePickerProvider } from '@exowpee/solidly';
 import { createSignal } from 'solid-js';
 
 // Wrap your app with DatePickerProvider
@@ -447,12 +642,74 @@ const [dates, setDates] = createSignal<DateValue>({});
   maxDate="2026-12-31"
 />
 
+// With time selection (uses dropdowns and Confirm button)
+const [dateTime, setDateTime] = createSignal<DateValue>({});
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Appointment"
+  showTime
+  timeFormat="24h"
+  minuteStep={15}
+  secondStep={15}
+  value={dateTime()}
+  onChange={setDateTime}
+/>
+
+// With shortcuts
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Quick Select"
+  showShortcuts
+  value={date()}
+  onChange={setDate}
+/>
+
+// Custom shortcuts in provider
+const customShortcuts = [
+  {
+    id: 'today',
+    label: 'Today',
+    getValue: () => ({ date: new Date().toISOString().split('T')[0] }),
+  },
+  {
+    id: 'next-week',
+    label: 'Next Week',
+    getValue: () => {
+      const start = new Date();
+      start.setDate(start.getDate() + 7 - start.getDay() + 1);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return {
+        startDate: start.toISOString().split('T')[0],
+        endDate: end.toISOString().split('T')[0],
+      };
+    },
+  },
+];
+
+<DatePickerProvider locale="en-US" shortcuts={customShortcuts}>
+  <App />
+</DatePickerProvider>
+
 // DateValue type reference
 interface DateValue {
   date?: string;         // For single mode (ISO format)
   startDate?: string;    // For range mode start
   endDate?: string;      // For range mode end
   multipleDates?: string[]; // For multiple mode
+  hour?: number;         // Selected hour (0-23)
+  minute?: number;       // Selected minute (0-59)
+  second?: number;       // Selected second (0-59)
+}
+
+// DatePickerShortcut type reference
+interface DatePickerShortcut {
+  id: string;            // Unique identifier
+  label: string;         // Display label
+  getValue: () => { date?: string; startDate?: string; endDate?: string };
 }
 
 // Keyboard Navigation:
