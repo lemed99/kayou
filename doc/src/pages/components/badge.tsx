@@ -1,11 +1,12 @@
-import Badge from '@lib/components/Badge';
+import { Badge } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function BadgePage() {
   return (
     <DocPage
       title="Badge"
-      description="Badge component for displaying small status indicators or labels. Badges are compact visual elements that convey metadata, counts, or categorization at a glance. They work well alongside other elements like list items, cards, or navigation to provide additional context without disrupting the primary content flow. Supports six color variants for different semantic meanings and two sizes for various contexts."
+      description="Compact status indicator with six color variants and two sizes."
       keyConcepts={[
         {
           term: 'Color Variants',
@@ -23,7 +24,6 @@ export default function BadgePage() {
             'Two sizes (xs and sm) for different contexts. Use xs for inline badges and sm when more prominence is needed.',
         },
       ]}
-      value="Badges help users scan and filter information quickly. Consistent badge usage for statuses, counts, and categories creates visual patterns that users learn to recognize, speeding up comprehension in data-rich interfaces."
       props={[
         {
           name: 'color',
@@ -98,7 +98,7 @@ export default function BadgePage() {
           ),
         },
       ]}
-      usage={`import { Badge } from '@exowpee/the_rock';
+      usage={`import { Badge } from '@exowpee/solidly';
 
 // Basic usage
 <Badge>New</Badge>

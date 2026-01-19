@@ -443,7 +443,7 @@ function formatTokensToHTML(tokens: Token[][], theme: Theme, isDark: boolean): s
   });
 
   const bgClass = isDark ? 'bg-gray-900' : 'bg-gray-50';
-  return `<pre class="whitespace-pre [tab-size:4] ${bgClass} leading-relaxed p-4 overflow-auto text-sm"><code style="font-family: plexMono, 'plexMono Fallback';">${codeContent}</code></pre>`;
+  return `<pre class="whitespace-pre [tab-size:4] ${bgClass} leading-relaxed p-4 overflow-auto text-sm"><code style="font-family: IBM Plex Mono, 'monospace'">${codeContent}</code></pre>`;
 }
 
 /**

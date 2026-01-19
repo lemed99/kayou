@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import Sidebar, { SidebarItem } from '@lib/components/Sidebar';
+import { Sidebar, SidebarItem } from '@exowpee/solidly-pro';
 
 import DocPage from '../../components/DocPage';
 
@@ -98,7 +98,8 @@ export default function SidebarPage() {
   return (
     <DocPage
       title="Sidebar"
-      description="A vertical navigation component that provides the primary navigation structure for applications. Sidebars organize navigation items hierarchically, supporting both flat lists and nested collapsible sections for complex information architectures. This component features an icon-only collapsed mode that maximizes content area while maintaining navigation access, smooth animated transitions between expanded and collapsed states, and popover menus that reveal nested items when collapsed. Built with comprehensive accessibility support including keyboard navigation, ARIA attributes for screen readers, and proper focus management. Items can be links (for navigation) or buttons (for actions like logout)."
+      isPro
+      description="Vertical navigation with nested collapsible sections. Features icon-only collapsed mode with popovers, animated transitions, and full keyboard/ARIA support."
       keyConcepts={[
         {
           term: 'Collapsible Mode',
@@ -116,7 +117,6 @@ export default function SidebarPage() {
             'Items with path render as anchor tags for navigation. Items with onClick render as buttons for actions (logout, open modal). This distinction is important for accessibility and SEO.',
         },
       ]}
-      value="Consistent navigation architecture is crucial for application usability. A well-designed sidebar provides orientation, enables discovery of features, and creates efficient workflows. The collapsible design balances navigation access with content space, adapting to user preferences and screen constraints."
       props={[
         {
           name: 'items',
@@ -294,7 +294,7 @@ export default function SidebarPage() {
           ),
         },
       ]}
-      usage={`import { Sidebar, SidebarItem } from '@exowpee/the_rock';
+      usage={`import { Sidebar, SidebarItem } from '@exowpee/solidly';
 
 // Define navigation items
 const items: SidebarItem[] = [

@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import ToggleSwitch from '@lib/components/ToggleSwitch';
+import { ToggleSwitch } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function ToggleSwitchPage() {
@@ -11,7 +12,7 @@ export default function ToggleSwitchPage() {
   return (
     <DocPage
       title="ToggleSwitch"
-      description="A binary toggle component for settings and preferences that take effect immediately. Toggle switches differ from checkboxes in their interaction model—toggles represent an on/off state change that happens instantly (like a light switch), while checkboxes represent selection that typically requires a form submission. This component features a smooth sliding animation for satisfying visual feedback, six color variants to match different contexts or indicate semantic meaning, and optional form integration via a hidden checkbox for traditional form submissions. Built with accessibility in mind, it uses role='switch' and aria-checked attributes so screen readers announce the current state correctly."
+      description="Binary toggle for instant on/off settings with smooth animation and six color variants."
       keyConcepts={[
         {
           term: 'Immediate vs Deferred Action',
@@ -29,7 +30,6 @@ export default function ToggleSwitchPage() {
             'When the name prop is provided, a hidden checkbox is rendered so the toggle value can be submitted in traditional HTML forms without JavaScript handling.',
         },
       ]}
-      value="Toggle switches provide a mobile-familiar pattern for binary choices in settings panels, admin dashboards, and preference screens. Their visual state is immediately clear, reducing user uncertainty about whether a feature is on or off—critical for security settings and privacy controls."
       props={[
         {
           name: 'checked',
@@ -158,7 +158,7 @@ export default function ToggleSwitchPage() {
           ),
         },
       ]}
-      usage={`import { ToggleSwitch } from '@exowpee/the_rock';
+      usage={`import { ToggleSwitch } from '@exowpee/solidly';
 
 // Basic usage
 const [enabled, setEnabled] = createSignal(false);

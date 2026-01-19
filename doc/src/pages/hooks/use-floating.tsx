@@ -175,12 +175,12 @@ export default function UseFloatingPage() {
           description: 'Accessor to get the arrow element.',
         },
       ]}
-      usage={`import { useFloating } from '@exowpee/the_rock';`}
+      usage={`import { useFloating } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Create a simple floating element that positions below a trigger.',
-          code: `import { useFloating } from '@exowpee/the_rock';
+          code: `import { useFloating } from '@exowpee/solidly;
 import { createSignal, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
@@ -216,7 +216,7 @@ function BasicFloating() {
         {
           title: 'With Arrow',
           description: 'Add an arrow pointing to the reference element.',
-          code: `import { useFloating } from '@exowpee/the_rock';
+          code: `import { useFloating } from '@exowpee/solidly;
 import { createSignal, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 

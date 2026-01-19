@@ -1,16 +1,16 @@
 import { createSignal } from 'solid-js';
 
-import Checkbox from '@lib/components/Checkbox';
+import { Checkbox } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function CheckboxPage() {
   const [checked1, setChecked1] = createSignal(false);
-  const [checked2, setChecked2] = createSignal(true);
 
   return (
     <DocPage
       title="Checkbox"
-      description="A binary input component for toggling options on or off. Checkboxes are fundamental form elements that allow users to make selections from multiple options or to confirm agreement with terms. This component provides integrated label support with flexible positioning, color variants for visual distinction, and full accessibility through auto-generated unique IDs that properly associate labels with inputs. Built on the native input element, it inherits browser focus management and keyboard support while adding consistent styling across platforms."
+      description="Binary input with integrated labels, flexible positioning, and color variants."
       keyConcepts={[
         {
           term: 'Label Association',
@@ -28,7 +28,6 @@ export default function CheckboxPage() {
             'Built on native input[type="checkbox"], inheriting keyboard navigation (Space to toggle), focus indicators, and screen reader announcements without additional ARIA attributes.',
         },
       ]}
-      value="Checkboxes are critical for data collection, settings management, and legal compliance (terms acceptance). Consistent checkbox behavior reduces form abandonment by making selection states immediately clear and interactions predictable across the application."
       props={[
         {
           name: 'label',
@@ -123,7 +122,7 @@ export default function CheckboxPage() {
           ),
         },
       ]}
-      usage={`import { Checkbox } from '@exowpee/the_rock';
+      usage={`import { Checkbox } from '@exowpee/solidly';
 
 // Basic usage
 <Checkbox label="Remember me" />

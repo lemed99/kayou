@@ -12,13 +12,13 @@ import {
   untrack,
 } from 'solid-js';
 
+import { A, useLocation } from '@solidjs/router';
+
 import { formatCodeToHTML } from '../helpers/formatCodeToHTML';
 
 // Move sections outside component to avoid recreation
 const SECTIONS = [
-  { id: 'description', title: 'Description' },
   { id: 'key-concepts', title: 'Key Concepts' },
-  { id: 'value', title: 'Value' },
   { id: 'related-hooks', title: 'Related Hooks' },
   { id: 'related-contexts', title: 'Related Contexts' },
   { id: 'usage', title: 'Usage' },
@@ -26,6 +26,68 @@ const SECTIONS = [
   { id: 'sub-components', title: 'Sub-components' },
   { id: 'examples', title: 'Examples' },
 ] as const;
+
+// Navigation pages for prev/next footer
+const gettingStartedPages = [
+  { path: '/overview/quickstart', label: 'Introduction' },
+  { path: '/overview/installation', label: 'Installation' },
+  { path: '/overview/why-solidjs', label: 'Why SolidJS?' },
+  { path: '/overview/why-solidly', label: 'Why Solidly?' },
+  { path: '/overview/contributing', label: 'Contributing' },
+  { path: '/overview/license', label: 'License' },
+];
+
+const componentCategories: Record<string, string[]> = {
+  Form: [
+    'button',
+    'checkbox',
+    'date-picker',
+    'label',
+    'helper-text',
+    'number-input',
+    'select',
+    'select-with-search',
+    'multi-select',
+    'text-input',
+    'textarea',
+    'toggle-switch',
+    'upload-file',
+  ],
+  Layout: ['accordion', 'drawer', 'modal', 'pagination', 'popover', 'sidebar', 'tooltip'],
+  Feedback: ['alert', 'badge', 'skeleton', 'spinner'],
+  Navigation: ['breadcrumb'],
+  'Data Display': ['data-table', 'virtual-list', 'virtual-grid', 'dynamic-virtual-list'],
+  Charts: ['line-chart', 'pie-chart', 'responsive-container'],
+};
+
+const toPascalCase = (str: string): string =>
+  str
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
+
+const toCamelCase = (str: string): string =>
+  str
+    .split('-')
+    .map((w, i) => (i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join('');
+
+const buildAllPages = (): Array<{ path: string; label: string }> => {
+  const pages: Array<{ path: string; label: string }> = [];
+  pages.push(...gettingStartedPages);
+  for (const items of Object.values(componentCategories)) {
+    for (const item of items) {
+      pages.push({ path: `/components/${item}`, label: toPascalCase(item) });
+    }
+  }
+  const hooks = ['use-custom-resource', 'use-date-picker', 'use-dynamic-virtual-list'];
+  for (const hook of hooks.sort()) {
+    pages.push({ path: `/hooks/${hook}`, label: toCamelCase(hook) });
+  }
+  return pages;
+};
+
+const allPages = buildAllPages();
 
 // Helper to generate example ID from title
 const getExampleId = (title: string): string => title.toLowerCase().replace(/\s+/g, '-');
@@ -85,12 +147,10 @@ interface SubComponentDefinition {
 
 interface DocPageProps {
   title: string;
-  /** Combined description and overview of the component */
+  /** Brief description of the component */
   description: string;
   /** Key terms and concepts to understand */
   keyConcepts?: KeyConceptDefinition[];
-  /** Why this component matters */
-  value?: string;
   /** Hooks that this component uses internally */
   relatedHooks?: RelatedItemDefinition[];
   /** Contexts that this component uses or requires */
@@ -100,6 +160,88 @@ interface DocPageProps {
   subComponents?: SubComponentDefinition[];
   examples?: ExampleDefinition[];
   usage?: string;
+  /** Mark as a Pro component */
+  isPro?: boolean;
+}
+
+// Previous/Next navigation footer
+function PrevNextFooter(): JSX.Element {
+  const location = useLocation();
+
+  const navigation = createMemo(() => {
+    const currentPath = location.pathname.replace(/\/$/, '');
+    const currentIndex = allPages.findIndex((page) => page.path === currentPath);
+    if (currentIndex === -1) return { prev: null, next: null };
+    return {
+      prev: currentIndex > 0 ? allPages[currentIndex - 1] : null,
+      next: currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null,
+    };
+  });
+
+  return (
+    <Show when={navigation().prev || navigation().next}>
+      <footer class="mt-12 border-t border-gray-200 pt-6 dark:border-gray-800">
+        <nav class="flex items-center justify-between gap-4">
+          <Show when={navigation().prev} fallback={<div />}>
+            {(prev) => (
+              <A
+                href={prev().path}
+                class="group flex flex-col items-start gap-1 rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:hover:border-gray-700 dark:hover:bg-gray-900"
+              >
+                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  <svg
+                    class="size-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  Previous
+                </span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                  {prev().label}
+                </span>
+              </A>
+            )}
+          </Show>
+          <Show when={navigation().next} fallback={<div />}>
+            {(next) => (
+              <A
+                href={next().path}
+                class="group flex flex-col items-end gap-1 rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:hover:border-gray-700 dark:hover:bg-gray-900"
+              >
+                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  Next
+                  <svg
+                    class="size-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                  {next().label}
+                </span>
+              </A>
+            )}
+          </Show>
+        </nav>
+      </footer>
+    </Show>
+  );
 }
 
 export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
@@ -127,12 +269,8 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
   const visibleSectionsConfig = createMemo(() => {
     return SECTIONS.filter((section) => {
       switch (section.id) {
-        case 'description':
-          return true; // Always show
         case 'key-concepts':
           return props.keyConcepts && props.keyConcepts.length > 0;
-        case 'value':
-          return !!props.value;
         case 'related-hooks':
           return relatedHooksArray().length > 0;
         case 'related-contexts':
@@ -230,46 +368,42 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
   });
 
   return (
-    <div class="mx-auto grid w-full max-w-2xl grid-cols-1 gap-10 xl:max-w-6xl xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
+    <div class="grid w-full max-w-2xl grid-cols-1 gap-10 xl:max-w-6xl xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
       {/* Main content */}
       <div class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
-        <h1 class="mb-8 text-4xl font-medium">{props.title}</h1>
+        <div class="mb-8 flex items-center gap-3">
+          <h1 class="text-4xl font-medium">{props.title}</h1>
+          <Show when={props.isPro}>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+              Pro
+            </span>
+          </Show>
+        </div>
 
-        <section id="description" class="mb-8 scroll-mt-20">
-          <h2 class="mb-4 text-2xl font-medium">Description</h2>
-          <p class="leading-relaxed text-gray-700 dark:text-gray-300">
-            {props.description}
-          </p>
-        </section>
+        <p class="mb-10 text-base leading-relaxed text-gray-600 dark:text-gray-400">
+          {props.description}
+        </p>
 
         <Show when={props.keyConcepts && props.keyConcepts.length > 0}>
-          <section id="key-concepts" class="mb-8 scroll-mt-20">
+          <section id="key-concepts" class="mb-10 scroll-mt-20">
             <h2 class="mb-4 text-2xl font-medium">Key Concepts</h2>
-            <dl class="space-y-4">
+            <dl class="grid gap-3 sm:grid-cols-2">
               <For each={props.keyConcepts}>
                 {(concept) => (
-                  <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                    <dt class="font-semibold text-gray-900 dark:text-white">
+                  <div class="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/30">
+                    <dt class="font-medium text-gray-900 dark:text-white">
                       {concept.term}
                     </dt>
-                    <dd class="mt-1 text-gray-600 dark:text-gray-400">
+                    <dd class="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
                       {concept.explanation}
                     </dd>
                   </div>
                 )}
               </For>
             </dl>
-          </section>
-        </Show>
-
-        <Show when={props.value}>
-          <section id="value" class="mb-8 scroll-mt-20">
-            <h2 class="mb-4 text-2xl font-medium">Value</h2>
-            <div class="rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4 dark:border-blue-400 dark:bg-blue-900/20">
-              <p class="leading-relaxed text-gray-700 dark:text-gray-300">
-                {props.value}
-              </p>
-            </div>
           </section>
         </Show>
 
@@ -517,36 +651,38 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
         </Show>
 
         {props.children}
+
+        {/* Previous/Next navigation footer */}
+        <PrevNextFooter />
       </div>
 
       {/* Table of contents sidebar */}
       <div class="max-xl:hidden">
-        <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-hidden px-6 pt-10 pb-24">
+        <div class="sticky top-16 max-h-[calc(100svh-4rem)] overflow-y-auto px-4 pt-10 pb-8">
           <div class="flex flex-col gap-3">
-            <h3 class="font-mono text-sm/6 font-medium tracking-widest text-gray-500 uppercase sm:text-xs/6 dark:text-gray-400">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
               On this page
             </h3>
-            <ul class="flex flex-col gap-2 border-l border-[color-mix(in_oklab,_var(--color-gray-950),white_90%)] dark:border-[color-mix(in_oklab,_var(--color-gray-950),white_20%)]">
+            <ul class="flex flex-col gap-2 text-sm">
               <For each={visibleSectionsConfig()}>
                 {(section) => (
-                  <li class="-ml-px flex flex-col items-start gap-2">
+                  <li class="flex flex-col items-start gap-2">
                     <a
                       aria-current={
                         visibleSections().has(section.id) ? 'location' : undefined
                       }
                       href={`#${section.id}`}
-                      class="inline-block border-l border-transparent pl-5 text-base/8 text-gray-600 hover:border-gray-950/25 hover:text-gray-950 aria-[current]:border-gray-950 aria-[current]:font-semibold aria-[current]:text-gray-950 sm:pl-4 sm:text-sm/6 dark:text-gray-300 dark:hover:border-white/25 dark:hover:text-white dark:aria-[current]:border-white dark:aria-[current]:text-white"
+                      class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:aria-[current]:text-white"
                     >
                       {section.title}
                     </a>
                     <Show when={section.id === 'examples' && examplesArray().length > 0}>
-                      <ul class="flex flex-col gap-2 border-l border-transparent dark:border-[color-mix(in_oklab,_var(--color-gray-950),white_20%)]">
+                      <ul class="flex flex-col gap-2 pl-3">
                         <For each={examplesArray()}>
                           {(example) => {
-                            // Use derived signal to maintain reactivity if example.title changes
                             const exampleId = () => getExampleId(example.title);
                             return (
-                              <li class="-ml-px flex flex-col items-start gap-2">
+                              <li class="flex flex-col items-start gap-2">
                                 <a
                                   aria-current={
                                     visibleSections().has(exampleId())
@@ -554,7 +690,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                                       : undefined
                                   }
                                   href={`#${exampleId()}`}
-                                  class="inline-block border-l border-transparent pl-8 text-base/8 text-gray-600 hover:border-gray-950/25 hover:text-gray-950 aria-[current]:border-gray-950 aria-[current]:font-semibold aria-[current]:text-gray-950 sm:pl-7.5 sm:text-sm/6 dark:text-gray-300 dark:hover:border-white/25 dark:hover:text-white dark:aria-[current]:border-white dark:aria-[current]:text-white"
+                                  class="text-gray-400 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-700 dark:text-gray-500 dark:hover:text-white dark:aria-[current]:text-gray-300"
                                 >
                                   {example.title}
                                 </a>
@@ -568,6 +704,23 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                 )}
               </For>
             </ul>
+          </div>
+
+          {/* Promo Card */}
+          <div class="mt-8 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              Ship <span class="text-blue-600 dark:text-blue-400">faster</span> with
+              beautiful components
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Discover 30+ stunning components by Solidly
+            </p>
+            <a
+              href="/components/button"
+              class="mt-3 inline-flex items-center justify-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Explore Components
+            </a>
           </div>
         </div>
       </div>
@@ -665,12 +818,62 @@ interface ExampleProps {
   component: () => JSX.Element;
 }
 
+type ViewportSize = 'desktop' | 'tablet' | 'mobile';
+
+const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
+  desktop: '100%',
+  tablet: '768px',
+  mobile: '375px',
+};
+
+// Viewport icons
+const DesktopIcon = () => (
+  <svg
+    class="size-4"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+    <line x1="8" y1="21" x2="16" y2="21" />
+    <line x1="12" y1="17" x2="12" y2="21" />
+  </svg>
+);
+
+const TabletIcon = () => (
+  <svg
+    class="size-4"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
+const MobileIcon = () => (
+  <svg
+    class="size-4"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
 export function Example(props: ExampleProps): JSX.Element {
   const [previewOverride, setPreviewOverride] = createSignal<'light' | 'dark' | null>(
     null,
   );
   const [copied, setCopied] = createSignal(false);
   const [globalIsDark, setGlobalIsDark] = createSignal(false);
+  const [viewport, setViewport] = createSignal<ViewportSize>('desktop');
 
   // Track global theme changes
   onMount(() => {
@@ -730,6 +933,50 @@ export function Example(props: ExampleProps): JSX.Element {
       <div class="flex items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <h3 class="text-xl font-medium dark:text-white">{props.title}</h3>
         <div class="flex items-center gap-2">
+          {/* Viewport size toggles */}
+          <div class="flex items-center rounded-md border border-gray-200 dark:border-gray-600">
+            <button
+              type="button"
+              onClick={() => setViewport('desktop')}
+              class={`p-2 transition-colors ${
+                viewport() === 'desktop'
+                  ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+              }`}
+              aria-label="Desktop view"
+              title="Desktop view"
+            >
+              <DesktopIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewport('tablet')}
+              class={`border-x border-gray-200 p-2 transition-colors dark:border-gray-600 ${
+                viewport() === 'tablet'
+                  ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+              }`}
+              aria-label="Tablet view"
+              title="Tablet view (768px)"
+            >
+              <TabletIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewport('mobile')}
+              class={`p-2 transition-colors ${
+                viewport() === 'mobile'
+                  ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+              }`}
+              aria-label="Mobile view"
+              title="Mobile view (375px)"
+            >
+              <MobileIcon />
+            </button>
+          </div>
+
+          {/* Theme toggle */}
           <Show when={previewOverride() !== null}>
             <button
               type="button"
@@ -793,22 +1040,36 @@ export function Example(props: ExampleProps): JSX.Element {
       </div>
       {/* Component preview - isolated theme context */}
       {/* Use explicit colors instead of dark: variants to truly isolate from global theme */}
-      <div class={isPreviewDark() ? 'dark' : ''}>
+      <div
+        class="overflow-x-auto"
+        style={{
+          'background-color': isPreviewDark() ? 'rgb(17 24 39)' : 'rgb(243 244 246)',
+        }}
+      >
         <div
-          class="px-4 py-6"
+          class={`mx-auto transition-all duration-300 ${isPreviewDark() ? 'dark' : ''}`}
           style={{
-            'background-color': isPreviewDark() ? 'rgb(31 41 55)' : 'rgb(255 255 255)',
+            width: VIEWPORT_WIDTHS[viewport()],
+            'min-width':
+              viewport() !== 'desktop' ? VIEWPORT_WIDTHS[viewport()] : undefined,
           }}
         >
-          <Show when={props.description}>
-            <p
-              class="mb-4"
-              style={{ color: isPreviewDark() ? 'rgb(209 213 219)' : 'rgb(55 65 81)' }}
-            >
-              {props.description}
-            </p>
-          </Show>
-          <div class="flex flex-wrap items-center gap-2">{props.component()}</div>
+          <div
+            class="px-4 py-6"
+            style={{
+              'background-color': isPreviewDark() ? 'rgb(31 41 55)' : 'rgb(255 255 255)',
+            }}
+          >
+            <Show when={props.description}>
+              <p
+                class="mb-4"
+                style={{ color: isPreviewDark() ? 'rgb(209 213 219)' : 'rgb(55 65 81)' }}
+              >
+                {props.description}
+              </p>
+            </Show>
+            <div class="flex flex-wrap items-center gap-2">{props.component()}</div>
+          </div>
         </div>
       </div>
       {/* Code block - follows global theme, not preview toggle */}

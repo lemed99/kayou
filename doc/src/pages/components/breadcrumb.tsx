@@ -1,11 +1,12 @@
-import Breadcrumb from '@lib/components/Breadcrumb';
+import { Breadcrumb } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function BreadcrumbPage() {
   return (
     <DocPage
       title="Breadcrumb"
-      description="Breadcrumb navigation component for showing page hierarchy and location within an application. Breadcrumbs help users understand where they are in a site structure and provide quick navigation to parent pages. The component uses semantic nav and ol elements with aria-label for accessibility, ensuring screen readers properly announce the navigation context. Supports custom link components via the 'as' prop for seamless integration with client-side routers like SolidJS Router."
+      description="Navigation trail showing page hierarchy with support for custom link components."
       keyConcepts={[
         {
           term: 'Hierarchical Navigation',
@@ -23,7 +24,6 @@ export default function BreadcrumbPage() {
             'The "as" prop allows using custom link components (e.g., A from @solidjs/router) instead of native anchor tags for SPA navigation.',
         },
       ]}
-      value="Breadcrumbs reduce user disorientation in deep navigation structures. They provide a clear path back to higher-level pages and help users build a mental model of the site architecture, reducing reliance on the browser back button."
       props={[
         {
           name: 'children',
@@ -88,7 +88,7 @@ export default function BreadcrumbPage() {
           ),
         },
       ]}
-      usage={`import { Breadcrumb } from '@exowpee/the_rock';
+      usage={`import { Breadcrumb } from '@exowpee/solidly';
 
 // Basic usage
 <Breadcrumb>

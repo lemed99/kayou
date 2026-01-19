@@ -8,7 +8,7 @@ const tsParser = tseslint.parser;
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'dev'],
+    ignores: ['**/dist', '**/node_modules', 'dev'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -18,7 +18,12 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: 'tsconfig.json',
+        project: [
+          './packages/core/tsconfig.json',
+          './packages/pro/tsconfig.json',
+          './doc/tsconfig.json',
+        ],
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     plugins: {

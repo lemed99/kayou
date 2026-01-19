@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import Button from '@lib/components/Button';
-import Drawer from '@lib/components/Drawer';
+import { Button, Drawer } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function DrawerPage() {
@@ -13,7 +13,7 @@ export default function DrawerPage() {
   return (
     <DocPage
       title="Drawer"
-      description="A panel component that slides in from the edge of the screen to reveal secondary content or navigation. Drawers are ideal for housing filters, settings, shopping carts, or navigation menus that don't need to be visible at all times. This component supports all four edge positions (right, left, top, bottom), customizable dimensions for each orientation, an optional header with integrated close button, and rounded edge styling. Built with accessibility in mind, it uses role='dialog' and aria-modal attributes to ensure screen readers properly announce the overlay context, and manages focus appropriately when opened."
+      description="Sliding panel from screen edge with four position variants and optional header."
       keyConcepts={[
         {
           term: 'Position Variants',
@@ -31,7 +31,6 @@ export default function DrawerPage() {
             'When opened, focus moves to the drawer content. The onClose callback handles dismissal via backdrop clicks, close button, or Escape key for intuitive interaction.',
         },
       ]}
-      value="Drawers preserve screen real estate by hiding secondary content until needed. They provide a consistent pattern for progressive disclosure—revealing details, filters, or actions without navigating away from the current context. This reduces cognitive load while keeping advanced functionality accessible."
       props={[
         {
           name: 'show',
@@ -180,7 +179,7 @@ export default function DrawerPage() {
           ),
         },
       ]}
-      usage={`import { Drawer } from '@exowpee/the_rock';
+      usage={`import { Drawer } from '@exowpee/solidly';
 
 // Basic usage
 const [show, setShow] = createSignal(false);

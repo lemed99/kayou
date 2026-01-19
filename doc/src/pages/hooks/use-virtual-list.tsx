@@ -55,12 +55,12 @@ export default function UseVirtualListPage() {
             'Returns scroll parameters for programmatic scrolling to a specific index. Does not perform the scroll - use returned values with element.scrollTo().',
         },
       ]}
-      usage={`import { useVirtualList } from '@exowpee/the_rock';`}
+      usage={`import { useVirtualList } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Create a custom virtualized list with the hook.',
-          code: `import { useVirtualList } from '@exowpee/the_rock';
+          code: `import { useVirtualList } from '@exowpee/solidly;
 import { createSignal, For } from 'solid-js';
 
 function CustomVirtualList() {
@@ -139,7 +139,7 @@ state.totalItems       // Total number of items
           title: 'Programmatic Scrolling',
           description:
             'Use scrollToIndex to calculate scroll position for a specific item.',
-          code: `import { useVirtualList } from '@exowpee/the_rock';
+          code: `import { useVirtualList } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 function ScrollableList() {
@@ -180,7 +180,7 @@ function ScrollableList() {
         {
           title: 'Tracking Scroll Position',
           description: 'Use setScrollPosition to persist or react to scroll changes.',
-          code: `import { useVirtualList } from '@exowpee/the_rock';
+          code: `import { useVirtualList } from '@exowpee/solidly;
 import { createSignal, createEffect } from 'solid-js';
 
 function ListWithScrollTracking() {
@@ -244,7 +244,7 @@ const [virtual, handleScroll] = useVirtualList({
 </For>
 
 // If you need variable row heights, use useDynamicVirtualList instead:
-import { useDynamicVirtualList } from '@exowpee/the_rock';`,
+import { useDynamicVirtualList } from '@exowpee/solidly;`,
         },
         {
           title: 'Types Reference',

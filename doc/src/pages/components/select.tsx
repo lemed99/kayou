@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import Select from '@lib/components/Select';
+import { Select } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 const fruitOptions = [
@@ -21,14 +22,14 @@ const countryOptions = [
 ];
 
 export default function SelectPage() {
-  const [selected1, setSelected1] = createSignal<string | undefined>();
-  const [selected2, setSelected2] = createSignal<string | undefined>();
+  const [, setSelected1] = createSignal<string | undefined>();
+  const [, setSelected2] = createSignal<string | undefined>();
   const [selected3, setSelected3] = createSignal<string | undefined>('banana');
 
   return (
     <DocPage
       title="Select"
-      description="Select dropdown component for single option selection. It combines a styled trigger input with a floating options panel that supports keyboard navigation (arrow keys, Enter, Escape, Home, End), virtual scrolling for performance with large datasets via optionRowHeight, and validation states. The component handles all interaction patterns: clicking to open, arrow keys to navigate, and Enter to select. The dropdown automatically positions itself using the floating UI engine to stay visible within the viewport. Full accessibility with ARIA listbox pattern."
+      description="Dropdown for single option selection with keyboard navigation, virtual scrolling, and validation states."
       keyConcepts={[
         {
           term: 'Options Array',
@@ -51,7 +52,6 @@ export default function SelectPage() {
             'Full keyboard support including Arrow Up/Down to navigate, Enter to select, Escape to close, and Home/End to jump to first/last option.',
         },
       ]}
-      value="Forms often require dropdowns with hundreds or thousands of options (employee lists, product catalogs, location hierarchies). This Select component handles these scenarios gracefully through virtual scrolling, ensuring consistent performance regardless of data size. The built-in validation states integrate seamlessly with form libraries, while the accessible implementation meets compliance requirements."
       props={[
         {
           name: 'options',
@@ -286,7 +286,7 @@ export default function SelectPage() {
           ),
         },
       ]}
-      usage={`import { Select } from '@exowpee/the_rock';
+      usage={`import { Select } from '@exowpee/solidly';
 
 // Basic usage
 const [selected, setSelected] = createSignal();

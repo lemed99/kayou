@@ -3,10 +3,11 @@ import {
   Line,
   LineChart,
   LineChartTooltip,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-} from '@lib/components/Charts/LineCharts';
-import { ResponsiveContainer } from '@lib/components/Charts/ResponsiveContainer';
+} from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 interface SubComponentProp {
@@ -202,7 +203,7 @@ export default function LineChartPage() {
   return (
     <DocPage
       title="LineChart"
-      description="LineChart is a composable charting component built on D3.js for rendering line charts with multiple data series, interactive tooltips, and hover states. It uses a compound component pattern where XAxis, YAxis, Line, CartesianGrid, and LineChartTooltip are nested children that share context. The chart automatically calculates scales based on data, supports responsive sizing via ResponsiveContainer, and provides full accessibility with ARIA attributes, keyboard navigation, and screen reader support."
+      description="D3-based line chart with composable axes, grid, tooltips, and multiple data series."
       keyConcepts={[
         {
           term: 'Compound Components',
@@ -225,7 +226,6 @@ export default function LineChartPage() {
             'Add multiple Line components with different dataKey props to display several data series on the same chart. Each line can have its own color and styling.',
         },
       ]}
-      value="Line charts are essential for visualizing trends over time or across categories. This implementation handles common requirements like multiple series comparison, interactive tooltips, and responsive layouts while maintaining accessibility for all users. The D3-powered rendering ensures smooth curves and accurate data representation."
       props={[
         {
           name: 'width',
@@ -495,8 +495,8 @@ export default function LineChartPage() {
   Line,
   CartesianGrid,
   LineChartTooltip,
-} from '@exowpee/the_rock/Charts/LineCharts';
-import { ResponsiveContainer } from '@exowpee/the_rock/Charts/ResponsiveContainer';
+} from '@exowpee/solidlyCharts/LineCharts';
+import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
 
 // Basic usage
 const data = [

@@ -313,7 +313,7 @@ export default function HomePage() {
             </svg>
           </A>
           <a
-            href="https://github.com/exowpee/the_rock"
+            href="https://github.com/exowpee/solidly"
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -342,7 +342,7 @@ export default function HomePage() {
           <div class="p-4">
             <code class="font-mono text-sm text-gray-100">
               <span class="text-green-400">$</span> npm install{' '}
-              <span class="text-cyan-400">@exowpee/the_rock</span>
+              <span class="text-cyan-400">@exowpee/solidly</span>
             </code>
           </div>
         </div>
@@ -446,7 +446,7 @@ export default function HomePage() {
               <div class="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-950 dark:border-gray-800">
                 <pre class="overflow-x-auto p-4 text-sm">
                   <code class="font-mono text-gray-100">
-                    npm install @exowpee/the_rock
+                    npm install @exowpee/solidly
                   </code>
                 </pre>
               </div>
@@ -469,7 +469,7 @@ export default function HomePage() {
                     <span class="text-yellow-300">Button</span>,{' '}
                     <span class="text-yellow-300">TextInput</span> {'}'}{' '}
                     <span class="text-purple-400">from</span>{' '}
-                    <span class="text-green-400">'@exowpee/the_rock'</span>;{'\n\n'}
+                    <span class="text-green-400">'@exowpee/solidly'</span>;{'\n\n'}
                     <span class="text-purple-400">function</span>{' '}
                     <span class="text-blue-400">App</span>() {'{'}
                     {'\n'}
@@ -564,7 +564,7 @@ export default function HomePage() {
               View Components
             </A>
             <a
-              href="https://github.com/exowpee/the_rock"
+              href="https://github.com/exowpee/solidly"
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"

@@ -1,4 +1,5 @@
-import Alert from '@lib/components/Alert';
+import { Alert } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 const InfoIcon = (props: { class: string }) => (
@@ -15,7 +16,7 @@ export default function AlertPage() {
   return (
     <DocPage
       title="Alert"
-      description="Alert component for displaying important messages to users. Alerts are used to communicate status information, warnings, errors, or success messages that require user attention. The component supports five color variants for different message types, optional icons for visual reinforcement, and additional content sections for detailed information or actions. Built with role='alert' for screen reader accessibility, ensuring assistive technologies announce the message immediately."
+      description="Message banner with five color variants, optional icons, and additional content sections."
       keyConcepts={[
         {
           term: 'Color Variants',
@@ -33,7 +34,6 @@ export default function AlertPage() {
             'A slot for extra content below the main message, useful for detailed explanations, lists, or action buttons.',
         },
       ]}
-      value="Alerts provide immediate feedback to users about important events or states. Consistent alert styling across an application helps users quickly recognize and respond to different message types, reducing cognitive load and improving the overall user experience."
       props={[
         {
           name: 'color',
@@ -122,7 +122,7 @@ export default function AlertPage() {
           ),
         },
       ]}
-      usage={`import { Alert } from '@exowpee/the_rock';
+      usage={`import { Alert } from '@exowpee/solidly';
 
 // Basic usage
 <Alert color="info">This is an info message</Alert>

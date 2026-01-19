@@ -1,13 +1,14 @@
 import { createSignal } from 'solid-js';
 
-import TextInput from '@lib/components/TextInput';
+import { TextInput } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function TextInputPage() {
   return (
     <DocPage
       title="TextInput"
-      description="A flexible text input component that serves as the foundation for form data entry. It provides a complete input experience with labels for identification, helper text for guidance, icons for visual context, and addons for prefixes like currency symbols or domain names. The component supports five validation states with corresponding colors for immediate feedback, loading states for async validation, and proper ARIA attributes ensuring screen readers announce labels, errors, and requirements correctly."
+      description="Text input with labels, helper text, icons, addons, and validation states."
       keyConcepts={[
         {
           term: 'Validation States',
@@ -25,7 +26,6 @@ export default function TextInputPage() {
             'Labels are properly associated via htmlFor, helper text is linked with aria-describedby, and required fields are announced to screen readers.',
         },
       ]}
-      value="Text inputs are the most common form elements. Consistent styling, clear validation feedback, and proper accessibility ensure users can complete forms efficiently and confidently, reducing abandonment rates and support requests."
       props={[
         {
           name: 'sizing',
@@ -206,7 +206,7 @@ export default function TextInputPage() {
           },
         },
       ]}
-      usage={`import { TextInput } from '@exowpee/the_rock';
+      usage={`import { TextInput } from '@exowpee/solidly';
 
 // Basic usage
 <TextInput placeholder="Enter text" />

@@ -30,14 +30,14 @@ export default function UseDatePickerPage() {
           description: 'Current locale for date formatting (e.g., "en-US", "fr-FR").',
         },
       ]}
-      usage={`import { useDatePicker } from '@exowpee/the_rock';`}
+      usage={`import { useDatePicker } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description:
             'Access the DatePicker context to get locale and cache information.',
-          code: `import { useDatePicker } from '@exowpee/the_rock';
-
+          code: `import { useDatePicker } from '@exowpee/solidly';
+solidly
 function MyDateComponent() {
   const { locale, monthCache } = useDatePicker();
 
@@ -53,8 +53,8 @@ function MyDateComponent() {
           title: 'Clearing the Cache',
           description:
             'Use clearDatePickerGlobal to clear all cached month data, useful when switching users or resetting state.',
-          code: `import { useDatePicker } from '@exowpee/the_rock';
-
+          code: `import { useDatePicker } from '@exowpee/solidly';
+solidly
 function ClearCacheButton() {
   const { clearDatePickerGlobal } = useDatePicker();
 
@@ -74,8 +74,8 @@ function ClearCacheButton() {
           title: 'Using Locale for Custom Formatting',
           description:
             'Access the locale to format dates consistently with the DatePicker.',
-          code: `import { useDatePicker } from '@exowpee/the_rock';
-
+          code: `import { useDatePicker } from '@exowpee/solidly';
+solidly
 function FormattedDate(props: { date: Date }) {
   const { locale } = useDatePicker();
 
@@ -97,8 +97,8 @@ function FormattedDate(props: { date: Date }) {
         {
           title: 'Checking Cache Status',
           description: 'Inspect the month cache to see which months have been cached.',
-          code: `import { useDatePicker } from '@exowpee/the_rock';
-import { For, Show } from 'solid-js';
+          code: `import { useDatePicker } from '@exowpee/solidly';
+import { For, Show } from 'solid-js';solidly
 
 function CacheInspector() {
   const { monthCache } = useDatePicker();
@@ -134,8 +134,8 @@ function CacheInspector() {
         {
           title: 'Error Handling',
           description: 'The hook throws an error if used outside a DatePickerProvider.',
-          code: `import { useDatePicker } from '@exowpee/the_rock';
-
+          code: `import { useDatePicker } from '@exowpee/solidly';
+solidly
 // This will throw an error!
 function BadComponent() {
   // Error: useDatePicker must be used within DatePickerProvider

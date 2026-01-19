@@ -1,4 +1,4 @@
-# Component Conventions for @exowpee/the_rock
+# Component Conventions for @exowpee/solidly
 
 ## File Structure
 

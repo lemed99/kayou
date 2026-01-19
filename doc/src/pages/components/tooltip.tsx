@@ -1,12 +1,12 @@
-import Button from '@lib/components/Button';
-import Tooltip from '@lib/components/Tooltip';
+import { Button, Tooltip } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function TooltipPage() {
   return (
     <DocPage
       title="Tooltip"
-      description="Tooltip component for displaying contextual information on hover or focus. Built on top of the useFloating hook, it automatically calculates the optimal position to ensure visibility within the viewport, flipping to the opposite side when necessary. The component handles both mouse and keyboard interactions, making it fully accessible with screen reader support via aria-describedby. It uses a portal to render outside the normal DOM hierarchy, preventing z-index and overflow issues common with nested tooltips. Supports configurable show/hide delays and automatic theme detection."
+      description="Auto-positioned hint text on hover/focus with configurable delays and placement."
       keyConcepts={[
         {
           term: 'Trigger Element',
@@ -29,7 +29,6 @@ export default function TooltipPage() {
             'The tooltip is linked to its trigger via aria-describedby, ensuring screen readers announce the tooltip content when the trigger is focused.',
         },
       ]}
-      value="Tooltips provide contextual guidance without leaving the workflow. This component ensures consistent tooltip behavior across the application, with built-in accessibility compliance for WCAG requirements. The automatic positioning prevents common issues like tooltips being cut off in modals or sidebars, while the delay configuration helps reduce visual noise in dense interfaces."
       props={[
         {
           name: 'content',
@@ -197,7 +196,7 @@ export default function TooltipPage() {
           ),
         },
       ]}
-      usage={`import { Tooltip } from '@exowpee/the_rock';
+      usage={`import { Tooltip } from '@exowpee/solidly';
 
 // Basic usage
 <Tooltip content="Helpful information">

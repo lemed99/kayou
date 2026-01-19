@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import Button from '@lib/components/Button';
-import Modal from '@lib/components/Modal';
+import { Button, Modal } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function ModalPage() {
@@ -12,7 +12,7 @@ export default function ModalPage() {
   return (
     <DocPage
       title="Modal"
-      description="Modal dialog component that creates an overlay demanding user attention before they can continue interacting with the page. It renders above all other content with a semi-transparent backdrop, automatically preventing background scrolling and trapping focus within the modal for accessibility. The component handles enter/exit animations smoothly and provides flexible sizing options from small confirmation dialogs to full-screen panels. It uses a portal to render at the document root, avoiding z-index conflicts with parent containers. Uses role='dialog' and aria-modal for accessibility."
+      description="Dialog overlay with backdrop, focus trapping, scroll lock, and flexible sizing options."
       keyConcepts={[
         {
           term: 'Controlled Component',
@@ -35,7 +35,6 @@ export default function ModalPage() {
             'The semi-transparent overlay behind the modal. Clicking it typically closes the modal, providing an intuitive dismiss interaction.',
         },
       ]}
-      value="Modals are fundamental to application workflows: confirmations, forms, detail views, and wizards all rely on focused dialog interactions. This component ensures consistent modal behavior across the application with proper accessibility attributes, focus management, and animation polish. The multiple size options accommodate everything from simple confirmations to complex data entry forms, while the scroll lock prevents the disorienting experience of background content shifting."
       props={[
         {
           name: 'show',
@@ -142,7 +141,7 @@ export default function ModalPage() {
           ),
         },
       ]}
-      usage={`import { Modal } from '@exowpee/the_rock';
+      usage={`import { Modal } from '@exowpee/solidly';
 
 // Basic usage
 const [show, setShow] = createSignal(false);

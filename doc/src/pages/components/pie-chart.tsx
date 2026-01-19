@@ -1,8 +1,8 @@
 import { Show, createSignal } from 'solid-js';
 
-import { Pie, PieChart, Sector } from '@lib/components/Charts/PieChart';
-import { ResponsiveContainer } from '@lib/components/Charts/ResponsiveContainer';
-import type { ActiveSector } from '@lib/components/Charts/types';
+import { Pie, PieChart, ResponsiveContainer, Sector } from '@exowpee/solidly-pro';
+import type { ActiveSector } from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 interface SubComponentProp {
@@ -311,7 +311,7 @@ export default function PieChartPage() {
   return (
     <DocPage
       title="PieChart"
-      description="PieChart is a composable charting component built on D3.js for rendering pie and donut charts. It uses a compound component pattern where Pie is nested inside PieChart to share context. The component supports interactive highlighting with custom active shapes, keyboard navigation for accessibility, responsive sizing, and full ARIA support for screen readers."
+      description="D3-based pie/donut chart with interactive segments and custom active shape highlighting."
       keyConcepts={[
         {
           term: 'Donut vs Pie',
@@ -334,7 +334,6 @@ export default function PieChartPage() {
             'The component automatically calculates percentages based on the dataKey values. These are available in the activeShape callback and via aria-labels for screen readers.',
         },
       ]}
-      value="Pie charts excel at showing proportional relationships - market share, budget allocation, survey responses. This implementation handles the math and rendering while providing interactivity and accessibility. The D3-powered arc generation ensures precise segments, and the active shape system allows rich hover effects."
       props={[
         {
           name: 'width',
@@ -648,8 +647,8 @@ export default function PieChartPage() {
           ),
         },
       ]}
-      usage={`import { PieChart, Pie, Sector } from '@exowpee/the_rock/Charts/PieChart';
-import { ResponsiveContainer } from '@exowpee/the_rock/Charts/ResponsiveContainer';
+      usage={`import { PieChart, Pie, Sector } from '@exowpee/solidlyCharts/PieChart';
+import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
 
 // Basic pie chart
 const data = [

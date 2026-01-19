@@ -1,14 +1,15 @@
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
-import Accordion, { type PanelData } from '@lib/components/Accordion';
+import { Accordion, type PanelData } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function AccordionPage() {
   return (
     <DocPage
       title="Accordion"
-      description="A vertically stacked set of interactive headings that each reveal or hide an associated section of content. Accordions are ideal for organizing information into collapsible sections, reducing visual clutter while keeping content accessible. The component supports both controlled and uncontrolled modes for flexible state management, smooth expand/collapse animations for polished interactions, and follows the WAI-ARIA accordion pattern for full keyboard accessibility including arrow key navigation between headers."
+      description="Collapsible content sections with controlled/uncontrolled modes and keyboard navigation."
       keyConcepts={[
         {
           term: 'Controlled vs Uncontrolled',
@@ -26,7 +27,6 @@ export default function AccordionPage() {
             'The highlightedKey prop visually emphasizes a specific panel and scrolls it into view, useful for deep-linking or search results.',
         },
       ]}
-      value="Accordions help users navigate complex information by progressively disclosing content. They reduce cognitive overload in dense interfaces like FAQs, settings panels, or documentation, letting users focus on one section at a time while maintaining awareness of available content."
       props={[
         {
           name: 'panels',
@@ -317,7 +317,7 @@ export default function AccordionPage() {
           },
         },
       ]}
-      usage={`import Accordion, { type PanelData } from '@exowpee/the_rock/Accordion';
+      usage={`import Accordion, { type PanelData } from '@exowpee/solidly/Accordion';
 
 // Define panel data
 const panels: PanelData[] = [

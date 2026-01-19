@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import Button from '@lib/components/Button';
-import Popover from '@lib/components/Popover';
+import { Button, Popover } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function PopoverPage() {
@@ -10,7 +10,7 @@ export default function PopoverPage() {
   return (
     <DocPage
       title="Popover"
-      description="A floating overlay component that displays rich content relative to a trigger element. Unlike tooltips which show simple text, popovers can contain complex content like forms, lists, or interactive elements. The component uses the floating UI engine to automatically position itself optimally within the viewport, flipping to the opposite side when necessary. It supports both click and hover triggers, making it adaptable for various interaction patterns from help panels to action menus. Full accessibility with ARIA attributes and keyboard navigation (Enter/Space to toggle, Escape to close)."
+      description="Floating overlay for rich content with auto-positioning, click/hover triggers, and keyboard support."
       keyConcepts={[
         {
           term: 'Trigger Mode',
@@ -33,7 +33,6 @@ export default function PopoverPage() {
             'The popover closes when clicking outside of it, providing intuitive dismiss behavior. This can be customized with the closeOnClickOutside prop.',
         },
       ]}
-      value="Popovers enable progressive disclosure patterns essential in complex interfaces. Instead of overwhelming users with information upfront, contextual details appear exactly when needed. This component provides the foundation for help systems, action menus, filter panels, and preview cards that keep dashboards clean while making depth accessible. The hover trigger mode is particularly valuable for data-dense tables where users need quick previews without clicking."
       props={[
         {
           name: 'content',
@@ -231,12 +230,12 @@ export default function PopoverPage() {
       <p class="text-sm text-gray-600 mb-4">Are you sure?</p>
       <div class="flex gap-2">
         <Button size="sm" color="light">Cancel</Button>
-        <Button size="sm" color="danger">Delete</Button>
+        <Button size="sm" color="failure">Delete</Button>
       </div>
     </div>
   }
 >
-  <Button color="danger">Delete Item</Button>
+  <Button color="failure">Delete Item</Button>
 </Popover>`,
           component: () => (
             <Popover
@@ -251,14 +250,14 @@ export default function PopoverPage() {
                     <Button size="sm" color="light">
                       Cancel
                     </Button>
-                    <Button size="sm" color="danger">
+                    <Button size="sm" color="failure">
                       Delete
                     </Button>
                   </div>
                 </div>
               }
             >
-              <Button color="danger">Delete Item</Button>
+              <Button color="failure">Delete Item</Button>
             </Popover>
           ),
         },
@@ -394,7 +393,7 @@ export default function PopoverPage() {
           ),
         },
       ]}
-      usage={`import { Popover } from '@exowpee/the_rock';
+      usage={`import { Popover } from '@exowpee/solidly';
 
 // Basic click-triggered popover
 <Popover content={<div class="p-4">Content here</div>}>

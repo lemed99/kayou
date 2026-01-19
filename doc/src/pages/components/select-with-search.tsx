@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import SelectWithSearch from '@lib/components/SelectWithSearch';
+import { SelectWithSearch } from '@exowpee/solidly-pro';
 
 import DocPage from '../../components/DocPage';
 
@@ -37,7 +37,8 @@ export default function SelectWithSearchPage() {
   return (
     <DocPage
       title="SelectWithSearch"
-      description="A searchable dropdown component optimized for selecting a single option from large datasets. Unlike basic selects that require scrolling through all options, SelectWithSearch lets users type to filter results instantly, making it practical for lists of hundreds or thousands of items. The component features real-time filtering as users type, full keyboard navigation (arrow keys, Enter, Escape), optional virtualization for handling massive datasets without performance degradation, and a custom CTA slot for actions like 'Add new item'. Built with ARIA combobox semantics for screen reader compatibility."
+      isPro
+      description="Searchable dropdown for selecting a single option from large datasets. Features type-to-filter, keyboard navigation, virtualization, and a custom CTA slot."
       keyConcepts={[
         {
           term: 'Type-to-Filter',
@@ -60,7 +61,6 @@ export default function SelectWithSearchPage() {
             'The onLazyLoad callback fires during scroll, enabling infinite scroll patterns where more options are fetched as users scroll down.',
         },
       ]}
-      value="Searchable selects dramatically improve form completion rates for fields with many options (countries, products, users). The type-to-filter pattern matches user expectations from modern autocomplete experiences, reducing time to find and select the right option from seconds to milliseconds."
       relatedHooks={[
         {
           name: 'useSelect',
@@ -402,7 +402,7 @@ export default function SelectWithSearchPage() {
           },
         },
       ]}
-      usage={`import { SelectWithSearch } from '@exowpee/the_rock';
+      usage={`import { SelectWithSearch } from '@exowpee/solidly';
 
 // Basic usage
 const [selected, setSelected] = createSignal(null);

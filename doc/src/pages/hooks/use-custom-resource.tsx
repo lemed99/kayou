@@ -112,13 +112,13 @@ export default function UseCustomResourcePage() {
         },
       ]}
       returnType="CustomResource<T>"
-      usage={`import { useCustomResource } from '@exowpee/the_rock';`}
+      usage={`import { useCustomResource } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Simple data fetching with loading and error states.',
-          code: `import { useCustomResource } from '@exowpee/the_rock';
-import { Show } from 'solid-js';
+          code: `import { useCustomResource } from '@exowpee/solidly';
+import { Show } from 'solid-js';solidly
 
 function UserProfile() {
   const { data, loading, error } = useCustomResource<User>({

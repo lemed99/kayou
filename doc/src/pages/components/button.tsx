@@ -1,13 +1,14 @@
 import { createSignal } from 'solid-js';
 
-import Button from '@lib/components/Button';
+import { Button } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function ButtonPage() {
   return (
     <DocPage
       title="Button"
-      description="A versatile button component for triggering actions and submitting forms. Buttons are the primary interactive elements in any interface, used for everything from form submissions to navigation actions. This component supports eight color variants for visual hierarchy, three sizes for different contexts, and a built-in loading state with spinner overlay that prevents double-submissions. Built with accessibility in mind, including keyboard support and screen reader announcements via aria-busy during loading states."
+      description="Button for triggering actions with multiple color variants, sizes, and a loading state with spinner overlay."
       keyConcepts={[
         {
           term: 'Color Variants',
@@ -25,7 +26,6 @@ export default function ButtonPage() {
             'The type prop controls form behavior: "submit" triggers form submission, "reset" clears forms, and "button" (default) prevents form submission.',
         },
       ]}
-      value="Consistent button styling establishes clear interaction patterns. Users learn to recognize primary vs secondary actions, understand loading feedback, and trust that disabled buttons won't respond. This predictability reduces errors and increases confidence in the interface."
       props={[
         {
           name: 'children',
@@ -167,7 +167,7 @@ const handleClick = () => {
           },
         },
       ]}
-      usage={`import { Button } from '@exowpee/the_rock';
+      usage={`import { Button } from '@exowpee/solidly';
 
 // Basic usage
 <Button>Click me</Button>

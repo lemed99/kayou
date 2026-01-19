@@ -1,13 +1,15 @@
 import { createSignal } from 'solid-js';
 
-import NumberInput from '@lib/components/NumberInput';
+import { NumberInput } from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 export default function NumberInputPage() {
   return (
     <DocPage
       title="NumberInput"
-      description="A specialized input component optimized for numeric data entry. Unlike generic text inputs, NumberInput understands numbers—it supports integers and floating-point values, enforces min/max constraints, respects step increments, and provides optional arrow buttons for quick adjustments. The component features intelligent debounced value processing that auto-formats and validates after 2 seconds of inactivity, preventing premature validation errors while typing. It includes full clipboard support (Ctrl/Cmd+C/V/X), keyboard navigation (Arrow Up/Down to increment/decrement), and typed callbacks that return actual numbers rather than strings."
+      isPro
+      description="Numeric input with integer/float support, min/max constraints, step increments, and optional arrow buttons. Features debounced validation and typed callbacks."
       keyConcepts={[
         {
           term: 'Debounced Processing',
@@ -25,7 +27,6 @@ export default function NumberInputPage() {
             'Min/max values are enforced on blur and through arrow buttons. The step prop controls increment/decrement amounts. For floats, precision controls decimal places.',
         },
       ]}
-      value="Numeric inputs are critical for financial data, quantities, measurements, and configuration values. Proper number handling prevents data corruption (leading zeros, invalid characters), ensures consistent precision for calculations, and provides a superior UX with keyboard shortcuts and smart validation timing."
       props={[
         {
           name: 'type',
@@ -293,7 +294,7 @@ const [lastUpdate, setLastUpdate] = createSignal('');
           ),
         },
       ]}
-      usage={`import { NumberInput } from '@exowpee/the_rock';
+      usage={`import { NumberInput } from '@exowpee/solidly';
 
 // Basic integer input
 <NumberInput placeholder="Enter quantity" />

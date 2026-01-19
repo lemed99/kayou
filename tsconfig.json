@@ -9,9 +9,7 @@
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "declaration": true,
-    "outDir": "dist",
+    "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "strict": true,
@@ -19,6 +17,12 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "vite.config.ts", "generate-icons.ts"],
-  "exclude": ["node_modules", "dist", "dev", "doc"]
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/pro" },
+    { "path": "./doc" },
+    { "path": "./dev" }
+  ],
+  "include": [],
+  "exclude": ["node_modules"]
 }

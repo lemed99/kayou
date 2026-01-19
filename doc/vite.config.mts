@@ -14,7 +14,18 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@lib': path.resolve(__dirname, '../src'),
+      // Map to workspace packages for development (must use absolute paths)
+      '@exowpee/solidly/icons': path.resolve(__dirname, '../packages/core/src/icons'),
+      '@exowpee/solidly/hooks': path.resolve(__dirname, '../packages/core/src/hooks'),
+      '@exowpee/solidly/context': path.resolve(__dirname, '../packages/core/src/context'),
+      '@exowpee/solidly/helpers': path.resolve(__dirname, '../packages/core/src/helpers'),
+      '@exowpee/solidly': path.resolve(__dirname, '../packages/core/src'),
+      '@exowpee/solidly-pro/hooks': path.resolve(__dirname, '../packages/pro/src/hooks'),
+      '@exowpee/solidly-pro/context': path.resolve(
+        __dirname,
+        '../packages/pro/src/context',
+      ),
+      '@exowpee/solidly-pro': path.resolve(__dirname, '../packages/pro/src'),
     },
   },
   server: {

@@ -91,12 +91,12 @@ export default function UseMutationPage() {
             'Function to execute the mutation. Returns a Promise that resolves with the data or rejects with the error.',
         },
       ]}
-      usage={`import { useMutation } from '@exowpee/the_rock';`}
+      usage={`import { useMutation } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Simple mutation for creating a resource.',
-          code: `import { useMutation } from '@exowpee/the_rock';
+          code: `import { useMutation } from '@exowpee/solidly;
 
 function CreateUserForm() {
   const { trigger, isMutating, error } = useMutation({
@@ -260,8 +260,8 @@ await trigger({ name: 'New Resource' });`,
         {
           title: 'With Button Loading State',
           description: 'Integrate with Button component for consistent UX.',
-          code: `import { Button } from '@exowpee/the_rock';
-import { useMutation } from '@exowpee/the_rock';
+          code: `import { Button } from '@exowpee/solidly;
+import { useMutation } from '@exowpee/solidly;
 
 function DeleteButton(props: { itemId: string }) {
   const { trigger, isMutating } = useMutation({

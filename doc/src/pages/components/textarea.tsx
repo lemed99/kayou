@@ -1,16 +1,14 @@
-import { createSignal } from 'solid-js';
 
-import Textarea from '@lib/components/Textarea';
+import { Textarea } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
 export default function TextareaPage() {
-  const [value, setValue] = createSignal('');
 
   return (
     <DocPage
       title="Textarea"
-      description="A multi-line text input component for longer form content like descriptions, comments, or messages. Textareas handle free-form text that doesn't fit in a single-line input, allowing users to write paragraphs of content with natural line breaks. This component integrates Label and HelperText components for a complete form field experience, supports five color variants for indicating validation states, and includes a loading state with spinner for async validation or AI-assisted writing scenarios. Built on the native textarea element, it inherits browser features like resize handles and spell checking while providing consistent styling."
+      description="Multi-line text input with integrated labels, validation states, and loading indicator. Supports resize handles and spell checking."
       keyConcepts={[
         {
           term: 'Integrated Field Components',
@@ -28,7 +26,6 @@ export default function TextareaPage() {
             'The isLoading prop displays a spinner, useful during async validation, AI content generation, or when submitting data. The textarea is not disabled, allowing users to continue editing.',
         },
       ]}
-      value="Textareas are essential for capturing detailed user input—product descriptions, support tickets, feedback forms, and content management. Consistent field styling with proper validation feedback reduces errors and ensures users provide the information your application needs."
       props={[
         {
           name: 'label',
@@ -187,7 +184,7 @@ export default function TextareaPage() {
           ),
         },
       ]}
-      usage={`import { Textarea } from '@exowpee/the_rock';
+      usage={`import { Textarea } from '@exowpee/solidly';
 
 // Basic usage
 <Textarea label="Description" placeholder="Enter description..." />

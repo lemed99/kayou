@@ -13,7 +13,12 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@lib/*": ["../src/*"]
+      "@exowpee/solidly": ["../packages/core/src"],
+      "@exowpee/solidly/*": ["../packages/core/src/*"],
+      "@exowpee/solidly-pro": ["../packages/pro/src"],
+      "@exowpee/solidly-pro/*": ["../packages/pro/src/*"]
     }
-  }
+  },
+  "include": ["src", "vite.config.mts"],
+  "exclude": ["node_modules", "dist"]
 }

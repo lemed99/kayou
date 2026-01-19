@@ -1,70 +1,28 @@
 {
-  "name": "@exowpee/the_rock",
-  "version": "0.1.12",
-  "description": "A UI component library built with SolidJS",
+  "name": "solidly-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for @exowpee/solidly UI component library",
   "type": "module",
-  "module": "./dist/index.es.js",
-  "types": "./dist/src/index.d.ts",
-  "sideEffects": false,
-  "exports": {
-    ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/index.es.js"
-    },
-    "./hooks": {
-      "types": "./dist/src/hooks/index.d.ts",
-      "import": "./dist/hooks/index.es.js"
-    },
-    "./context": {
-      "types": "./dist/src/context/index.d.ts",
-      "import": "./dist/context/index.es.js"
-    },
-    "./helpers": {
-      "types": "./dist/src/helpers/index.d.ts",
-      "import": "./dist/helpers/index.es.js"
-    },
-    "./icons": {
-      "types": "./dist/src/icons/index.d.ts",
-      "import": "./dist/icons/index.es.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
-    "serve": "vite preview",
+    "build": "pnpm -r build",
+    "build:core": "pnpm --filter @exowpee/solidly build",
+    "build:pro": "pnpm --filter @exowpee/solidly-pro build",
+    "dev": "pnpm --filter doc dev",
     "lint": "eslint '**/*.{ts,tsx}' --fix",
     "lint:ci": "eslint '**/*.{ts,tsx}' --max-warnings 0",
     "format": "prettier --check --ignore-path .prettierignore .",
     "format:fix": "prettier --write --ignore-path .prettierignore .",
+    "publish:core": "pnpm --filter @exowpee/solidly publish",
+    "publish:pro": "pnpm --filter @exowpee/solidly-pro publish",
     "claude:init": "claude /project:init-project",
     "claude:audit": "claude /project:audit-component",
     "claude:docs": "claude /project:document-component",
     "claude:fix": "claude /project:fix-component"
   },
-  "publishConfig": {
-    "registry": "https://gitlab.com/api/v4/projects/project_id/packages/npm/",
-    "access": "restricted"
-  },
-  "peerDependencies": {
-    "@formatjs/intl": "^3.1.0",
-    "solid-js": "^1.9.0",
-    "tailwindcss": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@formatjs/intl": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@solidjs/router": "^0.15.3",
-    "@tailwindcss/vite": "^4.1.13",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/d3-scale": "^4.0.9",
-    "@types/d3-selection": "^3.0.11",
-    "@types/d3-shape": "^3.1.7",
     "@types/node": "^24.5.2",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
@@ -72,19 +30,8 @@
     "eslint-plugin-unused-imports": "^4.2.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
-    "solid-js": "^1.9.9",
-    "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.1",
-    "vite": "^6.3.6",
-    "vite-plugin-solid": "^2.11.8"
-  },
-  "dependencies": {
-    "@solid-primitives/presence": "^0.1.2",
-    "d3-scale": "^4.0.2",
-    "d3-selection": "^3.0.0",
-    "d3-shape": "^3.2.0",
-    "tailwind-merge": "^3.3.1"
+    "typescript-eslint": "^8.44.1"
   },
   "repository": {
     "type": "git"

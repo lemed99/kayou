@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { VirtualGrid } from '@lib/components/VirtualGrid';
+import { VirtualGrid } from '@exowpee/solidly-pro';
 
 import DocPage from '../../components/DocPage';
 
@@ -24,7 +24,7 @@ export default function VirtualGridPage() {
   return (
     <DocPage
       title="VirtualGrid"
-      description="A high-performance grid component that renders only visible items, enabling smooth display of thousands of items without memory or performance issues. VirtualGrid automatically detects the column count from your CSS grid-template-columns, calculates which rows are visible based on scroll position, and renders only those items plus configurable overscan rows for smooth scrolling. Each cell has enforced height for precise scroll calculations, ensuring the scrollbar accurately represents the total content size. The component includes comprehensive accessibility with ARIA grid semantics and full keyboard navigation."
+      description="Virtualized grid rendering only visible items with CSS-driven column detection and keyboard navigation."
       keyConcepts={[
         {
           term: 'CSS-Driven Columns',
@@ -47,7 +47,6 @@ export default function VirtualGridPage() {
             'Full keyboard support: arrow keys navigate cells, Home/End move within rows (Ctrl+Home/End for first/last item), PageUp/PageDown scroll by visible rows.',
         },
       ]}
-      value="Grid displays are essential for product catalogs, image galleries, and card layouts. Virtualization enables smooth interaction with datasets that would otherwise freeze the browser, providing consistent 60fps scrolling regardless of whether you have 100 or 100,000 items."
       relatedHooks={[
         {
           name: 'useVirtualList',
@@ -315,7 +314,7 @@ const items = Array.from({ length: 50 }, (_, i) => ({
                   class="grid grid-cols-2"
                   aria-label="Card list"
                 >
-                  {(item, index) => (
+                  {(item) => (
                     <div class="h-full rounded-lg bg-white p-3 shadow">
                       <h3 class="font-medium">{item.title}</h3>
                       <p class="mt-1 text-sm text-gray-600">{item.description}</p>
@@ -466,7 +465,7 @@ const items = Array.from({ length: 50 }, (_, i) => ({
           },
         },
       ]}
-      usage={`import { VirtualGrid } from '@exowpee/the_rock';
+      usage={`import { VirtualGrid } from '@exowpee/solidly;
 
 // Basic usage - columns defined by CSS class
 <VirtualGrid

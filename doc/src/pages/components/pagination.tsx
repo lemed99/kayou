@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import Pagination from '@lib/components/Pagination';
+import { Pagination } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function PaginationPage() {
@@ -10,7 +11,7 @@ export default function PaginationPage() {
   return (
     <DocPage
       title="Pagination"
-      description="A navigation component for moving through paginated content. Pagination is essential for any data-heavy application that displays lists, tables, or search results too large to show at once. This component provides intuitive navigation with buttons for first, previous, next, and last pages, plus an editable page number input for jumping directly to any page. The input validates against min/max bounds, and tooltips provide clear labels for navigation buttons. The controlled design ensures the parent component maintains page state, making it easy to sync with data fetching logic."
+      description="Page navigation with first/prev/next/last buttons and direct page input."
       keyConcepts={[
         {
           term: 'Controlled Component',
@@ -28,7 +29,6 @@ export default function PaginationPage() {
             'Four navigation buttons (first, previous, next, last) with automatic disable states at boundaries. Tooltips explain each button for discoverability.',
         },
       ]}
-      value="Proper pagination is essential for application performance and usability. It prevents loading massive datasets into memory, provides clear navigation patterns for large result sets, and gives users control over their browsing experience. Consistent pagination behavior builds user confidence when working with extensive data."
       props={[
         {
           name: 'total',
@@ -83,7 +83,7 @@ export default function PaginationPage() {
           component: () => <Pagination total={1} page={1} onChange={() => {}} />,
         },
       ]}
-      usage={`import { Pagination } from '@exowpee/the_rock';
+      usage={`import { Pagination } from '@exowpee/solidly';
 
 // Basic usage
 const [page, setPage] = createSignal(1);

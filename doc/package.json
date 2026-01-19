@@ -1,7 +1,7 @@
 {
-  "name": "cool",
+  "name": "doc",
   "version": "0.0.0",
-  "description": "A UI component library built with SolidJS",
+  "description": "Documentation for @exowpee/solidly UI component library",
   "private": true,
   "scripts": {
     "start": "vite --host",
@@ -29,6 +29,8 @@
     "vite-plugin-solid": "^2.11.6"
   },
   "dependencies": {
+    "@exowpee/solidly": "workspace:*",
+    "@exowpee/solidly-pro": "workspace:*",
     "@formatjs/intl": "^3.1.6",
     "@solidjs/router": "^0.15.3",
     "solid-js": "^1.9.5",

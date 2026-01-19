@@ -1,11 +1,12 @@
-import Spinner from '@lib/components/Spinner';
+import { Spinner } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function SpinnerPage() {
   return (
     <DocPage
       title="Spinner"
-      description="An animated loading indicator for operations in progress. Spinners communicate that the system is working on a request, preventing users from thinking the interface is frozen. This component features a smooth CSS animation that performs well even on low-power devices, eight color variants to match different contexts and buttons, and three sizes for various use cases from inline button indicators to full-page loading states. The spinner includes screen reader text with role='status' so assistive technologies announce the loading state."
+      description="Animated loading indicator with eight color variants and three sizes."
       keyConcepts={[
         {
           term: 'Indeterminate Loading',
@@ -23,7 +24,6 @@ export default function SpinnerPage() {
             'Choose size based on context: xs for inline use in buttons or labels, sm as the default for general indicators, md for prominent full-section or page-level loading.',
         },
       ]}
-      value="Loading feedback is crucial for user trust. Without visual indication, users may click repeatedly, navigate away, or assume errors. Spinners provide the minimum viable feedback for any asynchronous operation, maintaining user confidence and preventing duplicate submissions."
       props={[
         {
           name: 'color',
@@ -112,7 +112,7 @@ export default function SpinnerPage() {
           ),
         },
       ]}
-      usage={`import { Spinner } from '@exowpee/the_rock';
+      usage={`import { Spinner } from '@exowpee/solidly';
 
 // Basic usage
 <Spinner />

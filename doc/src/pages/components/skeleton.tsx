@@ -1,11 +1,12 @@
-import Skeleton from '@lib/components/Skeleton';
+import { Skeleton } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function SkeletonPage() {
   return (
     <DocPage
       title="Skeleton"
-      description="A loading placeholder component that displays animated shapes while content is being fetched. Skeletons provide a better loading experience than spinners for content-heavy interfaces by showing the approximate layout of incoming content, reducing perceived loading time and preventing layout shifts. This component features a subtle pulse animation, fully customizable dimensions (supporting both fixed pixels and responsive percentages), and configurable gray shades for light and dark modes. Built with accessibility in mind, it uses aria-busy and role='status' so screen readers announce loading state."
+      description="Animated loading placeholder with customizable dimensions for content-heavy interfaces."
       keyConcepts={[
         {
           term: 'Content Layout Hints',
@@ -23,7 +24,6 @@ export default function SkeletonPage() {
             'The gray and darkGray props control appearance in light and dark modes respectively. Default values work well in most cases, but can be adjusted for specific design requirements.',
         },
       ]}
-      value="Skeleton loading dramatically improves perceived performance. Research shows users perceive skeleton screens as faster than spinners for equivalent wait times. By showing the content structure beforehand, skeletons reduce anxiety about what will appear and create a smoother visual transition when data arrives."
       props={[
         {
           name: 'width',
@@ -130,7 +130,7 @@ export default function SkeletonPage() {
           ),
         },
       ]}
-      usage={`import { Skeleton } from '@exowpee/the_rock';
+      usage={`import { Skeleton } from '@exowpee/solidly';
 
 // Basic usage
 <Skeleton />

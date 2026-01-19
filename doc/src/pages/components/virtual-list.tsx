@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { VirtualList, VirtualListHandle } from '@lib/components/VirtualList';
+import { VirtualList, VirtualListHandle } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -8,7 +8,7 @@ export default function VirtualListPage() {
   return (
     <DocPage
       title="VirtualList"
-      description="A high-performance virtualized list component that efficiently renders large datasets by only rendering visible items. Instead of creating DOM nodes for every item, it calculates which items are currently visible in the viewport and only renders those, plus a small buffer (overscan) above and below. As users scroll, items are recycled and repositioned, maintaining smooth 60fps scrolling even with tens of thousands of items. Each row is enforced to the exact rowHeight specified, enabling instant scroll position calculations without measuring DOM elements. Supports keyboard navigation, accessibility features, imperative scroll control, and customizable row rendering. For variable height rows, use DynamicVirtualList instead."
+      description="Virtualized list that renders only visible items for large datasets. Requires fixed row heights. Supports keyboard navigation, imperative scroll control, and accessibility."
       keyConcepts={[
         {
           term: 'Virtualization',
@@ -31,7 +31,6 @@ export default function VirtualListPage() {
             'The ref prop provides a handle with scrollToIndex method for programmatic scrolling. Useful for "scroll to top" buttons or keyboard navigation.',
         },
       ]}
-      value="Applications frequently deal with large datasets: audit logs, transaction histories, user directories, product catalogs. Without virtualization, rendering these lists causes browser lag, high memory usage, and poor user experience. VirtualList enables smooth handling of 100,000+ items with minimal memory footprint, making it essential for data-intensive dashboards and admin interfaces. The built-in accessibility support ensures compliance with accessibility requirements."
       props={[
         {
           name: 'items',
@@ -553,7 +552,7 @@ const items = () => Array.from({ length: 200 }, (_, i) => \`Item \${i + 1}\`);
           },
         },
       ]}
-      usage={`import { VirtualList, VirtualListHandle } from '@exowpee/the_rock';
+      usage={`import { VirtualList, VirtualListHandle } from '@exowpee/solidly';
 import { createSignal } from 'solid-js';
 
 // Basic usage with accessor

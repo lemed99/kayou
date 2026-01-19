@@ -89,6 +89,8 @@ interface HookDocPageProps {
   relatedComponents?: RelatedComponentDefinition[];
   examples?: ExampleDefinition[];
   usage?: string;
+  /** Mark as a Pro hook */
+  isPro?: boolean;
 }
 
 export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.Element {
@@ -210,7 +212,17 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
   return (
     <div class="mx-auto grid w-full max-w-2xl grid-cols-1 gap-10 xl:max-w-6xl xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
       <div class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
-        <h1 class="mb-8 text-4xl font-medium">{props.title}</h1>
+        <div class="mb-8 flex items-center gap-3">
+          <h1 class="text-4xl font-medium">{props.title}</h1>
+          <Show when={props.isPro}>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+              Pro
+            </span>
+          </Show>
+        </div>
 
         <section id="description" class="mb-8 scroll-mt-20">
           <h2 class="mb-4 text-2xl font-medium">Description</h2>

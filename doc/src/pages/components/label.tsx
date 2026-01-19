@@ -1,11 +1,12 @@
-import Label from '@lib/components/Label';
+import { Label } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function LabelPage() {
   return (
     <DocPage
       title="Label"
-      description="A form label component that identifies and describes input fields. Labels are essential for form usability and accessibility—they tell users what information to enter and, when properly associated via the 'for' attribute, clicking the label focuses its input. This component uses the semantic HTML label element, ensuring screen readers announce the label when users navigate to fields. It supports five color variants to indicate field states (valid, invalid, warning) and accepts content through either the value prop for simple text or children for custom markup like required field indicators."
+      description="Form label with five color variants and support for custom content."
       keyConcepts={[
         {
           term: 'Semantic HTML',
@@ -23,7 +24,6 @@ export default function LabelPage() {
             'The value prop handles simple text labels. For custom content like required asterisks or inline icons, use children to render JSX elements within the label.',
         },
       ]}
-      value="Properly labeled form fields are fundamental to usability and legal accessibility compliance (WCAG). Labels reduce input errors by clearly communicating expectations, and the clickable label-to-input association significantly improves form completion rates, especially on mobile where tap targets matter."
       props={[
         {
           name: 'value',
@@ -119,7 +119,7 @@ export default function LabelPage() {
           ),
         },
       ]}
-      usage={`import { Label } from '@exowpee/the_rock';
+      usage={`import { Label } from '@exowpee/solidly';
 
 // Basic usage with value
 <Label value="Email" />

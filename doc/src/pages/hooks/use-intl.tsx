@@ -38,12 +38,12 @@ export default function UseIntlPage() {
       ]}
       value="Internationalization is essential for enterprise applications serving global markets. The useIntl hook, built on the industry-standard FormatJS library, provides production-ready i18n that scales with your application. It handles complex scenarios like pluralization rules that vary by language, right-to-left text support, and locale-specific number formatting. By centralizing i18n through this hook, teams can ensure consistent translations, simplify the localization workflow, and easily add new languages without code changes."
       returnType="IntlShape"
-      usage={`import { useIntl } from '@exowpee/the_rock';`}
+      usage={`import { useIntl } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Access the IntlShape object with formatting methods.',
-          code: `import { useIntl } from '@exowpee/the_rock';
+          code: `import { useIntl } from '@exowpee/solidly;
 
 function MyComponent() {
   const intl = useIntl();

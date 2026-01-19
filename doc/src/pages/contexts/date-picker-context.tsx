@@ -41,13 +41,13 @@ export default function DatePickerContextPage() {
         },
       ]}
       contextType="DatePickerContextType | undefined"
-      usage={`import { DatePickerProvider } from '@exowpee/the_rock';`}
+      usage={`import { DatePickerProvider } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Provider Setup',
           description:
             'Wrap your application with DatePickerProvider to enable DatePicker components.',
-          code: `import { DatePickerProvider } from '@exowpee/the_rock';
+          code: `import { DatePickerProvider } from '@exowpee/solidly;
 
 function App() {
   return (
@@ -61,7 +61,7 @@ function App() {
           title: 'Dynamic Locale Switching',
           description: 'Change locale at runtime by updating the locale prop.',
           code: `import { createSignal } from 'solid-js';
-import { DatePickerProvider, DatePicker } from '@exowpee/the_rock';
+import { DatePickerProvider, DatePicker } from '@exowpee/solidly;
 
 function App() {
   const [locale, setLocale] = createSignal('en-US');
@@ -91,7 +91,7 @@ function App() {
         {
           title: 'Using with useDatePicker Hook',
           description: 'Access context values through the useDatePicker hook.',
-          code: `import { DatePickerProvider, useDatePicker } from '@exowpee/the_rock';
+          code: `import { DatePickerProvider, useDatePicker } from '@exowpee/solidly;
 
 function DateInfo() {
   const { locale, monthCache, clearDatePickerGlobal } = useDatePicker();
@@ -119,7 +119,7 @@ function App() {
           title: 'Multiple DatePickers',
           description:
             'All DatePicker components within the provider share the same cache and locale.',
-          code: `import { DatePickerProvider, DatePicker } from '@exowpee/the_rock';
+          code: `import { DatePickerProvider, DatePicker } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 function BookingForm() {
@@ -185,7 +185,7 @@ function BookingForm() {
 // - Cache loading happens in onMount (client-side only)
 
 // For SSR frameworks (SolidStart, Astro, etc.):
-import { DatePickerProvider, DatePicker } from '@exowpee/the_rock';
+import { DatePickerProvider, DatePicker } from '@exowpee/solidly;
 
 // Works safely in SSR context
 function App() {

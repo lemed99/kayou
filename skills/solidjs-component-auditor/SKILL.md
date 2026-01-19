@@ -2,7 +2,7 @@
 name: solidjs-component-auditor
 version: 2.0.0
 description: Comprehensive auditing system for SolidJS components. Performs deep analysis of type safety, reactivity patterns, accessibility, and performance. Generates actionable reports with prioritized fixes.
-author: @exowpee/the_rock
+author: @exowpee/solidly
 tags: [solidjs, audit, typescript, accessibility, quality]
 ---
 

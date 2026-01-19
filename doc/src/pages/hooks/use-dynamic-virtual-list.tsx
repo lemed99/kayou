@@ -67,13 +67,13 @@ export default function UseDynamicVirtualListPage() {
             'Returns scroll parameters for programmatic scrolling. Uses actual measured heights when available.',
         },
       ]}
-      usage={`import { useDynamicVirtualList } from '@exowpee/the_rock';`}
+      usage={`import { useDynamicVirtualList } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Create a custom virtualized list with variable row heights.',
-          code: `import { useDynamicVirtualList } from '@exowpee/the_rock';
-import { createSignal, For } from 'solid-js';
+          code: `import { useDynamicVirtualList } from '@exowpee/solidly';
+import { createSignal, For } from 'solid-js';solidly
 
 function CustomDynamicList() {
   const [items] = createSignal([
@@ -186,8 +186,8 @@ state.totalItems       // Total number of items
         {
           title: 'Programmatic Scrolling',
           description: 'Scroll to specific items using calculated positions.',
-          code: `import { useDynamicVirtualList } from '@exowpee/the_rock';
-import { createSignal } from 'solid-js';
+          code: `import { useDynamicVirtualList } from '@exowpee/solidly';
+import { createSignal } from 'solid-js';solidly
 
 function ScrollableList() {
   let containerRef: HTMLDivElement | undefined;
@@ -224,8 +224,8 @@ function ScrollableList() {
         {
           title: 'Tracking Average Height',
           description: 'Get the calculated average height for better future estimates.',
-          code: `import { useDynamicVirtualList } from '@exowpee/the_rock';
-import { createSignal, createEffect } from 'solid-js';
+          code: `import { useDynamicVirtualList } from '@exowpee/solidly';
+import { createSignal, createEffect } from 'solid-js';solidly
 
 function ListWithHeightTracking() {
   const [items] = createSignal([...]);

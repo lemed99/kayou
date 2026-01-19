@@ -1,4 +1,4 @@
-# Skills for @exowpee/the_rock
+# Skills for @exowpee/solidly
 
 This directory contains Claude skills for component library development.
 
@@ -158,7 +158,7 @@ Audit → Fix → Re-Audit → Document
 name: skill-name
 version: 1.0.0
 description: What the skill does
-author: @exowpee/the_rock
+author: @exowpee/solidly
 tags: [tag1, tag2]
 ---
 

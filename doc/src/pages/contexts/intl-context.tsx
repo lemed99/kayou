@@ -61,13 +61,13 @@ export default function IntlContextPage() {
         },
       ]}
       contextType="Accessor<IntlShape>"
-      usage={`import { IntlProvider } from '@exowpee/the_rock';`}
+      usage={`import { IntlProvider } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Provider Setup',
           description:
             'Wrap your application with IntlProvider to enable internationalization.',
-          code: `import { IntlProvider } from '@exowpee/the_rock';
+          code: `import { IntlProvider } from '@exowpee/solidly;
 import messages from './locales/en.json';
 
 function App() {
@@ -104,7 +104,7 @@ function App() {
           description:
             'Change locale at runtime by updating the locale and messages props.',
           code: `import { createSignal } from 'solid-js';
-import { IntlProvider } from '@exowpee/the_rock';
+import { IntlProvider } from '@exowpee/solidly;
 
 const allMessages = {
   'en-US': { greeting: 'Hello!', language: 'English' },
@@ -130,7 +130,7 @@ function App() {
         {
           title: 'Using with useIntl Hook',
           description: 'Access the IntlShape object through the useIntl hook.',
-          code: `import { useIntl } from '@exowpee/the_rock';
+          code: `import { useIntl } from '@exowpee/solidly;
 
 function GreetingComponent() {
   const intl = useIntl();

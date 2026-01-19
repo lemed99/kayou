@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import MultiSelect from '@lib/components/MultiSelect';
+import { MultiSelect } from '@exowpee/solidly-pro';
 
 import DocPage from '../../components/DocPage';
 
@@ -75,7 +75,8 @@ export default function MultiSelectPage() {
   return (
     <DocPage
       title="MultiSelect"
-      description="A dropdown component for selecting multiple options from a list, essential for tagging, categorization, and multi-choice forms. MultiSelect handles the complexity of multi-selection including visual state management, displaying selected items, and removing selections. The component features optional search functionality for filtering long lists, keyboard navigation for accessibility, virtualization for handling large option sets performantly, and customizable display values to show selection summaries like '3 items selected'. Built on TextInput with full ARIA listbox semantics for screen reader compatibility."
+      isPro
+      description="Dropdown for selecting multiple options from a list. Features search filtering, virtualization for large lists, keyboard navigation, and customizable display values."
       keyConcepts={[
         {
           term: 'Selection Display',
@@ -98,7 +99,6 @@ export default function MultiSelectPage() {
             'Set clearValues to true to programmatically clear all selections. Useful for form reset buttons or "Clear all" actions.',
         },
       ]}
-      value="Multi-select fields enable complex categorization and filtering that would otherwise require multiple form submissions. They are critical for admin interfaces, content management, and any scenario where users need to assign multiple attributes or tags efficiently."
       props={[
         {
           name: 'options',
@@ -365,7 +365,7 @@ export default function MultiSelectPage() {
           ),
         },
       ]}
-      usage={`import { MultiSelect } from '@exowpee/the_rock';
+      usage={`import { MultiSelect } from '@exowpee/solidly';
 
 // Basic usage
 const [selected, setSelected] = createSignal([]);

@@ -105,13 +105,13 @@ export default function CustomResourceContextPage() {
         },
       ]}
       contextType="CustomResourceContextValue<T>"
-      usage={`import { CustomResourceProvider } from '@exowpee/the_rock';`}
+      usage={`import { CustomResourceProvider } from '@exowpee/solidly';`}
       examples={[
         {
           title: 'Basic Provider Setup',
           description:
             'Wrap your application with the CustomResourceProvider to enable data fetching capabilities.',
-          code: `import { CustomResourceProvider } from '@exowpee/the_rock';
+          code: `import { CustomResourceProvider } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 function App() {
@@ -141,7 +141,7 @@ function App() {
           title: 'Custom Fetcher with Authentication',
           description:
             'Provide a custom fetcher function for adding authentication headers.',
-          code: `import { CustomResourceProvider } from '@exowpee/the_rock';
+          code: `import { CustomResourceProvider } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 function App() {
@@ -191,7 +191,7 @@ function App() {
         {
           title: 'Full Configuration Example',
           description: 'A complete example with all configuration options.',
-          code: `import { CustomResourceProvider } from '@exowpee/the_rock';
+          code: `import { CustomResourceProvider } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 function App() {

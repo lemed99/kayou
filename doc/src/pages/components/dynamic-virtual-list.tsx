@@ -1,9 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import {
-  DynamicVirtualList,
-  DynamicVirtualListHandle,
-} from '@lib/components/DynamicVirtualList';
+import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly-pro';
 
 import DocPage from '../../components/DocPage';
 
@@ -24,7 +21,7 @@ export default function DynamicVirtualListPage() {
   return (
     <DocPage
       title="DynamicVirtualList"
-      description="A virtualized list component that supports variable row heights. Unlike VirtualList which requires fixed row heights, DynamicVirtualList measures each row's actual height and uses binary search for efficient scroll position calculations. It maintains an internal cache of measured heights. When an item renders for the first time, its height is measured and cached, enabling accurate scrolling behavior even with wildly varying content sizes. The component also tracks average row height, which improves initial render estimates and can be persisted across sessions. Ideal for lists where items have varying content sizes like chat messages, comments, or expandable cards."
+      description="Virtualized list supporting variable row heights with automatic measurement and caching."
       keyConcepts={[
         {
           term: 'Dynamic Measurement',
@@ -47,7 +44,6 @@ export default function DynamicVirtualListPage() {
             'Scroll positions are calculated using binary search over cumulative heights, maintaining O(log n) performance even with thousands of variable-height items.',
         },
       ]}
-      value="Many interfaces display content with naturally variable heights: email threads, activity feeds, audit logs with varying detail levels, and document previews. DynamicVirtualList handles these scenarios without forcing artificial height constraints that would truncate content or waste space. The height caching and average tracking features optimize repeated renders, which is valuable in dashboards where users frequently navigate between views."
       props={[
         {
           name: 'items',
@@ -563,7 +559,7 @@ const [targetIndex, setTargetIndex] = createSignal(0);
           },
         },
       ]}
-      usage={`import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/the_rock';
+      usage={`import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly;
 import { createSignal } from 'solid-js';
 
 // Basic usage - items with variable heights

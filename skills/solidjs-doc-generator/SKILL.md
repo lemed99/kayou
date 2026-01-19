@@ -2,7 +2,7 @@
 name: solidjs-doc-generator
 version: 2.1.0
 description: Generates comprehensive TSX documentation pages for SolidJS components including props tables, interactive examples, accessibility guides, and TypeScript definitions.
-author: @exowpee/the_rock
+author: @exowpee/solidly
 tags: [solidjs, documentation, tsx, api-reference]
 ---
 
@@ -100,8 +100,8 @@ category: Forms | Layout | Data Display | Feedback | Navigation | Overlay
 #### 3. Installation & Import
 
 ```tsx
-npm install @exowpee/the_rock
-import { ComponentName } from '@exowpee/the_rock'
+npm install @exowpee/solidly
+import { ComponentName } from '@exowpee/solidly'
 ```
 
 #### 4. Quick Start
@@ -358,7 +358,7 @@ export default function ButtonPage() {
           component: () => <Button color="info">Info</Button>,
         },
       ]}
-      usage={`import { Button } from '@exowpee/the_rock';`}
+      usage={`import { Button } from '@exowpee/solidly';`}
     />
   );
 }

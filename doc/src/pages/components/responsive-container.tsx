@@ -3,11 +3,13 @@ import {
   Line,
   LineChart,
   LineChartTooltip,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-} from '@lib/components/Charts/LineCharts';
-import { Pie, PieChart } from '@lib/components/Charts/PieChart';
-import { ResponsiveContainer } from '@lib/components/Charts/ResponsiveContainer';
+} from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 const salesData = [
@@ -29,7 +31,7 @@ export default function ResponsiveContainerPage() {
   return (
     <DocPage
       title="ResponsiveContainer"
-      description="ResponsiveContainer is a wrapper component that makes charts responsive by tracking the container's dimensions and passing them to child charts. It uses ResizeObserver to detect size changes and provides the current width and height through a render prop function. This allows charts to automatically resize when the viewport or parent container changes."
+      description="Wrapper that tracks container dimensions and passes them to child charts via render props."
       keyConcepts={[
         {
           term: 'Render Props',
@@ -52,7 +54,6 @@ export default function ResponsiveContainerPage() {
             'Charts accept rwidth and rheight props that override their base width/height. Pass the size values from ResponsiveContainer to these props for responsive behavior.',
         },
       ]}
-      value="Charts with fixed dimensions break layouts on different screen sizes and don't adapt to dynamic containers like resizable panels or collapsible sidebars. ResponsiveContainer solves this by measuring the actual available space and passing it to charts, ensuring they always fit their container while maintaining aspect ratios and readability."
       props={[
         {
           name: 'minHeight',
@@ -319,9 +320,9 @@ export default function ResponsiveContainerPage() {
           ),
         },
       ]}
-      usage={`import { ResponsiveContainer } from '@exowpee/the_rock/Charts/ResponsiveContainer';
-import { LineChart, XAxis, YAxis, Line } from '@exowpee/the_rock/Charts/LineCharts';
-import { PieChart, Pie } from '@exowpee/the_rock/Charts/PieChart';
+      usage={`import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
+import { LineChart, XAxis, YAxis, Line } from '@exowpee/solidlyCharts/LineCharts';
+import { PieChart, Pie } from '@exowpee/solidlyCharts/PieChart';
 
 // Basic responsive chart
 <ResponsiveContainer minHeight={300}>

@@ -1,0 +1,70 @@
+{
+  "name": "@exowpee/solidly-pro",
+  "version": "1.0.0",
+  "description": "Pro components for solidly - Advanced UI components for enterprise SolidJS applications",
+  "type": "module",
+  "module": "./dist/index.es.js",
+  "types": "./dist/src/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.es.js"
+    },
+    "./hooks": {
+      "types": "./dist/src/hooks/index.d.ts",
+      "import": "./dist/hooks/index.es.js"
+    },
+    "./context": {
+      "types": "./dist/src/context/index.d.ts",
+      "import": "./dist/context/index.es.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "lint": "eslint '**/*.{ts,tsx}' --fix"
+  },
+  "publishConfig": {
+    "registry": "https://gitlab.com/api/v4/projects/PROJECT_ID/packages/npm/",
+    "access": "restricted"
+  },
+  "peerDependencies": {
+    "@exowpee/solidly": "^1.0.0",
+    "solid-js": "^1.9.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "dependencies": {
+    "@solid-primitives/presence": "^0.1.2",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@exowpee/solidly": "workspace:*",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.7",
+    "solid-js": "^1.9.9",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.6",
+    "vite-plugin-solid": "^2.11.8"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "keywords": [
+    "solidjs",
+    "solid",
+    "ui",
+    "components",
+    "enterprise",
+    "pro",
+    "datatable",
+    "charts",
+    "virtual-list"
+  ]
+}

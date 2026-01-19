@@ -1,11 +1,12 @@
-import HelperText from '@lib/components/HelperText';
+import { HelperText } from '@exowpee/solidly';
+
 import DocPage from '../../components/DocPage';
 
 export default function HelperTextPage() {
   return (
     <DocPage
       title="HelperText"
-      description="A companion text component that provides contextual guidance, validation feedback, or additional information for form fields. HelperText appears below inputs to explain requirements, show validation errors, or offer helpful tips without cluttering the main interface. The component supports five semantic color variants that visually communicate message importance: gray for neutral hints, info for informational notes, success for valid states, warning for caution, and failure for errors. When used consistently, helper text creates a predictable pattern where users know exactly where to look for guidance."
+      description="Form field guidance text with five semantic color variants for validation feedback."
       keyConcepts={[
         {
           term: 'Semantic Colors',
@@ -23,7 +24,6 @@ export default function HelperTextPage() {
             'For screen readers, pair HelperText with aria-describedby on the input element so the helper content is announced when users focus the field.',
         },
       ]}
-      value="Clear helper text reduces form errors and support requests by preventing mistakes before they happen. Validation messages that explain what went wrong and how to fix it lead to faster form completion and lower abandonment rates, directly impacting conversion and user satisfaction."
       props={[
         {
           name: 'content',
@@ -103,7 +103,7 @@ export default function HelperTextPage() {
           ),
         },
       ]}
-      usage={`import { HelperText } from '@exowpee/the_rock';
+      usage={`import { HelperText } from '@exowpee/solidly';
 
 // Basic usage
 <HelperText content="Enter your full name" />

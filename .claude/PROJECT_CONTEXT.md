@@ -1,4 +1,4 @@
-# Project Context: @exowpee/the_rock
+# Project Context: @exowpee/solidly
 
 Last Updated: 2026-01-13
 Total Components: 31
@@ -10,7 +10,7 @@ Test Coverage: 0%
 ## Project Overview
 
 **Purpose:** A UI component library built with SolidJS
-**Package Name:** @exowpee/the_rock
+**Package Name:** @exowpee/solidly
 **Version:** 0.1.12
 **Target Users:** Developers building with SolidJS
 **Design Philosophy:** Flowbite-inspired components with Tailwind CSS styling
@@ -216,19 +216,19 @@ src/
 ## Export Structure
 
 ```typescript
-// Main entry: @exowpee/the_rock
+// Main entry: @exowpee/solidly
 export { Accordion, Alert, Badge, ... } from './components'
 
-// Hooks: @exowpee/the_rock/hooks
+// Hooks: @exowpee/solidlyhooks
 export { useCustomResource, useDatePicker, ... } from './hooks'
 
-// Context: @exowpee/the_rock/context
+// Context: @exowpee/solidlycontext
 export { ThemeProvider, ToastProvider, ... } from './context'
 
-// Helpers: @exowpee/the_rock/helpers
+// Helpers: @exowpee/solidlyhelpers
 export { defaultProps, cache, ... } from './helpers'
 
-// Icons: @exowpee/the_rock/icons
+// Icons: @exowpee/solidlyicons
 export { ... } from './icons'
 ```
 

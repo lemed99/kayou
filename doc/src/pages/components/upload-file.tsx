@@ -1,13 +1,14 @@
 import { createSignal } from 'solid-js';
 
-import { UploadFile } from '@lib/components/UploadFile';
+import { UploadFile } from '@exowpee/solidly-pro';
+
 import DocPage from '../../components/DocPage';
 
 export default function UploadFilePage() {
   return (
     <DocPage
       title="UploadFile"
-      description="A file upload component supporting both drag-and-drop and click-to-browse interactions. UploadFile handles the complexity of file selection including multiple file support, file type validation, size limits, and maximum file count enforcement. The component displays visual feedback during drag operations, shows a list of uploaded files with size information and remove buttons, and integrates with the toast system for error notifications. Built with accessibility in mind, including proper ARIA labels for remove buttons."
+      description="Drag-and-drop file upload with type validation, size limits, and file list management."
       keyConcepts={[
         {
           term: 'Drag and Drop',
@@ -30,7 +31,6 @@ export default function UploadFilePage() {
             'Validation errors are displayed via the toast system using useToast. Custom error messages can be provided via maxSizeError, fileTypeError, and maxLengthError props.',
         },
       ]}
-      value="File uploads are critical for document management, profile pictures, attachments, and data import workflows. A well-designed upload component reduces user frustration by providing clear feedback, preventing invalid uploads before they reach the server, and offering an intuitive drag-and-drop experience that matches modern user expectations."
       relatedHooks={[
         {
           name: 'useToast',
@@ -281,7 +281,7 @@ export default function UploadFilePage() {
           ),
         },
       ]}
-      usage={`import { UploadFile } from '@exowpee/the_rock';
+      usage={`import { UploadFile } from '@exowpee/solidly;
 
 // Basic usage
 <UploadFile
