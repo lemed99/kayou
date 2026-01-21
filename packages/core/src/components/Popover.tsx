@@ -244,7 +244,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
   };
 
   return (
-    <div class={twMerge('relative flex grow', props.wrapperClass)}>
+    <div class={twMerge('relative', props.wrapperClass)}>
       <div
         ref={(el) => {
           triggerRef = el;
@@ -285,7 +285,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
           >
             <div
               class={twMerge(
-                'w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800 dark:shadow-none',
+                'w-fit rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-900 dark:shadow-none',
                 props.class,
               )}
             >

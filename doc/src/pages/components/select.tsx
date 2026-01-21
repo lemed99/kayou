@@ -33,23 +33,19 @@ export default function SelectPage() {
       keyConcepts={[
         {
           term: 'Options Array',
-          explanation:
-            'An array of objects with value and label properties. The value is the internal identifier, while label is displayed to users. Options can include custom labelWrapper for rich rendering.',
+          explanation: 'Objects with value (internal) and label (displayed) properties.',
         },
         {
           term: 'Virtual Scrolling',
-          explanation:
-            'When optionRowHeight is set, only visible options are rendered in the DOM. This enables smooth performance even with thousands of options.',
+          explanation: 'Set optionRowHeight for smooth performance with large lists.',
         },
         {
           term: 'Controlled vs Uncontrolled',
-          explanation:
-            'Pass a value prop and onSelect handler for controlled usage. The component manages its own open/close state but delegates selection to the parent.',
+          explanation: 'Pass value and onSelect for controlled mode.',
         },
         {
           term: 'Keyboard Navigation',
-          explanation:
-            'Full keyboard support including Arrow Up/Down to navigate, Enter to select, Escape to close, and Home/End to jump to first/last option.',
+          explanation: 'Arrow keys, Enter, Escape, and Home/End supported.',
         },
       ]}
       props={[

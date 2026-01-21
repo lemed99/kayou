@@ -28,23 +28,19 @@ export default function VirtualGridPage() {
       keyConcepts={[
         {
           term: 'CSS-Driven Columns',
-          explanation:
-            'Column count is determined by your CSS grid-template-columns class (e.g., "grid-cols-3"). This allows responsive layouts using Tailwind breakpoints without additional configuration.',
+          explanation: 'Column count from CSS class (e.g., "grid-cols-3"); supports Tailwind breakpoints.',
         },
         {
           term: 'Fixed Item Height',
-          explanation:
-            'Each cell is constrained to itemHeight with overflow hidden. This ensures accurate scroll calculations—design your cell content to fit within this height.',
+          explanation: 'Each cell constrained to itemHeight for accurate scroll calculations.',
         },
         {
           term: 'Overscan Rows',
-          explanation:
-            'Extra rows rendered above and below the visible area (default: 2) prevent white flashes during fast scrolling. Increase overscanRows for very fast scroll scenarios.',
+          explanation: 'Extra rows rendered off-screen prevent flashes during fast scroll.',
         },
         {
           term: 'Keyboard Navigation',
-          explanation:
-            'Full keyboard support: arrow keys navigate cells, Home/End move within rows (Ctrl+Home/End for first/last item), PageUp/PageDown scroll by visible rows.',
+          explanation: 'Arrow keys, Home/End, PageUp/Down for full keyboard control.',
         },
       ]}
       relatedHooks={[

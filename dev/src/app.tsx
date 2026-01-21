@@ -871,7 +871,7 @@ Key features include advanced processing capabilities, and an intuitive user int
           <Sidebar
               items={items}
               isMobile={false}
-              innerClass="bg-gray-100 dark:bg-gray-800"
+              innerClass="bg-gray-100 dark:bg-gray-900"
             >
               <div class="mb-2 px-2 text-xs text-gray-500">Custom Section</div>
             </Sidebar>

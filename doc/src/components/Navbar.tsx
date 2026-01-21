@@ -86,74 +86,349 @@ interface SearchItem {
 
 const searchIndex: SearchItem[] = [
   // Getting Started
-  { path: '/overview/quickstart', label: 'Introduction', category: 'Getting Started', keywords: ['start', 'begin', 'intro'] },
-  { path: '/overview/installation', label: 'Installation', category: 'Getting Started', keywords: ['install', 'setup', 'npm', 'pnpm'] },
-  { path: '/overview/why-solidjs', label: 'Why SolidJS?', category: 'Getting Started', keywords: ['solid', 'framework'] },
-  { path: '/overview/why-solidly', label: 'Why Solidly?', category: 'Getting Started', keywords: ['library', 'components'] },
-  { path: '/overview/contributing', label: 'Contributing', category: 'Getting Started', keywords: ['contribute', 'help'] },
-  { path: '/overview/license', label: 'License', category: 'Getting Started', keywords: ['mit', 'open source'] },
+  {
+    path: '/overview/quickstart',
+    label: 'Introduction',
+    category: 'Getting Started',
+    keywords: ['start', 'begin', 'intro'],
+  },
+  {
+    path: '/overview/installation',
+    label: 'Installation',
+    category: 'Getting Started',
+    keywords: ['install', 'setup', 'npm', 'pnpm'],
+  },
+  {
+    path: '/overview/why-solidjs',
+    label: 'Why SolidJS?',
+    category: 'Getting Started',
+    keywords: ['solid', 'framework'],
+  },
+  {
+    path: '/overview/why-solidly',
+    label: 'Why Solidly?',
+    category: 'Getting Started',
+    keywords: ['library', 'components'],
+  },
+  {
+    path: '/overview/contributing',
+    label: 'Contributing',
+    category: 'Getting Started',
+    keywords: ['contribute', 'help'],
+  },
+  {
+    path: '/overview/license',
+    label: 'License',
+    category: 'Getting Started',
+    keywords: ['mit', 'open source'],
+  },
 
   // Form Components
-  { path: '/components/button', label: 'Button', category: 'Components', keywords: ['click', 'action', 'submit'] },
-  { path: '/components/checkbox', label: 'Checkbox', category: 'Components', keywords: ['check', 'toggle', 'select'] },
-  { path: '/components/date-picker', label: 'DatePicker', category: 'Components', keywords: ['date', 'calendar', 'time'], isPro: true },
-  { path: '/components/label', label: 'Label', category: 'Components', keywords: ['text', 'form'] },
-  { path: '/components/helper-text', label: 'HelperText', category: 'Components', keywords: ['help', 'hint', 'description'] },
-  { path: '/components/number-input', label: 'NumberInput', category: 'Components', keywords: ['number', 'input', 'numeric'], isPro: true },
-  { path: '/components/select', label: 'Select', category: 'Components', keywords: ['dropdown', 'choose', 'option'] },
-  { path: '/components/select-with-search', label: 'SelectWithSearch', category: 'Components', keywords: ['dropdown', 'search', 'filter'], isPro: true },
-  { path: '/components/multi-select', label: 'MultiSelect', category: 'Components', keywords: ['multiple', 'tags', 'select'], isPro: true },
-  { path: '/components/text-input', label: 'TextInput', category: 'Components', keywords: ['text', 'input', 'field'] },
-  { path: '/components/textarea', label: 'Textarea', category: 'Components', keywords: ['text', 'multiline', 'input'] },
-  { path: '/components/toggle-switch', label: 'ToggleSwitch', category: 'Components', keywords: ['toggle', 'switch', 'on', 'off'] },
-  { path: '/components/upload-file', label: 'UploadFile', category: 'Components', keywords: ['upload', 'file', 'drag', 'drop'], isPro: true },
+  {
+    path: '/components/button',
+    label: 'Button',
+    category: 'Components',
+    keywords: ['click', 'action', 'submit'],
+  },
+  {
+    path: '/components/checkbox',
+    label: 'Checkbox',
+    category: 'Components',
+    keywords: ['check', 'toggle', 'select'],
+  },
+  {
+    path: '/components/date-picker',
+    label: 'DatePicker',
+    category: 'Components',
+    keywords: ['date', 'calendar', 'time'],
+    isPro: true,
+  },
+  {
+    path: '/components/label',
+    label: 'Label',
+    category: 'Components',
+    keywords: ['text', 'form'],
+  },
+  {
+    path: '/components/helper-text',
+    label: 'HelperText',
+    category: 'Components',
+    keywords: ['help', 'hint', 'description'],
+  },
+  {
+    path: '/components/number-input',
+    label: 'NumberInput',
+    category: 'Components',
+    keywords: ['number', 'input', 'numeric'],
+    isPro: true,
+  },
+  {
+    path: '/components/select',
+    label: 'Select',
+    category: 'Components',
+    keywords: ['dropdown', 'choose', 'option'],
+  },
+  {
+    path: '/components/select-with-search',
+    label: 'SelectWithSearch',
+    category: 'Components',
+    keywords: ['dropdown', 'search', 'filter'],
+    isPro: true,
+  },
+  {
+    path: '/components/multi-select',
+    label: 'MultiSelect',
+    category: 'Components',
+    keywords: ['multiple', 'tags', 'select'],
+    isPro: true,
+  },
+  {
+    path: '/components/text-input',
+    label: 'TextInput',
+    category: 'Components',
+    keywords: ['text', 'input', 'field'],
+  },
+  {
+    path: '/components/textarea',
+    label: 'Textarea',
+    category: 'Components',
+    keywords: ['text', 'multiline', 'input'],
+  },
+  {
+    path: '/components/toggle-switch',
+    label: 'ToggleSwitch',
+    category: 'Components',
+    keywords: ['toggle', 'switch', 'on', 'off'],
+  },
+  {
+    path: '/components/upload-file',
+    label: 'UploadFile',
+    category: 'Components',
+    keywords: ['upload', 'file', 'drag', 'drop'],
+    isPro: true,
+  },
 
   // Layout Components
-  { path: '/components/accordion', label: 'Accordion', category: 'Components', keywords: ['collapse', 'expand', 'panel'] },
-  { path: '/components/drawer', label: 'Drawer', category: 'Components', keywords: ['sidebar', 'slide', 'panel'] },
-  { path: '/components/modal', label: 'Modal', category: 'Components', keywords: ['dialog', 'popup', 'overlay'] },
-  { path: '/components/pagination', label: 'Pagination', category: 'Components', keywords: ['page', 'navigate', 'list'] },
-  { path: '/components/popover', label: 'Popover', category: 'Components', keywords: ['popup', 'tooltip', 'hover'] },
-  { path: '/components/sidebar', label: 'Sidebar', category: 'Components', keywords: ['navigation', 'menu', 'side'], isPro: true },
-  { path: '/components/tooltip', label: 'Tooltip', category: 'Components', keywords: ['hint', 'hover', 'info'] },
+  {
+    path: '/components/accordion',
+    label: 'Accordion',
+    category: 'Components',
+    keywords: ['collapse', 'expand', 'panel'],
+  },
+  {
+    path: '/components/drawer',
+    label: 'Drawer',
+    category: 'Components',
+    keywords: ['sidebar', 'slide', 'panel'],
+  },
+  {
+    path: '/components/modal',
+    label: 'Modal',
+    category: 'Components',
+    keywords: ['dialog', 'popup', 'overlay'],
+  },
+  {
+    path: '/components/pagination',
+    label: 'Pagination',
+    category: 'Components',
+    keywords: ['page', 'navigate', 'list'],
+  },
+  {
+    path: '/components/popover',
+    label: 'Popover',
+    category: 'Components',
+    keywords: ['popup', 'tooltip', 'hover'],
+  },
+  {
+    path: '/components/sidebar',
+    label: 'Sidebar',
+    category: 'Components',
+    keywords: ['navigation', 'menu', 'side'],
+    isPro: true,
+  },
+  {
+    path: '/components/tooltip',
+    label: 'Tooltip',
+    category: 'Components',
+    keywords: ['hint', 'hover', 'info'],
+  },
 
   // Feedback Components
-  { path: '/components/alert', label: 'Alert', category: 'Components', keywords: ['message', 'notification', 'warning'] },
-  { path: '/components/badge', label: 'Badge', category: 'Components', keywords: ['tag', 'label', 'status'] },
-  { path: '/components/skeleton', label: 'Skeleton', category: 'Components', keywords: ['loading', 'placeholder'] },
-  { path: '/components/spinner', label: 'Spinner', category: 'Components', keywords: ['loading', 'progress'] },
+  {
+    path: '/components/alert',
+    label: 'Alert',
+    category: 'Components',
+    keywords: ['message', 'notification', 'warning'],
+  },
+  {
+    path: '/components/badge',
+    label: 'Badge',
+    category: 'Components',
+    keywords: ['tag', 'label', 'status'],
+  },
+  {
+    path: '/components/skeleton',
+    label: 'Skeleton',
+    category: 'Components',
+    keywords: ['loading', 'placeholder'],
+  },
+  {
+    path: '/components/spinner',
+    label: 'Spinner',
+    category: 'Components',
+    keywords: ['loading', 'progress'],
+  },
 
   // Navigation Components
-  { path: '/components/breadcrumb', label: 'Breadcrumb', category: 'Components', keywords: ['navigation', 'path', 'trail'] },
+  {
+    path: '/components/breadcrumb',
+    label: 'Breadcrumb',
+    category: 'Components',
+    keywords: ['navigation', 'path', 'trail'],
+  },
 
   // Data Display Components
-  { path: '/components/data-table', label: 'DataTable', category: 'Components', keywords: ['table', 'grid', 'data', 'sort', 'filter'], isPro: true },
-  { path: '/components/virtual-list', label: 'VirtualList', category: 'Components', keywords: ['list', 'scroll', 'performance'] },
-  { path: '/components/virtual-grid', label: 'VirtualGrid', category: 'Components', keywords: ['grid', 'scroll', 'performance'], isPro: true },
-  { path: '/components/dynamic-virtual-list', label: 'DynamicVirtualList', category: 'Components', keywords: ['list', 'variable', 'height'], isPro: true },
+  {
+    path: '/components/data-table',
+    label: 'DataTable',
+    category: 'Components',
+    keywords: ['table', 'grid', 'data', 'sort', 'filter'],
+    isPro: true,
+  },
+  {
+    path: '/components/virtual-list',
+    label: 'VirtualList',
+    category: 'Components',
+    keywords: ['list', 'scroll', 'performance'],
+  },
+  {
+    path: '/components/virtual-grid',
+    label: 'VirtualGrid',
+    category: 'Components',
+    keywords: ['grid', 'scroll', 'performance'],
+    isPro: true,
+  },
+  {
+    path: '/components/dynamic-virtual-list',
+    label: 'DynamicVirtualList',
+    category: 'Components',
+    keywords: ['list', 'variable', 'height'],
+    isPro: true,
+  },
 
   // Chart Components
-  { path: '/components/line-chart', label: 'LineChart', category: 'Components', keywords: ['chart', 'graph', 'line', 'data'], isPro: true },
-  { path: '/components/pie-chart', label: 'PieChart', category: 'Components', keywords: ['chart', 'graph', 'pie', 'data'], isPro: true },
-  { path: '/components/responsive-container', label: 'ResponsiveContainer', category: 'Components', keywords: ['chart', 'responsive', 'container'], isPro: true },
+  {
+    path: '/components/line-chart',
+    label: 'LineChart',
+    category: 'Components',
+    keywords: ['chart', 'graph', 'line', 'data'],
+    isPro: true,
+  },
+  {
+    path: '/components/pie-chart',
+    label: 'PieChart',
+    category: 'Components',
+    keywords: ['chart', 'graph', 'pie', 'data'],
+    isPro: true,
+  },
+  {
+    path: '/components/responsive-container',
+    label: 'ResponsiveContainer',
+    category: 'Components',
+    keywords: ['chart', 'responsive', 'container'],
+    isPro: true,
+  },
 
   // Hooks
-  { path: '/hooks/use-debounce', label: 'useDebounce', category: 'Hooks', keywords: ['debounce', 'delay', 'throttle'] },
-  { path: '/hooks/use-floating', label: 'useFloating', category: 'Hooks', keywords: ['floating', 'position', 'tooltip', 'popover'] },
-  { path: '/hooks/use-intl', label: 'useIntl', category: 'Hooks', keywords: ['internationalization', 'i18n', 'translate'] },
-  { path: '/hooks/use-mutation', label: 'useMutation', category: 'Hooks', keywords: ['mutation', 'api', 'post', 'fetch'] },
-  { path: '/hooks/use-theme', label: 'useTheme', category: 'Hooks', keywords: ['theme', 'dark', 'light', 'mode'] },
-  { path: '/hooks/use-toast', label: 'useToast', category: 'Hooks', keywords: ['toast', 'notification', 'message'] },
-  { path: '/hooks/use-custom-resource', label: 'useCustomResource', category: 'Hooks', keywords: ['resource', 'fetch', 'api', 'swr'], isPro: true },
-  { path: '/hooks/use-date-picker', label: 'useDatePicker', category: 'Hooks', keywords: ['date', 'calendar', 'picker'], isPro: true },
-  { path: '/hooks/use-dynamic-virtual-list', label: 'useDynamicVirtualList', category: 'Hooks', keywords: ['virtual', 'list', 'scroll'], isPro: true },
+  {
+    path: '/hooks/use-debounce',
+    label: 'useDebounce',
+    category: 'Hooks',
+    keywords: ['debounce', 'delay', 'throttle'],
+  },
+  {
+    path: '/hooks/use-floating',
+    label: 'useFloating',
+    category: 'Hooks',
+    keywords: ['floating', 'position', 'tooltip', 'popover'],
+  },
+  {
+    path: '/hooks/use-intl',
+    label: 'useIntl',
+    category: 'Hooks',
+    keywords: ['internationalization', 'i18n', 'translate'],
+  },
+  {
+    path: '/hooks/use-mutation',
+    label: 'useMutation',
+    category: 'Hooks',
+    keywords: ['mutation', 'api', 'post', 'fetch'],
+  },
+  {
+    path: '/hooks/use-theme',
+    label: 'useTheme',
+    category: 'Hooks',
+    keywords: ['theme', 'dark', 'light', 'mode'],
+  },
+  {
+    path: '/hooks/use-toast',
+    label: 'useToast',
+    category: 'Hooks',
+    keywords: ['toast', 'notification', 'message'],
+  },
+  {
+    path: '/hooks/use-custom-resource',
+    label: 'useCustomResource',
+    category: 'Hooks',
+    keywords: ['resource', 'fetch', 'api', 'swr'],
+    isPro: true,
+  },
+  {
+    path: '/hooks/use-date-picker',
+    label: 'useDatePicker',
+    category: 'Hooks',
+    keywords: ['date', 'calendar', 'picker'],
+    isPro: true,
+  },
+  {
+    path: '/hooks/use-dynamic-virtual-list',
+    label: 'useDynamicVirtualList',
+    category: 'Hooks',
+    keywords: ['virtual', 'list', 'scroll'],
+    isPro: true,
+  },
 
   // Contexts
-  { path: '/contexts/intl-provider', label: 'IntlProvider', category: 'Contexts', keywords: ['i18n', 'internationalization', 'locale'] },
-  { path: '/contexts/theme-provider', label: 'ThemeProvider', category: 'Contexts', keywords: ['theme', 'dark', 'light'] },
-  { path: '/contexts/toast-provider', label: 'ToastProvider', category: 'Contexts', keywords: ['toast', 'notification'] },
-  { path: '/contexts/custom-resource-provider', label: 'CustomResourceProvider', category: 'Contexts', keywords: ['resource', 'fetch', 'cache'] },
-  { path: '/contexts/date-picker-provider', label: 'DatePickerProvider', category: 'Contexts', keywords: ['date', 'calendar', 'locale'] },
+  {
+    path: '/contexts/intl-provider',
+    label: 'IntlProvider',
+    category: 'Contexts',
+    keywords: ['i18n', 'internationalization', 'locale'],
+  },
+  {
+    path: '/contexts/theme-provider',
+    label: 'ThemeProvider',
+    category: 'Contexts',
+    keywords: ['theme', 'dark', 'light'],
+  },
+  {
+    path: '/contexts/toast-provider',
+    label: 'ToastProvider',
+    category: 'Contexts',
+    keywords: ['toast', 'notification'],
+  },
+  {
+    path: '/contexts/custom-resource-provider',
+    label: 'CustomResourceProvider',
+    category: 'Contexts',
+    keywords: ['resource', 'fetch', 'cache'],
+  },
+  {
+    path: '/contexts/date-picker-provider',
+    label: 'DatePickerProvider',
+    category: 'Contexts',
+    keywords: ['date', 'calendar', 'locale'],
+  },
 ];
 
 const Navbar: Component = () => {
@@ -260,19 +535,20 @@ const Navbar: Component = () => {
     },
     { href: '/components/button', label: 'Components', activePaths: ['/components'] },
     { href: '/icons', label: 'Icons', activePaths: ['/icons'] },
+    { href: '/blocks', label: 'Blocks', activePaths: ['/blocks'] },
   ];
 
   return (
     <>
       {/* Top promotional banner */}
-      <div class="flex h-10 items-center justify-center gap-3 bg-gradient-to-r from-pink-50 via-white to-blue-50 text-sm dark:from-pink-950/20 dark:via-gray-950 dark:to-blue-950/20">
+      {/* <div class="flex h-10 items-center justify-center gap-3 bg-gradient-to-r from-pink-50 via-white to-blue-50 text-sm dark:from-pink-950/20 dark:via-gray-950 dark:to-blue-950/20">
         <span class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
           <span>🚀</span>
           Ship faster with beautiful components
         </span>
         <A
           href="/pro"
-          class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           Solidly Pro
           <svg class="size-3" viewBox="0 0 20 20" fill="currentColor">
@@ -283,20 +559,16 @@ const Navbar: Component = () => {
             />
           </svg>
         </A>
-      </div>
+      </div> */}
 
       {/* Main navbar */}
-      <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-950/80">
+      <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-900/80">
         <nav class="mx-auto flex h-full max-w-[90rem] items-center justify-between px-4">
           {/* Left: Logo + Version */}
           <div class="flex items-center gap-3">
             <A href="/" class="flex items-center gap-2">
               <div class="flex size-8 items-center justify-center">
-                <svg
-                  class="size-7"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                >
+                <svg class="size-7" viewBox="0 0 32 32" fill="none">
                   {/* Building Blocks Logo - Isometric stacked cubes */}
                   {/* Bottom left block */}
                   <path d="M4 20l6-3.5v7L4 27v-7z" fill="#818CF8" />
@@ -314,11 +586,9 @@ const Navbar: Component = () => {
                   <path d="M10 13l6-3.5 6 3.5-6 3.5-6-3.5z" fill="#E9D5FF" />
                 </svg>
               </div>
-              <span class="text-xl font-bold text-gray-900 dark:text-white">
-                Solidly
-              </span>
+              <span class="text-xl font-bold text-gray-900 dark:text-white">Solidly</span>
             </A>
-            <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+            <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
               v1.0.0
             </span>
           </div>
@@ -348,7 +618,7 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
-                class="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:bg-gray-700"
+                class="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400 dark:hover:bg-gray-700"
               >
                 <SearchIcon />
                 <span class="hidden sm:inline">Search</span>
@@ -427,7 +697,7 @@ const Navbar: Component = () => {
 
         {/* Mobile Menu */}
         <Show when={isMobileMenuOpen()}>
-          <div class="border-t border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-gray-800 dark:bg-gray-950">
+          <div class="border-t border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-gray-800 dark:bg-gray-900">
             <div class="flex flex-col gap-4">
               <For each={navLinks}>
                 {(link) => (
@@ -470,7 +740,7 @@ const Navbar: Component = () => {
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
                 autofocus
-                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
+                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
               />
             </div>
 
@@ -495,8 +765,13 @@ const Navbar: Component = () => {
                   <For each={searchResults()}>
                     {(item, index) => (
                       <>
-                        <Show when={index() === 0 || searchResults()[index() - 1].category !== item.category}>
-                          <div class="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:bg-gray-800 dark:text-gray-400">
+                        <Show
+                          when={
+                            index() === 0 ||
+                            searchResults()[index() - 1].category !== item.category
+                          }
+                        >
+                          <div class="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:bg-gray-900 dark:text-gray-400">
                             {item.category}
                           </div>
                         </Show>
@@ -518,7 +793,7 @@ const Navbar: Component = () => {
                                   ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                                   : item.category === 'Contexts'
                                     ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
                             }`}
                           >
                             {item.label.charAt(0)}

@@ -12,23 +12,19 @@ export default function VirtualListPage() {
       keyConcepts={[
         {
           term: 'Virtualization',
-          explanation:
-            'The technique of only rendering visible items in the DOM. VirtualList maintains a "window" of rendered items that moves as users scroll, dramatically reducing memory usage and improving performance.',
+          explanation: 'Renders only visible items; window moves as user scrolls.',
         },
         {
           term: 'Fixed Row Height',
-          explanation:
-            'Each row must have the exact height specified in rowHeight. This constraint enables instant calculation of scroll positions and visible ranges without costly DOM measurements.',
+          explanation: 'Exact rowHeight required for instant scroll position calculation.',
         },
         {
           term: 'Overscan',
-          explanation:
-            'Extra items rendered above and below the visible area. This buffer prevents blank areas from appearing during fast scrolling. Default is 2 items.',
+          explanation: 'Extra items rendered off-screen prevent blanks during fast scroll.',
         },
         {
           term: 'Imperative Handle',
-          explanation:
-            'The ref prop provides a handle with scrollToIndex method for programmatic scrolling. Useful for "scroll to top" buttons or keyboard navigation.',
+          explanation: 'ref provides scrollToIndex for programmatic scrolling.',
         },
       ]}
       props={[

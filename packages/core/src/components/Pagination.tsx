@@ -1,5 +1,11 @@
 import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
+import {
+  ChevronLeftDoubleIcon,
+  ChevronLeftIcon,
+  ChevronRightDoubleIcon,
+  ChevronRightIcon,
+} from '../icons';
 import Button from './Button';
 import NumberInput from './NumberInput';
 import Tooltip from './Tooltip';
@@ -42,13 +48,12 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
     tooltip: string;
     ariaLabel: string;
   }) => (
-    <Tooltip content={navProps.tooltip} theme="auto">
+    <Tooltip hidden={navProps.disabled} content={navProps.tooltip} theme="auto">
       <Button
-        color="light"
+        color="gray"
         onClick={navProps.onClick}
         disabled={navProps.disabled}
-        class="w-8"
-        size="xs"
+        class="size-8"
         aria-label={navProps.ariaLabel}
       >
         {navProps.content}
@@ -58,7 +63,7 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
 
   return (
     <div class="flex items-center gap-6">
-      <div class="flex items-center gap-1 italic">
+      <div class="flex items-center gap-1 italic dark:text-white">
         <p>Page</p>
         <NumberInput
           type="integer"
@@ -82,28 +87,28 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
         <NavigationButton
           onClick={() => setPage(1)}
           disabled={props.page === 1}
-          content="«"
+          content={<ChevronLeftDoubleIcon class="size-2.5" strokeWidth={2} />}
           tooltip="Page 1"
           ariaLabel="Go to first page"
         />
         <NavigationButton
           onClick={() => setPage(Math.max(1, props.page - 1))}
           disabled={props.page === 1}
-          content="‹"
+          content={<ChevronLeftIcon class="size-2.5" strokeWidth={2} />}
           tooltip={`Page ${Math.max(1, props.page - 1)}`}
           ariaLabel="Go to previous page"
         />
         <NavigationButton
           onClick={() => setPage(Math.min(props.total, props.page + 1))}
           disabled={props.page === props.total}
-          content="›"
+          content={<ChevronRightIcon class="size-2.5" strokeWidth={2} />}
           tooltip={`Page ${Math.min(props.total, props.page + 1)}`}
           ariaLabel="Go to next page"
         />
         <NavigationButton
           onClick={() => setPage(props.total)}
           disabled={props.page === props.total}
-          content="»"
+          content={<ChevronRightDoubleIcon class="size-2.5" strokeWidth={2} />}
           tooltip={`Page ${props.total}`}
           ariaLabel="Go to last page"
         />

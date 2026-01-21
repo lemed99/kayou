@@ -7,21 +7,25 @@ export default function SkeletonPage() {
     <DocPage
       title="Skeleton"
       description="Animated loading placeholder with customizable dimensions for content-heavy interfaces."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Content Layout Hints',
-          explanation:
-            'Skeletons should approximate the shape and size of the content they replace. This reduces layout shift when content loads and gives users a preview of the incoming structure.',
+          explanation: 'Match shape and size of content to reduce layout shift.',
         },
         {
           term: 'Flexible Sizing',
-          explanation:
-            'Width and height accept numbers (pixels) or strings (percentages, rem, etc.). Use "100%" for responsive skeletons that fill their container.',
+          explanation: 'Accepts numbers (px) or strings (%, rem); "100%" for responsive.',
         },
         {
           term: 'Theme Adaptation',
-          explanation:
-            'The gray and darkGray props control appearance in light and dark modes respectively. Default values work well in most cases, but can be adjusted for specific design requirements.',
+          explanation: 'gray/darkGray props control light/dark mode appearance.',
         },
       ]}
       props={[

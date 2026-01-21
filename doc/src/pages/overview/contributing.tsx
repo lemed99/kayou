@@ -171,7 +171,7 @@ export default function ContributingPage() {
             <span>
               <strong class="text-gray-950 dark:text-white">Formatting</strong> — Use
               Prettier for code formatting. Run{' '}
-              <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-gray-800">
+              <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-gray-900">
                 pnpm format
               </code>{' '}
               before committing.
@@ -184,7 +184,7 @@ export default function ContributingPage() {
             <span>
               <strong class="text-gray-950 dark:text-white">Linting</strong> — All code
               must pass ESLint checks. Run{' '}
-              <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-gray-800">
+              <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-gray-900">
                 pnpm lint
               </code>{' '}
               to check.

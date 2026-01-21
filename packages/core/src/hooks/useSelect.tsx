@@ -367,7 +367,7 @@ const useSelect = <T extends MergedSelectProps>(
               <div
                 ref={refs.setFloating}
                 class={twMerge(
-                  'z-100 w-fit rounded-lg border border-gray-200 bg-white shadow dark:bg-gray-700',
+                  'z-100 w-fit rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-900',
                 )}
                 style={{
                   ...floatingStyles(),
@@ -400,7 +400,7 @@ const useSelect = <T extends MergedSelectProps>(
                       <For
                         each={filteredOptions()}
                         fallback={
-                          <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                          <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                             {props.noSearchResultPlaceholder || 'No results found'}
                           </div>
                         }
@@ -425,7 +425,7 @@ const useSelect = <T extends MergedSelectProps>(
                     loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
                     setScrollPosition={setScrollTop}
                     fallback={
-                      <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                      <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                         {props.noSearchResultPlaceholder || 'No results found'}
                       </div>
                     }

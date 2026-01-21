@@ -1,6 +1,6 @@
 # DatePicker Component Audit
 
-**Date**: 2026-01-14
+**Date**: 2026-01-14 (Updated: 2026-01-19)
 **Files Reviewed**:
 
 - `src/components/DatePicker.tsx`
@@ -9,7 +9,31 @@
 
 ## Summary
 
-The DatePicker component provides single, multiple, and range date selection with a floating calendar popup. While functional, it has significant accessibility gaps, type safety issues, and a problematic `onChange` implementation that fires on every render.
+The DatePicker component provides single, multiple, and range date selection with a floating calendar popup. It supports configurable week start day (Sunday or Monday), time selection, and shortcuts.
+
+## Recent Updates (2026-01-19)
+
+### Week Start Configuration
+Added `weekStartsOn` prop to configure whether the calendar week starts on Sunday (0) or Monday (1). Defaults to Monday.
+
+```tsx
+// Week starts on Monday (default)
+<DatePicker type="single" locale="en-US" />
+
+// Week starts on Sunday
+<DatePicker type="single" locale="en-US" weekStartsOn={0} />
+```
+
+### Time Picker Refactoring
+- Replaced Select dropdowns with NumberInput components for hour, minute, and second
+- Added `step` attribute to minute and second inputs using `minuteStep` and `secondStep` props
+- Removed unused `generateTimeOptions` function and related memos
+
+---
+
+## Historical Issues (2026-01-14)
+
+The following issues were identified in the original audit. Many have since been addressed:
 
 ---
 

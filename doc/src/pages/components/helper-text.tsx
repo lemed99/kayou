@@ -7,21 +7,25 @@ export default function HelperTextPage() {
     <DocPage
       title="HelperText"
       description="Form field guidance text with five semantic color variants for validation feedback."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Semantic Colors',
-          explanation:
-            'Color variants map to message intent: gray for passive hints, info for contextual information, success for valid input confirmation, warning for potential issues, and failure for blocking errors.',
+          explanation: 'Gray for hints, success/failure for validation, warning for caution.',
         },
         {
           term: 'Form Integration',
-          explanation:
-            'Position helper text immediately below its associated input for clear visual association. The text should be concise and actionable, telling users what they need to know or do.',
+          explanation: 'Position below input; keep text concise and actionable.',
         },
         {
           term: 'Accessibility Pairing',
-          explanation:
-            'For screen readers, pair HelperText with aria-describedby on the input element so the helper content is announced when users focus the field.',
+          explanation: 'Use aria-describedby on input to announce helper on focus.',
         },
       ]}
       props={[

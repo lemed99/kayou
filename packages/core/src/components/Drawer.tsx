@@ -59,7 +59,7 @@ export interface DrawerProps
 const theme = {
   backdrop: {
     base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
-    show: 'bg-gray-800/50 dark:bg-gray-800/80',
+    show: 'bg-gray-800/50 dark:bg-gray-900/80',
   },
   content: {
     positions: {

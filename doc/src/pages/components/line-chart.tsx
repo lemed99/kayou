@@ -203,27 +203,36 @@ export default function LineChartPage() {
   return (
     <DocPage
       title="LineChart"
+      isPro
       description="D3-based line chart with composable axes, grid, tooltips, and multiple data series."
+      dependencies={[
+        {
+          name: 'd3-scale',
+          url: 'https://github.com/d3/d3-scale',
+          usage: 'Provides scaleLinear and scalePoint for axis scaling',
+        },
+        {
+          name: 'd3-selection',
+          url: 'https://github.com/d3/d3-selection',
+          usage: 'Provides pointer utility for mouse position tracking',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Compound Components',
-          explanation:
-            'LineChart uses a parent-child pattern where child components (XAxis, YAxis, Line, etc.) access shared state via context. This allows flexible composition - add or remove features by including/excluding child components.',
+          explanation: 'Composable children (XAxis, YAxis, Line) share state via context.',
         },
         {
           term: 'D3 Scales',
-          explanation:
-            'The chart automatically creates D3 scales (scalePoint for X-axis categories, scaleLinear for Y-axis values) that map data values to pixel coordinates. Scales update reactively when data changes.',
+          explanation: 'Auto-creates D3 scales mapping data to pixel coordinates.',
         },
         {
           term: 'Responsive Container',
-          explanation:
-            'Wrap LineChart in ResponsiveContainer to make it resize with its parent. The container passes rwidth/rheight props that override the base width/height.',
+          explanation: 'Wrap in ResponsiveContainer for auto-resizing with parent.',
         },
         {
           term: 'Multiple Series',
-          explanation:
-            'Add multiple Line components with different dataKey props to display several data series on the same chart. Each line can have its own color and styling.',
+          explanation: 'Add multiple Line components with different dataKey props.',
         },
       ]}
       props={[

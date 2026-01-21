@@ -13,18 +13,15 @@ export default function NumberInputPage() {
       keyConcepts={[
         {
           term: 'Debounced Processing',
-          explanation:
-            'Values are processed and formatted after 2 seconds of inactivity (configurable via debounceDelay). This allows users to type freely without interruption, then see their input validated and formatted. Set debounceDelay to 0 for blur-only processing.',
+          explanation: 'Values processed after inactivity (2s default); set 0 for blur-only.',
         },
         {
           term: 'Typed Callbacks',
-          explanation:
-            'The onValueChange callback returns number | null, not strings. This eliminates parsing logic in parent components and ensures type safety for numeric operations.',
+          explanation: 'onValueChange returns number | null for type safety.',
         },
         {
           term: 'Constraint Enforcement',
-          explanation:
-            'Min/max values are enforced on blur and through arrow buttons. The step prop controls increment/decrement amounts. For floats, precision controls decimal places.',
+          explanation: 'Min/max enforced on blur; step controls increments.',
         },
       ]}
       props={[

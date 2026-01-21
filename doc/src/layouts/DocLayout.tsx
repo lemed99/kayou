@@ -37,6 +37,8 @@ const componentCategories: Record<string, string[]> = {
     'label',
     'helper-text',
     'number-input',
+    'password',
+    'rich-text-editor',
     'select',
     'select-with-search',
     'multi-select',
@@ -49,7 +51,7 @@ const componentCategories: Record<string, string[]> = {
   Feedback: ['alert', 'badge', 'skeleton', 'spinner'],
   Navigation: ['breadcrumb'],
   'Data Display': ['data-table', 'virtual-list', 'virtual-grid', 'dynamic-virtual-list'],
-  Charts: ['line-chart', 'pie-chart', 'responsive-container'],
+  Charts: ['area-chart', 'bar-chart', 'line-chart', 'pie-chart', 'responsive-container'],
 };
 
 // Pro components that should show a badge
@@ -57,12 +59,16 @@ const proComponents = new Set([
   'data-table',
   'date-picker',
   'multi-select',
-  'select-with-search',
   'number-input',
+  'password',
+  'rich-text-editor',
+  'select-with-search',
   'sidebar',
   'upload-file',
   'virtual-grid',
   'dynamic-virtual-list',
+  'area-chart',
+  'bar-chart',
   'line-chart',
   'pie-chart',
   'responsive-container',
@@ -95,7 +101,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(false);
   const [expandedSections, setExpandedSections] = createSignal<Set<string>>(
-    new Set(['getting-started', 'components', 'hooks']),
+    new Set(['getting-started', 'components', 'hooks', 'contexts']),
   );
   const [expandedCategories, setExpandedCategories] = createSignal<Set<string>>(
     new Set(Object.keys(componentCategories)),
@@ -160,7 +166,9 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
     'pro',
   ]);
   const filteredRoutes = createMemo(() => {
-    return routes.filter((route) => route.path && !excludedPaths.has(route.path as string));
+    return routes.filter(
+      (route) => route.path && !excludedPaths.has(route.path as string),
+    );
   });
 
   // Convert kebab-case to PascalCase for components (e.g., "data-table" → "DataTable")
@@ -245,11 +253,6 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
               : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
           }`}
         >
-          <span
-            class={`size-1 rounded-full ${
-              active ? 'bg-gray-900 dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
-          />
           {label}
           <Show when={options?.isPro}>
             <ProBadge />
@@ -410,7 +413,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   return (
     <div class="mx-auto max-w-[90rem]">
       {/* Mobile menu button */}
-      <div class="fixed top-[104px] right-0 left-0 z-20 flex h-12 items-center border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-gray-800 dark:bg-gray-950/95">
+      <div class="fixed top-[104px] right-0 left-0 z-20 flex h-12 items-center border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-gray-800 dark:bg-gray-900/95">
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
@@ -434,7 +437,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
             class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div class="fixed inset-y-0 left-0 w-72 overflow-y-auto bg-white p-6 shadow-xl dark:bg-gray-950">
+          <div class="fixed inset-y-0 left-0 w-72 overflow-y-auto bg-white p-6 shadow-xl dark:bg-gray-900">
             <SidebarContent />
           </div>
         </div>

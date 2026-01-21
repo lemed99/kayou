@@ -9,21 +9,25 @@ export default function TextareaPage() {
     <DocPage
       title="Textarea"
       description="Multi-line text input with integrated labels, validation states, and loading indicator. Supports resize handles and spell checking."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Integrated Field Components',
-          explanation:
-            'Label and HelperText are built in via props, ensuring consistent spacing, proper ID association for accessibility, and coordinated color states across the field.',
+          explanation: 'Label and HelperText built in via props with coordinated styling.',
         },
         {
           term: 'Validation States',
-          explanation:
-            'Five color variants (gray, info, success, warning, failure) provide visual feedback. Each state affects the border, label, and helper text colors simultaneously.',
+          explanation: 'Five colors affect border, label, and helper text simultaneously.',
         },
         {
           term: 'Loading State',
-          explanation:
-            'The isLoading prop displays a spinner, useful during async validation, AI content generation, or when submitting data. The textarea is not disabled, allowing users to continue editing.',
+          explanation: 'Spinner during async operations; textarea remains editable.',
         },
       ]}
       props={[

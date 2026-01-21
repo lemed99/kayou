@@ -7,21 +7,25 @@ export default function BadgePage() {
     <DocPage
       title="Badge"
       description="Compact status indicator with six color variants and two sizes."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Color Variants',
-          explanation:
-            'Six colors (default, gray, success, warning, failure, dark) for semantic meaning. Use success for positive states, failure for errors, warning for caution.',
+          explanation: 'Six semantic colors: success, failure, warning, gray, dark, default.',
         },
         {
           term: 'Compact Design',
-          explanation:
-            'Badges are intentionally small and unobtrusive. They supplement content rather than compete with it.',
+          explanation: 'Small and unobtrusive; supplements content without competing.',
         },
         {
           term: 'Size Options',
-          explanation:
-            'Two sizes (xs and sm) for different contexts. Use xs for inline badges and sm when more prominence is needed.',
+          explanation: 'xs for inline; sm for more prominence.',
         },
       ]}
       props={[

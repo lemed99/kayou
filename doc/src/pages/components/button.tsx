@@ -9,21 +9,25 @@ export default function ButtonPage() {
     <DocPage
       title="Button"
       description="Button for triggering actions with multiple color variants, sizes, and a loading state with spinner overlay."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes for button variants',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Color Variants',
-          explanation:
-            'Eight colors establish visual hierarchy. Use "info" or "blue" for primary actions, "gray" or "light" for secondary, and semantic colors (success, warning, failure) for contextual actions.',
+          explanation: 'Eight colors for visual hierarchy and semantic meaning.',
         },
         {
           term: 'Loading State',
-          explanation:
-            'When isLoading is true, a spinner overlay appears and the button becomes non-interactive. This prevents accidental double-clicks during async operations.',
+          explanation: 'Spinner overlay prevents double-clicks during async operations.',
         },
         {
           term: 'Button Types',
-          explanation:
-            'The type prop controls form behavior: "submit" triggers form submission, "reset" clears forms, and "button" (default) prevents form submission.',
+          explanation: 'Controls form behavior: submit, reset, or button (default).',
         },
       ]}
       props={[

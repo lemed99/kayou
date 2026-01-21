@@ -17,21 +17,25 @@ export default function AlertPage() {
     <DocPage
       title="Alert"
       description="Message banner with five color variants, optional icons, and additional content sections."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Color Variants',
-          explanation:
-            'Five semantic colors (info, success, warning, failure, dark) that convey the nature of the message at a glance.',
+          explanation: 'Five semantic colors convey message type at a glance.',
         },
         {
           term: 'Icon Support',
-          explanation:
-            'Optional icon component that receives a class prop for styling. Icons reinforce the message type visually.',
+          explanation: 'Optional icon component reinforces message type visually.',
         },
         {
           term: 'Additional Content',
-          explanation:
-            'A slot for extra content below the main message, useful for detailed explanations, lists, or action buttons.',
+          explanation: 'Slot for details, lists, or action buttons below main message.',
         },
       ]}
       props={[

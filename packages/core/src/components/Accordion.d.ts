@@ -36,6 +36,17 @@ export interface AccordionProps {
      */
     isSimple?: boolean;
     /**
+     * Gap between panels. When set, each panel is displayed as a separate card.
+     * Can be a Tailwind spacing class (e.g., '2', '4', '6') or custom value.
+     */
+    gap?: string;
+    /**
+     * When true, only one panel can be open at a time.
+     * Opening a panel will close any other open panel.
+     * @default false
+     */
+    exclusive?: boolean;
+    /**
      * Controlled state: map of panel keys to open state.
      */
     openPanels?: Record<string, boolean>;

@@ -15,18 +15,15 @@ export default function PaginationPage() {
       keyConcepts={[
         {
           term: 'Controlled Component',
-          explanation:
-            'Pagination is always controlled—you provide the current page and total pages, and handle the onChange callback. This design integrates naturally with data fetching where page state drives API requests.',
+          explanation: 'Provide current page, total, and onChange callback for data fetching.',
         },
         {
           term: 'Direct Page Input',
-          explanation:
-            'Users can type a page number directly into the input field for quick navigation to specific pages. The input validates bounds and only triggers onChange with valid page numbers.',
+          explanation: 'Type page number directly; validates bounds before triggering onChange.',
         },
         {
           term: 'Navigation Buttons',
-          explanation:
-            'Four navigation buttons (first, previous, next, last) with automatic disable states at boundaries. Tooltips explain each button for discoverability.',
+          explanation: 'First/prev/next/last buttons with auto-disable at boundaries.',
         },
       ]}
       props={[

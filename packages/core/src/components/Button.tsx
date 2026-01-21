@@ -44,7 +44,7 @@ const theme = {
   base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer transition-all duration-200',
   color: {
     gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 disabled:hover:bg-white focus:text-blue-700 dark:bg-transparent dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:disabled:hover:bg-gray-800',
-    dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 disabled:hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 dark:disabled:hover:bg-gray-800',
+    dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 disabled:hover:bg-gray-800 dark:bg-gray-900 dark:hover:bg-gray-700 dark:border-gray-700 dark:disabled:hover:bg-gray-800',
     failure:
       'text-white bg-red-700 border border-transparent hover:bg-red-800 disabled:hover:bg-red-800 dark:bg-red-500 dark:hover:bg-red-600 dark:disabled:hover:bg-red-500',
     info: 'text-white dark:text-gray-800 bg-blue-600 border border-transparent hover:bg-blue-700 disabled:bg-blue-600 dark:bg-gray-50 dark:hover:bg-gray-200',
@@ -98,7 +98,7 @@ const Button = (props: ButtonProps): JSX.Element => {
           {local.children}
         </div>
         <Show when={local.isLoading}>
-          <div class="absolute inset-0 z-5 flex h-full w-full items-center justify-center">
+          <div class="z-5 absolute inset-0 flex h-full w-full items-center justify-center">
             <Spinner size="sm" color={color()} />
           </div>
         </Show>

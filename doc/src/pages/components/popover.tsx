@@ -11,26 +11,37 @@ export default function PopoverPage() {
     <DocPage
       title="Popover"
       description="Floating overlay for rich content with auto-positioning, click/hover triggers, and keyboard support."
+      dependencies={[
+        {
+          name: '@solid-primitives/presence',
+          url: 'https://primitives.solidjs.community/package/presence',
+          usage: 'Provides createPresence for popover open/close transitions',
+        },
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Trigger Mode',
           explanation:
-            'Popovers can open on click (default) or hover (onHover prop). Click mode is better for interactive content, while hover mode suits preview/tooltip-like experiences.',
+            'Opens on click (default) or hover; click suits interactive content.',
         },
         {
           term: 'Placement',
           explanation:
-            'The position prop accepts 12 placement options combining side (top, bottom, left, right) with alignment (start, end, or center). The popover flips automatically if space is insufficient.',
+            '12 positions (side + alignment); auto-flips if space is insufficient.',
         },
         {
           term: 'Controlled vs Uncontrolled',
           explanation:
-            'Use isOpen and onOpenChange props for controlled mode where you manage visibility state. Without these, the component manages its own open/close state internally.',
+            'Use isOpen/onOpenChange for controlled; otherwise manages state internally.',
         },
         {
           term: 'Click Outside',
-          explanation:
-            'The popover closes when clicking outside of it, providing intuitive dismiss behavior. This can be customized with the closeOnClickOutside prop.',
+          explanation: 'Closes when clicking outside for intuitive dismiss behavior.',
         },
       ]}
       props={[

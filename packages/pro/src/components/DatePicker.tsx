@@ -136,6 +136,8 @@ export interface DatePickerProps {
   showShortcuts?: boolean;
   /** Custom shortcuts to use for this instance. Overrides provider shortcuts. */
   shortcuts?: DatePickerShortcut[];
+  /** Day the week starts on. 0 = Sunday, 1 = Monday. @default 1 */
+  weekStartsOn?: 0 | 1;
 }
 
 /**
@@ -172,6 +174,8 @@ export interface CalendarProps {
   ref?: (el: HTMLDivElement) => void;
   /** Accessor for the currently focused date (keyboard navigation). */
   focusedDate?: () => Date | null;
+  /** Day the week starts on. 0 = Sunday, 1 = Monday. */
+  weekStartsOn: 0 | 1;
 }
 
 /**
@@ -184,13 +188,15 @@ const startOfDay = (date: Date): Date => {
 
 /**
  * Generates an array of 42 dates (6 weeks) for the calendar grid,
- * starting from the Monday before the first day of the month.
+ * starting from the first day of the week before the first day of the month.
+ * @param date - The date representing the month to generate
+ * @param weekStartsOn - 0 for Sunday, 1 for Monday
  */
-const getSixWeeksMergedDaysInMonth = (date: Date): Date[] => {
+const getSixWeeksMergedDaysInMonth = (date: Date, weekStartsOn: 0 | 1): Date[] => {
   const { monthCache, setMonthCache } = useDatePicker();
   const year = date.getFullYear();
   const month = date.getMonth();
-  const key = `${year}-${month}`;
+  const key = `${year}-${month}-${weekStartsOn}`;
 
   const cached = monthCache[key];
   if (cached) {
@@ -200,8 +206,17 @@ const getSixWeeksMergedDaysInMonth = (date: Date): Date[] => {
   const firstDay = new Date(year, month, 1);
   const startDate = new Date(firstDay);
   const dayOfWeek = firstDay.getDay();
-  const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  startDate.setDate(startDate.getDate() - daysFromMonday);
+
+  // Calculate days to go back to reach the start of the week
+  let daysToSubtract: number;
+  if (weekStartsOn === 1) {
+    // Monday start: Sunday (0) -> 6, Monday (1) -> 0, etc.
+    daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  } else {
+    // Sunday start: Sunday (0) -> 0, Monday (1) -> 1, etc.
+    daysToSubtract = dayOfWeek;
+  }
+  startDate.setDate(startDate.getDate() - daysToSubtract);
 
   const days: Date[] = [];
   const currentDate = startDate;
@@ -227,7 +242,19 @@ const Calendar = (props: CalendarProps) => {
   const [showYearSelector, setShowYearSelector] = createSignal(false);
   const [customYear, setCustomYear] = createSignal('');
 
-  const days = createMemo(() => getSixWeeksMergedDaysInMonth(props.currentDate()));
+  const days = createMemo(() =>
+    getSixWeeksMergedDaysInMonth(props.currentDate(), props.weekStartsOn),
+  );
+
+  // Get day headers in correct order based on weekStartsOn
+  const dayHeaders = createMemo(() => {
+    const allDays = getDaysShort(props.locale); // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+    if (props.weekStartsOn === 0) {
+      // Rotate to start from Sunday: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
+      return [allDays[6], ...allDays.slice(0, 6)];
+    }
+    return allDays;
+  });
 
   const handleDateClick = (date: Date) => {
     if (props.isDateDisabled(date)) return;
@@ -326,7 +353,7 @@ const Calendar = (props: CalendarProps) => {
               type="button"
               onClick={() => navigateMonth(-1)}
               aria-label="Previous month"
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
+              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
             >
               <ChevronLeftIcon class="size-5" />
             </button>
@@ -342,7 +369,7 @@ const Calendar = (props: CalendarProps) => {
               }}
               aria-label="Select month"
               aria-expanded={showMonthSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
+              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
             >
               {getMonthsShort(props.locale)[props.currentDate().getMonth()]}
             </button>
@@ -356,7 +383,7 @@ const Calendar = (props: CalendarProps) => {
               }}
               aria-label="Select year"
               aria-expanded={showYearSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
+              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
             >
               {props.currentDate().getFullYear()}
             </button>
@@ -368,7 +395,7 @@ const Calendar = (props: CalendarProps) => {
               type="button"
               onClick={() => navigateMonth(1)}
               aria-label="Next month"
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10"
+              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
             >
               <ChevronRightIcon class="size-5" />
             </button>
@@ -383,10 +410,10 @@ const Calendar = (props: CalendarProps) => {
               class="grid grid-cols-7 border-b border-gray-300 py-2 dark:border-gray-700"
               role="row"
             >
-              <For each={getDaysShort(props.locale)}>
+              <For each={dayHeaders()}>
                 {(day) => (
                   <div
-                    class="text-center capitalize tracking-wide text-gray-500"
+                    class="text-center capitalize tracking-wide text-gray-500 dark:text-gray-400"
                     role="columnheader"
                     aria-label={day}
                   >
@@ -427,7 +454,7 @@ const Calendar = (props: CalendarProps) => {
                           rangeState.start && inCurrentMonth && !selected,
                         'bg-blue-500 text-white font-medium rounded-r-lg rounded-l-none':
                           rangeState.end && inCurrentMonth && !selected,
-                        'bg-blue-100 dark:bg-white/10':
+                        'bg-blue-100 dark:bg-blue-900/40':
                           inRange && !selected && inCurrentMonth,
                         'cursor-not-allowed! opacity-50': disabled,
                         'border-2 border-gray-700 border-dashed':
@@ -460,9 +487,9 @@ const Calendar = (props: CalendarProps) => {
                     role="option"
                     aria-selected={index() === props.currentDate().getMonth()}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700',
                       index() === props.currentDate().getMonth()
-                        ? 'bg-gray-50 font-semibold dark:bg-white/5'
+                        ? 'bg-gray-50 font-semibold dark:bg-gray-700'
                         : '',
                     )}
                   >
@@ -484,9 +511,9 @@ const Calendar = (props: CalendarProps) => {
                     role="option"
                     aria-selected={year === props.currentDate().getFullYear()}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-white/70 dark:hover:bg-white/10 dark:focus:bg-white/10',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700',
                       year === props.currentDate().getFullYear()
-                        ? 'bg-gray-50 font-semibold dark:bg-white/5'
+                        ? 'bg-gray-50 font-semibold dark:bg-gray-700'
                         : '',
                     )}
                   >
@@ -531,21 +558,8 @@ interface TimePickerProps {
 }
 
 /**
- * Generates an array of time options for Select components.
- */
-const generateTimeOptions = (max: number, step: number, padStart = true) => {
-  const options: { value: string; label: string }[] = [];
-  for (let i = 0; i < max; i += step) {
-    const value = i.toString();
-    const label = padStart ? i.toString().padStart(2, '0') : value;
-    options.push({ value, label });
-  }
-  return options;
-};
-
-/**
  * Internal time picker component for DatePicker.
- * Uses Select components for hour, minute, and second selection.
+ * Uses NumberInput components for hour, minute, and second selection.
  */
 const TimePicker = (props: TimePickerProps) => {
   const is12h = () => props.format === '12h';
@@ -555,27 +569,6 @@ const TimePicker = (props: TimePickerProps) => {
   createEffect(() => {
     setPeriod(props.hour() >= 12 ? 'PM' : 'AM');
   });
-
-  // Generate hour options based on format
-  const hourOptions = createMemo(() => {
-    if (is12h()) {
-      // 12-hour format: 12, 1, 2, ..., 11
-      const options: { value: string; label: string }[] = [];
-      for (let i = 0; i < 12; i++) {
-        const displayHour = i === 0 ? 12 : i;
-        options.push({
-          value: i.toString(),
-          label: displayHour.toString().padStart(2, '0'),
-        });
-      }
-      return options;
-    }
-    // 24-hour format: 00, 01, ..., 23
-    return generateTimeOptions(24, 1);
-  });
-
-  const minuteOptions = createMemo(() => generateTimeOptions(60, props.minuteStep));
-  const secondOptions = createMemo(() => generateTimeOptions(60, props.secondStep));
 
   const periodOptions = [
     { value: 'AM', label: 'AM' },
@@ -588,7 +581,7 @@ const TimePicker = (props: TimePickerProps) => {
       const h = props.hour() % 12;
       return h.toString();
     }
-    return props.hour().toString();
+    return props.hour().toString() ?? undefined;
   };
 
   const handleHourChange = (value: string) => {
@@ -618,35 +611,59 @@ const TimePicker = (props: TimePickerProps) => {
   };
 
   return (
-    <div class="border-t border-gray-300 pt-3 dark:border-gray-700">
-      <div class="mx-auto flex w-fit items-center justify-center gap-1">
-        <Select
-          options={hourOptions()}
+    <div class="flex items-center gap-2 border-t border-gray-300 pt-3 dark:border-gray-700">
+      <div class="flex w-fit items-center justify-center gap-0.5 rounded-lg border border-gray-200 dark:border-gray-700">
+        <NumberInput
           value={displayHour()}
-          onSelect={(opt) => opt && handleHourChange(opt.value)}
+          sizing="sm"
+          onChange={(e) => handleHourChange(e.target.value)}
+          placeholder="00"
+          style={{
+            border: 'none',
+            'background-color': 'transparent',
+            'text-align': 'center',
+          }}
+          min={is12h() ? 1 : 0}
+          max={is12h() ? 12 : 23}
+          class="w-10"
           aria-label="Hour"
-          sizing="sm"
-          fitContent={true}
         />
-        <span class="text-lg font-medium text-gray-400 dark:text-gray-500">:</span>
-        <Select
-          options={minuteOptions()}
-          value={props.minute().toString()}
-          onSelect={(opt) => opt && props.onMinuteChange(parseInt(opt.value, 10))}
+        <span class="font-medium text-gray-400 dark:text-gray-500">:</span>
+        <NumberInput
+          value={props.minute()}
+          sizing="sm"
+          onChange={(e) => props.onMinuteChange(parseInt(e.target.value))}
+          placeholder="00"
+          style={{
+            border: 'none',
+            'background-color': 'transparent',
+            'text-align': 'center',
+          }}
+          min={0}
+          max={59}
+          step={props.minuteStep}
+          class="w-10"
           aria-label="Minute"
-          sizing="sm"
-          fitContent={true}
         />
-        <span class="text-lg font-medium text-gray-400 dark:text-gray-500">:</span>
-        <Select
-          options={secondOptions()}
-          value={props.second().toString()}
-          onSelect={(opt) => opt && props.onSecondChange(parseInt(opt.value, 10))}
-          aria-label="Second"
+        <span class="font-medium text-gray-400 dark:text-gray-500">:</span>
+        <NumberInput
+          value={props.second()}
           sizing="sm"
-          fitContent={true}
+          onChange={(e) => props.onSecondChange(parseInt(e.target.value))}
+          placeholder="00"
+          style={{
+            border: 'none',
+            'background-color': 'transparent',
+            'text-align': 'center',
+          }}
+          min={0}
+          max={59}
+          step={props.secondStep}
+          class="w-10"
+          aria-label="Second"
         />
         <Show when={is12h()}>
+          <span class="h-5 w-1 bg-gray-200 dark:bg-gray-700" />
           <Select
             options={periodOptions}
             value={period()}
@@ -654,12 +671,13 @@ const TimePicker = (props: TimePickerProps) => {
             aria-label="AM/PM"
             sizing="sm"
             fitContent={true}
+            style={{ border: 'none', 'background-color': 'transparent' }}
           />
         </Show>
       </div>
-      <div class="mt-3 flex justify-end">
-        <Button type="button" onClick={props.onSubmit} size="sm" color="blue">
-          Confirm
+      <div>
+        <Button onClick={props.onSubmit} size="sm">
+          Done
         </Button>
       </div>
     </div>
@@ -706,7 +724,7 @@ const Shortcuts = (props: ShortcutsProps) => {
           <button
             type="button"
             onClick={() => props.onSelect(shortcut.getValue())}
-            class="rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-white/10 dark:focus:bg-white/10"
+            class="rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
           >
             {shortcut.label}
           </button>
@@ -1200,7 +1218,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   };
 
   return (
-    <div class={twMerge('relative w-full text-gray-700')}>
+    <div class={twMerge('relative w-full text-gray-700 dark:text-gray-200')}>
       <Show when={props.label}>
         <div class="mb-1 block">
           <Label value={props.label} color="gray" />
@@ -1277,7 +1295,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
             }}
             class={twMerge(
-              'z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-slate-600 dark:bg-slate-800 dark:text-white',
+              'z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white',
             )}
           >
             <div class="flex gap-3">
@@ -1305,6 +1323,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   calendarClass={props.calendarClass}
                   onKeyDown={handleCalendarKeyDown}
                   focusedDate={focusedDate}
+                  weekStartsOn={props.weekStartsOn ?? 1}
                 />
                 <Show when={showTime()}>
                   <TimePicker

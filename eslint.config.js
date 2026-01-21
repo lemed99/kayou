@@ -22,6 +22,7 @@ export default [
           './packages/core/tsconfig.json',
           './packages/pro/tsconfig.json',
           './doc/tsconfig.json',
+          './e2e/tsconfig.json',
         ],
         tsconfigRootDir: import.meta.dirname,
       },

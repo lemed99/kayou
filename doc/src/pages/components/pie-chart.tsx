@@ -311,27 +311,31 @@ export default function PieChartPage() {
   return (
     <DocPage
       title="PieChart"
+      isPro
       description="D3-based pie/donut chart with interactive segments and custom active shape highlighting."
+      dependencies={[
+        {
+          name: 'd3-shape',
+          url: 'https://github.com/d3/d3-shape',
+          usage: 'Provides arc function for rendering pie chart sectors',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Donut vs Pie',
-          explanation:
-            'Set innerRadius to 0 for a traditional pie chart, or a positive value to create a donut chart with a hole in the center. The hole can be used to display summary information.',
+          explanation: 'innerRadius=0 for pie; positive value creates donut with center hole.',
         },
         {
           term: 'Active Shape',
-          explanation:
-            'The activeShape prop accepts a render function that receives the hovered/focused segment data. Use it to create custom highlighting effects like enlarged segments or info displays.',
+          explanation: 'Render function for custom hover/focus effects on segments.',
         },
         {
           term: 'Keyboard Navigation',
-          explanation:
-            'Pie segments are focusable and support Arrow keys to navigate between segments, Home/End to jump to first/last, and Enter/Space to select. This ensures accessibility for keyboard users.',
+          explanation: 'Arrow keys navigate segments; Enter/Space to select.',
         },
         {
           term: 'Percentage Values',
-          explanation:
-            'The component automatically calculates percentages based on the dataKey values. These are available in the activeShape callback and via aria-labels for screen readers.',
+          explanation: 'Auto-calculated percentages available in activeShape and aria-labels.',
         },
       ]}
       props={[

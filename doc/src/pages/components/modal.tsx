@@ -13,26 +13,34 @@ export default function ModalPage() {
     <DocPage
       title="Modal"
       description="Dialog overlay with backdrop, focus trapping, scroll lock, and flexible sizing options."
+      dependencies={[
+        {
+          name: '@solid-primitives/presence',
+          url: 'https://primitives.solidjs.community/package/presence',
+          usage: 'Provides createPresence for smooth modal open/close transitions',
+        },
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Controlled Component',
-          explanation:
-            'The modal visibility is controlled via the show prop. Parent components manage the open/close state and pass an onClose handler for the close button and backdrop clicks.',
+          explanation: 'Parent manages visibility via show prop and onClose handler.',
         },
         {
           term: 'Focus Trapping',
-          explanation:
-            'When open, keyboard focus is trapped within the modal. Tab key cycles through focusable elements inside the modal, preventing users from accidentally interacting with background content.',
+          explanation: 'Tab key cycles only through elements inside the modal.',
         },
         {
           term: 'Scroll Lock',
-          explanation:
-            'Opening the modal prevents scrolling on the page body. This keeps the modal centered and visible, preventing confusing scroll behavior on the background content.',
+          explanation: 'Prevents body scrolling while modal is open.',
         },
         {
           term: 'Backdrop',
-          explanation:
-            'The semi-transparent overlay behind the modal. Clicking it typically closes the modal, providing an intuitive dismiss interaction.',
+          explanation: 'Click the overlay behind the modal to dismiss.',
         },
       ]}
       props={[
@@ -119,13 +127,13 @@ export default function ModalPage() {
         {
           title: 'Large Modal',
           description: 'Modal with larger size.',
-          code: `<Modal show={show()} size="lg" onClose={() => setShow(false)}>
+          code: `<Modal show={show()} size="xl" onClose={() => setShow(false)}>
   <p>Large modal content</p>
 </Modal>`,
           component: () => (
             <>
               <Button onClick={() => setShowLarge(true)}>Open Large Modal</Button>
-              <Modal show={showLarge()} size="lg" onClose={() => setShowLarge(false)}>
+              <Modal show={showLarge()} size="xl" onClose={() => setShowLarge(false)}>
                 <h3 class="mb-4 text-lg font-semibold dark:text-white">Large Modal</h3>
                 <p class="text-gray-600 dark:text-gray-300">
                   This modal uses the large size variant for more content space.

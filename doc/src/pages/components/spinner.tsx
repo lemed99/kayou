@@ -7,21 +7,25 @@ export default function SpinnerPage() {
     <DocPage
       title="Spinner"
       description="Animated loading indicator with eight color variants and three sizes."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Indeterminate Loading',
-          explanation:
-            'Spinners indicate ongoing work without communicating progress or duration. Use them when you cannot predict how long an operation will take.',
+          explanation: 'Shows ongoing work without progress; use when duration is unknown.',
         },
         {
           term: 'Context Matching',
-          explanation:
-            'Color variants let spinners blend with their context: use "light" inside dark buttons, "info" for primary actions, or semantic colors (success, failure) when the outcome is pending.',
+          explanation: '"light" for dark buttons, "info" for primary, semantic colors for status.',
         },
         {
           term: 'Size Selection',
-          explanation:
-            'Choose size based on context: xs for inline use in buttons or labels, sm as the default for general indicators, md for prominent full-section or page-level loading.',
+          explanation: 'xs for buttons, sm for general use, md for page-level loading.',
         },
       ]}
       props={[

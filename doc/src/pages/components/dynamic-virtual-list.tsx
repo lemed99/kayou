@@ -25,23 +25,19 @@ export default function DynamicVirtualListPage() {
       keyConcepts={[
         {
           term: 'Dynamic Measurement',
-          explanation:
-            'Unlike VirtualList, this component measures actual rendered heights. Items are rendered, measured, and their heights cached for future scroll calculations.',
+          explanation: 'Measures actual rendered heights and caches them for scroll calculations.',
         },
         {
           term: 'Estimated Row Height',
-          explanation:
-            'An initial estimate used before actual measurements. Providing a value close to your average item height improves initial render accuracy and reduces layout shifts.',
+          explanation: 'Initial estimate before measurement; closer to average improves accuracy.',
         },
         {
           term: 'Height Cache',
-          explanation:
-            'Measured heights are stored in a cache. When items change size (e.g., expansion), the cache updates automatically via ResizeObserver.',
+          explanation: 'Cached heights auto-update via ResizeObserver when items resize.',
         },
         {
           term: 'Binary Search',
-          explanation:
-            'Scroll positions are calculated using binary search over cumulative heights, maintaining O(log n) performance even with thousands of variable-height items.',
+          explanation: 'O(log n) scroll position calculation over cumulative heights.',
         },
       ]}
       props={[

@@ -41,7 +41,7 @@ export default function InstallationPage() {
     <div class="mx-auto max-w-4xl">
       {/* Header */}
       <div class="mb-12">
-        <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+        <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 dark:bg-gray-900 dark:text-gray-300">
           <TerminalIcon class="size-4" />
           Setup Guide
         </div>

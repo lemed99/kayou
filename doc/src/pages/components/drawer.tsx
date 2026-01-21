@@ -14,21 +14,30 @@ export default function DrawerPage() {
     <DocPage
       title="Drawer"
       description="Sliding panel from screen edge with four position variants and optional header."
+      dependencies={[
+        {
+          name: '@solid-primitives/presence',
+          url: 'https://primitives.solidjs.community/package/presence',
+          usage: 'Provides createPresence for slide-in/out animations',
+        },
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Position Variants',
-          explanation:
-            'Four edge positions serve different UX patterns: right for detail panels and actions, left for navigation, bottom for mobile-friendly sheets, and top for notifications or banners.',
+          explanation: 'Four positions: right, left, bottom, top.',
         },
         {
           term: 'Overlay Behavior',
-          explanation:
-            'Drawers include a backdrop overlay that dims the underlying content and captures clicks to close. This creates clear visual hierarchy and prevents accidental interaction with background elements.',
+          explanation: 'Backdrop dims content and closes on click.',
         },
         {
           term: 'Focus Management',
-          explanation:
-            'When opened, focus moves to the drawer content. The onClose callback handles dismissal via backdrop clicks, close button, or Escape key for intuitive interaction.',
+          explanation: 'Focus moves to drawer; closes via backdrop, button, or Escape.',
         },
       ]}
       props={[

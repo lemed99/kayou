@@ -133,7 +133,7 @@ export default function PricingPage() {
                   class={`mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
                     plan.highlighted
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-950 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-950 hover:bg-gray-200 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   {plan.cta}

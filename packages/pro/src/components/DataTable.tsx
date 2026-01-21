@@ -280,9 +280,9 @@ export function DataTable<T extends Record<string, unknown>>(
   const List = (row: T, index: Accessor<number>) => (
     <div
       class={twMerge(
-        'grid w-fit bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-900',
-        fullView() ? '' : 'border-b border-gray-200 last:border-b-0',
-        selectedRows().has(index()) ? 'bg-neutral-100' : '',
+        'grid w-fit bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700',
+        fullView() ? '' : 'border-b border-gray-200 last:border-b-0 dark:border-gray-700',
+        selectedRows().has(index()) ? 'bg-neutral-100 dark:bg-gray-800' : '',
       )}
       style={{
         'grid-template-columns': rowGridStyle(),
@@ -330,7 +330,7 @@ export function DataTable<T extends Record<string, unknown>>(
     setContainerRef: setTableRowsContainerRef,
     setScrollPosition: setScrollTop,
     fallback: <NoItemsComponent />,
-    rowClass: 'border-b border-gray-200 last:border-b-0',
+    rowClass: 'border-b border-gray-200 last:border-b-0 dark:border-gray-700',
   });
 
   const Table = () => {
@@ -338,15 +338,15 @@ export function DataTable<T extends Record<string, unknown>>(
       <div
         ref={setTableRef}
         class={twMerge(
-          'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white',
+          'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
           fullView() ? 'mt-2 h-[calc(100%-8px)]' : 'h-auto',
         )}
       >
         {/* Search Section */}
         <Show when={props.searchBar}>
-          <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-gray-600">
+          <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-gray-700">
             <div class="relative flex w-full max-w-md items-center">
-              <SearchRefractionIcon class="size-5 text-gray-400" />
+              <SearchRefractionIcon class="size-5 text-gray-400 dark:text-gray-500" />
               <input
                 ref={setSearchRef}
                 value={searchKey()}
@@ -354,7 +354,7 @@ export function DataTable<T extends Record<string, unknown>>(
                 placeholder="Search"
                 aria-label="Search table data"
                 onFocus={(e) => e.target.select()}
-                class="w-full py-3 pl-2 text-sm outline-none"
+                class="w-full bg-transparent py-3 pl-2 text-sm outline-none dark:text-white"
               />
               <Show when={searchKey()}>
                 <button
@@ -364,7 +364,7 @@ export function DataTable<T extends Record<string, unknown>>(
                     setSearchKey('');
                     searchRef()?.focus();
                   }}
-                  class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   <XCloseIcon class="size-4" aria-hidden="true" />
                 </button>
@@ -397,12 +397,12 @@ export function DataTable<T extends Record<string, unknown>>(
         <Show when={props.filters && !filterHook()}>
           <div
             class={twMerge(
-              'flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-2',
+              'flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-2 dark:border-gray-700',
               !props.searchBar ? 'rounded-t-lg' : '',
             )}
           >
             <div class="flex items-center">
-              <div class="flex items-center border-r border-gray-200 py-3 pr-6">
+              <div class="flex items-center border-r border-gray-200 py-3 pr-6 dark:border-gray-700">
                 <FilterFunnel01Icon class="mr-2 size-5" />
                 <p>{props.filterButtonText || 'Filter'}</p>
                 <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-white dark:text-gray-600">
@@ -442,7 +442,7 @@ export function DataTable<T extends Record<string, unknown>>(
         <Show when={props.rowSelection && selectedRows().size > 0}>
           <div
             class={twMerge(
-              'flex shrink-0 items-center border-b border-gray-200 px-6 py-3',
+              'flex shrink-0 items-center border-b border-gray-200 px-6 py-3 dark:border-gray-700',
               !props.searchBar && !props.filters ? 'rounded-t-lg' : '',
             )}
           >
@@ -450,7 +450,7 @@ export function DataTable<T extends Record<string, unknown>>(
               <Button size="xs" color="light">
                 ···
               </Button>
-              <span class="text-sm font-medium text-gray-700">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {props.selectedElementsText(selectedRows().size, baseData().length)}
               </span>
             </div>
@@ -517,7 +517,7 @@ export function DataTable<T extends Record<string, unknown>>(
                     role="status"
                     aria-live="polite"
                     aria-label="Loading table data"
-                    class={twMerge('grid bg-white dark:bg-gray-800')}
+                    class={twMerge('grid bg-white dark:bg-gray-900')}
                     style={{
                       'grid-template-columns': rowGridStyle(),
                     }}
@@ -552,7 +552,7 @@ export function DataTable<T extends Record<string, unknown>>(
                 role="status"
                 aria-live="polite"
                 aria-label="Refreshing data"
-                class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60"
+                class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60 dark:bg-gray-900/60"
               >
                 <Spinner />
               </div>
@@ -594,7 +594,7 @@ export function DataTable<T extends Record<string, unknown>>(
                 setPageScroll((ancestor() as Element).scrollTop);
                 setFullView(true);
               }}
-              class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-gray-700"
+              class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
             >
               <span>{props.seeMoreText}</span>
               <Maximize01Icon
@@ -607,7 +607,7 @@ export function DataTable<T extends Record<string, unknown>>(
 
         {/* Table Footer */}
         <Show when={props.expandable && !fullView() ? false : (props.footer ?? true)}>
-          <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row">
+          <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 dark:border-gray-700 sm:flex-row">
             <div class="flex items-center gap-4">
               <Show when={props.perPageControl}>
                 <div class="flex items-center gap-2">
@@ -623,7 +623,7 @@ export function DataTable<T extends Record<string, unknown>>(
                     onSelect={(option) => setPerPage(Number(option?.value || 10))}
                     fitContent={true}
                   />
-                  <span class="whitespace-nowrap text-sm text-gray-700">
+                  <span class="whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                     {props.elementsPerPageText}
                   </span>
                 </div>

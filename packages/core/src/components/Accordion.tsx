@@ -52,6 +52,17 @@ export interface AccordionProps {
    */
   isSimple?: boolean;
   /**
+   * Gap between panels. When set, each panel is displayed as a separate card.
+   * Can be a Tailwind spacing class (e.g., '2', '4', '6') or custom value.
+   */
+  gap?: string;
+  /**
+   * When true, only one panel can be open at a time.
+   * Opening a panel will close any other open panel.
+   * @default false
+   */
+  exclusive?: boolean;
+  /**
    * Controlled state: map of panel keys to open state.
    */
   openPanels?: Record<string, boolean>;
@@ -104,17 +115,39 @@ const Accordion = (props: AccordionProps): JSX.Element => {
 
   const togglePanel = (itemKey: string): void => {
     const onOpenChange = getOnOpenChange();
+    const isOpening = !getOpenState(itemKey);
+
     if (isControlled() && onOpenChange) {
-      const newState = { ...getOpenPanelsState() };
-      newState[itemKey] = !getOpenState(itemKey);
+      let newState: Record<string, boolean>;
+
+      if (props.exclusive && isOpening) {
+        // Close all panels and open only the clicked one
+        newState = {};
+        for (const panel of panels()) {
+          newState[panel.itemKey] = panel.itemKey === itemKey;
+        }
+      } else {
+        newState = { ...getOpenPanelsState() };
+        newState[itemKey] = isOpening;
+      }
+
       onOpenChange(newState);
     } else {
-      setInternalOpenPanels(itemKey, (prev) => !prev);
+      if (props.exclusive && isOpening) {
+        // Close all panels and open only the clicked one
+        for (const panel of panels()) {
+          setInternalOpenPanels(panel.itemKey, panel.itemKey === itemKey);
+        }
+      } else {
+        setInternalOpenPanels(itemKey, (prev) => !prev);
+      }
     }
   };
 
+  const isSeparated = () => !!props.gap;
+
   return (
-    <div class={twMerge('w-full', props.class)}>
+    <div class={twMerge('w-full', isSeparated() && `flex flex-col gap-${props.gap}`, props.class)}>
       <For each={panels()}>
         {(panel) => (
           <Panel
@@ -122,6 +155,7 @@ const Accordion = (props: AccordionProps): JSX.Element => {
             isOpen={getOpenState(panel.itemKey)}
             toggle={() => togglePanel(panel.itemKey)}
             isSimple={getIsSimple()}
+            isSeparated={isSeparated()}
             highlightedKey={getHighlightedKey()}
             highlightedClass={getHighlightedClass()}
           />
@@ -136,6 +170,7 @@ interface PanelProps {
   isOpen: boolean;
   toggle: () => void;
   isSimple: boolean;
+  isSeparated?: boolean;
   highlightedKey?: string;
   highlightedClass?: string;
 }
@@ -194,13 +229,16 @@ const Panel = (props: PanelProps): JSX.Element => {
   return (
     <div
       class={twMerge(
-        'border-b border-gray-200 dark:border-gray-700',
-        !props.isSimple && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
+        'border-gray-200 dark:border-gray-700',
+        props.isSeparated
+          ? 'rounded-lg border'
+          : 'border-b',
+        !props.isSimple && !props.isSeparated && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
         props.panel.class,
       )}
       id={itemId()}
     >
-      {!props.isSimple && (
+      {!props.isSimple && !props.isSeparated && (
         <style>
           {`
             #${itemId()}:first-child > button#${triggerId()} {
@@ -233,6 +271,8 @@ const Panel = (props: PanelProps): JSX.Element => {
         class={twMerge(
           'flex w-full cursor-pointer items-center justify-between p-3 text-left transition-all duration-200',
           props.isOpen && !props.isSimple && 'bg-gray-100/60 dark:bg-gray-700',
+          props.isSeparated && 'rounded-t-lg',
+          props.isSeparated && !props.isOpen && 'rounded-b-lg',
           isHighlighted() && (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
           props.panel.titleClass,
         )}
@@ -258,6 +298,7 @@ const Panel = (props: PanelProps): JSX.Element => {
           class={twMerge(
             'overflow-hidden border-t border-gray-200 dark:border-gray-700',
             !props.isSimple && 'dark:bg-gray-900/50',
+            props.isSeparated && 'rounded-b-lg',
             props.panel.contentClass,
           )}
           style={{

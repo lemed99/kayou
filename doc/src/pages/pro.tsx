@@ -136,10 +136,10 @@ const features = [
 
 export default function ProPage() {
   return (
-    <div class="min-h-screen bg-white dark:bg-gray-950">
+    <div class="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
       <div class="relative overflow-hidden pt-24 pb-16 sm:pb-24">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-950" />
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900" />
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-3xl text-center">
             <ProBadge />

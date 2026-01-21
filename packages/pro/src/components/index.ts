@@ -25,6 +25,13 @@ export {
 export { DynamicVirtualList, type DynamicVirtualListHandle } from './DynamicVirtualList';
 export { default as MultiSelect } from './MultiSelect';
 export { default as NumberInput } from './NumberInput';
+export {
+  default as Password,
+  DEFAULT_REQUIREMENTS,
+  type PasswordProps,
+  type PasswordRequirement,
+  type PasswordStrength,
+} from './Password';
 export { default as SelectWithSearch } from './SelectWithSearch';
 export { default as Sidebar, type SidebarItem } from './Sidebar';
 export { UploadFile } from './UploadFile';
@@ -34,3 +41,11 @@ export { VirtualGrid } from './VirtualGrid';
 
 // Charts
 export * from './Charts';
+
+// Rich Text Editor
+export {
+  RichTextEditor,
+  Toolbar as RichTextEditorToolbar,
+  type RichTextEditorProps,
+  type ToolbarConfig,
+} from './RichTextEditor';

@@ -11,21 +11,25 @@ export default function CheckboxPage() {
     <DocPage
       title="Checkbox"
       description="Binary input with integrated labels, flexible positioning, and color variants."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Label Association',
-          explanation:
-            'Labels are automatically linked to checkboxes via generated IDs, ensuring clicking the label toggles the checkbox. This larger click target improves usability, especially on touch devices.',
+          explanation: 'Clicking label toggles checkbox via auto-linked IDs.',
         },
         {
           term: 'Controlled vs Uncontrolled',
-          explanation:
-            'Use the checked prop with onChange for controlled mode where you manage state. Without checked, the checkbox manages its own state internally.',
+          explanation: 'Use checked + onChange for controlled mode.',
         },
         {
           term: 'Accessibility',
-          explanation:
-            'Built on native input[type="checkbox"], inheriting keyboard navigation (Space to toggle), focus indicators, and screen reader announcements without additional ARIA attributes.',
+          explanation: 'Native checkbox with Space key toggle and screen reader support.',
         },
       ]}
       props={[

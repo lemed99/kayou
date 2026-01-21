@@ -393,7 +393,7 @@ export default function HomePage() {
           <For each={componentCategories}>
             {(category) => (
               <div class="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-blue-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-blue-700">
-                <div class="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors group-hover:bg-blue-50 group-hover:text-blue-600 dark:bg-gray-800 dark:text-gray-400 dark:group-hover:bg-blue-950 dark:group-hover:text-blue-400">
+                <div class="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors group-hover:bg-blue-50 group-hover:text-blue-600 dark:bg-gray-900 dark:text-gray-400 dark:group-hover:bg-blue-950 dark:group-hover:text-blue-400">
                   {category.icon}
                 </div>
                 <h3 class="font-semibold text-gray-950 dark:text-white">
@@ -405,13 +405,13 @@ export default function HomePage() {
                 <div class="mt-4 flex flex-wrap gap-1.5">
                   <For each={category.components.slice(0, 4)}>
                     {(comp) => (
-                      <span class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                      <span class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-900 dark:text-gray-400">
                         {comp}
                       </span>
                     )}
                   </For>
                   {category.components.length > 4 && (
-                    <span class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-500">
+                    <span class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-900 dark:text-gray-500">
                       +{category.components.length - 4} more
                     </span>
                   )}
@@ -549,7 +549,7 @@ export default function HomePage() {
 
       {/* Footer CTA */}
       <div class="mx-auto mt-24 max-w-2xl text-center">
-        <div class="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-8 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+        <div class="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-8 dark:border-gray-800 dark:from-gray-900 dark:to-gray-900">
           <h2 class="text-xl font-bold text-gray-950 dark:text-white">
             Ready to get started?
           </h2>

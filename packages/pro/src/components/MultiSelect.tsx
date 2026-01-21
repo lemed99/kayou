@@ -155,8 +155,8 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
       }
       preOptionsComponent={
         <Show when={local.withSearch === true}>
-          <div class="relative flex min-w-[210px] items-center border-b border-gray-200 px-3 dark:border-gray-600">
-            <SearchRefractionIcon class="size-4 text-gray-400" aria-hidden="true" />
+          <div class="relative flex min-w-[210px] items-center border-b border-gray-200 px-3 dark:border-gray-700">
+            <SearchRefractionIcon class="size-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
             <label for={searchInputId} class="sr-only">
               Search options
             </label>
@@ -180,7 +180,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
                   setHighlightedOption(null);
                   (searchRef() as HTMLElement)?.focus();
                 }}
-                class="ml-3 h-full cursor-pointer text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                class="ml-3 h-full cursor-pointer text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500"
               />
             </Show>
           </div>

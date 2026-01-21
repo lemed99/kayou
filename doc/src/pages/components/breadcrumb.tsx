@@ -7,21 +7,25 @@ export default function BreadcrumbPage() {
     <DocPage
       title="Breadcrumb"
       description="Navigation trail showing page hierarchy with support for custom link components."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Hierarchical Navigation',
-          explanation:
-            'Each breadcrumb item represents a level in the site hierarchy, from the root (usually Home) to the current page.',
+          explanation: 'Items represent hierarchy levels from root to current page.',
         },
         {
           term: 'Current Page Indicator',
-          explanation:
-            'The last item typically represents the current page and is styled differently (no link, aria-current="page") to indicate the user\'s location.',
+          explanation: 'Last item styled differently with aria-current="page".',
         },
         {
           term: 'Router Integration',
-          explanation:
-            'The "as" prop allows using custom link components (e.g., A from @solidjs/router) instead of native anchor tags for SPA navigation.',
+          explanation: '"as" prop enables custom link components for SPA navigation.',
         },
       ]}
       props={[

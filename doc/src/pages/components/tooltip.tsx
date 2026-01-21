@@ -7,26 +7,34 @@ export default function TooltipPage() {
     <DocPage
       title="Tooltip"
       description="Auto-positioned hint text on hover/focus with configurable delays and placement."
+      dependencies={[
+        {
+          name: '@solid-primitives/presence',
+          url: 'https://primitives.solidjs.community/package/presence',
+          usage: 'Provides createPresence for tooltip visibility transitions',
+        },
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Trigger Element',
-          explanation:
-            'The child element that activates the tooltip on hover or focus. This is passed as children to the Tooltip component.',
+          explanation: 'Child element activates tooltip on hover or focus.',
         },
         {
           term: 'Placement',
-          explanation:
-            'The preferred position (top, bottom, left, right) where the tooltip appears. The component automatically flips to the opposite side if there is insufficient space.',
+          explanation: 'Position (top/bottom/left/right) with auto-flip if space is insufficient.',
         },
         {
           term: 'Show/Hide Delay',
-          explanation:
-            'Configurable delays prevent tooltips from appearing instantly on accidental hovers and from disappearing too quickly when moving between elements.',
+          explanation: 'Configurable delays prevent accidental triggers and quick disappear.',
         },
         {
           term: 'Accessibility',
-          explanation:
-            'The tooltip is linked to its trigger via aria-describedby, ensuring screen readers announce the tooltip content when the trigger is focused.',
+          explanation: 'Linked via aria-describedby for screen reader announcement.',
         },
       ]}
       props={[

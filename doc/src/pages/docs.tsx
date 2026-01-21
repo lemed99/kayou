@@ -92,7 +92,7 @@ export default function DocsPage() {
           <For each={['Button', 'TextInput', 'Select', 'Modal', 'DataTable', 'DatePicker']}>{(comp) => (
             <A
               href={`/components/${comp.toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '')}`}
-              class="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              class="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               {comp}
             </A>

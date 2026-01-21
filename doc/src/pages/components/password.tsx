@@ -1,0 +1,367 @@
+import { createSignal } from 'solid-js';
+
+import {
+  DEFAULT_REQUIREMENTS,
+  Password,
+  type PasswordRequirement,
+  type PasswordStrength,
+} from '@exowpee/solidly-pro';
+
+import DocPage from '../../components/DocPage';
+
+export default function PasswordPage() {
+  return (
+    <DocPage
+      title="Password"
+      isPro
+      description="Password input with show/hide toggle, strength indicator, and customizable requirements validation."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
+      keyConcepts={[
+        {
+          term: 'Show/Hide Toggle',
+          explanation: 'Toggle password visibility with accessible button and eye icons.',
+        },
+        {
+          term: 'Strength Indicator',
+          explanation: 'Visual progress bar showing password strength (weak, fair, good, strong).',
+        },
+        {
+          term: 'Requirements Validation',
+          explanation: 'Real-time checklist of customizable password requirements.',
+        },
+        {
+          term: 'Customizable Rules',
+          explanation: 'Provide custom requirements or use defaults (length, uppercase, lowercase, number, special).',
+        },
+      ]}
+      props={[
+        {
+          name: 'showStrength',
+          type: 'boolean',
+          default: 'false',
+          description: 'Show the password strength indicator bar',
+        },
+        {
+          name: 'showRequirements',
+          type: 'boolean',
+          default: 'false',
+          description: 'Show password requirements checklist',
+        },
+        {
+          name: 'requirements',
+          type: 'PasswordRequirement[]',
+          default: 'DEFAULT_REQUIREMENTS',
+          description: 'Custom password requirements with key, label, and validate function',
+        },
+        {
+          name: 'calculateStrength',
+          type: '(password, met, total) => PasswordStrength',
+          default: '-',
+          description: 'Custom function to calculate password strength',
+        },
+        {
+          name: 'onStrengthChange',
+          type: '(strength: PasswordStrength) => void',
+          default: '-',
+          description: 'Callback fired when password strength changes',
+        },
+        {
+          name: 'onRequirementsChange',
+          type: '(met: string[], unmet: string[]) => void',
+          default: '-',
+          description: 'Callback fired when requirements validation changes',
+        },
+        {
+          name: 'showPasswordLabel',
+          type: 'string',
+          default: '"Show password"',
+          description: 'Accessible label for show password button',
+        },
+        {
+          name: 'hidePasswordLabel',
+          type: 'string',
+          default: '"Hide password"',
+          description: 'Accessible label for hide password button',
+        },
+        {
+          name: 'strengthClass',
+          type: 'string',
+          default: '-',
+          description: 'Additional CSS class for strength indicator container',
+        },
+        {
+          name: 'requirementsClass',
+          type: 'string',
+          default: '-',
+          description: 'Additional CSS class for requirements container',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          default: '-',
+          description: 'Label text displayed above the input',
+        },
+        {
+          name: 'helperText',
+          type: 'string',
+          default: '-',
+          description: 'Helper text displayed below the input',
+        },
+        {
+          name: 'color',
+          type: '"gray" | "info" | "failure" | "warning" | "success"',
+          default: 'Auto (based on strength)',
+          description: 'Color variant for styling. Auto-calculated from strength if not set.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          default: 'false',
+          description: 'Disable the input',
+        },
+      ]}
+      examples={[
+        {
+          title: 'Basic Usage',
+          description: 'Simple password input with show/hide toggle.',
+          code: `<Password label="Password" placeholder="Enter password" />`,
+          component: () => {
+            return (
+              <div class="w-full max-w-sm">
+                <Password label="Password" placeholder="Enter password" />
+              </div>
+            );
+          },
+        },
+        {
+          title: 'With Strength Indicator',
+          description: 'Password input with visual strength meter.',
+          code: `<Password
+  label="Password"
+  placeholder="Enter password"
+  showStrength
+/>`,
+          component: () => {
+            return (
+              <div class="w-full max-w-sm">
+                <Password label="Password" placeholder="Enter password" showStrength />
+              </div>
+            );
+          },
+        },
+        {
+          title: 'With Requirements Checklist',
+          description: 'Password input showing validation requirements in real-time.',
+          code: `<Password
+  label="Password"
+  placeholder="Enter password"
+  showRequirements
+/>`,
+          component: () => {
+            return (
+              <div class="w-full max-w-sm">
+                <Password label="Password" placeholder="Enter password" showRequirements />
+              </div>
+            );
+          },
+        },
+        {
+          title: 'Full Featured',
+          description: 'Password input with both strength indicator and requirements.',
+          code: `<Password
+  label="Create Password"
+  placeholder="Enter a strong password"
+  showStrength
+  showRequirements
+  helperText="Choose a password that meets all requirements"
+/>`,
+          component: () => {
+            return (
+              <div class="w-full max-w-sm">
+                <Password
+                  label="Create Password"
+                  placeholder="Enter a strong password"
+                  showStrength
+                  showRequirements
+                  helperText="Choose a password that meets all requirements"
+                />
+              </div>
+            );
+          },
+        },
+        {
+          title: 'Custom Requirements',
+          description: 'Password input with custom validation rules.',
+          code: `const customRequirements: PasswordRequirement[] = [
+  {
+    key: 'minLength',
+    label: 'At least 12 characters',
+    validate: (password) => password.length >= 12,
+  },
+  {
+    key: 'noSpaces',
+    label: 'No spaces allowed',
+    validate: (password) => !password.includes(' '),
+  },
+  {
+    key: 'mixedCase',
+    label: 'Both uppercase and lowercase',
+    validate: (password) => /[a-z]/.test(password) && /[A-Z]/.test(password),
+  },
+];
+
+<Password
+  label="Password"
+  showRequirements
+  requirements={customRequirements}
+/>`,
+          component: () => {
+            const customRequirements: PasswordRequirement[] = [
+              {
+                key: 'minLength',
+                label: 'At least 12 characters',
+                validate: (password) => password.length >= 12,
+              },
+              {
+                key: 'noSpaces',
+                label: 'No spaces allowed',
+                validate: (password) => !password.includes(' '),
+              },
+              {
+                key: 'mixedCase',
+                label: 'Both uppercase and lowercase',
+                validate: (password) =>
+                  /[a-z]/.test(password) && /[A-Z]/.test(password),
+              },
+            ];
+            return (
+              <div class="w-full max-w-sm">
+                <Password
+                  label="Password"
+                  placeholder="Enter password"
+                  showRequirements
+                  requirements={customRequirements}
+                />
+              </div>
+            );
+          },
+        },
+        {
+          title: 'With Callbacks',
+          description: 'Track password strength and requirements changes.',
+          code: `const [strength, setStrength] = createSignal<PasswordStrength>('weak');
+const [metCount, setMetCount] = createSignal(0);
+
+<Password
+  label="Password"
+  showStrength
+  onStrengthChange={setStrength}
+  onRequirementsChange={(met) => setMetCount(met.length)}
+/>
+
+<p>Strength: {strength()}</p>
+<p>Requirements met: {metCount()} / 5</p>`,
+          component: () => {
+            const [strength, setStrength] = createSignal<PasswordStrength>('weak');
+            const [metCount, setMetCount] = createSignal(0);
+            return (
+              <div class="w-full max-w-sm space-y-4">
+                <Password
+                  label="Password"
+                  placeholder="Enter password"
+                  showStrength
+                  onStrengthChange={setStrength}
+                  onRequirementsChange={(met) => setMetCount(met.length)}
+                />
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  <p>Strength: <span class="font-medium">{strength()}</span></p>
+                  <p>Requirements met: <span class="font-medium">{metCount()} / {DEFAULT_REQUIREMENTS.length}</span></p>
+                </div>
+              </div>
+            );
+          },
+        },
+        {
+          title: 'Controlled Value',
+          description: 'Control the password value externally.',
+          code: `const [password, setPassword] = createSignal('');
+
+<Password
+  label="Password"
+  value={password()}
+  onInput={(e) => setPassword(e.currentTarget.value)}
+  showStrength
+/>
+
+<Button onClick={() => setPassword('')}>Clear</Button>`,
+          component: () => {
+            const [password, setPassword] = createSignal('');
+            return (
+              <div class="w-full max-w-sm space-y-4">
+                <Password
+                  label="Password"
+                  placeholder="Enter password"
+                  value={password()}
+                  onInput={(e) => setPassword(e.currentTarget.value)}
+                  showStrength
+                />
+                <button
+                  type="button"
+                  class="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600"
+                  onClick={() => setPassword('')}
+                >
+                  Clear Password
+                </button>
+              </div>
+            );
+          },
+        },
+      ]}
+      usage={`import { Password, DEFAULT_REQUIREMENTS, type PasswordRequirement } from '@exowpee/solidly-pro';
+
+// Basic usage
+<Password label="Password" placeholder="Enter password" />
+
+// With strength indicator
+<Password label="Password" showStrength />
+
+// With requirements checklist
+<Password label="Password" showRequirements />
+
+// Full featured
+<Password
+  label="Create Password"
+  showStrength
+  showRequirements
+  onStrengthChange={(strength) => console.log(strength)}
+  onRequirementsChange={(met, unmet) => console.log(met, unmet)}
+/>
+
+// Custom requirements
+const customRequirements: PasswordRequirement[] = [
+  {
+    key: 'minLength',
+    label: 'At least 12 characters',
+    validate: (password) => password.length >= 12,
+  },
+  {
+    key: 'noSpaces',
+    label: 'No spaces allowed',
+    validate: (password) => !password.includes(' '),
+  },
+];
+
+<Password
+  label="Password"
+  showRequirements
+  requirements={customRequirements}
+/>`}
+    />
+  );
+}

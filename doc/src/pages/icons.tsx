@@ -334,7 +334,7 @@ export default function IconsPage() {
   };
 
   return (
-    <div class="min-h-screen bg-white dark:bg-gray-950">
+    <div class="min-h-screen bg-white dark:bg-gray-900">
       {/* Header - heroicons style */}
       <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950/20">
         {/* Decorative icon */}
@@ -384,7 +384,7 @@ export default function IconsPage() {
       </div>
 
       {/* Search bar - minimal style */}
-      <div class="border-t border-gray-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:border-gray-800 dark:bg-gray-950">
+      <div class="border-t border-gray-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:border-gray-800 dark:bg-gray-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="flex items-center gap-4 py-6">
             <Icons.SearchSmIcon class="size-5 text-gray-400" />
@@ -413,7 +413,7 @@ export default function IconsPage() {
 
           {/* Sidebar - sticky */}
           <aside
-            class={`fixed inset-y-0 left-0 z-40 w-64 transform overflow-y-auto border-r border-gray-200 bg-white pt-4 transition-transform lg:relative lg:row-span-1 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:border-0 lg:bg-transparent lg:pt-0 dark:border-gray-800 dark:bg-gray-950 lg:dark:bg-transparent ${
+            class={`fixed inset-y-0 left-0 z-40 w-64 transform overflow-y-auto border-r border-gray-200 bg-white pt-4 transition-transform lg:relative lg:row-span-1 lg:w-auto lg:translate-x-0 lg:overflow-visible lg:border-0 lg:bg-transparent lg:pt-0 dark:border-gray-800 dark:bg-gray-900 lg:dark:bg-transparent ${
               sidebarOpen() ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
@@ -444,7 +444,7 @@ export default function IconsPage() {
                       class={`rounded-full px-2 py-0.5 text-xs ${
                         selectedCategory() === null
                           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
                       }`}
                     >
                       {allIcons.length}
@@ -475,7 +475,7 @@ export default function IconsPage() {
                           class={`rounded-full px-2 py-0.5 text-xs ${
                             selectedCategory() === category
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                              : 'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
                           }`}
                         >
                           {iconsByCategory()[category]?.length || 0}
@@ -536,7 +536,7 @@ export default function IconsPage() {
                 when={filteredIcons().length > 0}
                 fallback={
                   <div class="flex flex-col items-center justify-center py-20">
-                    <div class="rounded-full bg-gray-100 p-4 dark:bg-gray-800">
+                    <div class="rounded-full bg-gray-100 p-4 dark:bg-gray-900">
                       <Icons.SearchSmIcon class="size-8 text-gray-400" />
                     </div>
                     <h3 class="mt-4 text-lg font-medium text-gray-950 dark:text-white">
@@ -564,7 +564,7 @@ export default function IconsPage() {
                           {/* Copy button on hover */}
                           <button
                             onClick={(e) => copyIconName(icon.name, e)}
-                            class="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                            class="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700"
                             title={`Copy ${icon.name}`}
                           >
                             <Icons.Copy01Icon class="size-3" />

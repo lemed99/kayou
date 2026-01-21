@@ -10,21 +10,38 @@ export default function AccordionPage() {
     <DocPage
       title="Accordion"
       description="Collapsible content sections with controlled/uncontrolled modes and keyboard navigation."
+      dependencies={[
+        {
+          name: '@solid-primitives/presence',
+          url: 'https://primitives.solidjs.community/package/presence',
+          usage: 'Provides createPresence for smooth mount/unmount animations',
+        },
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Controlled vs Uncontrolled',
-          explanation:
-            'In uncontrolled mode, the accordion manages its own open/closed state. In controlled mode, you provide openPanels and onOpenChange to manage state externally.',
+          explanation: 'Use openPanels + onOpenChange for controlled mode.',
         },
         {
           term: 'Panel Data Structure',
-          explanation:
-            'Each panel is defined by an object with itemKey (unique identifier), title (header content), and content (expandable body). Custom classes can override default styling.',
+          explanation: 'Objects with itemKey, title, and content properties.',
         },
         {
           term: 'Highlighting',
-          explanation:
-            'The highlightedKey prop visually emphasizes a specific panel and scrolls it into view, useful for deep-linking or search results.',
+          explanation: 'highlightedKey emphasizes a panel and scrolls it into view.',
+        },
+        {
+          term: 'Gap Mode',
+          explanation: 'Setting a gap displays panels as individual cards with space between them.',
+        },
+        {
+          term: 'Exclusive Mode',
+          explanation: 'When exclusive is true, only one panel can be open at a time. Opening a panel closes others.',
         },
       ]}
       props={[
@@ -52,6 +69,18 @@ export default function AccordionPage() {
           type: 'boolean',
           default: 'true',
           description: 'When true, renders without borders and background styling',
+        },
+        {
+          name: 'gap',
+          type: 'string',
+          default: '-',
+          description: 'Gap between panels (Tailwind spacing value). When set, panels display as separate cards.',
+        },
+        {
+          name: 'exclusive',
+          type: 'boolean',
+          default: 'false',
+          description: 'When true, only one panel can be open at a time. Opening a panel closes any other open panel.',
         },
         {
           name: 'openPanels',
@@ -158,6 +187,66 @@ export default function AccordionPage() {
               },
             ];
             return <Accordion panels={panels} isSimple={false} />;
+          },
+        },
+        {
+          title: 'Separated Cards',
+          description:
+            'Set a gap to display each panel as a separate card. Useful for distinct content sections.',
+          code: `<Accordion panels={panels} gap="4" />`,
+          component: () => {
+            const panels: PanelData[] = [
+              {
+                itemKey: 'sep-1',
+                title: <span class="font-medium">Account Settings</span>,
+                content: (
+                  <p>Manage your account preferences, password, and security options.</p>
+                ),
+              },
+              {
+                itemKey: 'sep-2',
+                title: <span class="font-medium">Notification Preferences</span>,
+                content: (
+                  <p>Configure email, push, and SMS notification settings.</p>
+                ),
+              },
+              {
+                itemKey: 'sep-3',
+                title: <span class="font-medium">Privacy & Data</span>,
+                content: <p>Control your data sharing and privacy settings.</p>,
+              },
+            ];
+            return <Accordion panels={panels} gap="4" />;
+          },
+        },
+        {
+          title: 'Exclusive Mode',
+          description:
+            'Only one panel can be open at a time. Opening a panel automatically closes others.',
+          code: `<Accordion panels={panels} exclusive />`,
+          component: () => {
+            const panels: PanelData[] = [
+              {
+                itemKey: 'exc-1',
+                title: <span class="font-medium">Step 1: Create Account</span>,
+                content: (
+                  <p>Fill in your details and create a new account to get started.</p>
+                ),
+              },
+              {
+                itemKey: 'exc-2',
+                title: <span class="font-medium">Step 2: Verify Email</span>,
+                content: (
+                  <p>Check your inbox and click the verification link we sent you.</p>
+                ),
+              },
+              {
+                itemKey: 'exc-3',
+                title: <span class="font-medium">Step 3: Complete Profile</span>,
+                content: <p>Add your profile photo and bio to complete setup.</p>,
+              },
+            ];
+            return <Accordion panels={panels} exclusive />;
           },
         },
         {
@@ -334,6 +423,12 @@ const panels: PanelData[] = [
 
 // Styled variant with borders
 <Accordion panels={panels} isSimple={false} />
+
+// Separated cards with gap
+<Accordion panels={panels} gap="4" />
+
+// Exclusive mode (only one panel open at a time)
+<Accordion panels={panels} exclusive />
 
 // Controlled mode
 const [openPanels, setOpenPanels] = createStore({});

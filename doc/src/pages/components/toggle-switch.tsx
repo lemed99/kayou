@@ -13,21 +13,25 @@ export default function ToggleSwitchPage() {
     <DocPage
       title="ToggleSwitch"
       description="Binary toggle for instant on/off settings with smooth animation and six color variants."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Immediate vs Deferred Action',
-          explanation:
-            'Use toggle switches for settings that apply immediately (dark mode, notifications). Use checkboxes when the selection will be submitted later as part of a form.',
+          explanation: 'Use toggles for instant settings; checkboxes for form submissions.',
         },
         {
           term: 'Semantic Colors',
-          explanation:
-            'Color variants can reinforce meaning: success (green) for enabling features, failure (red) for destructive toggles, or simply blue as a neutral default.',
+          explanation: 'Six colors reinforce meaning: success, failure, warning, etc.',
         },
         {
           term: 'Form Integration',
-          explanation:
-            'When the name prop is provided, a hidden checkbox is rendered so the toggle value can be submitted in traditional HTML forms without JavaScript handling.',
+          explanation: 'name prop renders hidden checkbox for HTML form submission.',
         },
       ]}
       props={[

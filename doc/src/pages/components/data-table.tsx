@@ -122,37 +122,40 @@ export default function DataTablePage() {
   return (
     <DocPage
       title="DataTable"
+      isPro
       description="Table with virtualization, pagination, row selection, and a comprehensive filter system."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes for table styling',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Virtualization',
-          explanation:
-            'For large datasets, the table can render only visible rows using either fixed-height (VirtualList) or dynamic-height (DynamicVirtualList) virtualization. Set rowHeight for fixed or estimatedRowHeight for dynamic.',
+          explanation: 'Renders only visible rows; use rowHeight (fixed) or estimatedRowHeight (dynamic).',
         },
         {
           term: 'Filter System',
           explanation:
-            'Built-in filter system with filterConfigs prop. Supports operators like equal, contains, include, greaterThan, lessThan, gte, lte, between, isEmpty, isNotEmpty. Field types include text, number, select, selectSearch, multiSelect, datepicker, dateRange.',
+            'Built-in filters via filterConfigs with operators (contains, equal, between, etc.).',
         },
         {
           term: 'Filter Modes',
-          explanation:
-            'Internal mode applies filters client-side. External mode (filterMode="external") only tracks filter state for server-side filtering via onFiltersChange callback.',
+          explanation: 'Internal: client-side filtering. External: server-side via onFiltersChange.',
         },
         {
           term: 'Popover Filter UI',
-          explanation:
-            'The filter system uses a popover-based UI. Click the "Filter" button to open a popover where you can add filters with Column/Operator/Value dropdowns. Filters are only applied when you click the "Filter" submit button.',
+          explanation: 'Popover with Column/Operator/Value dropdowns; apply on submit.',
         },
         {
           term: 'CSS Grid Layout',
-          explanation:
-            'Uses div-based CSS Grid instead of HTML tables for maximum flexibility. This allows virtualization to work correctly and supports complex interactive content within cells.',
+          explanation: 'Div-based CSS Grid enables virtualization and complex cell content.',
         },
         {
           term: 'Expandable View',
-          explanation:
-            'When expandable is true and data exceeds defaultRowsCount, shows a "see more" button that opens a full-screen modal with the complete virtualized table.',
+          explanation: '"See more" button opens full-screen modal when data exceeds defaultRowsCount.',
         },
       ]}
       props={[

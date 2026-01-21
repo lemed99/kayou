@@ -11,36 +11,48 @@ export default function DatePickerPage() {
       <DocPage
         title="DatePicker"
         description="Calendar input supporting single, multiple, and range selection with locale-aware formatting. Requires DatePickerProvider."
+        isPro
+        dependencies={[
+          {
+            name: '@solid-primitives/presence',
+            url: 'https://primitives.solidjs.community/package/presence',
+            usage: 'Provides createPresence for calendar popup transitions',
+          },
+          {
+            name: 'tailwind-merge',
+            url: 'https://github.com/dcastil/tailwind-merge',
+            usage: 'Merges Tailwind CSS classes without conflicts',
+          },
+        ]}
         keyConcepts={[
           {
             term: 'Selection Type',
-            explanation:
-              'The DatePicker supports three modes: "single" for one date, "range" for start/end dates, and "multiple" for selecting several individual dates.',
+            explanation: 'Three modes: single, range (start/end), or multiple dates.',
           },
           {
             term: 'Locale',
-            explanation:
-              'The locale prop determines how dates are formatted and which language is used for day/month names. Common values include "en-US", "fr-FR", and "de-DE".',
+            explanation: 'Controls date formatting and day/month names (e.g., "en-US", "fr-FR").',
           },
           {
             term: 'Min/Max Constraints',
-            explanation:
-              'Use minDate and maxDate props to restrict the selectable date range. Dates outside this range appear disabled in the calendar.',
+            explanation: 'Restrict selectable dates; out-of-range dates appear disabled.',
           },
           {
             term: 'DateValue Type',
             explanation:
-              'The value type varies by selection mode: { date } for single, { startDate, endDate } for range, and { multipleDates } for multiple selection.',
+              'Value shape varies by mode: { date }, { startDate, endDate }, or { multipleDates }.',
           },
           {
             term: 'Time Selection',
-            explanation:
-              'Enable showTime prop (single mode only) to add hour/minute/second selectors using dropdowns. Click "Confirm" to apply the selection. The DateValue will include hour, minute, and second properties.',
+            explanation: 'showTime adds hour/minute/second dropdowns (single mode only).',
           },
           {
             term: 'Shortcuts',
-            explanation:
-              'Enable showShortcuts to display quick selection buttons (Today, Yesterday, This Week, etc.) on the left side. Customize shortcuts via provider or per-instance.',
+            explanation: 'Quick selection buttons (Today, This Week, etc.) via showShortcuts.',
+          },
+          {
+            term: 'Week Start',
+            explanation: 'weekStartsOn: 0 for Sunday, 1 for Monday (default).',
           },
         ]}
         props={[
@@ -193,6 +205,13 @@ export default function DatePickerPage() {
             default: 'Provider shortcuts',
             description:
               'Custom shortcuts for this instance. Overrides provider shortcuts.',
+          },
+          {
+            name: 'weekStartsOn',
+            type: '0 | 1',
+            default: '1',
+            description:
+              'Day the week starts on. 0 for Sunday, 1 for Monday.',
           },
         ]}
         examples={[
@@ -588,6 +607,39 @@ const [message, setMessage] = createSignal('');
               );
             },
           },
+          {
+            title: 'Week Starts on Sunday',
+            description: 'Configure the calendar to start the week on Sunday instead of Monday.',
+            code: `<DatePicker
+  type="single"
+  locale="en-US"
+  label="Week starts Sunday"
+  weekStartsOn={0}
+/>
+
+<DatePicker
+  type="single"
+  locale="en-US"
+  label="Week starts Monday (default)"
+  weekStartsOn={1}
+/>`,
+            component: () => (
+              <div class="flex flex-col gap-4">
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Week starts Sunday"
+                  weekStartsOn={0}
+                />
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Week starts Monday (default)"
+                  weekStartsOn={1}
+                />
+              </div>
+            ),
+          },
         ]}
         usage={`import { DatePicker, DatePickerProvider } from '@exowpee/solidly';
 import { createSignal } from 'solid-js';
@@ -665,6 +717,20 @@ const [dateTime, setDateTime] = createSignal<DateValue>({});
   showShortcuts
   value={date()}
   onChange={setDate}
+/>
+
+// Week starts on Sunday (US style)
+<DatePicker
+  type="single"
+  locale="en-US"
+  weekStartsOn={0}
+/>
+
+// Week starts on Monday (default, European style)
+<DatePicker
+  type="single"
+  locale="en-US"
+  weekStartsOn={1}
 />
 
 // Custom shortcuts in provider

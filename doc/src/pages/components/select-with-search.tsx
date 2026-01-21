@@ -42,23 +42,19 @@ export default function SelectWithSearchPage() {
       keyConcepts={[
         {
           term: 'Type-to-Filter',
-          explanation:
-            'Users can type to narrow down options instantly. The filter is case-insensitive and matches against the label text, making it easy to find items in large lists.',
+          explanation: 'Case-insensitive search narrows options instantly.',
         },
         {
           term: 'Auto-Fill Mode',
-          explanation:
-            'When autoFillSearchKey is true, selecting an option fills the input with that label. This is useful when users need to see their selection clearly after choosing.',
+          explanation: 'autoFillSearchKey fills input with selected label.',
         },
         {
           term: 'Virtualization',
-          explanation:
-            'Set optionRowHeight to enable virtualization, which renders only visible options. Essential for lists with hundreds of items to maintain smooth scrolling.',
+          explanation: 'optionRowHeight enables rendering only visible options.',
         },
         {
           term: 'Lazy Loading',
-          explanation:
-            'The onLazyLoad callback fires during scroll, enabling infinite scroll patterns where more options are fetched as users scroll down.',
+          explanation: 'onLazyLoad callback enables infinite scroll patterns.',
         },
       ]}
       relatedHooks={[

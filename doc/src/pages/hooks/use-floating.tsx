@@ -5,64 +5,6 @@ export default function UseFloatingPage() {
     <HookDocPage
       title="useFloating"
       description="A positioning engine hook for floating UI elements like tooltips, popovers, and dropdowns. Automatically handles positioning relative to a reference element, viewport boundary detection, placement flipping when there's not enough space, and optional arrow positioning. This is the foundation for components like Tooltip and Popover."
-      overview="The useFloating hook provides a complete solution for positioning floating elements in your UI. Unlike CSS-only approaches that struggle with viewport edges and dynamic content, this hook calculates optimal positioning in JavaScript, taking into account the reference element's position, the floating element's dimensions, viewport boundaries, and scrollable containers. It handles the complexity of keeping floating elements visible and properly aligned, even when the page scrolls or the window resizes. The hook uses a reactive approach with SolidJS signals, meaning positions automatically update when dependencies change."
-      whenToUse={[
-        'Building tooltips that need to stay visible within the viewport',
-        'Creating dropdown menus that should flip direction when near screen edges',
-        'Implementing popovers with arrows that point to their trigger elements',
-        'Positioning autocomplete suggestions relative to input fields',
-        'Any UI pattern where an element needs to "float" near another element',
-      ]}
-      keyConcepts={[
-        {
-          term: 'Reference Element',
-          explanation:
-            'The trigger element that the floating element positions itself relative to. For a tooltip, this would be the button or text being hovered.',
-        },
-        {
-          term: 'Floating Element',
-          explanation:
-            'The element that appears near the reference, such as a tooltip bubble, dropdown menu, or popover panel.',
-        },
-        {
-          term: 'Placement',
-          explanation:
-            'The preferred position of the floating element relative to the reference (e.g., "top", "bottom-start"). The hook may change this if there is insufficient space.',
-        },
-        {
-          term: 'Flipping',
-          explanation:
-            'When the floating element cannot fit in the preferred placement, it automatically "flips" to the opposite side (e.g., from "bottom" to "top").',
-        },
-        {
-          term: 'Arrow',
-          explanation:
-            'An optional visual pointer connecting the floating element to its reference. The hook calculates arrow positioning automatically.',
-        },
-      ]}
-      value="In enterprise applications, consistent and accessible floating UI is critical for user experience. This hook ensures tooltips, dropdowns, and popovers work reliably across different screen sizes, zoom levels, and scroll contexts. It eliminates common issues like tooltips getting cut off, dropdowns appearing off-screen, or popovers misaligning after content changes. By abstracting this complexity into a reusable hook, teams can build consistent floating UI patterns without duplicating positioning logic across components."
-      relatedComponents={[
-        {
-          name: 'Tooltip',
-          path: '/components/tooltip',
-          description: 'Displays contextual information on hover or focus.',
-        },
-        {
-          name: 'Popover',
-          path: '/components/popover',
-          description: 'Shows rich content in a floating panel.',
-        },
-        {
-          name: 'DatePicker',
-          path: '/components/date-picker',
-          description: 'Uses floating positioning for the calendar dropdown.',
-        },
-        {
-          name: 'Select',
-          path: '/components/select',
-          description: 'Positions the options dropdown using this hook.',
-        },
-      ]}
       parameters={[
         {
           name: 'placement',

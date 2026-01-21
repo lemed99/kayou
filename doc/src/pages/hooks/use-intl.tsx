@@ -5,38 +5,6 @@ export default function UseIntlPage() {
     <HookDocPage
       title="useIntl"
       description="A hook to access the FormatJS internationalization API. Provides methods for formatting messages, dates, numbers, relative times, and lists according to the current locale. Must be used within an IntlProvider."
-      overview="The useIntl hook gives you access to the full power of FormatJS within your SolidJS components. It returns an IntlShape object containing the current locale settings and a comprehensive set of formatting methods. Rather than manually implementing locale-aware formatting, you can use these methods to ensure consistent internationalization across your entire application. The hook automatically responds to locale changes from the IntlProvider, so when users switch languages, all formatted content updates reactively."
-      whenToUse={[
-        'Displaying translated text with interpolated values',
-        'Formatting dates in locale-appropriate styles (e.g., MM/DD/YYYY vs DD/MM/YYYY)',
-        'Displaying numbers with correct thousands separators and decimal marks',
-        'Showing currency values with proper symbols and formatting',
-        'Creating human-readable relative times like "2 hours ago"',
-        'Formatting lists with appropriate conjunctions ("A, B, and C" vs "A, B et C")',
-      ]}
-      keyConcepts={[
-        {
-          term: 'IntlShape',
-          explanation:
-            'The object returned by useIntl containing the current locale, message dictionary, and all formatting methods. This is the main interface for all internationalization operations.',
-        },
-        {
-          term: 'Message Descriptor',
-          explanation:
-            'An object with an "id" key referencing a translated message, and optionally a "defaultMessage" for fallback. Messages can include ICU syntax for pluralization and interpolation.',
-        },
-        {
-          term: 'ICU Message Format',
-          explanation:
-            'A standard syntax for handling pluralization, gender selection, and variable interpolation in translated strings. Example: "{count, plural, one {# item} other {# items}}".',
-        },
-        {
-          term: 'Locale',
-          explanation:
-            'A BCP 47 language tag like "en-US" or "fr-FR" that determines formatting rules for dates, numbers, and text direction.',
-        },
-      ]}
-      value="Internationalization is essential for enterprise applications serving global markets. The useIntl hook, built on the industry-standard FormatJS library, provides production-ready i18n that scales with your application. It handles complex scenarios like pluralization rules that vary by language, right-to-left text support, and locale-specific number formatting. By centralizing i18n through this hook, teams can ensure consistent translations, simplify the localization workflow, and easily add new languages without code changes."
       returnType="IntlShape"
       usage={`import { useIntl } from '@exowpee/solidly';`}
       examples={[

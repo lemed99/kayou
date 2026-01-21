@@ -17,7 +17,7 @@ export const optionsContainerClass =
 export const optionClass = (option: Option, highlightedOption: Option | null) => {
   return twMerge(
     'flex cursor-pointer items-center justify-between px-2 py-1.5 text-sm whitespace-nowrap',
-    highlightedOption?.value == option.value ? 'rounded bg-blue-50' : '',
+    highlightedOption?.value == option.value ? 'rounded bg-blue-50 dark:bg-gray-700' : '',
   );
 };
 
@@ -75,7 +75,7 @@ export const ChevronDownButton = (props: {
     aria-label="Open dropdown"
     disabled={props.disabled}
     onFocus={() => props.onFocus?.()}
-    class="absolute top-0 right-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+    class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
   >
     <ChevronDownIcon class="size-4" aria-hidden="true" />
   </button>

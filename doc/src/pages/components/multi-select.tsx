@@ -77,26 +77,29 @@ export default function MultiSelectPage() {
       title="MultiSelect"
       isPro
       description="Dropdown for selecting multiple options from a list. Features search filtering, virtualization for large lists, keyboard navigation, and customizable display values."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes for multi-select styling',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Selection Display',
-          explanation:
-            'By default, selected option labels are concatenated. Use displayValue to show custom text like "N items selected" for cleaner presentation with many selections.',
+          explanation: 'Labels concatenated by default; use displayValue for custom text.',
         },
         {
           term: 'Search Mode',
-          explanation:
-            'Enable withSearch to add a filter input in the dropdown. Essential for option lists longer than 10-15 items where scrolling becomes tedious.',
+          explanation: 'withSearch adds filter input for large option lists.',
         },
         {
           term: 'Controlled Values',
-          explanation:
-            'The values prop accepts an array of selected option values (not objects). This controlled approach makes it easy to sync with form state and validate selections.',
+          explanation: 'values prop accepts array of selected option values.',
         },
         {
           term: 'Clear All',
-          explanation:
-            'Set clearValues to true to programmatically clear all selections. Useful for form reset buttons or "Clear all" actions.',
+          explanation: 'clearValues=true clears all selections programmatically.',
         },
       ]}
       props={[

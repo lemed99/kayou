@@ -5,37 +5,6 @@ export default function IntlContextPage() {
     <ContextDocPage
       title="IntlContext"
       description="A context provider for internationalization (i18n) using FormatJS. IntlContext wraps your application to provide locale-aware formatting methods for messages, dates, numbers, and more. It integrates seamlessly with the useIntl hook for accessing formatting capabilities throughout your component tree."
-      overview="IntlContext establishes the internationalization foundation for your entire application. By wrapping your component tree with the IntlProvider, you make locale information and translated messages available to any descendant component via the useIntl hook. The context manages the current locale setting and a dictionary of translated messages, then provides the FormatJS IntlShape object that contains all formatting methods. When the locale or messages change, all components using useIntl automatically receive the updated values and re-render with the new translations."
-      whenToUse={[
-        'Building applications that need to support multiple languages',
-        'Formatting dates, numbers, and currencies according to user locale preferences',
-        'Implementing a language switcher that updates all text dynamically',
-        'Ensuring consistent translation patterns across a large component library',
-        'Providing locale-aware formatting for international user bases',
-      ]}
-      keyConcepts={[
-        {
-          term: 'IntlProvider',
-          explanation:
-            'The provider component that wraps your application and supplies internationalization context. It accepts a locale and messages, then makes the FormatJS IntlShape available to descendants.',
-        },
-        {
-          term: 'Locale',
-          explanation:
-            'A BCP 47 language tag (e.g., "en-US", "fr-FR") that determines how dates, numbers, and pluralization rules are applied. Different locales use different date formats, number separators, and grammatical rules.',
-        },
-        {
-          term: 'Messages Dictionary',
-          explanation:
-            'A key-value object mapping message IDs to translated strings. Each supported language has its own messages file, and the appropriate one is passed to IntlProvider based on user preference.',
-        },
-        {
-          term: 'ICU Message Syntax',
-          explanation:
-            'The message format standard used in translation strings. Supports variable interpolation ({name}), pluralization ({count, plural, ...}), and select expressions ({gender, select, ...}).',
-        },
-      ]}
-      value="For enterprise applications serving global markets, robust internationalization infrastructure is non-negotiable. IntlContext, powered by FormatJS (the same library behind react-intl), provides battle-tested i18n that handles edge cases like complex pluralization rules, bidirectional text, and locale-specific formatting. It integrates with standard localization workflows and tools, making it easy to work with translation teams and localization platforms. By establishing i18n at the context level, you ensure every component has access to consistent, professional-grade translations without prop drilling or manual setup."
       relatedHooks={[
         {
           name: 'useIntl',

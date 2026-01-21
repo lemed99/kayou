@@ -1,4 +1,4 @@
-import { type Component, type JSX, Suspense } from 'solid-js';
+import { type Component, type JSX, Show, Suspense } from 'solid-js';
 
 import { ToastProvider } from '@exowpee/solidly/context';
 import { useLocation } from '@solidjs/router';
@@ -8,6 +8,9 @@ import DocLayout from './layouts/DocLayout';
 
 const App: Component<{ children: JSX.Element }> = (props): JSX.Element => {
   const location = useLocation();
+
+  // Check if we're on the preview page (no chrome)
+  const isPreviewPage = () => location.pathname.startsWith('/preview');
 
   // Check if we're on a docs page (has sidebar)
   const isDocsPage = () => {
@@ -29,17 +32,25 @@ const App: Component<{ children: JSX.Element }> = (props): JSX.Element => {
   };
 
   return (
-    <ToastProvider methods={{}}>
-      <div class="min-h-dvh bg-white dark:bg-gray-950">
-        {/* Global Navbar (includes banner) */}
-        <Navbar />
+    <Show
+      when={!isPreviewPage()}
+      fallback={
+        // Preview pages render without any chrome
+        <Suspense>{props.children}</Suspense>
+      }
+    >
+      <ToastProvider methods={{}}>
+        <div class="min-h-dvh bg-white dark:bg-gray-900">
+          {/* Global Navbar (includes banner) */}
+          <Navbar />
 
-        {/* Main Content Area */}
-        <main>
-          <Suspense>{getLayout(props.children)}</Suspense>
-        </main>
-      </div>
-    </ToastProvider>
+          {/* Main Content Area */}
+          <main>
+            <Suspense>{getLayout(props.children)}</Suspense>
+          </main>
+        </div>
+      </ToastProvider>
+    </Show>
   );
 };
 

@@ -50,7 +50,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
   );
 
   return (
-    <Switch fallback={<span class="text-sm text-gray-500">Unsupported field type</span>}>
+    <Switch fallback={<span class="text-sm text-gray-500 dark:text-gray-400">Unsupported field type</span>}>
       <Match when={props.config.fieldType === 'text'}>
         <TextInput
           value={(props.filter.value as string) || ''}
@@ -73,7 +73,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
             type={props.config.numberConfig?.type || 'integer'}
             class="w-[80px]"
           />
-          <span class="text-gray-500">-</span>
+          <span class="text-gray-500 dark:text-gray-400">-</span>
           <NumberInput
             value={betweenValues()[1]?.toString() || ''}
             onValueChange={(v) => props.onChange([betweenValues()[0] ?? 0, v ?? 0])}
@@ -253,7 +253,7 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
       <button
         type="button"
         onClick={() => props.onRemove()}
-        class="shrink-0 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+        class="shrink-0 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         aria-label="Remove filter"
       >
         <XCloseIcon class="size-5" aria-hidden="true" />
@@ -452,7 +452,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const popoverContentWithAttr = (
     <div
       data-filter-popover
-      class="w-[520px] max-w-[calc(100vw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700"
+      class="w-[520px] max-w-[calc(100vw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700"
     >
       {/* Filter rows */}
       <div class="mb-4 space-y-3">
@@ -460,7 +460,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           when={draftFilters().length > 0}
           fallback={
             <div class="flex items-center gap-2 py-2">
-              <InfoCircleIcon class="size-5 text-gray-400" aria-hidden="true" />
+              <InfoCircleIcon class="size-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 {props.noFiltersText || 'No filters are being applied.'}
               </span>

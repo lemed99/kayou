@@ -12,23 +12,19 @@ export default function UploadFilePage() {
       keyConcepts={[
         {
           term: 'Drag and Drop',
-          explanation:
-            'Users can drag files directly onto the upload area. The component provides visual feedback when files are being dragged over, and validates files on drop.',
+          explanation: 'Drag files onto upload area with visual feedback.',
         },
         {
           term: 'File Validation',
-          explanation:
-            'Three validation layers: file type (via accept prop with MIME types or extensions), file size (via maxSize in bytes), and file count (via maxLength). Invalid files trigger toast notifications.',
+          explanation: 'Three layers: type (accept), size (maxSize), count (maxLength).',
         },
         {
           term: 'Multiple File Mode',
-          explanation:
-            'When multiple is true, users can select multiple files and the component maintains a list. Files can be removed individually. The onChange callback receives a FileList.',
+          explanation: 'multiple=true allows selecting and managing multiple files.',
         },
         {
           term: 'Toast Integration',
-          explanation:
-            'Validation errors are displayed via the toast system using useToast. Custom error messages can be provided via maxSizeError, fileTypeError, and maxLengthError props.',
+          explanation: 'Validation errors display via useToast with custom messages.',
         },
       ]}
       relatedHooks={[

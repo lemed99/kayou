@@ -35,23 +35,19 @@ export default function ResponsiveContainerPage() {
       keyConcepts={[
         {
           term: 'Render Props',
-          explanation:
-            'ResponsiveContainer accepts children as a function that receives the current size ({ rwidth, rheight }). This pattern allows you to pass the dimensions directly to chart components.',
+          explanation: 'Children receive { rwidth, rheight } to pass to chart components.',
         },
         {
           term: 'ResizeObserver',
-          explanation:
-            'The component uses the browser ResizeObserver API to efficiently detect container size changes. This is more performant than polling or listening to window resize events.',
+          explanation: 'Efficiently detects container size changes via browser API.',
         },
         {
           term: 'Minimum Height',
-          explanation:
-            'Use the minHeight prop to ensure the container has a minimum height even before content renders. This prevents layout shifts and ensures the chart is visible.',
+          explanation: 'minHeight prevents layout shifts before content renders.',
         },
         {
           term: 'rwidth/rheight Props',
-          explanation:
-            'Charts accept rwidth and rheight props that override their base width/height. Pass the size values from ResponsiveContainer to these props for responsive behavior.',
+          explanation: 'Charts accept these props to override base dimensions responsively.',
         },
       ]}
       props={[

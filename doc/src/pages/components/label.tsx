@@ -7,21 +7,25 @@ export default function LabelPage() {
     <DocPage
       title="Label"
       description="Form label with five color variants and support for custom content."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Semantic HTML',
-          explanation:
-            'Uses the native <label> element with the for attribute to create a programmatic association with inputs. This enables clicking labels to focus inputs and ensures assistive technologies announce labels correctly.',
+          explanation: 'Native <label> with "for" links to inputs for accessibility.',
         },
         {
           term: 'Color States',
-          explanation:
-            'Color variants provide visual feedback about field state. Use gray for normal fields, failure for invalid inputs, success for validated fields, and warning for inputs needing attention.',
+          explanation: 'Gray for normal, failure/success/warning for validation states.',
         },
         {
           term: 'Flexible Content',
-          explanation:
-            'The value prop handles simple text labels. For custom content like required asterisks or inline icons, use children to render JSX elements within the label.',
+          explanation: 'value for text; children for custom JSX like required asterisks.',
         },
       ]}
       props={[

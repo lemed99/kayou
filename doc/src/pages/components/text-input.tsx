@@ -9,21 +9,25 @@ export default function TextInputPage() {
     <DocPage
       title="TextInput"
       description="Text input with labels, helper text, icons, addons, and validation states."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
       keyConcepts={[
         {
           term: 'Validation States',
-          explanation:
-            'The color prop indicates validation status: gray (neutral), success (valid), warning (caution), failure (error). Each state has distinct styling and can be paired with helperText for explanations.',
+          explanation: 'Color prop shows status: success, warning, or failure.',
         },
         {
           term: 'Icons and Addons',
-          explanation:
-            'Icons appear inside the input for visual hints (search, email). Addons are external elements like "https://" prefixes or currency symbols that provide context without being part of the input value.',
+          explanation: 'Icons go inside; addons are external prefixes like "https://".',
         },
         {
           term: 'Accessibility',
-          explanation:
-            'Labels are properly associated via htmlFor, helper text is linked with aria-describedby, and required fields are announced to screen readers.',
+          explanation: 'Labels and helper text are properly linked for screen readers.',
         },
       ]}
       props={[

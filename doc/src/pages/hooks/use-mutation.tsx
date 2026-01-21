@@ -5,37 +5,6 @@ export default function UseMutationPage() {
     <HookDocPage
       title="useMutation"
       description="A data mutation hook for handling async operations like POST, PUT, and DELETE requests. Provides reactive state management with loading indicators, error handling, success/error callbacks at both hook and trigger levels, and built-in URL templating for dynamic endpoints."
-      overview="The useMutation hook simplifies async data operations by managing the complexity of loading states, error handling, and callbacks in a consistent pattern. Unlike data fetching hooks that run automatically, mutations are triggered imperatively when you need them—typically in response to user actions like form submissions or button clicks. The hook returns reactive signals for the mutation result, any errors, and loading state, plus a trigger function to execute the mutation. It supports URL templating with {param} placeholders for dynamic endpoints, and allows callbacks at both the hook level (for consistent behavior) and trigger level (for one-off handling)."
-      whenToUse={[
-        'Submitting form data to an API',
-        'Creating, updating, or deleting resources',
-        'Any POST, PUT, PATCH, or DELETE operation',
-        'Operations that need loading state and error handling',
-        'When you need to chain mutations with async/await',
-      ]}
-      keyConcepts={[
-        {
-          term: 'Trigger Function',
-          explanation:
-            'Unlike data fetching hooks that run automatically, mutations are triggered manually via the trigger() function. This returns a Promise so you can await the result or chain with .then().',
-        },
-        {
-          term: 'URL Templating',
-          explanation:
-            'URLs can include {param} placeholders that are replaced at trigger time. For example, "/api/users/{id}" with urlArgs: { id: "123" } becomes "/api/users/123".',
-        },
-        {
-          term: 'Dual Callbacks',
-          explanation:
-            'Callbacks can be defined at hook level (always called) and trigger level (called for that specific invocation). Both are called on success/error, hook-level first.',
-        },
-        {
-          term: 'Generic Error Type',
-          explanation:
-            "The TError generic allows typing custom error shapes from your API. Default is Error, but you can specify your API's error format for full type safety.",
-        },
-      ]}
-      value="Consistent mutation handling is critical for data integrity and user experience. This hook ensures loading states prevent duplicate submissions, errors are captured and surfaced properly, and success callbacks can trigger UI updates or navigation. By standardizing mutation patterns, teams avoid common bugs like missing loading indicators, swallowed errors, or race conditions from rapid clicking."
       parameters={[
         {
           name: 'urlString',

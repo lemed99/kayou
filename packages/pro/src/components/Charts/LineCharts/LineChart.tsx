@@ -259,7 +259,7 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
           <Show
             when={customTooltip()}
             fallback={
-              <div class="border border-gray-200 bg-white px-2 py-1.5 text-xs shadow">
+              <div class="border border-gray-200 bg-white px-2 py-1.5 text-xs shadow dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                 <div class="whitespace-nowrap">
                   <b>{String(activeIndex()!.item[xKey()])}</b>
                 </div>
