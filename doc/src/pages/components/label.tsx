@@ -64,8 +64,6 @@ export default function LabelPage() {
         {
           title: 'Basic Label',
           description: 'Simple label with value prop.',
-          code: `<Label value="Email" />
-<Label value="Password" />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <Label value="Email" />
@@ -76,11 +74,6 @@ export default function LabelPage() {
         {
           title: 'Color Variants',
           description: 'Five color variants for different states.',
-          code: `<Label value="Default label" color="gray" />
-<Label value="Info label" color="info" />
-<Label value="Success label" color="success" />
-<Label value="Warning label" color="warning" />
-<Label value="Error label" color="failure" />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <Label value="Default label" color="gray" />
@@ -94,10 +87,6 @@ export default function LabelPage() {
         {
           title: 'With Form Element',
           description: 'Label associated with an input using the for attribute.',
-          code: `<div>
-  <Label value="Username" for="username-input" />
-  <input id="username-input" type="text" class="..." />
-</div>`,
           component: () => (
             <div class="flex flex-col gap-1">
               <Label value="Username" for="username-input" />
@@ -113,9 +102,6 @@ export default function LabelPage() {
         {
           title: 'Using Children',
           description: 'Using children instead of value prop.',
-          code: `<Label for="email">
-  Email Address <span class="text-red-500">*</span>
-</Label>`,
           component: () => (
             <Label for="email">
               Email Address <span class="text-red-500">*</span>
@@ -123,22 +109,24 @@ export default function LabelPage() {
           ),
         },
       ]}
-      usage={`import { Label } from '@exowpee/solidly';
+      usage={`
+        import { Label } from '@exowpee/solidly';
 
-// Basic usage with value
-<Label value="Email" />
+        // Basic usage with value
+        <Label value="Email" />
 
-// With for attribute
-<Label value="Username" for="username-input" />
-<input id="username-input" type="text" />
+        // With for attribute
+        <Label value="Username" for="username-input" />
+        <input id="username-input" type="text" />
 
-// With color variant
-<Label value="Error field" color="failure" />
+        // With color variant
+        <Label value="Error field" color="failure" />
 
-// Using children for custom content
-<Label for="email">
-  Email <span class="text-red-500">*</span>
-</Label>`}
+        // Using children for custom content
+        <Label for="email">
+          Email <span class="text-red-500">*</span>
+        </Label>
+      `}
     />
   );
 }

@@ -160,7 +160,10 @@ test.describe('Accordion', () => {
   // ==================== Controlled Mode ====================
 
   test('should support controlled mode with external button', async ({ page }) => {
-    const toggleButton = page.locator('button').filter({ hasText: /Toggle Panel/i }).first();
+    const toggleButton = page
+      .locator('button')
+      .filter({ hasText: /Toggle Panel/i })
+      .first();
 
     if (await toggleButton.isVisible()) {
       await toggleButton.click();
@@ -175,7 +178,10 @@ test.describe('Accordion', () => {
   // ==================== Highlighted Panel ====================
 
   test('should support panel highlighting', async ({ page }) => {
-    const highlightButton = page.locator('button').filter({ hasText: /Highlight/i }).first();
+    const highlightButton = page
+      .locator('button')
+      .filter({ hasText: /Highlight/i })
+      .first();
 
     if (await highlightButton.isVisible()) {
       await highlightButton.click();
@@ -189,10 +195,13 @@ test.describe('Accordion', () => {
   });
 
   test('should clear highlighting when clear button is clicked', async ({ page }) => {
-    const highlightButton = page.locator('button').filter({ hasText: /Highlight/i }).first();
+    const highlightButton = page
+      .locator('button')
+      .filter({ hasText: /Highlight/i })
+      .first();
     const clearButton = page.locator('button').filter({ hasText: /Clear/i }).first();
 
-    if (await highlightButton.isVisible() && await clearButton.isVisible()) {
+    if ((await highlightButton.isVisible()) && (await clearButton.isVisible())) {
       await highlightButton.click();
       await page.waitForTimeout(300);
 
@@ -221,7 +230,9 @@ test.describe('Accordion', () => {
     expect(['true', 'false']).toContain(ariaExpanded);
   });
 
-  test('should maintain state when clicking same panel multiple times', async ({ page }) => {
+  test('should maintain state when clicking same panel multiple times', async ({
+    page,
+  }) => {
     const trigger = page.locator('[id^="accordion-trigger-"]').first();
 
     await trigger.click();

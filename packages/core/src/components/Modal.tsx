@@ -1,11 +1,11 @@
 import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
+import { XCloseIcon } from '@exowpee/solidly-icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { preventBackgroundScroll } from '../helpers/preventBackgroundScroll';
-import { XCloseIcon } from '../icons';
 
 /**
  * Size variants for the Modal component.

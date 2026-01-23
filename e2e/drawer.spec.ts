@@ -8,7 +8,10 @@ test.describe('Drawer', () => {
   // ==================== Basic Rendering ====================
 
   test('should render drawer trigger button', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await expect(trigger).toBeVisible();
   });
 
@@ -21,7 +24,10 @@ test.describe('Drawer', () => {
   // ==================== Opening/Closing ====================
 
   test('should open drawer on trigger click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -30,7 +36,10 @@ test.describe('Drawer', () => {
   });
 
   test('should close drawer on close button click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -46,7 +55,10 @@ test.describe('Drawer', () => {
   });
 
   test('should close drawer on Escape key', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -62,7 +74,10 @@ test.describe('Drawer', () => {
   });
 
   test('should close drawer on backdrop click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -115,7 +130,10 @@ test.describe('Drawer', () => {
   });
 
   test('should render drawer from bottom position', async ({ page }) => {
-    const bottomTrigger = page.locator('button').filter({ hasText: /bottom/i }).first();
+    const bottomTrigger = page
+      .locator('button')
+      .filter({ hasText: /bottom/i })
+      .first();
     if (await bottomTrigger.isVisible()) {
       await bottomTrigger.click();
       await page.waitForTimeout(600);
@@ -128,7 +146,10 @@ test.describe('Drawer', () => {
   // ==================== Accessibility (ARIA) ====================
 
   test('should have proper aria attributes', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -138,7 +159,10 @@ test.describe('Drawer', () => {
   });
 
   test('drawer should have aria-modal attribute', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -147,7 +171,10 @@ test.describe('Drawer', () => {
   });
 
   test('close button should have aria-label', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -160,7 +187,10 @@ test.describe('Drawer', () => {
   // ==================== Focus Management ====================
 
   test('should trap focus inside drawer when open', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -175,7 +205,10 @@ test.describe('Drawer', () => {
   });
 
   test('close button should be focusable', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -189,7 +222,10 @@ test.describe('Drawer', () => {
   // ==================== Drawer Content ====================
 
   test('should display drawer title', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -199,7 +235,10 @@ test.describe('Drawer', () => {
   });
 
   test('should display drawer content', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -212,7 +251,10 @@ test.describe('Drawer', () => {
   // ==================== Animation ====================
 
   test('should animate on open', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
 
     // Wait for animation
@@ -223,7 +265,10 @@ test.describe('Drawer', () => {
   });
 
   test('should animate on close', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -240,7 +285,10 @@ test.describe('Drawer', () => {
   // ==================== Backdrop ====================
 
   test('should render backdrop when drawer is open', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -253,7 +301,10 @@ test.describe('Drawer', () => {
   // ==================== Edge Cases ====================
 
   test('should handle rapid open/close', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
 
     await trigger.click();
     await page.waitForTimeout(100);
@@ -275,7 +326,10 @@ test.describe('Drawer', () => {
   });
 
   test('should maintain state after interactions', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|drawer|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|drawer|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 

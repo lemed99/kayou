@@ -1,36 +1,8 @@
-// @exowpee/solidly - Free, open-source UI component library for SolidJS
+// @exowpee/solidly - A complete, opinionated UI component library for SolidJS
 // https://github.com/exowpee/solidly
 
-// Components
-export {
-  Accordion,
-  Alert,
-  Badge,
-  Breadcrumb,
-  Button,
-  Checkbox,
-  Drawer,
-  HelperText,
-  IconWrapper,
-  Label,
-  Modal,
-  NumberInput,
-  Pagination,
-  Popover,
-  Select,
-  Skeleton,
-  Spinner,
-  TextInput,
-  Textarea,
-  ToggleSwitch,
-  Tooltip,
-  VirtualList,
-} from './components';
+// Re-export everything from components
+export * from './components';
 
-// Types
-export type {
-  AccordionProps,
-  PanelData,
-  TextInputProps,
-  VirtualListHandle,
-} from './components';
+// Context providers
+export { DatePickerProvider, DEFAULT_DATE_SHORTCUTS } from './context';

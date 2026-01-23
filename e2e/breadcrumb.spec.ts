@@ -8,13 +8,17 @@ test.describe('Breadcrumb', () => {
   // ==================== Basic Rendering ====================
 
   test('should render breadcrumb navigation', async ({ page }) => {
-    const nav = page.locator('nav[aria-label*="breadcrumb" i], nav[aria-label*="Breadcrumb" i]');
+    const nav = page.locator(
+      'nav[aria-label*="breadcrumb" i], nav[aria-label*="Breadcrumb" i]',
+    );
     const count = await nav.count();
     expect(count).toBeGreaterThan(0);
   });
 
   test('should display breadcrumb items', async ({ page }) => {
-    const breadcrumbItems = page.locator('nav li, nav a, nav span').filter({ hasText: /.+/ });
+    const breadcrumbItems = page
+      .locator('nav li, nav a, nav span')
+      .filter({ hasText: /.+/ });
     const count = await breadcrumbItems.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -30,7 +34,10 @@ test.describe('Breadcrumb', () => {
   // ==================== Breadcrumb Items ====================
 
   test('should render Home item', async ({ page }) => {
-    const homeItem = page.locator('nav').filter({ hasText: /Home|Dashboard/i }).first();
+    const homeItem = page
+      .locator('nav')
+      .filter({ hasText: /Home|Dashboard/i })
+      .first();
     if (await homeItem.isVisible()) {
       await expect(homeItem).toBeVisible();
     }
@@ -111,7 +118,9 @@ test.describe('Breadcrumb', () => {
   // ==================== Current Page Indicator ====================
 
   test('should indicate current page', async ({ page }) => {
-    const currentPage = page.locator('[aria-current="page"], nav li:last-child, nav span:last-child');
+    const currentPage = page.locator(
+      '[aria-current="page"], nav li:last-child, nav span:last-child',
+    );
     const count = await currentPage.count();
     expect(count).toBeGreaterThan(0);
   });

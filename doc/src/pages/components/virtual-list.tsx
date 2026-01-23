@@ -16,11 +16,13 @@ export default function VirtualListPage() {
         },
         {
           term: 'Fixed Row Height',
-          explanation: 'Exact rowHeight required for instant scroll position calculation.',
+          explanation:
+            'Exact rowHeight required for instant scroll position calculation.',
         },
         {
           term: 'Overscan',
-          explanation: 'Extra items rendered off-screen prevent blanks during fast scroll.',
+          explanation:
+            'Extra items rendered off-screen prevent blanks during fast scroll.',
         },
         {
           term: 'Imperative Handle',
@@ -162,22 +164,6 @@ export default function VirtualListPage() {
         {
           title: 'Basic Usage',
           description: 'Simple virtualized list rendering 1000 items efficiently.',
-          code: `const items = () => Array.from({ length: 1000 }, (_, i) => ({
-  id: i,
-  name: \`Item \${i + 1}\`
-}));
-
-<VirtualList
-  items={items}
-  rootHeight={300}
-  rowHeight={40}
->
-  {(item) => (
-    <div class="p-2 border-b border-gray-200">
-      {item.name}
-    </div>
-  )}
-</VirtualList>`,
           component: () => {
             const items = () =>
               Array.from({ length: 50 }, (_, i) => ({
@@ -202,32 +188,6 @@ export default function VirtualListPage() {
           title: 'With Selection',
           description:
             'Selectable list with keyboard navigation. Use arrow keys, Home, End, PageUp, PageDown to navigate.',
-          code: `const [selectedId, setSelectedId] = createSignal<number | null>(null);
-const items = () => Array.from({ length: 100 }, (_, i) => ({
-  id: i,
-  name: \`Option \${i + 1}\`
-}));
-
-<VirtualList
-  items={items}
-  rootHeight={200}
-  rowHeight={36}
-  role="listbox"
-  aria-label="Select an option"
-  aria-activedescendant={selectedId() !== null ? \`option-\${selectedId()}\` : undefined}
->
-  {(item) => (
-    <div
-      id={\`option-\${item.id}\`}
-      role="option"
-      aria-selected={selectedId() === item.id}
-      class={selectedId() === item.id ? 'bg-blue-100' : 'bg-white'}
-      onClick={() => setSelectedId(item.id)}
-    >
-      {item.name}
-    </div>
-  )}
-</VirtualList>`,
           component: () => {
             const [selectedId, setSelectedId] = createSignal<number | null>(null);
             const items = () =>
@@ -270,29 +230,6 @@ const items = () => Array.from({ length: 100 }, (_, i) => ({
           title: 'Scroll To Index',
           description:
             'Use the imperative handle to programmatically scroll to specific items.',
-          code: `let listHandle: VirtualListHandle | undefined;
-const [targetIndex, setTargetIndex] = createSignal(0);
-const items = () => Array.from({ length: 500 }, (_, i) => \`Item \${i + 1}\`);
-
-<input
-  type="number"
-  min={0}
-  max={499}
-  value={targetIndex()}
-  onInput={(e) => setTargetIndex(Number(e.target.value))}
-/>
-<button onClick={() => listHandle?.scrollToIndex(targetIndex(), 'smooth')}>
-  Scroll to Item
-</button>
-
-<VirtualList
-  ref={(handle) => (listHandle = handle)}
-  items={items}
-  rootHeight={200}
-  rowHeight={40}
->
-  {(item, index) => <div class="p-2">{item}</div>}
-</VirtualList>`,
           component: () => {
             let listHandle: VirtualListHandle | undefined;
             const [targetIndex, setTargetIndex] = createSignal(0);
@@ -339,23 +276,6 @@ const items = () => Array.from({ length: 500 }, (_, i) => \`Item \${i + 1}\`);
           title: 'With Loading Indicator',
           description:
             'Display a loading indicator at the end of the list for infinite scroll.',
-          code: `const [items, setItems] = createSignal(
-  Array.from({ length: 50 }, (_, i) => \`Item \${i + 1}\`)
-);
-const [loading, setLoading] = createSignal(false);
-
-<VirtualList
-  items={items}
-  rootHeight={200}
-  rowHeight={40}
-  loading={loading() && (
-    <div class="p-4 text-center text-gray-500">
-      Loading more items...
-    </div>
-  )}
->
-  {(item) => <div class="p-2">{item}</div>}
-</VirtualList>`,
           component: () => {
             const [loading, setLoading] = createSignal(false);
             const [items, setItems] = createSignal(
@@ -410,20 +330,6 @@ const [loading, setLoading] = createSignal(false);
         {
           title: 'Empty State',
           description: 'Display a fallback when there are no items.',
-          code: `const [items, setItems] = createSignal<string[]>([]);
-
-<VirtualList
-  items={items}
-  rootHeight={200}
-  rowHeight={40}
-  fallback={
-    <div class="p-8 text-center text-gray-500">
-      No items to display
-    </div>
-  }
->
-  {(item) => <div class="p-2">{item}</div>}
-</VirtualList>`,
           component: () => {
             const [items, setItems] = createSignal<string[]>([]);
             const [hasItems, setHasItems] = createSignal(false);
@@ -463,25 +369,6 @@ const [loading, setLoading] = createSignal(false);
         {
           title: 'Custom Row Styling',
           description: 'Apply custom classes to row wrappers using rowClass.',
-          code: `const items = () => Array.from({ length: 100 }, (_, i) => ({
-  id: i,
-  name: \`User \${i + 1}\`,
-  email: \`user\${i + 1}@example.com\`
-}));
-
-<VirtualList
-  items={items}
-  rootHeight={250}
-  rowHeight={60}
-  rowClass="border-b border-gray-100"
->
-  {(item) => (
-    <div class="p-2">
-      <div class="font-medium">{item.name}</div>
-      <div class="text-sm text-gray-500">{item.email}</div>
-    </div>
-  )}
-</VirtualList>`,
           component: () => {
             const items = () =>
               Array.from({ length: 100 }, (_, i) => ({
@@ -512,19 +399,6 @@ const [loading, setLoading] = createSignal(false);
           title: 'Scroll Position Persistence',
           description:
             'Track scroll position to restore it later (e.g., after navigation).',
-          code: `const [scrollPosition, setScrollPosition] = createSignal(0);
-const items = () => Array.from({ length: 200 }, (_, i) => \`Item \${i + 1}\`);
-
-<p>Scroll position: {scrollPosition()}px</p>
-
-<VirtualList
-  items={items}
-  rootHeight={200}
-  rowHeight={40}
-  setScrollPosition={setScrollPosition}
->
-  {(item) => <div class="p-2">{item}</div>}
-</VirtualList>`,
           component: () => {
             const [scrollPosition, setScrollPosition] = createSignal(0);
             const items = () => Array.from({ length: 200 }, (_, i) => `Item ${i + 1}`);
@@ -548,79 +422,81 @@ const items = () => Array.from({ length: 200 }, (_, i) => \`Item \${i + 1}\`);
           },
         },
       ]}
-      usage={`import { VirtualList, VirtualListHandle } from '@exowpee/solidly';
-import { createSignal } from 'solid-js';
+      usage={`
+        import { VirtualList, VirtualListHandle } from '@exowpee/solidly';
+        import { createSignal } from 'solid-js';
 
-// Basic usage with accessor
-const [items, setItems] = createSignal([...]);
+        // Basic usage with accessor
+        const [items, setItems] = createSignal([...]);
 
-<VirtualList
-  items={items}
-  rootHeight={400}
-  rowHeight={50}
->
-  {(item, index) => (
-    <div>{item.name} (#{index()})</div>
-  )}
-</VirtualList>
+        <VirtualList
+          items={items}
+          rootHeight={400}
+          rowHeight={50}
+        >
+          {(item, index) => (
+            <div>{item.name} (#{index()})</div>
+          )}
+        </VirtualList>
 
-// With imperative scroll control
-let listHandle: VirtualListHandle | undefined;
+        // With imperative scroll control
+        let listHandle: VirtualListHandle | undefined;
 
-<VirtualList
-  ref={(handle) => (listHandle = handle)}
-  items={items}
-  rootHeight={400}
-  rowHeight={50}
->
-  {(item) => <div>{item.name}</div>}
-</VirtualList>
+        <VirtualList
+          ref={(handle) => (listHandle = handle)}
+          items={items}
+          rootHeight={400}
+          rowHeight={50}
+        >
+          {(item) => <div>{item.name}</div>}
+        </VirtualList>
 
-// Scroll to item
-listHandle?.scrollToIndex(50, 'smooth');
+        // Scroll to item
+        listHandle?.scrollToIndex(50, 'smooth');
 
-// Accessible listbox pattern
-const [selectedId, setSelectedId] = createSignal<string | null>(null);
+        // Accessible listbox pattern
+        const [selectedId, setSelectedId] = createSignal<string | null>(null);
 
-<VirtualList
-  items={items}
-  rootHeight={300}
-  rowHeight={40}
-  role="listbox"
-  aria-label="Select an item"
-  aria-activedescendant={selectedId() ?? undefined}
->
-  {(item) => (
-    <div
-      id={item.id}
-      role="option"
-      aria-selected={selectedId() === item.id}
-      onClick={() => setSelectedId(item.id)}
-    >
-      {item.name}
-    </div>
-  )}
-</VirtualList>
+        <VirtualList
+          items={items}
+          rootHeight={300}
+          rowHeight={40}
+          role="listbox"
+          aria-label="Select an item"
+          aria-activedescendant={selectedId() ?? undefined}
+        >
+          {(item) => (
+            <div
+              id={item.id}
+              role="option"
+              aria-selected={selectedId() === item.id}
+              onClick={() => setSelectedId(item.id)}
+            >
+              {item.name}
+            </div>
+          )}
+        </VirtualList>
 
-// VirtualListHandle type reference
-type VirtualListHandle = {
-  scrollToIndex: (index: number, behavior?: ScrollBehavior) => void;
-};
+        // VirtualListHandle type reference
+        type VirtualListHandle = {
+          scrollToIndex: (index: number, behavior?: ScrollBehavior) => void;
+        };
 
-// Keyboard Navigation (when role is set):
-// - Home: Scroll to first item
-// - End: Scroll to last item
-// - PageUp: Scroll up by one page
-// - PageDown: Scroll down by one page
+        // Keyboard Navigation (when role is set):
+        // - Home: Scroll to first item
+        // - End: Scroll to last item
+        // - PageUp: Scroll up by one page
+        // - PageDown: Scroll down by one page
 
-// Important: Row Height Enforcement
-// ---------------------------------
-// Each row wrapper has enforced height and overflow: hidden.
-// This ensures scroll calculations are always accurate.
-// Content taller than rowHeight will be clipped.
-//
-// Design your row content to fit within rowHeight.
-// If you need variable height rows, use DynamicVirtualList instead.`}
+        // Important: Row Height Enforcement
+        // ---------------------------------
+        // Each row wrapper has enforced height and overflow: hidden.
+        // This ensures scroll calculations are always accurate.
+        // Content taller than rowHeight will be clipped.
+        //
+        // Design your row content to fit within rowHeight.
+        // If you need variable height rows, use DynamicVirtualList instead.
+      `}
       relatedHooks={[
         {
           name: 'useVirtualList',

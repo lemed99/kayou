@@ -6,7 +6,9 @@ test.describe('Skeleton', () => {
   });
 
   test('should render skeleton components', async ({ page }) => {
-    const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]').first();
+    const skeleton = page
+      .locator('[class*="skeleton"], [class*="animate-pulse"]')
+      .first();
     await expect(skeleton).toBeVisible();
   });
 
@@ -23,19 +25,25 @@ test.describe('Skeleton', () => {
   });
 
   test('should render text skeleton', async ({ page }) => {
-    const textSkeleton = page.locator('[class*="skeleton"][class*="h-4"], [class*="skeleton"][class*="h-5"]');
+    const textSkeleton = page.locator(
+      '[class*="skeleton"][class*="h-4"], [class*="skeleton"][class*="h-5"]',
+    );
     const count = await textSkeleton.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });
 
   test('should render circular skeleton', async ({ page }) => {
-    const circularSkeleton = page.locator('[class*="rounded-full"][class*="skeleton"], [class*="rounded-full"][class*="animate"]');
+    const circularSkeleton = page.locator(
+      '[class*="rounded-full"][class*="skeleton"], [class*="rounded-full"][class*="animate"]',
+    );
     const count = await circularSkeleton.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });
 
   test('should have appropriate dimensions', async ({ page }) => {
-    const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]').first();
+    const skeleton = page
+      .locator('[class*="skeleton"], [class*="animate-pulse"]')
+      .first();
     const boundingBox = await skeleton.boundingBox();
 
     expect(boundingBox).toBeTruthy();
@@ -50,13 +58,17 @@ test.describe('Skeleton', () => {
   });
 
   test('should render card skeleton', async ({ page }) => {
-    const cardSkeleton = page.locator('[class*="skeleton"]').filter({ has: page.locator('div') });
+    const cardSkeleton = page
+      .locator('[class*="skeleton"]')
+      .filter({ has: page.locator('div') });
     const count = await cardSkeleton.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });
 
   test('should have consistent color', async ({ page }) => {
-    const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]').first();
+    const skeleton = page
+      .locator('[class*="skeleton"], [class*="animate-pulse"]')
+      .first();
     const styles = await skeleton.evaluate((el) => window.getComputedStyle(el));
     expect(styles).toBeTruthy();
   });

@@ -17,7 +17,8 @@ export default function HelperTextPage() {
       keyConcepts={[
         {
           term: 'Semantic Colors',
-          explanation: 'Gray for hints, success/failure for validation, warning for caution.',
+          explanation:
+            'Gray for hints, success/failure for validation, warning for caution.',
         },
         {
           term: 'Form Integration',
@@ -58,11 +59,6 @@ export default function HelperTextPage() {
         {
           title: 'Color Variants',
           description: 'Five color variants for different message types.',
-          code: `<HelperText content="This is a neutral hint" color="gray" />
-<HelperText content="This is informational" color="info" />
-<HelperText content="This is a success message" color="success" />
-<HelperText content="This is a warning" color="warning" />
-<HelperText content="This is an error message" color="failure" />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <HelperText content="This is a neutral hint" color="gray" />
@@ -76,10 +72,6 @@ export default function HelperTextPage() {
         {
           title: 'Form Field Example',
           description: 'Common usage below a form field.',
-          code: `<div>
-  <input type="email" placeholder="Email" class="..." />
-  <HelperText content="We'll never share your email" />
-</div>`,
           component: () => (
             <div class="w-64">
               <input
@@ -94,8 +86,6 @@ export default function HelperTextPage() {
         {
           title: 'Validation Messages',
           description: 'Using helper text for form validation feedback.',
-          code: `<HelperText content="Password must be at least 8 characters" color="failure" />
-<HelperText content="Email is valid" color="success" />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <HelperText
@@ -107,19 +97,21 @@ export default function HelperTextPage() {
           ),
         },
       ]}
-      usage={`import { HelperText } from '@exowpee/solidly';
+      usage={`
+        import { HelperText } from '@exowpee/solidly';
 
-// Basic usage
-<HelperText content="Enter your full name" />
+        // Basic usage
+        <HelperText content="Enter your full name" />
 
-// With color for validation
-<HelperText content="This field is required" color="failure" />
+        // With color for validation
+        <HelperText content="This field is required" color="failure" />
 
-// Success message
-<HelperText content="Email verified successfully" color="success" />
+        // Success message
+        <HelperText content="Email verified successfully" color="success" />
 
-// Warning message
-<HelperText content="This action cannot be undone" color="warning" />`}
+        // Warning message
+        <HelperText content="This action cannot be undone" color="warning" />
+      `}
     />
   );
 }

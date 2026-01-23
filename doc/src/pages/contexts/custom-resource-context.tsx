@@ -105,145 +105,159 @@ export default function CustomResourceContextPage() {
         },
       ]}
       contextType="CustomResourceContextValue<T>"
-      usage={`import { CustomResourceProvider } from '@exowpee/solidly';`}
+      usage={`
+        import { CustomResourceProvider } from '@exowpee/solidly';
+      `}
       examples={[
         {
           title: 'Basic Provider Setup',
           description:
             'Wrap your application with the CustomResourceProvider to enable data fetching capabilities.',
-          code: `import { CustomResourceProvider } from '@exowpee/solidly;
-import { createSignal } from 'solid-js';
+          code: `
+            import { CustomResourceProvider } from '@exowpee/solidly;
+            import { createSignal } from 'solid-js';
 
-function App() {
-  const [refreshData] = createSignal({});
+            function App() {
+              const [refreshData] = createSignal({});
 
-  return (
-    <CustomResourceProvider refreshData={refreshData}>
-      <Dashboard />
-    </CustomResourceProvider>
-  );
-}`,
+              return (
+                <CustomResourceProvider refreshData={refreshData}>
+                  <Dashboard />
+                </CustomResourceProvider>
+              );
+            }
+          `,
         },
         {
           title: 'With API Base URL',
           description:
             'Configure a base URL to automatically prepend to all resource URLs.',
-          code: `<CustomResourceProvider
-  refreshData={refreshData}
-  baseUrl="https://api.example.com/v1"
->
-  {/* All useCustomResource calls will use this base URL */}
-  {/* urlString="/users" becomes "https://api.example.com/v1/users" */}
-  <UserList />
-</CustomResourceProvider>`,
+          code: `
+            <CustomResourceProvider
+              refreshData={refreshData}
+              baseUrl="https://api.example.com/v1"
+            >
+              {/* All useCustomResource calls will use this base URL */}
+              {/* urlString="/users" becomes "https://api.example.com/v1/users" */}
+              <UserList />
+            </CustomResourceProvider>
+          `,
         },
         {
           title: 'Custom Fetcher with Authentication',
           description:
             'Provide a custom fetcher function for adding authentication headers.',
-          code: `import { CustomResourceProvider } from '@exowpee/solidly;
-import { createSignal } from 'solid-js';
+          code: `
+            import { CustomResourceProvider } from '@exowpee/solidly;
+            import { createSignal } from 'solid-js';
 
-function App() {
-  const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({});
+            function App() {
+              const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({});
 
-  // Custom fetcher with authentication
-  const customFetcher = async (url: string) => {
-    const res = await fetch(url, {
-      headers: {
-        'Authorization': \`Bearer \${getToken()}\`,
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) throw new Error('Request failed');
-    return res.json();
-  };
+              // Custom fetcher with authentication
+              const customFetcher = async (url: string) => {
+                const res = await fetch(url, {
+                  headers: {
+                    'Authorization': \`Bearer \${getToken()}\`,
+                    'Content-Type': 'application/json',
+                  },
+                });
+                if (!res.ok) throw new Error('Request failed');
+                return res.json();
+              };
 
-  return (
-    <CustomResourceProvider
-      refreshData={refreshData}
-      fetcher={customFetcher}
-    >
-      <YourComponents />
-    </CustomResourceProvider>
-  );
-}`,
+              return (
+                <CustomResourceProvider
+                  refreshData={refreshData}
+                  fetcher={customFetcher}
+                >
+                  <YourComponents />
+                </CustomResourceProvider>
+              );
+            }
+          `,
         },
         {
           title: 'Custom Retry Configuration',
           description:
             'Configure retry behavior for failed requests. 500 errors are NOT retried by default.',
-          code: `<CustomResourceProvider
-  refreshData={refreshData}
-  retryCount={5}
-  retryDelay={1000}
-  exponentialBackoff={true}
-  errorsBlackList={[400, 401, 403, 404, 500]}
->
-  <YourComponents />
-</CustomResourceProvider>
+          code: `
+            <CustomResourceProvider
+              refreshData={refreshData}
+              retryCount={5}
+              retryDelay={1000}
+              exponentialBackoff={true}
+              errorsBlackList={[400, 401, 403, 404, 500]}
+            >
+              <YourComponents />
+            </CustomResourceProvider>
 
-// With this config:
-// - 400/401/403/404/500 errors: Will NOT retry
-// - 502/503/504 errors: Will retry up to 5 times (transient server issues)
-// - Retry delays: 1s, 2s, 4s, 8s, 16s (exponential)`,
+            // With this config:
+            // - 400/401/403/404/500 errors: Will NOT retry
+            // - 502/503/504 errors: Will retry up to 5 times (transient server issues)
+            // - Retry delays: 1s, 2s, 4s, 8s, 16s (exponential)
+          `,
         },
         {
           title: 'Full Configuration Example',
           description: 'A complete example with all configuration options.',
-          code: `import { CustomResourceProvider } from '@exowpee/solidly;
-import { createSignal } from 'solid-js';
+          code: `
+            import { CustomResourceProvider } from '@exowpee/solidly;
+            import { createSignal } from 'solid-js';
 
-function App() {
-  const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({});
+            function App() {
+              const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({});
 
-  return (
-    <CustomResourceProvider
-      refreshData={refreshData}
-      baseUrl="https://api.example.com/v1"
-      retryCount={5}
-      retryDelay={1000}
-      exponentialBackoff={true}
-      errorsBlackList={[400, 401, 403, 404, 500]}
-      dedupeRequests={true}
-      dedupeInterval={5000}
-      onSuccess={(data, fromCache) => {
-        console.log('Fetch succeeded:', { data, fromCache });
-      }}
-      onError={(err) => {
-        console.error('Fetch failed:', err);
-        showErrorNotification(err);
-      }}
-    >
-      <YourComponents />
-    </CustomResourceProvider>
-  );
-}`,
+              return (
+                <CustomResourceProvider
+                  refreshData={refreshData}
+                  baseUrl="https://api.example.com/v1"
+                  retryCount={5}
+                  retryDelay={1000}
+                  exponentialBackoff={true}
+                  errorsBlackList={[400, 401, 403, 404, 500]}
+                  dedupeRequests={true}
+                  dedupeInterval={5000}
+                  onSuccess={(data, fromCache) => {
+                    console.log('Fetch succeeded:', { data, fromCache });
+                  }}
+                  onError={(err) => {
+                    console.error('Fetch failed:', err);
+                    showErrorNotification(err);
+                  }}
+                >
+                  <YourComponents />
+                </CustomResourceProvider>
+              );
+            }
+          `,
         },
         {
           title: 'Triggering Refresh',
           description:
             'Use the refreshData signal to trigger refresh for specific resources.',
-          code: `function RefreshButton() {
-  const [, setRefreshData] = useRefreshData(); // Your app's refresh signal
+          code: `
+            function RefreshButton() {
+              const [, setRefreshData] = useRefreshData(); // Your app's refresh signal
 
-  const handleRefresh = () => {
-    // Trigger refresh for resources with refreshKey="users"
-    setRefreshData(prev => ({ ...prev, users: true }));
-  };
+              const handleRefresh = () => {
+                // Trigger refresh for resources with refreshKey="users"
+                setRefreshData(prev => ({ ...prev, users: true }));
+              };
 
-  return <button onClick={handleRefresh}>Refresh Users</button>;
-}
+              return <button onClick={handleRefresh}>Refresh Users</button>;
+            }
 
-// In another component:
-function UserList() {
-  const { data } = useCustomResource<User[]>({
-    urlString: () => '/users',
-    refreshKey: 'users', // Links to the refresh signal
-  });
+            // In another component:
+            function UserList() {
+              const { data } = useCustomResource<User[]>({
+                urlString: () => '/users',
+                refreshKey: 'users', // Links to the refresh signal
+              });
 
-  return <For each={data()}>{(user) => <UserCard user={user} />}</For>;
-}`,
+              return <For each={data()}>{(user) => <UserCard user={user} />}</For>;
+            }
+          `,
         },
       ]}
     />

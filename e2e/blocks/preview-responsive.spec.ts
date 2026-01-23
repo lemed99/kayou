@@ -92,7 +92,10 @@ test.describe('Preview Page Responsive Tests', () => {
       await page.waitForTimeout(500);
 
       // Look for back/menu button - first button with an svg icon
-      const backButton = page.locator('button').filter({ has: page.locator('svg') }).first();
+      const backButton = page
+        .locator('button')
+        .filter({ has: page.locator('svg') })
+        .first();
       await expect(backButton).toBeVisible();
     });
 

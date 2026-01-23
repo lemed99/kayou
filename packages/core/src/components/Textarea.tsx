@@ -81,7 +81,7 @@ const Textarea = (props: TextareaProps): JSX.Element => {
       </Show>
       <div class="relative w-full">
         <Show when={local.isLoading}>
-          <div class="pointer-events-none absolute top-2.5 left-2.5 flex items-center">
+          <div class="pointer-events-none absolute left-2.5 top-2.5 flex items-center">
             <Spinner size="sm" color={color()} />
           </div>
         </Show>

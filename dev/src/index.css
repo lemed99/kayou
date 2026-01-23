@@ -1,7 +1,0 @@
-@import 'tailwindcss';
-@source "../../src";
-@custom-variant dark (&:where(.dark, .dark *));
-
-body {
-  font-family: 'Ubuntu', sans-serif;
-}

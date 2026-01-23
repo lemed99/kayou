@@ -100,10 +100,6 @@ export default function DrawerPage() {
         {
           title: 'Right Drawer',
           description: 'Drawer sliding in from the right (default).',
-          code: `<Button onClick={() => setShow(true)}>Open Right Drawer</Button>
-<Drawer show={show()} onClose={() => setShow(false)} showHeader>
-  <p>Drawer content goes here</p>
-</Drawer>`,
           component: () => (
             <>
               <Button onClick={() => setShowRight(true)}>Open Right Drawer</Button>
@@ -121,9 +117,6 @@ export default function DrawerPage() {
         {
           title: 'Left Drawer',
           description: 'Drawer sliding in from the left.',
-          code: `<Drawer show={show()} position="left" onClose={() => setShow(false)}>
-  <p>Left drawer content</p>
-</Drawer>`,
           component: () => (
             <>
               <Button onClick={() => setShowLeft(true)}>Open Left Drawer</Button>
@@ -142,9 +135,6 @@ export default function DrawerPage() {
         {
           title: 'Top Drawer',
           description: 'Drawer sliding in from the top.',
-          code: `<Drawer show={show()} position="top" onClose={() => setShow(false)}>
-  <p>Top drawer content</p>
-</Drawer>`,
           component: () => (
             <>
               <Button onClick={() => setShowTop(true)}>Open Top Drawer</Button>
@@ -163,14 +153,6 @@ export default function DrawerPage() {
         {
           title: 'Bottom Drawer with Rounded Edges',
           description: 'Drawer with rounded edges option.',
-          code: `<Drawer
-  show={show()}
-  position="bottom"
-  roundedEdges
-  onClose={() => setShow(false)}
->
-  <p>Bottom drawer content</p>
-</Drawer>`,
           component: () => (
             <>
               <Button onClick={() => setShowBottom(true)}>Open Bottom Drawer</Button>
@@ -188,33 +170,35 @@ export default function DrawerPage() {
           ),
         },
       ]}
-      usage={`import { Drawer } from '@exowpee/solidly';
+      usage={`
+        import { Drawer } from '@exowpee/solidly';
 
-// Basic usage
-const [show, setShow] = createSignal(false);
+        // Basic usage
+        const [show, setShow] = createSignal(false);
 
-<Button onClick={() => setShow(true)}>Open Drawer</Button>
-<Drawer show={show()} onClose={() => setShow(false)}>
-  <p>Drawer content</p>
-</Drawer>
+        <Button onClick={() => setShow(true)}>Open Drawer</Button>
+        <Drawer show={show()} onClose={() => setShow(false)}>
+          <p>Drawer content</p>
+        </Drawer>
 
-// With header and custom width
-<Drawer
-  show={show()}
-  onClose={() => setShow(false)}
-  showHeader
-  width="w-96"
->
-  <p>Content here</p>
-</Drawer>
+        // With header and custom width
+        <Drawer
+          show={show()}
+          onClose={() => setShow(false)}
+          showHeader
+          width="w-96"
+        >
+          <p>Content here</p>
+        </Drawer>
 
-// Different positions
-<Drawer show={show()} position="left" onClose={handleClose}>...</Drawer>
-<Drawer show={show()} position="top" onClose={handleClose}>...</Drawer>
-<Drawer show={show()} position="bottom" onClose={handleClose}>...</Drawer>
+        // Different positions
+        <Drawer show={show()} position="left" onClose={handleClose}>...</Drawer>
+        <Drawer show={show()} position="top" onClose={handleClose}>...</Drawer>
+        <Drawer show={show()} position="bottom" onClose={handleClose}>...</Drawer>
 
-// With rounded edges
-<Drawer show={show()} roundedEdges onClose={handleClose}>...</Drawer>`}
+        // With rounded edges
+        <Drawer show={show()} roundedEdges onClose={handleClose}>...</Drawer>
+      `}
     />
   );
 }

@@ -53,7 +53,9 @@ test.describe('Label', () => {
 
   test('should render disabled state', async ({ page }) => {
     // Disabled labels may have different styling
-    const disabledLabel = page.locator('label[class*="disabled"], label[class*="opacity"]');
+    const disabledLabel = page.locator(
+      'label[class*="disabled"], label[class*="opacity"]',
+    );
     const count = await disabledLabel.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });

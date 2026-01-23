@@ -18,7 +18,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@exowpee/solidly-icons": ["../icons/dist/src/index.d.ts"],
+      "@exowpee/solidly-hooks": ["../hooks/dist/src/index.d.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["node_modules", "dist"]

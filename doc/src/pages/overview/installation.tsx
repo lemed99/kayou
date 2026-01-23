@@ -1,5 +1,5 @@
 /* eslint-disable solid/no-innerhtml */
-import { CheckCircleIcon, TerminalIcon } from '@exowpee/solidly/icons';
+import { CheckCircleIcon, TerminalIcon } from '@exowpee/solidly-icons';
 
 import { formatCodeToHTML } from '../../helpers/formatCodeToHTML';
 
@@ -28,7 +28,7 @@ import { Button, Modal, Select } from '@exowpee/solidly';
 import { useMutation, useToggle } from '@exowpee/solidly/hooks';
 
 // Import icons
-import { ArrowRightIcon, CheckIcon } from '@exowpee/solidly/icons';
+import { ArrowRightIcon, CheckIcon } from '@exowpee/solidly-icons';
 
 // Import contexts
 import { ToastProvider, useToast } from '@exowpee/solidly/contexts';`;

@@ -12,24 +12,34 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should have add/create button', async ({ page }) => {
-      const addButton = page.locator('button:has-text("Add"), button:has-text("Create"), button:has-text("New"), button:has(svg[class*="plus"])').first();
+      const addButton = page
+        .locator(
+          'button:has-text("Add"), button:has-text("Create"), button:has-text("New"), button:has(svg[class*="plus"])',
+        )
+        .first();
       await expect(addButton).toBeVisible();
     });
 
     test('should have edit functionality', async ({ page }) => {
-      const editButton = page.locator('button:has-text("Edit"), button[aria-label*="edit" i], button:has(svg)');
+      const editButton = page.locator(
+        'button:has-text("Edit"), button[aria-label*="edit" i], button:has(svg)',
+      );
       const count = await editButton.count();
       expect(count).toBeGreaterThan(0);
     });
 
     test('should have delete functionality', async ({ page }) => {
-      const deleteButton = page.locator('button:has-text("Delete"), button[aria-label*="delete" i], button:has(svg[class*="trash"])');
+      const deleteButton = page.locator(
+        'button:has-text("Delete"), button[aria-label*="delete" i], button:has(svg[class*="trash"])',
+      );
       const count = await deleteButton.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
 
     test('should have search functionality', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await expect(searchInput).toBeVisible();
     });
 
@@ -46,14 +56,18 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should allow searching for items', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await searchInput.fill('test search');
       await expect(searchInput).toHaveValue('test search');
     });
 
     test('should be responsive on mobile', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
-      const container = page.locator('[class*="crud"], [class*="interface"], main').first();
+      const container = page
+        .locator('[class*="crud"], [class*="interface"], main')
+        .first();
       await expect(container).toBeVisible();
     });
 
@@ -62,7 +76,9 @@ test.describe('Data Management Blocks', () => {
       await page.waitForTimeout(300);
       const grid = page.locator('[class*="grid"]').first();
       if (await grid.isVisible()) {
-        const gridStyle = await grid.evaluate(el => window.getComputedStyle(el).gridTemplateColumns);
+        const gridStyle = await grid.evaluate(
+          (el) => window.getComputedStyle(el).gridTemplateColumns,
+        );
         expect(gridStyle).toBeDefined();
       }
     });
@@ -91,18 +107,24 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should have sorting functionality', async ({ page }) => {
-      const sortableHeader = page.locator('th[class*="sort"], th:has(svg), button:has-text("Sort")');
+      const sortableHeader = page.locator(
+        'th[class*="sort"], th:has(svg), button:has-text("Sort")',
+      );
       const count = await sortableHeader.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
 
     test('should have search functionality', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await expect(searchInput).toBeVisible();
     });
 
     test('should have pagination', async ({ page }) => {
-      const pagination = page.locator('[class*="pagination"], button:has-text("Next"), button:has-text("Previous"), nav[aria-label*="pagination"]');
+      const pagination = page.locator(
+        '[class*="pagination"], button:has-text("Next"), button:has-text("Previous"), nav[aria-label*="pagination"]',
+      );
       const count = await pagination.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
@@ -134,7 +156,9 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should render list items', async ({ page }) => {
-      const listItems = page.locator('[class*="list"] > *, [class*="item"], [class*="card"]');
+      const listItems = page.locator(
+        '[class*="list"] > *, [class*="item"], [class*="card"]',
+      );
       const count = await listItems.count();
       expect(count).toBeGreaterThan(0);
     });
@@ -146,27 +170,37 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should have search functionality', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await expect(searchInput).toBeVisible();
     });
 
     test('should have filter options', async ({ page }) => {
-      const filterButton = page.locator('button:has-text("Filter"), [class*="filter"], select');
+      const filterButton = page.locator(
+        'button:has-text("Filter"), [class*="filter"], select',
+      );
       const count = await filterButton.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
 
     test('should have add new button', async ({ page }) => {
-      const addButton = page.locator('button:has-text("Add"), button:has-text("New"), button:has-text("Create")').first();
+      const addButton = page
+        .locator(
+          'button:has-text("Add"), button:has-text("New"), button:has-text("Create")',
+        )
+        .first();
       await expect(addButton).toBeVisible();
     });
 
     test('list items should be clickable', async ({ page }) => {
       const listItem = page.locator('[class*="item"], [class*="card"]').first();
       if (await listItem.isVisible()) {
-        const clickable = await listItem.evaluate(el => {
+        const clickable = await listItem.evaluate((el) => {
           const style = window.getComputedStyle(el);
-          return style.cursor === 'pointer' || el.tagName === 'BUTTON' || el.tagName === 'A';
+          return (
+            style.cursor === 'pointer' || el.tagName === 'BUTTON' || el.tagName === 'A'
+          );
         });
         expect(clickable || true).toBeTruthy();
       }
@@ -190,24 +224,32 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should render search input', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await expect(searchInput).toBeVisible();
     });
 
     test('should have filter options', async ({ page }) => {
-      const filterOptions = page.locator('select, [class*="filter"], button:has-text("Filter"), input[type="checkbox"]');
+      const filterOptions = page.locator(
+        'select, [class*="filter"], button:has-text("Filter"), input[type="checkbox"]',
+      );
       const count = await filterOptions.count();
       expect(count).toBeGreaterThan(0);
     });
 
     test('should allow typing in search', async ({ page }) => {
-      const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]').first();
+      const searchInput = page
+        .locator('input[type="search"], input[placeholder*="search" i]')
+        .first();
       await searchInput.fill('test query');
       await expect(searchInput).toHaveValue('test query');
     });
 
     test('should have clear/reset button', async ({ page }) => {
-      const clearButton = page.locator('button:has-text("Clear"), button:has-text("Reset"), button[aria-label*="clear" i]');
+      const clearButton = page.locator(
+        'button:has-text("Clear"), button:has-text("Reset"), button[aria-label*="clear" i]',
+      );
       const count = await clearButton.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
@@ -219,7 +261,9 @@ test.describe('Data Management Blocks', () => {
     });
 
     test('should have category or tag filters', async ({ page }) => {
-      const categories = page.locator('[class*="category"], [class*="tag"], [class*="badge"], select');
+      const categories = page.locator(
+        '[class*="category"], [class*="tag"], [class*="badge"], select',
+      );
       const count = await categories.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
@@ -234,14 +278,18 @@ test.describe('Data Management Blocks', () => {
 
     test('should be responsive on mobile', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
-      const container = page.locator('[class*="search"], [class*="filter"], main').first();
+      const container = page
+        .locator('[class*="search"], [class*="filter"], main')
+        .first();
       await expect(container).toBeVisible();
     });
 
     test('filters should collapse or drawer on mobile', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.waitForTimeout(300);
-      const filterToggle = page.locator('button:has-text("Filter"), [class*="filter-toggle"]');
+      const filterToggle = page.locator(
+        'button:has-text("Filter"), [class*="filter-toggle"]',
+      );
       const count = await filterToggle.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });

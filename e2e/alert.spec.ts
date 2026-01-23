@@ -30,7 +30,10 @@ test.describe('Alert', () => {
   // ==================== Color Variants ====================
 
   test('should render info color variant', async ({ page }) => {
-    const infoAlert = page.locator('[role="alert"]').filter({ hasText: /Info alert/i }).first();
+    const infoAlert = page
+      .locator('[role="alert"]')
+      .filter({ hasText: /Info alert/i })
+      .first();
     if (await infoAlert.isVisible()) {
       await expect(infoAlert).toBeVisible();
     }
@@ -67,7 +70,10 @@ test.describe('Alert', () => {
   });
 
   test('should render dark color variant', async ({ page }) => {
-    const darkAlert = page.locator('[role="alert"]').filter({ hasText: /Dark alert/i }).first();
+    const darkAlert = page
+      .locator('[role="alert"]')
+      .filter({ hasText: /Dark alert/i })
+      .first();
     if (await darkAlert.isVisible()) {
       await expect(darkAlert).toBeVisible();
     }

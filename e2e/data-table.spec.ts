@@ -66,7 +66,13 @@ test.describe('DataTable', () => {
   // ==================== Data Display ====================
 
   test('should display user data', async ({ page }) => {
-    const users = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams', 'Charlie Brown'];
+    const users = [
+      'John Doe',
+      'Jane Smith',
+      'Bob Johnson',
+      'Alice Williams',
+      'Charlie Brown',
+    ];
     let foundCount = 0;
 
     for (const user of users) {
@@ -144,14 +150,18 @@ test.describe('DataTable', () => {
   // ==================== Search Bar ====================
 
   test('should render search bar when enabled', async ({ page }) => {
-    const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
+    const searchInput = page
+      .locator('input[type="search"], input[placeholder*="Search"]')
+      .first();
     if (await searchInput.isVisible()) {
       await expect(searchInput).toBeVisible();
     }
   });
 
   test('should filter data on search', async ({ page }) => {
-    const searchInput = page.locator('input[type="search"], input[placeholder*="Search"]').first();
+    const searchInput = page
+      .locator('input[type="search"], input[placeholder*="Search"]')
+      .first();
 
     if (await searchInput.isVisible()) {
       await searchInput.fill('John');
@@ -165,14 +175,20 @@ test.describe('DataTable', () => {
   // ==================== Filter System ====================
 
   test('should render filter button', async ({ page }) => {
-    const filterButton = page.locator('button').filter({ hasText: /Filter/i }).first();
+    const filterButton = page
+      .locator('button')
+      .filter({ hasText: /Filter/i })
+      .first();
     if (await filterButton.isVisible()) {
       await expect(filterButton).toBeVisible();
     }
   });
 
   test('should open filter popover on button click', async ({ page }) => {
-    const filterButton = page.locator('button').filter({ hasText: /Filter/i }).first();
+    const filterButton = page
+      .locator('button')
+      .filter({ hasText: /Filter/i })
+      .first();
 
     if (await filterButton.isVisible()) {
       await filterButton.click();
@@ -187,7 +203,10 @@ test.describe('DataTable', () => {
   });
 
   test('should have add filter option', async ({ page }) => {
-    const filterButton = page.locator('button').filter({ hasText: /Filter/i }).first();
+    const filterButton = page
+      .locator('button')
+      .filter({ hasText: /Filter/i })
+      .first();
 
     if (await filterButton.isVisible()) {
       await filterButton.click();
@@ -203,7 +222,9 @@ test.describe('DataTable', () => {
   // ==================== Pagination ====================
 
   test('should render pagination controls', async ({ page }) => {
-    const pagination = page.locator('[class*="pagination"], nav[aria-label*="pagination"]').first();
+    const pagination = page
+      .locator('[class*="pagination"], nav[aria-label*="pagination"]')
+      .first();
     if (await pagination.isVisible()) {
       await expect(pagination).toBeVisible();
     }
@@ -220,7 +241,9 @@ test.describe('DataTable', () => {
 
   test('should render loading skeleton', async ({ page }) => {
     // Look for loading skeleton indicators
-    const skeleton = page.locator('[class*="animate-pulse"], [class*="skeleton"]').first();
+    const skeleton = page
+      .locator('[class*="animate-pulse"], [class*="skeleton"]')
+      .first();
     if (await skeleton.isVisible()) {
       await expect(skeleton).toBeVisible();
     }
@@ -238,14 +261,20 @@ test.describe('DataTable', () => {
   // ==================== Expandable Table ====================
 
   test('should render see more button when expandable', async ({ page }) => {
-    const seeMore = page.locator('button').filter({ hasText: /See more/i }).first();
+    const seeMore = page
+      .locator('button')
+      .filter({ hasText: /See more/i })
+      .first();
     if (await seeMore.isVisible()) {
       await expect(seeMore).toBeVisible();
     }
   });
 
   test('should expand to full view on see more click', async ({ page }) => {
-    const seeMore = page.locator('button').filter({ hasText: /See more/i }).first();
+    const seeMore = page
+      .locator('button')
+      .filter({ hasText: /See more/i })
+      .first();
 
     if (await seeMore.isVisible()) {
       await seeMore.click();

@@ -1,4 +1,12 @@
-import { Accessor, For, JSX, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import {
+  Accessor,
+  For,
+  JSX,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
+} from 'solid-js';
 
 import { useVirtualList } from '../hooks/useVirtualList';
 

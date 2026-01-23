@@ -23,7 +23,8 @@ export default function ToggleSwitchPage() {
       keyConcepts={[
         {
           term: 'Immediate vs Deferred Action',
-          explanation: 'Use toggles for instant settings; checkboxes for form submissions.',
+          explanation:
+            'Use toggles for instant settings; checkboxes for form submissions.',
         },
         {
           term: 'Semantic Colors',
@@ -76,13 +77,6 @@ export default function ToggleSwitchPage() {
         {
           title: 'Basic Toggle',
           description: 'Simple toggle switch.',
-          code: `const [checked, setChecked] = createSignal(false);
-
-<ToggleSwitch
-  label="Enable notifications"
-  checked={checked()}
-  onChange={setChecked}
-/>`,
           component: () => (
             <ToggleSwitch
               label="Enable notifications"
@@ -94,12 +88,6 @@ export default function ToggleSwitchPage() {
         {
           title: 'Color Variants',
           description: 'Different color options when active.',
-          code: `<ToggleSwitch label="Blue (default)" color="blue" checked onChange={() => {}} />
-<ToggleSwitch label="Success" color="success" checked onChange={() => {}} />
-<ToggleSwitch label="Warning" color="warning" checked onChange={() => {}} />
-<ToggleSwitch label="Failure" color="failure" checked onChange={() => {}} />
-<ToggleSwitch label="Dark" color="dark" checked onChange={() => {}} />
-<ToggleSwitch label="Gray" color="gray" checked onChange={() => {}} />`,
           component: () => (
             <div class="flex flex-col gap-4">
               <ToggleSwitch
@@ -119,8 +107,6 @@ export default function ToggleSwitchPage() {
         {
           title: 'Disabled State',
           description: 'Toggle in disabled state.',
-          code: `<ToggleSwitch label="Disabled off" checked={false} disabled onChange={() => {}} />
-<ToggleSwitch label="Disabled on" checked disabled onChange={() => {}} />`,
           component: () => (
             <div class="flex flex-col gap-4">
               <ToggleSwitch
@@ -136,11 +122,6 @@ export default function ToggleSwitchPage() {
         {
           title: 'Settings Panel',
           description: 'Common use case in settings.',
-          code: `<div class="flex flex-col gap-4">
-  <ToggleSwitch label="Dark mode" checked={darkMode()} onChange={setDarkMode} />
-  <ToggleSwitch label="Email notifications" checked={email()} onChange={setEmail} />
-  <ToggleSwitch label="Push notifications" checked={push()} onChange={setPush} />
-</div>`,
           component: () => (
             <div class="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
               <ToggleSwitch
@@ -162,40 +143,42 @@ export default function ToggleSwitchPage() {
           ),
         },
       ]}
-      usage={`import { ToggleSwitch } from '@exowpee/solidly';
+      usage={`
+        import { ToggleSwitch } from '@exowpee/solidly';
 
-// Basic usage
-const [enabled, setEnabled] = createSignal(false);
+        // Basic usage
+        const [enabled, setEnabled] = createSignal(false);
 
-<ToggleSwitch
-  label="Enable feature"
-  checked={enabled()}
-  onChange={setEnabled}
-/>
+        <ToggleSwitch
+          label="Enable feature"
+          checked={enabled()}
+          onChange={setEnabled}
+        />
 
-// With color variant
-<ToggleSwitch
-  label="Active status"
-  color="success"
-  checked={active()}
-  onChange={setActive}
-/>
+        // With color variant
+        <ToggleSwitch
+          label="Active status"
+          color="success"
+          checked={active()}
+          onChange={setActive}
+        />
 
-// With form name (creates hidden checkbox)
-<ToggleSwitch
-  label="Subscribe"
-  name="subscribe"
-  checked={subscribe()}
-  onChange={setSubscribe}
-/>
+        // With form name (creates hidden checkbox)
+        <ToggleSwitch
+          label="Subscribe"
+          name="subscribe"
+          checked={subscribe()}
+          onChange={setSubscribe}
+        />
 
-// Disabled state
-<ToggleSwitch
-  label="Locked setting"
-  checked={true}
-  disabled
-  onChange={() => {}}
-/>`}
+        // Disabled state
+        <ToggleSwitch
+          label="Locked setting"
+          checked={true}
+          disabled
+          onChange={() => {}}
+        />
+      `}
     />
   );
 }

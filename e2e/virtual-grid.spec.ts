@@ -7,13 +7,17 @@ test.describe('VirtualGrid', () => {
 
   test('should render virtual grid container', async ({ page }) => {
     // VirtualGrid renders in a scrollable container
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"], [class*="grid"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"], [class*="grid"]')
+      .first();
     await expect(container).toBeVisible();
   });
 
   test('should render visible grid items only', async ({ page }) => {
     // Virtual grid renders only visible items
-    const items = page.locator('[class*="overflow-auto"] > div, [class*="grid"] > div').first();
+    const items = page
+      .locator('[class*="overflow-auto"] > div, [class*="grid"] > div')
+      .first();
     await expect(items).toBeVisible();
   });
 
@@ -24,7 +28,9 @@ test.describe('VirtualGrid', () => {
   });
 
   test('should scroll vertically', async ({ page }) => {
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       const initialScroll = await container.evaluate((el) => el.scrollTop);
@@ -41,7 +47,9 @@ test.describe('VirtualGrid', () => {
   });
 
   test('should scroll horizontally if enabled', async ({ page }) => {
-    const container = page.locator('[class*="overflow-x-auto"], [class*="overflow-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-x-auto"], [class*="overflow-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -54,7 +62,9 @@ test.describe('VirtualGrid', () => {
   });
 
   test('should update items on scroll', async ({ page }) => {
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -76,7 +86,9 @@ test.describe('VirtualGrid', () => {
   });
 
   test('should maintain grid structure', async ({ page }) => {
-    const gridItems = page.locator('[class*="grid"] > div, [class*="overflow-auto"] > div > div');
+    const gridItems = page.locator(
+      '[class*="grid"] > div, [class*="overflow-auto"] > div > div',
+    );
     const count = await gridItems.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -88,7 +100,9 @@ test.describe('VirtualGrid', () => {
   });
 
   test('should be keyboard navigable', async ({ page }) => {
-    const firstItem = page.locator('[class*="grid"] > div, [class*="overflow-auto"] > div').first();
+    const firstItem = page
+      .locator('[class*="grid"] > div, [class*="overflow-auto"] > div')
+      .first();
 
     if (await firstItem.isVisible()) {
       await firstItem.click();

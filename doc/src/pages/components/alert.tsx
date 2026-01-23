@@ -74,11 +74,6 @@ export default function AlertPage() {
         {
           title: 'Color Variants',
           description: 'Five color variants for different message types.',
-          code: `<Alert color="info">Info alert message</Alert>
-<Alert color="success">Success alert message</Alert>
-<Alert color="warning">Warning alert message</Alert>
-<Alert color="failure">Failure alert message</Alert>
-<Alert color="dark">Dark alert message</Alert>`,
           component: () => (
             <div class="flex flex-col gap-4">
               <Alert color="info">Info alert message</Alert>
@@ -92,9 +87,6 @@ export default function AlertPage() {
         {
           title: 'With Icon',
           description: 'Display an icon alongside the alert message.',
-          code: `<Alert color="info" icon={InfoIcon}>
-  Alert with an info icon
-</Alert>`,
           component: () => (
             <Alert color="info" icon={InfoIcon}>
               Alert with an info icon
@@ -104,16 +96,6 @@ export default function AlertPage() {
         {
           title: 'With Additional Content',
           description: 'Add extra content below the main message.',
-          code: `<Alert
-  color="warning"
-  additionalContent={
-    <div class="mt-2 text-sm">
-      Please review the details and take action.
-    </div>
-  }
->
-  Warning: Action required
-</Alert>`,
           component: () => (
             <Alert
               color="warning"
@@ -126,23 +108,25 @@ export default function AlertPage() {
           ),
         },
       ]}
-      usage={`import { Alert } from '@exowpee/solidly';
+      usage={`
+        import { Alert } from '@exowpee/solidly';
 
-// Basic usage
-<Alert color="info">This is an info message</Alert>
+        // Basic usage
+        <Alert color="info">This is an info message</Alert>
 
-// With icon
-<Alert color="success" icon={CheckIcon}>
-  Operation completed successfully
-</Alert>
+        // With icon
+        <Alert color="success" icon={CheckIcon}>
+          Operation completed successfully
+        </Alert>
 
-// With additional content
-<Alert
-  color="failure"
-  additionalContent={<button>Retry</button>}
->
-  An error occurred
-</Alert>`}
+        // With additional content
+        <Alert
+          color="failure"
+          additionalContent={<button>Retry</button>}
+        >
+          An error occurred
+        </Alert>
+      `}
     />
   );
 }

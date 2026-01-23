@@ -85,7 +85,9 @@ test.describe('Textarea', () => {
   });
 
   test('should render error state', async ({ page }) => {
-    const errorTextarea = page.locator('textarea[class*="error"], textarea[class*="border-red"]');
+    const errorTextarea = page.locator(
+      'textarea[class*="error"], textarea[class*="border-red"]',
+    );
     const count = await errorTextarea.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });

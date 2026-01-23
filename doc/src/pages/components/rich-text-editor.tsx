@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { RichTextEditor } from '@exowpee/solidly-pro';
+import { RichTextEditor } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -25,7 +25,6 @@ export default function RichTextEditorPage() {
   return (
     <DocPage
       title="RichTextEditor"
-      isPro
       description="Production-ready WYSIWYG editor built on Tiptap. Perfect for product descriptions, reviews, comments, and general content editing."
       dependencies={[
         {
@@ -79,7 +78,8 @@ export default function RichTextEditorPage() {
         },
         {
           term: 'Character Limit',
-          explanation: 'Optional maxLength enforces character limits with visual feedback.',
+          explanation:
+            'Optional maxLength enforces character limits with visual feedback.',
         },
       ]}
       props={[
@@ -264,10 +264,6 @@ export default function RichTextEditorPage() {
         {
           title: 'Basic Editor',
           description: 'Simple editor with default toolbar options.',
-          code: `<RichTextEditor
-  placeholder="Write something..."
-  onChange={(html) => console.log(html)}
-/>`,
           component: () => (
             <RichTextEditor
               placeholder="Write something amazing..."
@@ -278,10 +274,6 @@ export default function RichTextEditorPage() {
         {
           title: 'With Initial Content',
           description: 'Editor pre-populated with HTML content.',
-          code: `<RichTextEditor
-  content={sampleContent}
-  onChange={(html) => setContent(html)}
-/>`,
           component: () => (
             <RichTextEditor
               content={controlledContent()}
@@ -292,19 +284,6 @@ export default function RichTextEditorPage() {
         {
           title: 'Product Review Editor',
           description: 'Simplified editor for customer reviews with character limit.',
-          code: `<RichTextEditor
-  label="Your Review"
-  placeholder="Share your experience with this product..."
-  maxLength={1000}
-  showCharacterCount
-  toolbar={{
-    headings: false,
-    alignment: false,
-    blockquote: false,
-    codeBlock: false,
-  }}
-  helperText="Be specific about what you liked or disliked"
-/>`,
           component: () => (
             <RichTextEditor
               label="Your Review"
@@ -325,13 +304,6 @@ export default function RichTextEditorPage() {
         {
           title: 'With Label and Validation',
           description: 'Editor with label, required indicator, and error state.',
-          code: `<RichTextEditor
-  label="Product Description"
-  required
-  error="Description is required"
-  placeholder="Describe your product..."
-  minHeight={200}
-/>`,
           component: () => (
             <RichTextEditor
               label="Product Description"
@@ -345,21 +317,6 @@ export default function RichTextEditorPage() {
         {
           title: 'Minimal Toolbar',
           description: 'Only basic formatting for simple comments.',
-          code: `<RichTextEditor
-  placeholder="Add a comment..."
-  toolbar={{
-    formatting: true,
-    headings: false,
-    lists: false,
-    alignment: false,
-    link: true,
-    blockquote: false,
-    history: false,
-    clearFormatting: false,
-  }}
-  minHeight={100}
-  maxHeight={200}
-/>`,
           component: () => (
             <RichTextEditor
               placeholder="Add a comment..."
@@ -381,23 +338,6 @@ export default function RichTextEditorPage() {
         {
           title: 'Full Featured',
           description: 'All toolbar options enabled including code blocks.',
-          code: `<RichTextEditor
-  label="Documentation"
-  placeholder="Write detailed documentation..."
-  toolbar={{
-    formatting: true,
-    headings: true,
-    lists: true,
-    alignment: true,
-    link: true,
-    blockquote: true,
-    codeBlock: true,
-    horizontalRule: true,
-    history: true,
-    clearFormatting: true,
-  }}
-  showCharacterCount
-/>`,
           component: () => (
             <RichTextEditor
               label="Documentation"
@@ -421,96 +361,82 @@ export default function RichTextEditorPage() {
         {
           title: 'Disabled State',
           description: 'Editor in disabled state.',
-          code: `<RichTextEditor
-  content="<p>This content cannot be edited.</p>"
-  disabled
-/>`,
           component: () => (
-            <RichTextEditor
-              content="<p>This content cannot be edited.</p>"
-              disabled
-            />
+            <RichTextEditor content="<p>This content cannot be edited.</p>" disabled />
           ),
         },
         {
           title: 'Read-Only Mode',
           description: 'Display content without toolbar (read-only).',
-          code: `<RichTextEditor
-  content={sampleContent}
-  readOnly
-/>`,
-          component: () => (
-            <RichTextEditor
-              content={sampleContent}
-              readOnly
-            />
-          ),
+          component: () => <RichTextEditor content={sampleContent} readOnly />,
         },
       ]}
-      usage={`import { RichTextEditor, type ToolbarConfig } from '@exowpee/solidly-pro';
+      usage={`
+        import { RichTextEditor, type ToolbarConfig } from '@exowpee/solidly';
 
-// Basic usage
-const [content, setContent] = createSignal('');
+        // Basic usage
+        const [content, setContent] = createSignal('');
 
-<RichTextEditor
-  placeholder="Write something..."
-  onChange={(html) => setContent(html)}
-/>
+        <RichTextEditor
+          placeholder="Write something..."
+          onChange={(html) => setContent(html)}
+        />
 
-// With initial content and character limit
-<RichTextEditor
-  content="<p>Initial content</p>"
-  onChange={(html) => setContent(html)}
-  maxLength={5000}
-  showCharacterCount
-/>
+        // With initial content and character limit
+        <RichTextEditor
+          content="<p>Initial content</p>"
+          onChange={(html) => setContent(html)}
+          maxLength={5000}
+          showCharacterCount
+        />
 
-// Customized toolbar for reviews
-const reviewToolbar: ToolbarConfig = {
-  formatting: true,
-  headings: false,
-  lists: true,
-  alignment: false,
-  link: true,
-  blockquote: false,
-  codeBlock: false,
-  horizontalRule: false,
-  history: true,
-  clearFormatting: true,
-};
+        // Customized toolbar for reviews
+        const reviewToolbar: ToolbarConfig = {
+          formatting: true,
+          headings: false,
+          lists: true,
+          alignment: false,
+          link: true,
+          blockquote: false,
+          codeBlock: false,
+          horizontalRule: false,
+          history: true,
+          clearFormatting: true,
+        };
 
-<RichTextEditor
-  label="Your Review"
-  required
-  placeholder="Share your experience..."
-  toolbar={reviewToolbar}
-  maxLength={1000}
-  showCharacterCount
-  onChange={(html) => setReview(html)}
-/>
+        <RichTextEditor
+          label="Your Review"
+          required
+          placeholder="Share your experience..."
+          toolbar={reviewToolbar}
+          maxLength={1000}
+          showCharacterCount
+          onChange={(html) => setReview(html)}
+        />
 
-// With validation
-const [error, setError] = createSignal('');
+        // With validation
+        const [error, setError] = createSignal('');
 
-<RichTextEditor
-  label="Description"
-  required
-  error={error()}
-  onChange={(html) => {
-    setContent(html);
-    if (!html || html === '<p></p>') {
-      setError('Description is required');
-    } else {
-      setError('');
-    }
-  }}
-/>
+        <RichTextEditor
+          label="Description"
+          required
+          error={error()}
+          onChange={(html) => {
+            setContent(html);
+            if (!html || html === '<p></p>') {
+              setError('Description is required');
+            } else {
+              setError('');
+            }
+          }}
+        />
 
-// Read-only display
-<RichTextEditor
-  content={savedContent}
-  readOnly
-/>`}
+        // Read-only display
+        <RichTextEditor
+          content={savedContent}
+          readOnly
+        />
+      `}
     />
   );
 }

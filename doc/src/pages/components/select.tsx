@@ -128,17 +128,6 @@ export default function SelectPage() {
         {
           title: 'Basic Select',
           description: 'Simple select with options.',
-          code: `const [selected, setSelected] = createSignal();
-
-<Select
-  options={[
-    { value: 'apple', label: 'Apple' },
-    { value: 'banana', label: 'Banana' },
-    { value: 'cherry', label: 'Cherry' },
-  ]}
-  placeholder="Select a fruit"
-  onSelect={(opt) => setSelected(opt?.value)}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -152,13 +141,6 @@ export default function SelectPage() {
         {
           title: 'With Label and Helper Text',
           description: 'Select with label and helper text.',
-          code: `<Select
-  label="Country"
-  helperText="Select your country of residence"
-  options={countryOptions}
-  placeholder="Choose a country"
-  onSelect={handleSelect}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -174,12 +156,6 @@ export default function SelectPage() {
         {
           title: 'With Default Value',
           description: 'Select with a pre-selected value.',
-          code: `<Select
-  label="Favorite Fruit"
-  options={fruitOptions}
-  value="banana"
-  onSelect={handleSelect}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -194,8 +170,6 @@ export default function SelectPage() {
         {
           title: 'Validation States',
           description: 'Different color states for validation feedback.',
-          code: `<Select color="success" helperText="Valid selection" ... />
-<Select color="failure" helperText="Please select an option" ... />`,
           component: () => (
             <div class="flex w-64 flex-col gap-4">
               <Select
@@ -220,12 +194,6 @@ export default function SelectPage() {
         {
           title: 'Required Field',
           description: 'Select marked as required.',
-          code: `<Select
-  label="Category"
-  required
-  options={options}
-  onSelect={handleSelect}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -241,13 +209,6 @@ export default function SelectPage() {
         {
           title: 'Disabled State',
           description: 'Select in disabled state.',
-          code: `<Select
-  label="Disabled Select"
-  disabled
-  options={options}
-  value="apple"
-  onSelect={() => {}}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -263,12 +224,6 @@ export default function SelectPage() {
         {
           title: 'Loading State',
           description: 'Select in loading state.',
-          code: `<Select
-  label="Loading Select"
-  isLoading
-  options={options}
-  onSelect={() => {}}
-/>`,
           component: () => (
             <div class="w-64">
               <Select
@@ -282,55 +237,57 @@ export default function SelectPage() {
           ),
         },
       ]}
-      usage={`import { Select } from '@exowpee/solidly';
+      usage={`
+        import { Select } from '@exowpee/solidly';
 
-// Basic usage
-const [selected, setSelected] = createSignal();
+        // Basic usage
+        const [selected, setSelected] = createSignal();
 
-<Select
-  options={[
-    { value: '1', label: 'Option 1' },
-    { value: '2', label: 'Option 2' },
-    { value: '3', label: 'Option 3' },
-  ]}
-  placeholder="Select an option"
-  onSelect={(opt) => setSelected(opt?.value)}
-/>
+        <Select
+          options={[
+            { value: '1', label: 'Option 1' },
+            { value: '2', label: 'Option 2' },
+            { value: '3', label: 'Option 3' },
+          ]}
+          placeholder="Select an option"
+          onSelect={(opt) => setSelected(opt?.value)}
+        />
 
-// With label and validation
-<Select
-  label="Category"
-  required
-  color={hasError() ? 'failure' : 'gray'}
-  helperText={hasError() ? 'Required field' : undefined}
-  options={categories}
-  value={selectedCategory()}
-  onSelect={(opt) => setSelectedCategory(opt?.value)}
-/>
+        // With label and validation
+        <Select
+          label="Category"
+          required
+          color={hasError() ? 'failure' : 'gray'}
+          helperText={hasError() ? 'Required field' : undefined}
+          options={categories}
+          value={selectedCategory()}
+          onSelect={(opt) => setSelectedCategory(opt?.value)}
+        />
 
-// Virtual scrolling for large lists
-<Select
-  options={largeOptionsList}
-  optionRowHeight={32}
-  onSelect={handleSelect}
-/>
+        // Virtual scrolling for large lists
+        <Select
+          options={largeOptionsList}
+          optionRowHeight={32}
+          onSelect={handleSelect}
+        />
 
-// Custom label rendering
-<Select
-  options={[
-    {
-      value: 'premium',
-      label: 'Premium Plan',
-      labelWrapper: (label) => (
-        <div class="flex items-center gap-2">
-          <span class="text-yellow-500">★</span>
-          {label}
-        </div>
-      ),
-    },
-  ]}
-  onSelect={handleSelect}
-/>`}
+        // Custom label rendering
+        <Select
+          options={[
+            {
+              value: 'premium',
+              label: 'Premium Plan',
+              labelWrapper: (label) => (
+                <div class="flex items-center gap-2">
+                  <span class="text-yellow-500">★</span>
+                  {label}
+                </div>
+              ),
+            },
+          ]}
+          onSelect={handleSelect}
+        />
+      `}
       relatedHooks={[
         {
           name: 'useSelect',

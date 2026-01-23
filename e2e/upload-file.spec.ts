@@ -12,13 +12,17 @@ test.describe('UploadFile', () => {
 
   test('should render upload area', async ({ page }) => {
     // UploadFile component renders a div with drag and drop area
-    const uploadArea = page.locator('[class*="border-dashed"], [class*="cursor-pointer"]').first();
+    const uploadArea = page
+      .locator('[class*="border-dashed"], [class*="cursor-pointer"]')
+      .first();
     await expect(uploadArea).toBeVisible();
   });
 
   test('should render upload button', async ({ page }) => {
     // The upload area itself is clickable
-    const uploadArea = page.locator('[class*="border-dashed"], [class*="cursor-pointer"], button').first();
+    const uploadArea = page
+      .locator('[class*="border-dashed"], [class*="cursor-pointer"], button')
+      .first();
     await expect(uploadArea).toBeVisible();
   });
 
@@ -54,7 +58,9 @@ test.describe('UploadFile', () => {
   });
 
   test('should show drop indicator on drag over', async ({ page }) => {
-    const dropzone = page.locator('[class*="border-dashed"], [class*="cursor-pointer"]').first();
+    const dropzone = page
+      .locator('[class*="border-dashed"], [class*="cursor-pointer"]')
+      .first();
 
     if (await dropzone.isVisible()) {
       // Simulate drag over

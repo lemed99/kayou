@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { MultiSelect } from '@exowpee/solidly-pro';
+import { MultiSelect } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -75,7 +75,6 @@ export default function MultiSelectPage() {
   return (
     <DocPage
       title="MultiSelect"
-      isPro
       description="Dropdown for selecting multiple options from a list. Features search filtering, virtualization for large lists, keyboard navigation, and customizable display values."
       dependencies={[
         {
@@ -193,19 +192,7 @@ export default function MultiSelectPage() {
       examples={[
         {
           title: 'Basic MultiSelect',
-          description: 'Simple multi-select dropdown.',
-          code: `const [selected, setSelected] = createSignal([]);
-
-<MultiSelect
-  options={[
-    { value: 'react', label: 'React' },
-    { value: 'solid', label: 'SolidJS' },
-    { value: 'vue', label: 'Vue' },
-  ]}
-  onMultiSelect={(opts) => setSelected(opts || [])}
-  placeholder="Select frameworks"
-/>`,
-          component: () => {
+          description: 'Simple multi-select dropdown.',          component: () => {
             const [, setSelected] = createSignal<typeof sampleOptions>([]);
             return (
               <MultiSelect
@@ -218,15 +205,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'With Search',
-          description: 'Enables filtering options by typing.',
-          code: `<MultiSelect
-  options={countryOptions}
-  onMultiSelect={handleSelect}
-  withSearch
-  searchPlaceholder="Search countries..."
-  placeholder="Select countries"
-/>`,
-          component: () => {
+          description: 'Enables filtering options by typing.',          component: () => {
             const [, setSelected] = createSignal<typeof countryOptions>([]);
             return (
               <MultiSelect
@@ -242,15 +221,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'With Label and Helper Text',
-          description: 'MultiSelect with label above and helper text below.',
-          code: `<MultiSelect
-  options={options}
-  onMultiSelect={handleSelect}
-  label="Technologies"
-  helperText="Select all that apply"
-  placeholder="Choose technologies"
-/>`,
-          component: () => {
+          description: 'MultiSelect with label above and helper text below.',          component: () => {
             const [, setSelected] = createSignal<typeof sampleOptions>([]);
             return (
               <MultiSelect
@@ -265,14 +236,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'Pre-selected Values',
-          description: 'MultiSelect with initial selected values.',
-          code: `<MultiSelect
-  options={options}
-  values={['solid', 'react']}
-  onMultiSelect={handleSelect}
-  placeholder="Select frameworks"
-/>`,
-          component: () => {
+          description: 'MultiSelect with initial selected values.',          component: () => {
             const [, setSelected] = createSignal<typeof sampleOptions>([]);
             return (
               <MultiSelect
@@ -286,15 +250,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'Disabled State',
-          description: 'MultiSelect that cannot be interacted with.',
-          code: `<MultiSelect
-  options={options}
-  values={['solid']}
-  onMultiSelect={handleSelect}
-  disabled
-  placeholder="Disabled"
-/>`,
-          component: () => (
+          description: 'MultiSelect that cannot be interacted with.',          component: () => (
             <MultiSelect
               options={sampleOptions}
               values={['solid']}
@@ -306,14 +262,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'Loading State',
-          description: 'Shows loading spinner while fetching options.',
-          code: `<MultiSelect
-  options={[]}
-  onMultiSelect={handleSelect}
-  isLoading
-  placeholder="Loading..."
-/>`,
-          component: () => (
+          description: 'Shows loading spinner while fetching options.',          component: () => (
             <MultiSelect
               options={[]}
               onMultiSelect={() => {}}
@@ -324,18 +273,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'Controlled Selection',
-          description: 'Interactive example with controlled state.',
-          code: `const [selected, setSelected] = createSignal<Option[]>([]);
-
-<MultiSelect
-  options={options}
-  values={selected().map(o => o.value)}
-  onMultiSelect={(opts) => setSelected(opts || [])}
-  withSearch
-  label="Frameworks"
-  helperText={\`Selected: \${selected().length}\`}
-/>`,
-          component: () => {
+          description: 'Interactive example with controlled state.',          component: () => {
             const [selected, setSelected] = createSignal<typeof sampleOptions>([]);
             return (
               <MultiSelect
@@ -351,14 +289,7 @@ export default function MultiSelectPage() {
         },
         {
           title: 'Custom Display Value',
-          description: 'Override the displayed text in the input.',
-          code: `<MultiSelect
-  options={options}
-  values={['solid', 'react', 'vue']}
-  displayValue="3 frameworks selected"
-  onMultiSelect={handleSelect}
-/>`,
-          component: () => (
+          description: 'Override the displayed text in the input.',          component: () => (
             <MultiSelect
               options={sampleOptions}
               values={['solid', 'react', 'vue']}
@@ -368,44 +299,46 @@ export default function MultiSelectPage() {
           ),
         },
       ]}
-      usage={`import { MultiSelect } from '@exowpee/solidly';
+      usage={`
+        import { MultiSelect } from '@exowpee/solidly';
 
-// Basic usage
-const [selected, setSelected] = createSignal([]);
+        // Basic usage
+        const [selected, setSelected] = createSignal([]);
 
-<MultiSelect
-  options={[
-    { value: 'opt1', label: 'Option 1' },
-    { value: 'opt2', label: 'Option 2' },
-  ]}
-  onMultiSelect={(opts) => setSelected(opts || [])}
-  placeholder="Select options"
-/>
+        <MultiSelect
+          options={[
+            { value: 'opt1', label: 'Option 1' },
+            { value: 'opt2', label: 'Option 2' },
+          ]}
+          onMultiSelect={(opts) => setSelected(opts || [])}
+          placeholder="Select options"
+        />
 
-// With search functionality
-<MultiSelect
-  options={options}
-  onMultiSelect={handleSelect}
-  withSearch
-  searchPlaceholder="Search..."
-/>
+        // With search functionality
+        <MultiSelect
+          options={options}
+          onMultiSelect={handleSelect}
+          withSearch
+          searchPlaceholder="Search..."
+        />
 
-// With label and controlled values
-<MultiSelect
-  options={options}
-  values={selected().map(o => o.value)}
-  onMultiSelect={setSelected}
-  label="Categories"
-  helperText="Select multiple categories"
-/>
+        // With label and controlled values
+        <MultiSelect
+          options={options}
+          values={selected().map(o => o.value)}
+          onMultiSelect={setSelected}
+          label="Categories"
+          helperText="Select multiple categories"
+        />
 
-// Custom display value
-<MultiSelect
-  options={options}
-  values={selectedValues}
-  displayValue={\`\${selectedValues.length} selected\`}
-  onMultiSelect={handleSelect}
-/>`}
+        // Custom display value
+        <MultiSelect
+          options={options}
+          values={selectedValues}
+          displayValue={\`\${selectedValues.length} selected\`}
+          onMultiSelect={handleSelect}
+        />
+      `}
       relatedHooks={[
         {
           name: 'useSelect',

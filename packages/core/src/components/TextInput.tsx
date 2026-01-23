@@ -7,9 +7,9 @@ import {
   splitProps,
 } from 'solid-js';
 
+import { ChevronDownIcon, ChevronUpIcon } from '@exowpee/solidly-icons';
 import { twMerge } from 'tailwind-merge';
 
-import { ChevronDownIcon, ChevronUpIcon } from '../icons';
 import HelperText from './HelperText';
 import Label from './Label';
 import Spinner from './Spinner';

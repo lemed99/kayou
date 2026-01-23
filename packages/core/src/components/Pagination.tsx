@@ -5,7 +5,8 @@ import {
   ChevronLeftIcon,
   ChevronRightDoubleIcon,
   ChevronRightIcon,
-} from '../icons';
+} from '@exowpee/solidly-icons';
+
 import Button from './Button';
 import NumberInput from './NumberInput';
 import Tooltip from './Tooltip';

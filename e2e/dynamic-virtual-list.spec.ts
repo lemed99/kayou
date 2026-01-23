@@ -7,13 +7,17 @@ test.describe('DynamicVirtualList', () => {
 
   test('should render dynamic virtual list container', async ({ page }) => {
     // DynamicVirtualList renders in a scrollable container
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
   });
 
   test('should render visible items', async ({ page }) => {
     // Virtual list renders only visible items - check for any div content
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
 
     // Verify container has content
@@ -23,12 +27,16 @@ test.describe('DynamicVirtualList', () => {
 
   test('should handle variable height items', async ({ page }) => {
     // Dynamic virtual list supports variable height items
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
   });
 
   test('should scroll smoothly', async ({ page }) => {
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -43,7 +51,9 @@ test.describe('DynamicVirtualList', () => {
   });
 
   test('should update on scroll', async ({ page }) => {
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -59,12 +69,16 @@ test.describe('DynamicVirtualList', () => {
 
   test('should recalculate on content resize', async ({ page }) => {
     // Dynamic lists recalculate when content changes
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
   });
 
   test('should handle large datasets efficiently', async ({ page }) => {
-    const container = page.locator('[class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
 
     // Should render a reasonable number of items

@@ -1,9 +1,0 @@
-export declare const isDateValid: (dateString: string) => boolean;
-export declare const getDaysShort: (locale: string) => string[];
-export declare const getMonthsShort: (locale: string) => string[];
-export declare const formatDate: (date: Date | string, format: string) => string;
-export declare const parseDate: (dateString: string) => Date;
-export declare const isSameDay: (date1: Date, date2: Date) => boolean;
-export declare const isInRange: (date: Date, start: Date | string, end: Date | string) => boolean;
-export declare const addMonths: (date: Date, months: number) => Date;
-export declare const toISO: (date: Date) => string;

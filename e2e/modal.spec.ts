@@ -6,12 +6,18 @@ test.describe('Modal', () => {
   });
 
   test('should render modal trigger button', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await expect(trigger).toBeVisible();
   });
 
   test('should open modal on trigger click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -20,7 +26,10 @@ test.describe('Modal', () => {
   });
 
   test('should close modal on close button click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -37,7 +46,10 @@ test.describe('Modal', () => {
   });
 
   test('should close modal on Escape key', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -54,7 +66,10 @@ test.describe('Modal', () => {
   });
 
   test('should close modal on backdrop click', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -71,7 +86,10 @@ test.describe('Modal', () => {
   });
 
   test('should have proper aria attributes', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -81,7 +99,10 @@ test.describe('Modal', () => {
   });
 
   test('should trap focus inside modal', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -95,7 +116,10 @@ test.describe('Modal', () => {
   });
 
   test('should render modal with title', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 
@@ -106,7 +130,10 @@ test.describe('Modal', () => {
   });
 
   test('should render modal with content', async ({ page }) => {
-    const trigger = page.locator('button').filter({ hasText: /open|modal|show/i }).first();
+    const trigger = page
+      .locator('button')
+      .filter({ hasText: /open|modal|show/i })
+      .first();
     await trigger.click();
     await page.waitForTimeout(600);
 

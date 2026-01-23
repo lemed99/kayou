@@ -1,9 +1,8 @@
 import { Component, JSX, ValidComponent, createMemo, splitProps } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
+import { ChevronRightIcon } from '@exowpee/solidly-icons';
 import { twMerge } from 'tailwind-merge';
-
-import { ChevronRightIcon } from '../icons';
 
 /**
  * Props for the Breadcrumb component.

@@ -9,7 +9,6 @@ import {
   onMount,
 } from 'solid-js';
 
-import { Diamond01Icon } from '@exowpee/solidly/icons';
 import { A, useLocation } from '@solidjs/router';
 import routes from '~solid-pages';
 
@@ -22,8 +21,6 @@ interface Route {
 const gettingStartedPages = [
   { path: '/overview/quickstart', label: 'Introduction' },
   { path: '/overview/installation', label: 'Installation' },
-  { path: '/overview/why-solidjs', label: 'Why SolidJS?' },
-  { path: '/overview/why-solidly', label: 'Why Solidly?' },
   { path: '/overview/contributing', label: 'Contributing' },
   { path: '/overview/license', label: 'License' },
 ];
@@ -53,32 +50,6 @@ const componentCategories: Record<string, string[]> = {
   'Data Display': ['data-table', 'virtual-list', 'virtual-grid', 'dynamic-virtual-list'],
   Charts: ['area-chart', 'bar-chart', 'line-chart', 'pie-chart', 'responsive-container'],
 };
-
-// Pro components that should show a badge
-const proComponents = new Set([
-  'data-table',
-  'date-picker',
-  'multi-select',
-  'number-input',
-  'password',
-  'rich-text-editor',
-  'select-with-search',
-  'sidebar',
-  'upload-file',
-  'virtual-grid',
-  'dynamic-virtual-list',
-  'area-chart',
-  'bar-chart',
-  'line-chart',
-  'pie-chart',
-  'responsive-container',
-  'use-custom-resource',
-  'use-date-picker',
-  'use-dynamic-virtual-list',
-]);
-
-// Pro Badge component
-const ProBadge = () => <Diamond01Icon class="text-blue-500" />;
 
 // Chevron icon for collapsible sections
 const ChevronIcon = (props: { expanded: boolean; class?: string }) => (
@@ -236,11 +207,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   };
 
   // Render a sidebar link item with bullet dot
-  const renderLink = (
-    path: string,
-    label: string,
-    options?: { isPro?: boolean },
-  ): JSX.Element => {
+  const renderLink = (path: string, label: string): JSX.Element => {
     const active = isActivePath(path);
     return (
       <li>
@@ -254,9 +221,6 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
           }`}
         >
           {label}
-          <Show when={options?.isPro}>
-            <ProBadge />
-          </Show>
         </A>
       </li>
     );
@@ -336,9 +300,6 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
                         renderLink(
                           `${fullPath}/${item.path}`,
                           formatComponentPath(item.path),
-                          {
-                            isPro: proComponents.has(item.path),
-                          },
                         )
                       }
                     </For>
@@ -364,11 +325,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
       'hooks',
       <ul class="space-y-0.5 pl-3">
         <For each={sortedChildren}>
-          {(child) =>
-            renderLink(`${fullPath}/${child.path}`, formatHookPath(child.path), {
-              isPro: proComponents.has(child.path),
-            })
-          }
+          {(child) => renderLink(`${fullPath}/${child.path}`, formatHookPath(child.path))}
         </For>
       </ul>,
     );

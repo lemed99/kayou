@@ -6,7 +6,9 @@ test.describe('Pagination', () => {
   });
 
   test('should render pagination component', async ({ page }) => {
-    const pagination = page.locator('nav[aria-label*="pagination" i], nav, [class*="pagination"]').first();
+    const pagination = page
+      .locator('nav[aria-label*="pagination" i], nav, [class*="pagination"]')
+      .first();
     await expect(pagination).toBeVisible();
   });
 

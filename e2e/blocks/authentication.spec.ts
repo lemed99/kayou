@@ -12,7 +12,9 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should have email input', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email" i]')
+        .first();
       await expect(emailInput).toBeVisible();
     });
 
@@ -22,12 +24,18 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should have submit button', async ({ page }) => {
-      const submitButton = page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Log in")').first();
+      const submitButton = page
+        .locator(
+          'button[type="submit"], button:has-text("Sign in"), button:has-text("Log in")',
+        )
+        .first();
       await expect(submitButton).toBeVisible();
     });
 
     test('should allow typing in email field', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email" i]')
+        .first();
       await emailInput.fill('test@example.com');
       await expect(emailInput).toHaveValue('test@example.com');
     });
@@ -40,7 +48,9 @@ test.describe('Authentication Blocks', () => {
 
     test('should have remember me checkbox or social login options', async ({ page }) => {
       const checkbox = page.locator('input[type="checkbox"]').first();
-      const socialButtons = page.locator('button:has-text("Google"), button:has-text("GitHub"), button:has(svg)');
+      const socialButtons = page.locator(
+        'button:has-text("Google"), button:has-text("GitHub"), button:has(svg)',
+      );
       const hasCheckbox = await checkbox.isVisible().catch(() => false);
       const hasSocialButtons = await socialButtons.count();
       expect(hasCheckbox || hasSocialButtons > 0).toBeTruthy();
@@ -64,12 +74,16 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should have name input', async ({ page }) => {
-      const nameInput = page.locator('input[placeholder*="name" i], input[id*="name" i]').first();
+      const nameInput = page
+        .locator('input[placeholder*="name" i], input[id*="name" i]')
+        .first();
       await expect(nameInput).toBeVisible();
     });
 
     test('should have email input', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email" i]')
+        .first();
       await expect(emailInput).toBeVisible();
     });
 
@@ -79,7 +93,11 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should have create account button', async ({ page }) => {
-      const submitButton = page.locator('button[type="submit"], button:has-text("Create"), button:has-text("Sign up")').first();
+      const submitButton = page
+        .locator(
+          'button[type="submit"], button:has-text("Create"), button:has-text("Sign up")',
+        )
+        .first();
       await expect(submitButton).toBeVisible();
     });
 
@@ -87,7 +105,9 @@ test.describe('Authentication Blocks', () => {
       const passwordInput = page.locator('input[type="password"]').first();
       await passwordInput.fill('Str0ngP@ss!');
       // Look for strength indicator
-      const strengthIndicator = page.locator('[class*="strength"], [class*="progress"], div:has-text("Strong"), div:has-text("Weak"), div:has-text("Fair")');
+      const strengthIndicator = page.locator(
+        '[class*="strength"], [class*="progress"], div:has-text("Strong"), div:has-text("Weak"), div:has-text("Fair")',
+      );
       const hasStrengthIndicator = await strengthIndicator.count();
       expect(hasStrengthIndicator).toBeGreaterThanOrEqual(0);
     });
@@ -110,23 +130,33 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should have email input', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email" i]')
+        .first();
       await expect(emailInput).toBeVisible();
     });
 
     test('should have submit button', async ({ page }) => {
-      const submitButton = page.locator('button[type="submit"], button:has-text("Send"), button:has-text("Reset"), button:has-text("Submit")').first();
+      const submitButton = page
+        .locator(
+          'button[type="submit"], button:has-text("Send"), button:has-text("Reset"), button:has-text("Submit")',
+        )
+        .first();
       await expect(submitButton).toBeVisible();
     });
 
     test('should allow email submission', async ({ page }) => {
-      const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+      const emailInput = page
+        .locator('input[type="email"], input[placeholder*="email" i]')
+        .first();
       await emailInput.fill('test@example.com');
       await expect(emailInput).toHaveValue('test@example.com');
     });
 
     test('should have back to login link', async ({ page }) => {
-      const backLink = page.locator('a:has-text("back"), a:has-text("login"), a:has-text("sign in"), button:has-text("back")');
+      const backLink = page.locator(
+        'a:has-text("back"), a:has-text("login"), a:has-text("sign in"), button:has-text("back")',
+      );
       const hasBackLink = await backLink.count();
       expect(hasBackLink).toBeGreaterThanOrEqual(0);
     });
@@ -153,14 +183,20 @@ test.describe('Authentication Blocks', () => {
       await expect(passwordInput).toBeVisible();
     });
 
-    test('should have confirm password input or second password field', async ({ page }) => {
+    test('should have confirm password input or second password field', async ({
+      page,
+    }) => {
       const passwordInputs = page.locator('input[type="password"]');
       const count = await passwordInputs.count();
       expect(count).toBeGreaterThanOrEqual(1);
     });
 
     test('should have submit button', async ({ page }) => {
-      const submitButton = page.locator('button[type="submit"], button:has-text("Reset"), button:has-text("Update"), button:has-text("Change")').first();
+      const submitButton = page
+        .locator(
+          'button[type="submit"], button:has-text("Reset"), button:has-text("Update"), button:has-text("Change")',
+        )
+        .first();
       await expect(submitButton).toBeVisible();
     });
 
@@ -177,18 +213,26 @@ test.describe('Authentication Blocks', () => {
     });
 
     test('should render OTP input fields', async ({ page }) => {
-      const otpInputs = page.locator('input[maxlength="1"], input[class*="otp"], input[inputmode="numeric"]');
+      const otpInputs = page.locator(
+        'input[maxlength="1"], input[class*="otp"], input[inputmode="numeric"]',
+      );
       const count = await otpInputs.count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
 
     test('should have verify button', async ({ page }) => {
-      const verifyButton = page.locator('button[type="submit"], button:has-text("Verify"), button:has-text("Confirm"), button:has-text("Submit")').first();
+      const verifyButton = page
+        .locator(
+          'button[type="submit"], button:has-text("Verify"), button:has-text("Confirm"), button:has-text("Submit")',
+        )
+        .first();
       await expect(verifyButton).toBeVisible();
     });
 
     test('should have resend code option', async ({ page }) => {
-      const resendOption = page.locator('button:has-text("Resend"), a:has-text("Resend"), span:has-text("Resend")');
+      const resendOption = page.locator(
+        'button:has-text("Resend"), a:has-text("Resend"), span:has-text("Resend")',
+      );
       const hasResend = await resendOption.count();
       expect(hasResend).toBeGreaterThanOrEqual(0);
     });

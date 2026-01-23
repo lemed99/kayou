@@ -6,12 +6,16 @@ test.describe('NumberInput', () => {
   });
 
   test('should render number input', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await expect(input).toBeVisible();
   });
 
   test('should accept numeric input', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await input.click();
     await input.fill('42');
 
@@ -20,7 +24,9 @@ test.describe('NumberInput', () => {
   });
 
   test('should increment value with up arrow', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await input.click();
     await input.fill('10');
 
@@ -31,7 +37,9 @@ test.describe('NumberInput', () => {
   });
 
   test('should decrement value with down arrow', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await input.click();
     await input.fill('10');
 
@@ -75,8 +83,12 @@ test.describe('NumberInput', () => {
   });
 
   test('should render increment/decrement buttons', async ({ page }) => {
-    const incrementButton = page.locator('button[aria-label*="increment" i], button[aria-label*="increase" i], button:has-text("+")');
-    const decrementButton = page.locator('button[aria-label*="decrement" i], button[aria-label*="decrease" i], button:has-text("-")');
+    const incrementButton = page.locator(
+      'button[aria-label*="increment" i], button[aria-label*="increase" i], button:has-text("+")',
+    );
+    const decrementButton = page.locator(
+      'button[aria-label*="decrement" i], button[aria-label*="decrease" i], button:has-text("-")',
+    );
 
     // Some number inputs have buttons
     const incCount = await incrementButton.count();
@@ -85,7 +97,9 @@ test.describe('NumberInput', () => {
   });
 
   test('should be keyboard accessible', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await input.focus();
     await expect(input).toBeFocused();
   });
@@ -100,7 +114,9 @@ test.describe('NumberInput', () => {
   });
 
   test('should handle decimal numbers', async ({ page }) => {
-    const input = page.locator('input[type="number"], input[inputmode="numeric"]').first();
+    const input = page
+      .locator('input[type="number"], input[inputmode="numeric"]')
+      .first();
     await input.click();
     await input.fill('3.14');
 

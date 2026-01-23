@@ -17,11 +17,13 @@ export default function SpinnerPage() {
       keyConcepts={[
         {
           term: 'Indeterminate Loading',
-          explanation: 'Shows ongoing work without progress; use when duration is unknown.',
+          explanation:
+            'Shows ongoing work without progress; use when duration is unknown.',
         },
         {
           term: 'Context Matching',
-          explanation: '"light" for dark buttons, "info" for primary, semantic colors for status.',
+          explanation:
+            '"light" for dark buttons, "info" for primary, semantic colors for status.',
         },
         {
           term: 'Size Selection',
@@ -52,18 +54,11 @@ export default function SpinnerPage() {
         {
           title: 'Default Spinner',
           description: 'Default info-colored spinner.',
-          code: `<Spinner />`,
           component: () => <Spinner />,
         },
         {
           title: 'Color Variants',
           description: 'All available color options.',
-          code: `<Spinner color="info" />
-<Spinner color="success" />
-<Spinner color="warning" />
-<Spinner color="failure" />
-<Spinner color="gray" />
-<Spinner color="dark" />`,
           component: () => (
             <div class="flex items-center gap-4">
               <Spinner color="info" />
@@ -78,9 +73,6 @@ export default function SpinnerPage() {
         {
           title: 'Sizes',
           description: 'Three size options: xs, sm, and md.',
-          code: `<Spinner size="xs" />
-<Spinner size="sm" />
-<Spinner size="md" />`,
           component: () => (
             <div class="flex items-center gap-4">
               <Spinner size="xs" />
@@ -92,10 +84,6 @@ export default function SpinnerPage() {
         {
           title: 'Button Loading State',
           description: 'Common use case inside a button.',
-          code: `<button class="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white">
-  <Spinner size="xs" color="light" />
-  Loading...
-</button>`,
           component: () => (
             <button class="flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white">
               <Spinner size="xs" color="light" />
@@ -106,9 +94,6 @@ export default function SpinnerPage() {
         {
           title: 'Full Page Loading',
           description: 'Centered spinner for page loading states.',
-          code: `<div class="flex h-32 items-center justify-center">
-  <Spinner size="md" />
-</div>`,
           component: () => (
             <div class="flex h-32 items-center justify-center rounded border border-gray-200 dark:border-gray-600">
               <Spinner size="md" />
@@ -116,29 +101,31 @@ export default function SpinnerPage() {
           ),
         },
       ]}
-      usage={`import { Spinner } from '@exowpee/solidly';
+      usage={`
+        import { Spinner } from '@exowpee/solidly';
 
-// Basic usage
-<Spinner />
+        // Basic usage
+        <Spinner />
 
-// With color
-<Spinner color="success" />
+        // With color
+        <Spinner color="success" />
 
-// With size
-<Spinner size="md" />
+        // With size
+        <Spinner size="md" />
 
-// In a button
-<Button disabled>
-  <Spinner size="xs" color="light" />
-  <span class="ml-2">Processing...</span>
-</Button>
+        // In a button
+        <Button disabled>
+          <Spinner size="xs" color="light" />
+          <span class="ml-2">Processing...</span>
+        </Button>
 
-// Loading state
-<Show when={loading()} fallback={<Content />}>
-  <div class="flex justify-center">
-    <Spinner size="md" />
-  </div>
-</Show>`}
+        // Loading state
+        <Show when={loading()} fallback={<Content />}>
+          <div class="flex justify-center">
+            <Spinner size="md" />
+          </div>
+        </Show>
+      `}
     />
   );
 }

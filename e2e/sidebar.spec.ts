@@ -51,7 +51,11 @@ test.describe('Sidebar', () => {
   });
 
   test('should support collapse/expand toggle', async ({ page }) => {
-    const toggleButton = page.locator('button[aria-label*="collapse" i], button[aria-label*="expand" i], button[aria-label*="toggle" i]').first();
+    const toggleButton = page
+      .locator(
+        'button[aria-label*="collapse" i], button[aria-label*="expand" i], button[aria-label*="toggle" i]',
+      )
+      .first();
 
     if (await toggleButton.isVisible()) {
       await toggleButton.click();

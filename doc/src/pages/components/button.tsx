@@ -79,14 +79,6 @@ export default function ButtonPage() {
           title: 'Color Variants',
           description:
             'Eight color variants for different purposes and visual hierarchy.',
-          code: `<Button color="info">Info</Button>
-<Button color="gray">Gray</Button>
-<Button color="dark">Dark</Button>
-<Button color="light">Light</Button>
-<Button color="success">Success</Button>
-<Button color="failure">Failure</Button>
-<Button color="warning">Warning</Button>
-<Button color="blue">Blue</Button>`,
           component: () => (
             <>
               <Button color="info">Info</Button>
@@ -103,9 +95,6 @@ export default function ButtonPage() {
         {
           title: 'Size Variants',
           description: 'Three size options for different contexts.',
-          code: `<Button size="xs">Extra Small</Button>
-<Button size="sm">Small</Button>
-<Button size="md">Medium</Button>`,
           component: () => (
             <>
               <Button size="xs">Extra Small</Button>
@@ -118,8 +107,6 @@ export default function ButtonPage() {
           title: 'Loading State',
           description:
             'Shows a spinner overlay during async operations. The button is automatically disabled.',
-          code: `<Button isLoading={true}>Saving...</Button>
-<Button isLoading={true} color="success">Processing</Button>`,
           component: () => (
             <>
               <Button isLoading={true}>Saving...</Button>
@@ -133,8 +120,6 @@ export default function ButtonPage() {
           title: 'Disabled State',
           description:
             'Prevents user interaction when the button should not be clickable.',
-          code: `<Button disabled>Disabled</Button>
-<Button disabled color="success">Disabled Success</Button>`,
           component: () => (
             <>
               <Button disabled>Disabled</Button>
@@ -147,16 +132,6 @@ export default function ButtonPage() {
         {
           title: 'Interactive Loading',
           description: 'Click the button to see loading state in action.',
-          code: `const [isLoading, setIsLoading] = createSignal(false);
-
-const handleClick = () => {
-  setIsLoading(true);
-  setTimeout(() => setIsLoading(false), 2000);
-};
-
-<Button isLoading={isLoading()} onClick={handleClick}>
-  {isLoading() ? 'Loading...' : 'Click Me'}
-</Button>`,
           component: () => {
             const [isLoading, setIsLoading] = createSignal(false);
             const handleClick = () => {
@@ -171,27 +146,30 @@ const handleClick = () => {
           },
         },
       ]}
-      usage={`import { Button } from '@exowpee/solidly';
+      usage={`
+        import { Button } from '@exowpee/solidly';
 
-// Basic usage
-<Button>Click me</Button>
+        // Basic usage
+        <Button>Click me</Button>
 
-// With color and size
-<Button color="success" size="md">
-  Save Changes
-</Button>
+        // With color and size
+        <Button color="success" size="md">
+          Save Changes
+        </Button>
 
-// Loading state
-<Button isLoading={isLoading()} onClick={handleSave}>
-  {isLoading() ? 'Saving...' : 'Save'}
-</Button>
+        // Loading state
+        <Button isLoading={isLoading()} onClick={handleSave}>
+          {isLoading() ? 'Saving...' : 'Save'}
+        </Button>
 
-// Form submit
-<form onSubmit={handleSubmit}>
-  <Button type="submit" color="success">
-    Submit
-  </Button>
-</form>`}
+        // Form submit
+        <form onSubmit={handleSubmit}>
+          <Button type="submit" color="success">
+            Submit
+          </Button>
+        </form>
+
+      `}
     />
   );
 }

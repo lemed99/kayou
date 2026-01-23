@@ -85,11 +85,6 @@ export default function ModalPage() {
         {
           title: 'Default Modal',
           description: 'Basic modal positioned at the top-center.',
-          code: `<Button onClick={() => setShow(true)}>Open Modal</Button>
-<Modal show={show()} onClose={() => setShow(false)}>
-  <h3 class="text-lg font-semibold">Modal Title</h3>
-  <p>Modal content goes here.</p>
-</Modal>`,
           component: () => (
             <>
               <Button onClick={() => setShowDefault(true)}>Open Modal</Button>
@@ -105,9 +100,6 @@ export default function ModalPage() {
         {
           title: 'Centered Modal',
           description: 'Modal centered vertically on the screen.',
-          code: `<Modal show={show()} position="center" onClose={() => setShow(false)}>
-  <p>Centered modal content</p>
-</Modal>`,
           component: () => (
             <>
               <Button onClick={() => setShowCenter(true)}>Open Centered Modal</Button>
@@ -127,9 +119,6 @@ export default function ModalPage() {
         {
           title: 'Large Modal',
           description: 'Modal with larger size.',
-          code: `<Modal show={show()} size="xl" onClose={() => setShow(false)}>
-  <p>Large modal content</p>
-</Modal>`,
           component: () => (
             <>
               <Button onClick={() => setShowLarge(true)}>Open Large Modal</Button>
@@ -149,27 +138,29 @@ export default function ModalPage() {
           ),
         },
       ]}
-      usage={`import { Modal } from '@exowpee/solidly';
+      usage={`
+        import { Modal } from '@exowpee/solidly';
 
-// Basic usage
-const [show, setShow] = createSignal(false);
+        // Basic usage
+        const [show, setShow] = createSignal(false);
 
-<Button onClick={() => setShow(true)}>Open</Button>
-<Modal show={show()} onClose={() => setShow(false)}>
-  <h3>Modal Title</h3>
-  <p>Modal content</p>
-</Modal>
+        <Button onClick={() => setShow(true)}>Open</Button>
+        <Modal show={show()} onClose={() => setShow(false)}>
+          <h3>Modal Title</h3>
+          <p>Modal content</p>
+        </Modal>
 
-// Centered modal
-<Modal show={show()} position="center" onClose={handleClose}>
-  <p>Centered content</p>
-</Modal>
+        // Centered modal
+        <Modal show={show()} position="center" onClose={handleClose}>
+          <p>Centered content</p>
+        </Modal>
 
-// Different sizes
-<Modal show={show()} size="sm" onClose={handleClose}>...</Modal>
-<Modal show={show()} size="lg" onClose={handleClose}>...</Modal>
-<Modal show={show()} size="xl" onClose={handleClose}>...</Modal>
-<Modal show={show()} size="screen" onClose={handleClose}>...</Modal>`}
+        // Different sizes
+        <Modal show={show()} size="sm" onClose={handleClose}>...</Modal>
+        <Modal show={show()} size="lg" onClose={handleClose}>...</Modal>
+        <Modal show={show()} size="xl" onClose={handleClose}>...</Modal>
+        <Modal show={show()} size="screen" onClose={handleClose}>...</Modal>
+      `}
     />
   );
 }

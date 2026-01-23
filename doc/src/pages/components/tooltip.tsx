@@ -26,11 +26,13 @@ export default function TooltipPage() {
         },
         {
           term: 'Placement',
-          explanation: 'Position (top/bottom/left/right) with auto-flip if space is insufficient.',
+          explanation:
+            'Position (top/bottom/left/right) with auto-flip if space is insufficient.',
         },
         {
           term: 'Show/Hide Delay',
-          explanation: 'Configurable delays prevent accidental triggers and quick disappear.',
+          explanation:
+            'Configurable delays prevent accidental triggers and quick disappear.',
         },
         {
           term: 'Accessibility',
@@ -92,9 +94,6 @@ export default function TooltipPage() {
         {
           title: 'Basic Tooltip',
           description: 'Simple tooltip on hover or focus.',
-          code: `<Tooltip content="This is a tooltip">
-  <Button>Hover me</Button>
-</Tooltip>`,
           component: () => (
             <Tooltip content="This is a tooltip">
               <Button>Hover me</Button>
@@ -104,10 +103,6 @@ export default function TooltipPage() {
         {
           title: 'Placement Options',
           description: 'Tooltips can be positioned on any side.',
-          code: `<Tooltip content="Top tooltip" placement="top">...</Tooltip>
-<Tooltip content="Bottom tooltip" placement="bottom">...</Tooltip>
-<Tooltip content="Left tooltip" placement="left">...</Tooltip>
-<Tooltip content="Right tooltip" placement="right">...</Tooltip>`,
           component: () => (
             <div class="flex flex-wrap items-center gap-4">
               <Tooltip content="Top tooltip" placement="top">
@@ -128,9 +123,6 @@ export default function TooltipPage() {
         {
           title: 'Theme Variants',
           description: 'Dark, light, or auto theme based on app theme.',
-          code: `<Tooltip content="Dark tooltip" theme="dark">...</Tooltip>
-<Tooltip content="Light tooltip" theme="light">...</Tooltip>
-<Tooltip content="Auto tooltip" theme="auto">...</Tooltip>`,
           component: () => (
             <div class="flex flex-wrap items-center gap-4">
               <Tooltip content="Dark tooltip" theme="dark">
@@ -148,9 +140,6 @@ export default function TooltipPage() {
         {
           title: 'With Delay',
           description: 'Add delays before showing or hiding the tooltip.',
-          code: `<Tooltip content="Delayed tooltip" showDelay={500} hideDelay={200}>
-  <Button>Hover (500ms delay)</Button>
-</Tooltip>`,
           component: () => (
             <Tooltip content="Delayed tooltip" showDelay={500} hideDelay={200}>
               <Button>Hover (500ms delay)</Button>
@@ -160,16 +149,6 @@ export default function TooltipPage() {
         {
           title: 'Rich Content',
           description: 'Tooltip content can be JSX elements.',
-          code: `<Tooltip
-  content={
-    <div class="text-center">
-      <p class="font-semibold">Rich Tooltip</p>
-      <p class="text-xs opacity-75">With multiple lines</p>
-    </div>
-  }
->
-  <Button>Rich content</Button>
-</Tooltip>`,
           component: () => (
             <Tooltip
               content={
@@ -186,11 +165,6 @@ export default function TooltipPage() {
         {
           title: 'On Text Elements',
           description: 'Tooltips work with any focusable or hoverable element.',
-          code: `<Tooltip content="Click to learn more">
-  <a href="#" class="text-blue-600 underline">
-    What is this?
-  </a>
-</Tooltip>`,
           component: () => (
             <Tooltip content="Click to learn more">
               <a
@@ -204,44 +178,46 @@ export default function TooltipPage() {
           ),
         },
       ]}
-      usage={`import { Tooltip } from '@exowpee/solidly';
+      usage={`
+        import { Tooltip } from '@exowpee/solidly';
 
-// Basic usage
-<Tooltip content="Helpful information">
-  <Button>Hover me</Button>
-</Tooltip>
+        // Basic usage
+        <Tooltip content="Helpful information">
+          <Button>Hover me</Button>
+        </Tooltip>
 
-// With placement
-<Tooltip content="Bottom tooltip" placement="bottom">
-  <span>Hover for info</span>
-</Tooltip>
+        // With placement
+        <Tooltip content="Bottom tooltip" placement="bottom">
+          <span>Hover for info</span>
+        </Tooltip>
 
-// With theme
-<Tooltip content="Light themed" theme="light">
-  <Button>Light tooltip</Button>
-</Tooltip>
+        // With theme
+        <Tooltip content="Light themed" theme="light">
+          <Button>Light tooltip</Button>
+        </Tooltip>
 
-// With delays (good for preventing accidental triggers)
-<Tooltip content="Delayed" showDelay={300} hideDelay={100}>
-  <Button>Hover me</Button>
-</Tooltip>
+        // With delays (good for preventing accidental triggers)
+        <Tooltip content="Delayed" showDelay={300} hideDelay={100}>
+          <Button>Hover me</Button>
+        </Tooltip>
 
-// Rich content
-<Tooltip
-  content={
-    <div>
-      <strong>Title</strong>
-      <p>Description text</p>
-    </div>
-  }
->
-  <Button>Info</Button>
-</Tooltip>
+        // Rich content
+        <Tooltip
+          content={
+            <div>
+              <strong>Title</strong>
+              <p>Description text</p>
+            </div>
+          }
+        >
+          <Button>Info</Button>
+        </Tooltip>
 
-// Programmatically hidden
-<Tooltip content="Won't show" hidden={isDisabled()}>
-  <Button>Disabled tooltip</Button>
-</Tooltip>`}
+        // Programmatically hidden
+        <Tooltip content="Won't show" hidden={isDisabled()}>
+          <Button>Disabled tooltip</Button>
+        </Tooltip>
+      `}
       relatedHooks={[
         {
           name: 'useFloating',

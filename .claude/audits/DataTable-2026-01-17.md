@@ -119,7 +119,7 @@ This interactive element is a `<div>` with only an `onClick` handler. It cannot 
     setPageScroll((ancestor() as Element).scrollTop);
     setFullView(true);
   }}
-  class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset dark:border-gray-700"
+  class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:border-gray-700"
   aria-expanded={fullView()}
 >
   <span>{props.seeMoreText}</span>
@@ -198,7 +198,7 @@ const minWidth = columnWidths().get(col.key) || 0;
     setSearchKey('');
     (searchRef() as HTMLElement)?.focus();
   }}
-  class="absolute top-0 right-0 h-full cursor-pointer px-3 ..."
+  class="absolute right-0 top-0 h-full cursor-pointer px-3 ..."
 >
   <XCloseIcon class="size-4" />
 </button>
@@ -532,7 +532,7 @@ The validating state is not announced to screen reader users.
 ```tsx
 <For each={columns()}>
   {(column) => (
-    <div class="flex items-center gap-1 px-6 py-3 whitespace-nowrap">{/* ... */}</div>
+    <div class="flex items-center gap-1 whitespace-nowrap px-6 py-3">{/* ... */}</div>
   )}
 </For>
 ```

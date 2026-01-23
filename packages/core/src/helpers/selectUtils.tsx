@@ -1,9 +1,9 @@
 import { JSX, Show } from 'solid-js';
 
+import { CheckIcon, ChevronDownIcon, XCloseIcon } from '@exowpee/solidly-icons';
 import { twMerge } from 'tailwind-merge';
 
 import Spinner from '../components/Spinner';
-import { CheckIcon, ChevronDownIcon, XCloseIcon } from '../icons';
 
 export interface Option {
   value: string;

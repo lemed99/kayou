@@ -112,191 +112,207 @@ export default function UseCustomResourcePage() {
         },
       ]}
       returnType="CustomResource<T>"
-      usage={`import { useCustomResource } from '@exowpee/solidly';`}
+      usage={`
+        import { useCustomResource } from '@exowpee/solidly';
+      `}
       examples={[
         {
           title: 'Basic Usage',
           description: 'Simple data fetching with loading and error states.',
-          code: `import { useCustomResource } from '@exowpee/solidly';
-import { Show } from 'solid-js';solidly
+          code: `
+            import { useCustomResource } from '@exowpee/solidly';
+            import { Show } from 'solid-js';
 
-function UserProfile() {
-  const { data, loading, error } = useCustomResource<User>({
-    urlString: () => '/api/users/me',
-  });
+            function UserProfile() {
+              const { data, loading, error } = useCustomResource<User>({
+                urlString: () => '/api/users/me',
+              });
 
-  return (
-    <Show when={!loading()} fallback={<Spinner />}>
-      <Show when={!error()} fallback={<ErrorMessage error={error()} />}>
-        <div>{data()?.name}</div>
-      </Show>
-    </Show>
-  );
-}`,
+              return (
+                <Show when={!loading()} fallback={<Spinner />}>
+                  <Show when={!error()} fallback={<ErrorMessage error={error()} />}>
+                    <div>{data()?.name}</div>
+                  </Show>
+                </Show>
+              );
+            }
+          `,
         },
         {
           title: 'Conditional Fetching',
           description:
             'Use the condition prop to control when fetching should occur. Useful for dependent queries.',
-          code: `function OrderDetails(props: { orderId: Accessor<string | null> }) {
-  // Only fetch when orderId is available
-  const { data, loading } = useCustomResource<Order>({
-    urlString: () => \`/api/orders/\${props.orderId()}\`,
-    condition: () => !!props.orderId(),
-  });
+          code: `
+            function OrderDetails(props: { orderId: Accessor<string | null> }) {
+              // Only fetch when orderId is available
+              const { data, loading } = useCustomResource<Order>({
+                urlString: () => \`/api/orders/\${props.orderId()}\`,
+                condition: () => !!props.orderId(),
+              });
 
-  return (
-    <Show when={props.orderId()} fallback={<p>Select an order</p>}>
-      <Show when={!loading()} fallback={<Spinner />}>
-        <OrderCard order={data()} />
-      </Show>
-    </Show>
-  );
-}`,
+              return (
+                <Show when={props.orderId()} fallback={<p>Select an order</p>}>
+                  <Show when={!loading()} fallback={<Spinner />}>
+                    <OrderCard order={data()} />
+                  </Show>
+                </Show>
+              );
+            }
+          `,
         },
         {
           title: 'Automatic Retry with Exponential Backoff',
           description:
             'Failed requests are automatically retried with increasing delays. 500 errors are NOT retried as they indicate processing errors, not transient issues.',
-          code: `const { data, error, attempts, errorStatus } = useCustomResource<Data>({
-  urlString: () => '/api/unstable-endpoint',
-  options: {
-    retryCount: 5,        // Max 5 retries
-    retryDelay: 1000,     // Base delay: 1 second
-    exponentialBackoff: true, // Delays: 1s, 2s, 4s, 8s, 16s
-    // 400, 401, 403, 404, 500 will NOT be retried (in blacklist)
-    // 502, 503, 504 WILL be retried (transient server issues)
-  },
-});
+          code: `
+            const { data, error, attempts, errorStatus } = useCustomResource<Data>({
+              urlString: () => '/api/unstable-endpoint',
+              options: {
+                retryCount: 5,        // Max 5 retries
+                retryDelay: 1000,     // Base delay: 1 second
+                exponentialBackoff: true, // Delays: 1s, 2s, 4s, 8s, 16s
+                // 400, 401, 403, 404, 500 will NOT be retried (in blacklist)
+                // 502, 503, 504 WILL be retried (transient server issues)
+              },
+            });
 
-// Track retry progress
-createEffect(() => {
-  if (attempts() > 0) {
-    console.log(\`Retry attempt \${attempts()}/5\`);
-  }
-});`,
+            // Track retry progress
+            createEffect(() => {
+              if (attempts() > 0) {
+                console.log(\`Retry attempt \${attempts()}/5\`);
+              }
+            });
+          `,
         },
         {
           title: 'SWR (Stale-While-Revalidate)',
           description:
             'Show cached data immediately while fetching fresh data in the background.',
-          code: `function ProductList() {
-  const { data, validating, fromCache } = useCustomResource<Product[]>({
-    urlString: () => '/api/products',
-    swr: true,           // Enable SWR pattern
-    pullFromCache: true, // Use IndexedDB cache
-  });
+          code: `
+            function ProductList() {
+              const { data, validating, fromCache } = useCustomResource<Product[]>({
+                urlString: () => '/api/products',
+                swr: true,           // Enable SWR pattern
+                pullFromCache: true, // Use IndexedDB cache
+              });
 
-  return (
-    <div>
-      {/* Show indicator when revalidating */}
-      <Show when={validating()}>
-        <div class="fixed top-4 right-4">
-          <Spinner size="sm" />
-          <span>Updating...</span>
-        </div>
-      </Show>
+              return (
+                <div>
+                  {/* Show indicator when revalidating */}
+                  <Show when={validating()}>
+                    <div class="fixed top-4 right-4">
+                      <Spinner size="sm" />
+                      <span>Updating...</span>
+                    </div>
+                  </Show>
 
-      {/* Show cache indicator */}
-      <Show when={fromCache()}>
-        <Badge color="warning">Showing cached data</Badge>
-      </Show>
+                  {/* Show cache indicator */}
+                  <Show when={fromCache()}>
+                    <Badge color="warning">Showing cached data</Badge>
+                  </Show>
 
-      {/* Data is available immediately from cache */}
-      <For each={data()}>
-        {(product) => <ProductCard product={product} />}
-      </For>
-    </div>
-  );
-}`,
+                  {/* Data is available immediately from cache */}
+                  <For each={data()}>
+                    {(product) => <ProductCard product={product} />}
+                  </For>
+                </div>
+              );
+            }
+          `,
         },
         {
           title: 'Manual Refresh',
           description:
             'Use refetch() for manual refresh or refreshKey for coordinated refresh across components.',
-          code: `function UserDashboard() {
-  const { data, refetch, loading } = useCustomResource<User>({
-    urlString: () => '/api/user',
-    refreshKey: 'user', // Links to context.refreshData
-  });
+          code: `
+            function UserDashboard() {
+              const { data, refetch, loading } = useCustomResource<User>({
+                urlString: () => '/api/user',
+                refreshKey: 'user', // Links to context.refreshData
+              });
 
-  return (
-    <div>
-      <button
-        onClick={refetch}
-        disabled={loading()}
-        class="btn-primary"
-      >
-        {loading() ? 'Refreshing...' : 'Refresh Data'}
-      </button>
-      <UserInfo user={data()} />
-    </div>
-  );
-}
+              return (
+                <div>
+                  <button
+                    onClick={refetch}
+                    disabled={loading()}
+                    class="btn-primary"
+                  >
+                    {loading() ? 'Refreshing...' : 'Refresh Data'}
+                  </button>
+                  <UserInfo user={data()} />
+                </div>
+              );
+            }
 
-// Refresh from anywhere using context
-function RefreshAllButton() {
-  const [, setRefreshData] = useRefreshSignal();
+            // Refresh from anywhere using context
+            function RefreshAllButton() {
+              const [, setRefreshData] = useRefreshSignal();
 
-  const refreshAll = () => {
-    setRefreshData({ user: true, orders: true });
-  };
+              const refreshAll = () => {
+                setRefreshData({ user: true, orders: true });
+              };
 
-  return <button onClick={refreshAll}>Refresh All</button>;
-}`,
+              return <button onClick={refreshAll}>Refresh All</button>;
+            }
+          `,
         },
         {
           title: 'Custom Options',
           description: 'Override context defaults with per-resource configuration.',
-          code: `function CriticalData() {
-  const { data, error, attempts, errorStatus } = useCustomResource<ImportantData>({
-    urlString: () => '/api/critical-data',
-    options: {
-      retryCount: 10,
-      retryDelay: 500,
-      exponentialBackoff: true,
-      onError: (err) => {
-        reportToSentry(err);
-      },
-    },
-  });
+          code: `
+            function CriticalData() {
+              const { data, error, attempts, errorStatus } = useCustomResource<ImportantData>({
+                urlString: () => '/api/critical-data',
+                options: {
+                  retryCount: 10,
+                  retryDelay: 500,
+                  exponentialBackoff: true,
+                  onError: (err) => {
+                    reportToSentry(err);
+                  },
+                },
+              });
 
-  return (
-    <Show when={error()}>
-      <div>
-        Failed after {attempts()} attempts.
-        Status: {errorStatus()}
-      </div>
-    </Show>
-  );
-}`,
+              return (
+                <Show when={error()}>
+                  <div>
+                    Failed after {attempts()} attempts.
+                    Status: {errorStatus()}
+                  </div>
+                </Show>
+              );
+            }
+          `,
         },
         {
           title: 'ResourceOptions Interface',
           description:
             'Configuration options that can be passed per-resource to override context defaults.',
-          code: `interface ResourceOptions<T> {
-  // Custom fetch function
-  fetcher?: (url: string) => Promise<T>;
+          code: `
+            interface ResourceOptions<T> {
+              // Custom fetch function
+              fetcher?: (url: string) => Promise<T>;
 
-  // Success/error callbacks
-  onSuccess?: (data: T, fromCache: boolean) => void;
-  onError?: (err: unknown) => void;
+              // Success/error callbacks
+              onSuccess?: (data: T, fromCache: boolean) => void;
+              onError?: (err: unknown) => void;
 
-  // Retry configuration
-  retryCount?: number;        // Default: 3
-  retryDelay?: number;        // Default: 2000ms
-  exponentialBackoff?: boolean; // Default: true
+              // Retry configuration
+              retryCount?: number;        // Default: 3
+              retryDelay?: number;        // Default: 2000ms
+              exponentialBackoff?: boolean; // Default: true
 
-  // HTTP errors that should NOT trigger retry
-  // Default: [404, 500, 400, 401, 403]
-  // 500 is included because it indicates processing errors, not transient issues
-  errorsBlackList?: number[];
+              // HTTP errors that should NOT trigger retry
+              // Default: [404, 500, 400, 401, 403]
+              // 500 is included because it indicates processing errors, not transient issues
+              errorsBlackList?: number[];
 
-  // Request deduplication
-  dedupeRequests?: boolean;   // Default: true
-  dedupeInterval?: number;    // Default: 2000ms
-}`,
+              // Request deduplication
+              dedupeRequests?: boolean;   // Default: true
+              dedupeInterval?: number;    // Default: 2000ms
+            }
+          `,
         },
       ]}
     />

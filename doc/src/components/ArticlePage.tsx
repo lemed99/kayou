@@ -62,10 +62,11 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
     headings.forEach((heading) => {
       // Generate ID if not present
       if (!heading.id) {
-        heading.id = heading.textContent
-          ?.toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '') || '';
+        heading.id =
+          heading.textContent
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') || '';
       }
 
       // Add scroll-mt class for header offset
@@ -159,13 +160,17 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
       <div class="max-xl:hidden">
         <div class="sticky top-16 max-h-[calc(100svh-4rem)] overflow-y-auto px-4 pt-10 pb-8">
           <div class="flex flex-col gap-3">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white">On this page</h3>
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+              On this page
+            </h3>
             <ul class="flex flex-col gap-2 text-sm">
               <For each={tocItems()}>
                 {(item) => (
                   <li style={{ 'padding-left': item.level === 3 ? '0.75rem' : '0' }}>
                     <a
-                      aria-current={visibleSections().has(item.id) ? 'location' : undefined}
+                      aria-current={
+                        visibleSections().has(item.id) ? 'location' : undefined
+                      }
                       href={`#${item.id}`}
                       class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:aria-[current]:text-white"
                     >
@@ -175,23 +180,6 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
                 )}
               </For>
             </ul>
-          </div>
-
-          {/* Promo Card */}
-          <div class="mt-8 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">
-              Ship <span class="text-blue-600 dark:text-blue-400">faster</span> with
-              beautiful components
-            </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Discover 30+ stunning components by Solidly
-            </p>
-            <a
-              href="/components/button"
-              class="mt-3 inline-flex items-center justify-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              Explore Components
-            </a>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { SelectWithSearch } from '@exowpee/solidly-pro';
+import { SelectWithSearch } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -37,7 +37,6 @@ export default function SelectWithSearchPage() {
   return (
     <DocPage
       title="SelectWithSearch"
-      isPro
       description="Searchable dropdown for selecting a single option from large datasets. Features type-to-filter, keyboard navigation, virtualization, and a custom CTA slot."
       keyConcepts={[
         {
@@ -175,17 +174,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Basic SelectWithSearch',
           description: 'Simple searchable dropdown.',
-          code: `const [selected, setSelected] = createSignal(null);
-
-<SelectWithSearch
-  options={[
-    { value: 'react', label: 'React' },
-    { value: 'solid', label: 'SolidJS' },
-    { value: 'vue', label: 'Vue' },
-  ]}
-  onSelect={(opt) => setSelected(opt)}
-  placeholder="Search frameworks..."
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
               null,
@@ -202,12 +190,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'With Auto-Fill',
           description: 'Automatically fills input with selected option label.',
-          code: `<SelectWithSearch
-  options={countryOptions}
-  onSelect={handleSelect}
-  autoFillSearchKey
-  placeholder="Search countries..."
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof countryOptions)[0] | null>(null);
             return (
@@ -224,14 +206,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'With Label and Helper Text',
           description: 'SelectWithSearch with label above and helper text below.',
-          code: `<SelectWithSearch
-  options={userOptions}
-  onSelect={handleSelect}
-  label="Assignee"
-  helperText="Select the person to assign"
-  placeholder="Search users..."
-  autoFillSearchKey
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof userOptions)[0] | null>(null);
             return (
@@ -249,13 +223,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Pre-selected Value',
           description: 'SelectWithSearch with an initial selected value.',
-          code: `<SelectWithSearch
-  options={frameworkOptions}
-  idValue="solid"
-  autoFillSearchKey
-  onSelect={handleSelect}
-  placeholder="Search frameworks..."
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
               null,
@@ -274,12 +241,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Disabled State',
           description: 'SelectWithSearch that cannot be interacted with.',
-          code: `<SelectWithSearch
-  options={frameworkOptions}
-  onSelect={handleSelect}
-  disabled
-  placeholder="Disabled"
-/>`,
           component: () => (
             <SelectWithSearch
               options={frameworkOptions}
@@ -292,12 +253,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Loading State',
           description: 'Shows loading spinner while fetching options.',
-          code: `<SelectWithSearch
-  options={[]}
-  onSelect={handleSelect}
-  isLoading
-  placeholder="Loading..."
-/>`,
           component: () => (
             <SelectWithSearch
               options={[]}
@@ -310,16 +265,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Controlled Selection',
           description: 'Interactive example with controlled state.',
-          code: `const [selected, setSelected] = createSignal(null);
-
-<SelectWithSearch
-  options={countryOptions}
-  onSelect={(opt) => setSelected(opt)}
-  autoFillSearchKey
-  label="Country"
-  helperText={selected() ? \`Selected: \${selected().label}\` : 'No selection'}
-  placeholder="Search countries..."
-/>`,
           component: () => {
             const [selected, setSelected] = createSignal<
               (typeof countryOptions)[0] | null
@@ -341,16 +286,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'With Custom CTA',
           description: 'Adds a custom action at the bottom of the dropdown.',
-          code: `<SelectWithSearch
-  options={userOptions}
-  onSelect={handleSelect}
-  placeholder="Search users..."
-  cta={
-    <button class="w-full p-2 text-blue-600 hover:bg-blue-50">
-      + Add new user
-    </button>
-  }
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof userOptions)[0] | null>(null);
             return (
@@ -373,14 +308,6 @@ export default function SelectWithSearchPage() {
         {
           title: 'Required Field',
           description: 'Shows required indicator on the label.',
-          code: `<SelectWithSearch
-  options={frameworkOptions}
-  onSelect={handleSelect}
-  label="Framework"
-  required
-  placeholder="Select a framework..."
-  autoFillSearchKey
-/>`,
           component: () => {
             const [, setSelected] = createSignal<(typeof frameworkOptions)[0] | null>(
               null,
@@ -398,55 +325,57 @@ export default function SelectWithSearchPage() {
           },
         },
       ]}
-      usage={`import { SelectWithSearch } from '@exowpee/solidly';
+      usage={`
+        import { SelectWithSearch } from '@exowpee/solidly';
 
-// Basic usage
-const [selected, setSelected] = createSignal(null);
+        // Basic usage
+        const [selected, setSelected] = createSignal(null);
 
-<SelectWithSearch
-  options={[
-    { value: 'opt1', label: 'Option 1' },
-    { value: 'opt2', label: 'Option 2' },
-  ]}
-  onSelect={(opt) => setSelected(opt)}
-  placeholder="Search options..."
-/>
+        <SelectWithSearch
+          options={[
+            { value: 'opt1', label: 'Option 1' },
+            { value: 'opt2', label: 'Option 2' },
+          ]}
+          onSelect={(opt) => setSelected(opt)}
+          placeholder="Search options..."
+        />
 
-// With auto-fill (recommended for most use cases)
-<SelectWithSearch
-  options={options}
-  onSelect={handleSelect}
-  autoFillSearchKey
-  placeholder="Search..."
-/>
+        // With auto-fill (recommended for most use cases)
+        <SelectWithSearch
+          options={options}
+          onSelect={handleSelect}
+          autoFillSearchKey
+          placeholder="Search..."
+        />
 
-// With label and pre-selected value
-<SelectWithSearch
-  options={options}
-  idValue="preselected-id"
-  autoFillSearchKey
-  onSelect={handleSelect}
-  label="Category"
-  helperText="Select a category"
-/>
+        // With label and pre-selected value
+        <SelectWithSearch
+          options={options}
+          idValue="preselected-id"
+          autoFillSearchKey
+          onSelect={handleSelect}
+          label="Category"
+          helperText="Select a category"
+        />
 
-// With lazy loading for large datasets
-<SelectWithSearch
-  options={options}
-  onSelect={handleSelect}
-  optionRowHeight={32}
-  isLazyLoading={isLoading}
-  onLazyLoad={(progress) => {
-    if (progress > 0.8) loadMoreOptions();
-  }}
-/>
+        // With lazy loading for large datasets
+        <SelectWithSearch
+          options={options}
+          onSelect={handleSelect}
+          optionRowHeight={32}
+          isLazyLoading={isLoading}
+          onLazyLoad={(progress) => {
+            if (progress > 0.8) loadMoreOptions();
+          }}
+        />
 
-// With custom CTA
-<SelectWithSearch
-  options={options}
-  onSelect={handleSelect}
-  cta={<button>+ Add new item</button>}
-/>`}
+        // With custom CTA
+        <SelectWithSearch
+          options={options}
+          onSelect={handleSelect}
+          cta={<button>+ Add new item</button>}
+        />
+      `}
     />
   );
 }

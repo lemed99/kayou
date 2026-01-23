@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { DataTable, type FilterConfig } from '@exowpee/solidly-pro';
+import { DataTable, type FilterConfig } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -122,7 +122,6 @@ export default function DataTablePage() {
   return (
     <DocPage
       title="DataTable"
-      isPro
       description="Table with virtualization, pagination, row selection, and a comprehensive filter system."
       dependencies={[
         {
@@ -376,27 +375,7 @@ export default function DataTablePage() {
       examples={[
         {
           title: 'Basic Table',
-          description: 'Simple table with data and columns.',
-          code: `const columns = [
-  { key: 'name', label: 'Name', width: 25 },
-  { key: 'email', label: 'Email', width: 30 },
-  { key: 'role', label: 'Role', width: 15 },
-  { key: 'status', label: 'Status', width: 15 },
-  { key: 'department', label: 'Department', width: 15 },
-];
-
-<DataTable
-  data={users}
-  columns={columns}
-  loading={false}
-  error={null}
-  errorMessage="Failed to load data"
-  noDataMessage="No users found"
-  seeMoreText="See more"
-    elementsPerPageText="per page"
-  selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
-/>`,
-          component: () => (
+          description: 'Simple table with data and columns.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -412,16 +391,7 @@ export default function DataTablePage() {
         },
         {
           title: 'With Row Selection',
-          description: 'Table with selectable rows.',
-          code: `<DataTable
-  data={users}
-  columns={columns}
-  rowSelection
-  loading={false}
-  error={null}
-  ...
-/>`,
-          component: () => (
+          description: 'Table with selectable rows.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -438,16 +408,7 @@ export default function DataTablePage() {
         },
         {
           title: 'With Search Bar',
-          description: 'Table with a search input.',
-          code: `<DataTable
-  data={users}
-  columns={columns}
-  searchBar
-  loading={false}
-  error={null}
-  ...
-/>`,
-          component: () => (
+          description: 'Table with a search input.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -465,53 +426,7 @@ export default function DataTablePage() {
         {
           title: 'With Filter System',
           description:
-            'Table with built-in filter system supporting text, select, multiSelect, and number filters.',
-          code: `const filterConfigs: FilterConfig<User>[] = [
-  {
-    key: 'name',
-    label: 'Name',
-    fieldType: 'text',
-    dataType: 'string',
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    fieldType: 'select',
-    dataType: 'string',
-    options: [
-      { value: 'active', label: 'Active' },
-      { value: 'inactive', label: 'Inactive' },
-      { value: 'pending', label: 'Pending' },
-    ],
-  },
-  {
-    key: 'role',
-    label: 'Role',
-    fieldType: 'multiSelect',
-    dataType: 'array',
-    options: [
-      { value: 'Admin', label: 'Admin' },
-      { value: 'Editor', label: 'Editor' },
-      { value: 'User', label: 'User' },
-    ],
-  },
-  {
-    key: 'age',
-    label: 'Age',
-    fieldType: 'number',
-    dataType: 'number',
-  },
-];
-
-<DataTable
-  data={users}
-  columns={columns}
-  filterConfigs={filterConfigs}
-  loading={false}
-  error={null}
-  ...
-/>`,
-          component: () => (
+            'Table with built-in filter system supporting text, select, multiSelect, and number filters.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -532,21 +447,7 @@ export default function DataTablePage() {
         },
         {
           title: 'With Pagination',
-          description: 'Table with pagination controls.',
-          code: `const [page, setPage] = createSignal(1);
-
-<DataTable
-  data={users}
-  columns={columns}
-  pageTotal={5}
-  onPageChange={setPage}
-  perPageControl
-  footer
-  loading={false}
-  error={null}
-  ...
-/>`,
-          component: () => (
+          description: 'Table with pagination controls.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -566,15 +467,7 @@ export default function DataTablePage() {
         },
         {
           title: 'Loading State',
-          description: 'Table in loading state with skeleton.',
-          code: `<DataTable
-  data={[]}
-  columns={columns}
-  loading={true}
-  error={null}
-  ...
-/>`,
-          component: () => (
+          description: 'Table in loading state with skeleton.',          component: () => (
             <DataTable
               data={[]}
               columns={columns}
@@ -590,16 +483,7 @@ export default function DataTablePage() {
         },
         {
           title: 'Error State',
-          description: 'Table in error state.',
-          code: `<DataTable
-  data={[]}
-  columns={columns}
-  loading={false}
-  error={new Error('Network error')}
-  errorMessage="Failed to load users. Please try again."
-  ...
-/>`,
-          component: () => (
+          description: 'Table in error state.',          component: () => (
             <DataTable
               data={[]}
               columns={columns}
@@ -616,18 +500,7 @@ export default function DataTablePage() {
         {
           title: 'Expandable Table',
           description:
-            'Table that shows limited rows with a "see more" button to expand to full view.',
-          code: `<DataTable
-  data={users}
-  columns={columns}
-  expandable
-  defaultRowsCount={3}
-  rowHeight={56}
-  loading={false}
-  error={null}
-  ...
-/>`,
-          component: () => (
+            'Table that shows limited rows with a "see more" button to expand to full view.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
@@ -646,30 +519,7 @@ export default function DataTablePage() {
         },
         {
           title: 'Custom Cell Rendering',
-          description: 'Table with custom render functions for cells.',
-          code: `const columnsWithRender = [
-  { key: 'name', label: 'Name', width: 25 },
-  { key: 'email', label: 'Email', width: 30 },
-  {
-    key: 'status',
-    label: 'Status',
-    width: 20,
-    render: (value) => (
-      <span class={\`px-2 py-1 rounded text-xs font-medium \${
-        value === 'active'
-          ? 'bg-green-100 text-green-800'
-          : value === 'inactive'
-            ? 'bg-red-100 text-red-800'
-            : 'bg-yellow-100 text-yellow-800'
-      }\`}>
-        {value}
-      </span>
-    ),
-  },
-];
-
-<DataTable data={users} columns={columnsWithRender} ... />`,
-          component: () => (
+          description: 'Table with custom render functions for cells.',          component: () => (
             <DataTable
               data={sampleUsers}
               columns={[
@@ -707,105 +557,107 @@ export default function DataTablePage() {
           ),
         },
       ]}
-      usage={`import { DataTable } from '@exowpee/solidly;
-import type { FilterConfig } from '@exowpee/solidly;
+      usage={`
+        import { DataTable } from '@exowpee/solidly;
+        import type { FilterConfig } from '@exowpee/solidly;
 
-// Basic usage
-<DataTable
-  data={users}
-  columns={[
-    { key: 'name', label: 'Name', width: 30 },
-    { key: 'email', label: 'Email', width: 40 },
-    { key: 'status', label: 'Status', width: 30 },
-  ]}
-  loading={isLoading()}
-  error={error()}
-  errorMessage="Failed to load data"
-  noDataMessage="No data available"
-  seeMoreText="See more"
-    elementsPerPageText="per page"
-  selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
-/>
+        // Basic usage
+        <DataTable
+          data={users}
+          columns={[
+            { key: 'name', label: 'Name', width: 30 },
+            { key: 'email', label: 'Email', width: 40 },
+            { key: 'status', label: 'Status', width: 30 },
+          ]}
+          loading={isLoading()}
+          error={error()}
+          errorMessage="Failed to load data"
+          noDataMessage="No data available"
+          seeMoreText="See more"
+            elementsPerPageText="per page"
+          selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
+        />
 
-// With all features
-<DataTable
-  data={users}
-  columns={columns}
-  loading={isLoading()}
-  validating={isValidating()}
-  error={error()}
-  errorMessage="Failed to load data"
-  noDataMessage="No data available"
-  seeMoreText="See more"
-    elementsPerPageText="per page"
-  selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
-  rowSelection
-  searchBar
-  configureColumns
-  expandable
-  defaultRowsCount={5}
-  rowHeight={56}
-  pageTotal={totalPages()}
-  onPageChange={handlePageChange}
-  perPageControl
-/>
+        // With all features
+        <DataTable
+          data={users}
+          columns={columns}
+          loading={isLoading()}
+          validating={isValidating()}
+          error={error()}
+          errorMessage="Failed to load data"
+          noDataMessage="No data available"
+          seeMoreText="See more"
+            elementsPerPageText="per page"
+          selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
+          rowSelection
+          searchBar
+          configureColumns
+          expandable
+          defaultRowsCount={5}
+          rowHeight={56}
+          pageTotal={totalPages()}
+          onPageChange={handlePageChange}
+          perPageControl
+        />
 
-// With filter system (popover-based UI)
-// Click "Filter" button to open popover with Column/Operator/Value inputs
-// Filters are only applied when clicking the submit button
-const filterConfigs: FilterConfig<User>[] = [
-  {
-    key: 'name',
-    label: 'Name',
-    fieldType: 'text',
-    dataType: 'string',
-    operators: ['contains', 'equal'],
-    defaultOperator: 'contains',
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    fieldType: 'select',
-    dataType: 'string',
-    options: statusOptions,
-  },
-  {
-    key: 'createdAt',
-    label: 'Created',
-    fieldType: 'dateRange',
-    dataType: 'date',
-  },
-];
+        // With filter system (popover-based UI)
+        // Click "Filter" button to open popover with Column/Operator/Value inputs
+        // Filters are only applied when clicking the submit button
+        const filterConfigs: FilterConfig<User>[] = [
+          {
+            key: 'name',
+            label: 'Name',
+            fieldType: 'text',
+            dataType: 'string',
+            operators: ['contains', 'equal'],
+            defaultOperator: 'contains',
+          },
+          {
+            key: 'status',
+            label: 'Status',
+            fieldType: 'select',
+            dataType: 'string',
+            options: statusOptions,
+          },
+          {
+            key: 'createdAt',
+            label: 'Created',
+            fieldType: 'dateRange',
+            dataType: 'date',
+          },
+        ];
 
-<DataTable
-  data={users}
-  columns={columns}
-  filterConfigs={filterConfigs}
-  filterMode="internal"  // or "external" for server-side
-  filterButtonText="Filter"
-  addFilterText="Add filter"
-  resetText="Reset"
-  applyText="Apply"
-  ...
-/>
+        <DataTable
+          data={users}
+          columns={columns}
+          filterConfigs={filterConfigs}
+          filterMode="internal"  // or "external" for server-side
+          filterButtonText="Filter"
+          addFilterText="Add filter"
+          resetText="Reset"
+          applyText="Apply"
+          ...
+        />
 
-// Server-side filtering (controlled)
-const [filters, setFilters] = createSignal<FilterState>(new Map());
+        // Server-side filtering (controlled)
+        const [filters, setFilters] = createSignal<FilterState>(new Map());
 
-createEffect(() => {
-  // Fetch data based on filter state
-  fetchUsers({ filters: filters() });
-});
+        createEffect(() => {
+          // Fetch data based on filter state
+          fetchUsers({ filters: filters() });
+        });
 
-<DataTable
-  data={users}
-  columns={columns}
-  filterConfigs={filterConfigs}
-  filterState={filters()}
-  onFiltersChange={setFilters}
-  filterMode="external"
-  ...
-/>`}
+        <DataTable
+          data={users}
+          columns={columns}
+          filterConfigs={filterConfigs}
+          filterState={filters()}
+          onFiltersChange={setFilters}
+          filterMode="external"
+          ...
+        />
+      `}
       relatedHooks={[
         {
           name: 'useDataTableFilters',

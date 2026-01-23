@@ -14,7 +14,10 @@ test.describe('Checkbox', () => {
   });
 
   test('should render checkbox with label', async ({ page }) => {
-    const label = page.locator('label').filter({ has: page.locator('input[type="checkbox"]') }).first();
+    const label = page
+      .locator('label')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
     await expect(label).toBeVisible();
     const text = await label.textContent();
     expect(text).toBeTruthy();
@@ -33,7 +36,10 @@ test.describe('Checkbox', () => {
   });
 
   test('should toggle checkbox when clicking on label', async ({ page }) => {
-    const label = page.locator('label').filter({ has: page.locator('input[type="checkbox"]') }).first();
+    const label = page
+      .locator('label')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
 
     if (await label.isVisible()) {
       const checkbox = label.locator('input[type="checkbox"]');
@@ -66,14 +72,20 @@ test.describe('Checkbox', () => {
   // ==================== Color Variants ====================
 
   test('should render blue color variant', async ({ page }) => {
-    const blueCheckbox = page.locator('label').filter({ hasText: /Blue checkbox/i }).first();
+    const blueCheckbox = page
+      .locator('label')
+      .filter({ hasText: /Blue checkbox/i })
+      .first();
     if (await blueCheckbox.isVisible()) {
       await expect(blueCheckbox).toBeVisible();
     }
   });
 
   test('should render dark color variant', async ({ page }) => {
-    const darkCheckbox = page.locator('label').filter({ hasText: /Dark checkbox/i }).first();
+    const darkCheckbox = page
+      .locator('label')
+      .filter({ hasText: /Dark checkbox/i })
+      .first();
     if (await darkCheckbox.isVisible()) {
       await expect(darkCheckbox).toBeVisible();
     }
@@ -82,14 +94,20 @@ test.describe('Checkbox', () => {
   // ==================== Label Position ====================
 
   test('should render label on right side by default', async ({ page }) => {
-    const rightLabel = page.locator('label').filter({ hasText: /Label on right/i }).first();
+    const rightLabel = page
+      .locator('label')
+      .filter({ hasText: /Label on right/i })
+      .first();
     if (await rightLabel.isVisible()) {
       await expect(rightLabel).toBeVisible();
     }
   });
 
   test('should render label on left side when specified', async ({ page }) => {
-    const leftLabel = page.locator('label').filter({ hasText: /Label on left/i }).first();
+    const leftLabel = page
+      .locator('label')
+      .filter({ hasText: /Label on left/i })
+      .first();
     if (await leftLabel.isVisible()) {
       await expect(leftLabel).toBeVisible();
     }
@@ -107,7 +125,10 @@ test.describe('Checkbox', () => {
   });
 
   test('should render disabled checked checkbox', async ({ page }) => {
-    const disabledCheckedLabel = page.locator('label').filter({ hasText: /Disabled checked/i }).first();
+    const disabledCheckedLabel = page
+      .locator('label')
+      .filter({ hasText: /Disabled checked/i })
+      .first();
     if (await disabledCheckedLabel.isVisible()) {
       const checkbox = disabledCheckedLabel.locator('input[type="checkbox"]');
       await expect(checkbox).toBeDisabled();
@@ -174,7 +195,10 @@ test.describe('Checkbox', () => {
   });
 
   test('clicking label should toggle checkbox', async ({ page }) => {
-    const label = page.locator('label').filter({ has: page.locator('input[type="checkbox"]') }).first();
+    const label = page
+      .locator('label')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
     const checkbox = label.locator('input[type="checkbox"]');
 
     const initialChecked = await checkbox.isChecked();
@@ -188,7 +212,10 @@ test.describe('Checkbox', () => {
 
   test('should work in controlled mode', async ({ page }) => {
     // First checkbox is the controlled one with "Accept terms"
-    const termsLabel = page.locator('label').filter({ hasText: /Accept terms/i }).first();
+    const termsLabel = page
+      .locator('label')
+      .filter({ hasText: /Accept terms/i })
+      .first();
 
     if (await termsLabel.isVisible()) {
       const checkbox = termsLabel.locator('input[type="checkbox"]');

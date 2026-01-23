@@ -12,7 +12,6 @@ export default defineConfig({
         hooks: './src/hooks/index.ts',
         context: './src/context/index.ts',
         helpers: './src/helpers/index.ts',
-        icons: './src/icons/index.ts',
       },
       name: 'solidly',
       fileName: (_, entryName) =>
@@ -20,7 +19,13 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['solid-js', 'solid-js/web', '@formatjs/intl'],
+      external: [
+        'solid-js',
+        'solid-js/web',
+        '@formatjs/intl',
+        '@exowpee/solidly-icons',
+        '@exowpee/solidly-hooks',
+      ],
       output: {
         globals: {
           'solid-js': 'SolidJS',

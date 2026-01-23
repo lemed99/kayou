@@ -47,7 +47,9 @@ test.describe('ToggleSwitch', () => {
   });
 
   test('should render disabled state', async ({ page }) => {
-    const disabledToggle = page.locator('[role="switch"][aria-disabled="true"], [role="switch"][disabled]');
+    const disabledToggle = page.locator(
+      '[role="switch"][aria-disabled="true"], [role="switch"][disabled]',
+    );
     const count = await disabledToggle.count();
 
     if (count > 0) {

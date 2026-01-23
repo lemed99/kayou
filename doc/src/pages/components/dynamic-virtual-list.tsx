@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly-pro';
+import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -25,11 +25,13 @@ export default function DynamicVirtualListPage() {
       keyConcepts={[
         {
           term: 'Dynamic Measurement',
-          explanation: 'Measures actual rendered heights and caches them for scroll calculations.',
+          explanation:
+            'Measures actual rendered heights and caches them for scroll calculations.',
         },
         {
           term: 'Estimated Row Height',
-          explanation: 'Initial estimate before measurement; closer to average improves accuracy.',
+          explanation:
+            'Initial estimate before measurement; closer to average improves accuracy.',
         },
         {
           term: 'Height Cache',
@@ -190,23 +192,6 @@ export default function DynamicVirtualListPage() {
           title: 'Basic Usage with Variable Heights',
           description:
             'Items with different content lengths are rendered with their natural heights.',
-          code: `const items = () => [
-  { id: 1, text: 'Short item' },
-  { id: 2, text: 'This is a much longer item with more content...' },
-  { id: 3, text: 'Medium item here' },
-];
-
-<DynamicVirtualList
-  items={items}
-  rootHeight={300}
-  estimatedRowHeight={60}
->
-  {(item) => (
-    <div class="p-3 border-b">
-      <p>{item.text}</p>
-    </div>
-  )}
-</DynamicVirtualList>`,
           component: () => {
             const items = () => generateItems(100);
             return (
@@ -229,25 +214,6 @@ export default function DynamicVirtualListPage() {
         {
           title: 'Chat Messages',
           description: 'Perfect for chat interfaces where messages vary in length.',
-          code: `const messages = () => [
-  { id: 1, sender: 'Alice', text: 'Hi!', isMe: false },
-  { id: 2, sender: 'You', text: 'Hello! How are you?', isMe: true },
-  { id: 3, sender: 'Alice', text: 'Great! I wanted to discuss...', isMe: false },
-];
-
-<DynamicVirtualList
-  items={messages}
-  rootHeight={400}
-  estimatedRowHeight={50}
->
-  {(msg) => (
-    <div class={msg.isMe ? 'text-right' : 'text-left'}>
-      <div class={msg.isMe ? 'bg-blue-500 text-white' : 'bg-gray-200'}>
-        {msg.text}
-      </div>
-    </div>
-  )}
-</DynamicVirtualList>`,
           component: () => {
             const messages = () =>
               Array.from({ length: 50 }, (_, i) => ({
@@ -290,27 +256,6 @@ export default function DynamicVirtualListPage() {
         {
           title: 'With Selection and Accessibility',
           description: 'Accessible listbox with variable height options.',
-          code: `const [selectedId, setSelectedId] = createSignal<number | null>(null);
-
-<DynamicVirtualList
-  items={items}
-  rootHeight={250}
-  estimatedRowHeight={60}
-  role="listbox"
-  rowRole="option"
-  aria-label="Select an item"
-  aria-activedescendant={selectedId() !== null ? \`item-\${selectedId()}\` : undefined}
->
-  {(item) => (
-    <div
-      id={\`item-\${item.id}\`}
-      aria-selected={selectedId() === item.id}
-      onClick={() => setSelectedId(item.id)}
-    >
-      {item.title}
-    </div>
-  )}
-</DynamicVirtualList>`,
           component: () => {
             const [selectedId, setSelectedId] = createSignal<number | null>(null);
             const items = () => generateItems(50);
@@ -351,21 +296,6 @@ export default function DynamicVirtualListPage() {
           title: 'Scroll To Index',
           description:
             'Programmatically scroll to items. Scroll positions are calculated using actual measured heights.',
-          code: `let listHandle: DynamicVirtualListHandle | undefined;
-const [targetIndex, setTargetIndex] = createSignal(0);
-
-<button onClick={() => listHandle?.scrollToIndex(targetIndex(), 'smooth')}>
-  Scroll to Item
-</button>
-
-<DynamicVirtualList
-  ref={(handle) => (listHandle = handle)}
-  items={items}
-  rootHeight={250}
-  estimatedRowHeight={60}
->
-  {(item, index) => <div>{item.title} (#{index()})</div>}
-</DynamicVirtualList>`,
           component: () => {
             let listHandle: DynamicVirtualListHandle | undefined;
             const [targetIndex, setTargetIndex] = createSignal(0);
@@ -415,18 +345,6 @@ const [targetIndex, setTargetIndex] = createSignal(0);
           title: 'Track Average Row Height',
           description:
             'Monitor the calculated average height for better initial estimates in future renders.',
-          code: `const [avgHeight, setAvgHeight] = createSignal(0);
-
-<p>Average row height: {avgHeight().toFixed(1)}px</p>
-
-<DynamicVirtualList
-  items={items}
-  rootHeight={250}
-  estimatedRowHeight={60}
-  setAverageRowHeight={setAvgHeight}
->
-  {(item) => <div>{item.content}</div>}
-</DynamicVirtualList>`,
           component: () => {
             const [avgHeight, setAvgHeight] = createSignal(0);
             const items = () => generateItems(100);
@@ -458,16 +376,6 @@ const [targetIndex, setTargetIndex] = createSignal(0);
           title: 'Expandable Items',
           description:
             'Items can change height dynamically. The list automatically adjusts.',
-          code: `const [expandedId, setExpandedId] = createSignal<number | null>(null);
-
-<DynamicVirtualList items={items} rootHeight={300} estimatedRowHeight={50}>
-  {(item) => (
-    <div onClick={() => setExpandedId(expandedId() === item.id ? null : item.id)}>
-      <div>{item.title}</div>
-      {expandedId() === item.id && <div>{item.details}</div>}
-    </div>
-  )}
-</DynamicVirtualList>`,
           component: () => {
             const [expandedId, setExpandedId] = createSignal<number | null>(null);
             const items = () =>
@@ -509,14 +417,6 @@ const [targetIndex, setTargetIndex] = createSignal(0);
         {
           title: 'Empty State',
           description: 'Display a fallback when there are no items.',
-          code: `<DynamicVirtualList
-  items={() => []}
-  rootHeight={200}
-  estimatedRowHeight={50}
-  fallback={<div class="p-8 text-center">No items</div>}
->
-  {(item) => <div>{item}</div>}
-</DynamicVirtualList>`,
           component: () => {
             const [items, setItems] = createSignal<
               typeof generateItems extends (n: number) => infer R ? R : never
@@ -555,85 +455,87 @@ const [targetIndex, setTargetIndex] = createSignal(0);
           },
         },
       ]}
-      usage={`import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly;
-import { createSignal } from 'solid-js';
+      usage={`
+        import { DynamicVirtualList, DynamicVirtualListHandle } from '@exowpee/solidly;
+        import { createSignal } from 'solid-js';
 
-// Basic usage - items with variable heights
-const [items, setItems] = createSignal([
-  { id: 1, text: 'Short' },
-  { id: 2, text: 'This is a longer message...' },
-]);
+        // Basic usage - items with variable heights
+        const [items, setItems] = createSignal([
+          { id: 1, text: 'Short' },
+          { id: 2, text: 'This is a longer message...' },
+        ]);
 
-<DynamicVirtualList
-  items={items}
-  rootHeight={400}
-  estimatedRowHeight={60}
->
-  {(item, index) => (
-    <div class="p-3">
-      <p>{item.text}</p>
-    </div>
-  )}
-</DynamicVirtualList>
+        <DynamicVirtualList
+          items={items}
+          rootHeight={400}
+          estimatedRowHeight={60}
+        >
+          {(item, index) => (
+            <div class="p-3">
+              <p>{item.text}</p>
+            </div>
+          )}
+        </DynamicVirtualList>
 
-// With imperative scroll control
-let listHandle: DynamicVirtualListHandle | undefined;
+        // With imperative scroll control
+        let listHandle: DynamicVirtualListHandle | undefined;
 
-<DynamicVirtualList
-  ref={(handle) => (listHandle = handle)}
-  items={items}
-  rootHeight={400}
-  estimatedRowHeight={60}
->
-  {(item) => <div>{item.text}</div>}
-</DynamicVirtualList>
+        <DynamicVirtualList
+          ref={(handle) => (listHandle = handle)}
+          items={items}
+          rootHeight={400}
+          estimatedRowHeight={60}
+        >
+          {(item) => <div>{item.text}</div>}
+        </DynamicVirtualList>
 
-// Scroll to item (uses actual measured heights)
-listHandle?.scrollToIndex(50, 'smooth');
+        // Scroll to item (uses actual measured heights)
+        listHandle?.scrollToIndex(50, 'smooth');
 
-// Track average height for better estimates
-const [avgHeight, setAvgHeight] = createSignal(60);
+        // Track average height for better estimates
+        const [avgHeight, setAvgHeight] = createSignal(60);
 
-<DynamicVirtualList
-  items={items}
-  rootHeight={400}
-  estimatedRowHeight={avgHeight()}
-  setAverageRowHeight={setAvgHeight}
->
-  {(item) => <div>{item.text}</div>}
-</DynamicVirtualList>
+        <DynamicVirtualList
+          items={items}
+          rootHeight={400}
+          estimatedRowHeight={avgHeight()}
+          setAverageRowHeight={setAvgHeight}
+        >
+          {(item) => <div>{item.text}</div>}
+        </DynamicVirtualList>
 
-// Accessible listbox with variable height options
-<DynamicVirtualList
-  items={items}
-  rootHeight={300}
-  estimatedRowHeight={60}
-  role="listbox"
-  rowRole="option"
-  aria-label="Select an item"
->
-  {(item) => (
-    <div id={item.id} role="option">
-      {item.text}
-    </div>
-  )}
-</DynamicVirtualList>
+        // Accessible listbox with variable height options
+        <DynamicVirtualList
+          items={items}
+          rootHeight={300}
+          estimatedRowHeight={60}
+          role="listbox"
+          rowRole="option"
+          aria-label="Select an item"
+        >
+          {(item) => (
+            <div id={item.id} role="option">
+              {item.text}
+            </div>
+          )}
+        </DynamicVirtualList>
 
-// DynamicVirtualListHandle type reference
-type DynamicVirtualListHandle = {
-  scrollToIndex: (index: number, behavior?: ScrollBehavior) => void;
-};
+        // DynamicVirtualListHandle type reference
+        type DynamicVirtualListHandle = {
+          scrollToIndex: (index: number, behavior?: ScrollBehavior) => void;
+        };
 
-// Keyboard Navigation (when role is set):
-// - Home: Scroll to first item
-// - End: Scroll to last item
-// - PageUp: Scroll up by one page
-// - PageDown: Scroll down by one page
+        // Keyboard Navigation (when role is set):
+        // - Home: Scroll to first item
+        // - End: Scroll to last item
+        // - PageUp: Scroll up by one page
+        // - PageDown: Scroll down by one page
 
-// When to use DynamicVirtualList vs VirtualList:
-// - Use DynamicVirtualList when item heights vary (chat, comments, cards)
-// - Use VirtualList when all items have the same fixed height (tables, simple lists)
-// - DynamicVirtualList has slightly more overhead due to height measurements`}
+        // When to use DynamicVirtualList vs VirtualList:
+        // - Use DynamicVirtualList when item heights vary (chat, comments, cards)
+        // - Use VirtualList when all items have the same fixed height (tables, simple lists)
+        // - DynamicVirtualList has slightly more overhead due to height measurements
+      `}
       relatedHooks={[
         {
           name: 'useDynamicVirtualList',

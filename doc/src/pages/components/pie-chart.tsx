@@ -1,7 +1,7 @@
 import { Show, createSignal } from 'solid-js';
 
-import { Pie, PieChart, ResponsiveContainer, Sector } from '@exowpee/solidly-pro';
-import type { ActiveSector } from '@exowpee/solidly-pro';
+import { Pie, PieChart, ResponsiveContainer, Sector } from '@exowpee/solidly';
+import type { ActiveSector } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -311,7 +311,6 @@ export default function PieChartPage() {
   return (
     <DocPage
       title="PieChart"
-      isPro
       description="D3-based pie/donut chart with interactive segments and custom active shape highlighting."
       dependencies={[
         {
@@ -323,7 +322,8 @@ export default function PieChartPage() {
       keyConcepts={[
         {
           term: 'Donut vs Pie',
-          explanation: 'innerRadius=0 for pie; positive value creates donut with center hole.',
+          explanation:
+            'innerRadius=0 for pie; positive value creates donut with center hole.',
         },
         {
           term: 'Active Shape',
@@ -335,7 +335,8 @@ export default function PieChartPage() {
         },
         {
           term: 'Percentage Values',
-          explanation: 'Auto-calculated percentages available in activeShape and aria-labels.',
+          explanation:
+            'Auto-calculated percentages available in activeShape and aria-labels.',
         },
       ]}
       props={[
@@ -394,18 +395,6 @@ export default function PieChartPage() {
         {
           title: 'Basic Pie Chart',
           description: 'Simple pie chart showing market share data.',
-          code: `<PieChart width={400} height={400}>
-  <Pie
-    data={marketShareData}
-    dataKey="value"
-    labelKey="name"
-    cx="50%"
-    cy="50%"
-    innerRadius={0}
-    outerRadius={120}
-    fill="#8884d8"
-  />
-</PieChart>`,
           component: () => (
             <div class="flex justify-center">
               <PieChart width={300} height={300}>
@@ -426,18 +415,6 @@ export default function PieChartPage() {
         {
           title: 'Donut Chart',
           description: 'Pie chart with inner radius creating a donut shape.',
-          code: `<PieChart width={400} height={400}>
-  <Pie
-    data={salesByRegion}
-    dataKey="sales"
-    labelKey="region"
-    cx="50%"
-    cy="50%"
-    innerRadius={60}
-    outerRadius={120}
-    fill="#82ca9d"
-  />
-</PieChart>`,
           component: () => (
             <div class="flex justify-center">
               <PieChart width={300} height={300}>
@@ -458,40 +435,6 @@ export default function PieChartPage() {
         {
           title: 'With Active Shape',
           description: 'Custom highlight effect when hovering or focusing segments.',
-          code: `const renderActiveShape = (props) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, percent, data } = props;
-  return (
-    <g>
-      <text x={cx} y={cy - 10} text-anchor="middle" fill="#333" font-size="14">
-        {data.name}
-      </text>
-      <text x={cx} y={cy + 10} text-anchor="middle" fill="#666" font-size="12">
-        {(percent * 100).toFixed(1)}%
-      </text>
-      <Sector
-        innerRadius={innerRadius - 5}
-        outerRadius={outerRadius + 10}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-    </g>
-  );
-};
-
-<PieChart width={400} height={400}>
-  <Pie
-    data={budgetData}
-    dataKey="amount"
-    labelKey="category"
-    cx="50%"
-    cy="50%"
-    innerRadius={60}
-    outerRadius={100}
-    fill="#ffc658"
-    activeShape={renderActiveShape}
-  />
-</PieChart>`,
           component: () => (
             <div class="flex justify-center">
               <PieChart width={300} height={300}>
@@ -513,26 +456,6 @@ export default function PieChartPage() {
         {
           title: 'With Selection Callback',
           description: 'Handle segment selection via click or keyboard.',
-          code: `const [selected, setSelected] = createSignal(null);
-
-<PieChart width={400} height={400}>
-  <Pie
-    data={marketShareData}
-    dataKey="value"
-    labelKey="name"
-    cx="50%"
-    cy="50%"
-    innerRadius={60}
-    outerRadius={120}
-    fill="#a855f7"
-    onSegmentSelect={(data, index) => {
-      setSelected(data);
-      console.log('Selected:', data.name, 'at index', index);
-    }}
-  />
-</PieChart>
-
-{selected() && <p>Selected: {selected().name}</p>}`,
           component: () => (
             <div class="flex flex-col items-center gap-4">
               <PieChart width={300} height={300}>
@@ -559,27 +482,6 @@ export default function PieChartPage() {
         {
           title: 'Responsive Pie Chart',
           description: 'Chart that resizes with its container.',
-          code: `<ResponsiveContainer minHeight={400}>
-  {(size) => (
-    <PieChart
-      width={400}
-      height={400}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <Pie
-        data={salesByRegion}
-        dataKey="sales"
-        labelKey="region"
-        cx="50%"
-        cy="50%"
-        innerRadius={40}
-        outerRadius={Math.min(size.rwidth, size.rheight) / 3}
-        fill="#8884d8"
-      />
-    </PieChart>
-  )}
-</ResponsiveContainer>`,
           component: () => (
             <div class="w-full">
               <ResponsiveContainer minHeight={300}>
@@ -609,24 +511,6 @@ export default function PieChartPage() {
         {
           title: 'Accessible Pie Chart',
           description: 'Chart with full accessibility attributes.',
-          code: `<PieChart
-  width={400}
-  height={400}
-  ariaLabel="Browser market share distribution"
-  title="Browser Market Share 2024"
-  description="Chrome leads with 65%, followed by Safari at 19%"
->
-  <Pie
-    data={marketShareData}
-    dataKey="value"
-    labelKey="name"
-    cx="50%"
-    cy="50%"
-    innerRadius={60}
-    outerRadius={120}
-    fill="#4285f4"
-  />
-</PieChart>`,
           component: () => (
             <div class="flex justify-center">
               <PieChart
@@ -651,81 +535,83 @@ export default function PieChartPage() {
           ),
         },
       ]}
-      usage={`import { PieChart, Pie, Sector } from '@exowpee/solidlyCharts/PieChart';
-import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
+      usage={`
+        import { PieChart, Pie, Sector } from '@exowpee/solidlyCharts/PieChart';
+        import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
 
-// Basic pie chart
-const data = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 200 },
-];
+        // Basic pie chart
+        const data = [
+          { name: 'Group A', value: 400 },
+          { name: 'Group B', value: 300 },
+          { name: 'Group C', value: 200 },
+        ];
 
-<PieChart width={400} height={400}>
-  <Pie
-    data={data}
-    dataKey="value"
-    labelKey="name"
-    cx="50%"
-    cy="50%"
-    innerRadius={0}
-    outerRadius={120}
-    fill="#8884d8"
-  />
-</PieChart>
+        <PieChart width={400} height={400}>
+          <Pie
+            data={data}
+            dataKey="value"
+            labelKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={0}
+            outerRadius={120}
+            fill="#8884d8"
+          />
+        </PieChart>
 
-// Donut chart with active shape
-const renderActiveShape = (props) => (
-  <g>
-    <text x={props.cx} y={props.cy} text-anchor="middle">
-      {props.data.name}: {(props.percent * 100).toFixed(0)}%
-    </text>
-    <Sector
-      innerRadius={props.innerRadius - 5}
-      outerRadius={props.outerRadius + 10}
-      startAngle={props.startAngle}
-      endAngle={props.endAngle}
-      fill={props.fill}
-    />
-  </g>
-);
+        // Donut chart with active shape
+        const renderActiveShape = (props) => (
+          <g>
+            <text x={props.cx} y={props.cy} text-anchor="middle">
+              {props.data.name}: {(props.percent * 100).toFixed(0)}%
+            </text>
+            <Sector
+              innerRadius={props.innerRadius - 5}
+              outerRadius={props.outerRadius + 10}
+              startAngle={props.startAngle}
+              endAngle={props.endAngle}
+              fill={props.fill}
+            />
+          </g>
+        );
 
-<PieChart width={400} height={400}>
-  <Pie
-    data={data}
-    dataKey="value"
-    labelKey="name"
-    cx="50%"
-    cy="50%"
-    innerRadius={60}
-    outerRadius={120}
-    fill="#82ca9d"
-    activeShape={renderActiveShape}
-    onSegmentSelect={(data, index) => console.log(data, index)}
-  />
-</PieChart>
+        <PieChart width={400} height={400}>
+          <Pie
+            data={data}
+            dataKey="value"
+            labelKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={120}
+            fill="#82ca9d"
+            activeShape={renderActiveShape}
+            onSegmentSelect={(data, index) => console.log(data, index)}
+          />
+        </PieChart>
 
-// Responsive
-<ResponsiveContainer minHeight={400}>
-  {(size) => (
-    <PieChart
-      width={400}
-      height={400}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <Pie
-        data={data}
-        dataKey="value"
-        cx="50%"
-        cy="50%"
-        innerRadius={60}
-        outerRadius={100}
-        fill="#ffc658"
-      />
-    </PieChart>
-  )}
-</ResponsiveContainer>`}
+        // Responsive
+        <ResponsiveContainer minHeight={400}>
+          {(size) => (
+            <PieChart
+              width={400}
+              height={400}
+              rwidth={size.rwidth}
+              rheight={size.rheight}
+            >
+              <Pie
+                data={data}
+                dataKey="value"
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                fill="#ffc658"
+              />
+            </PieChart>
+          )}
+        </ResponsiveContainer>
+      `}
       subComponents={subComponents}
     />
   );

@@ -6,7 +6,9 @@ test.describe('Spinner', () => {
   });
 
   test('should render spinner component', async ({ page }) => {
-    const spinner = page.locator('[class*="spinner"], [class*="animate-spin"], [role="status"]').first();
+    const spinner = page
+      .locator('[class*="spinner"], [class*="animate-spin"], [role="status"]')
+      .first();
     await expect(spinner).toBeVisible();
   });
 
@@ -16,7 +18,9 @@ test.describe('Spinner', () => {
   });
 
   test('should have accessible label', async ({ page }) => {
-    const spinner = page.locator('[role="status"], [aria-label*="loading" i], [aria-label*="Loading" i]');
+    const spinner = page.locator(
+      '[role="status"], [aria-label*="loading" i], [aria-label*="Loading" i]',
+    );
     const count = await spinner.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });

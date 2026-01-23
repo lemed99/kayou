@@ -5,7 +5,7 @@ import {
   Password,
   type PasswordRequirement,
   type PasswordStrength,
-} from '@exowpee/solidly-pro';
+} from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -13,7 +13,6 @@ export default function PasswordPage() {
   return (
     <DocPage
       title="Password"
-      isPro
       description="Password input with show/hide toggle, strength indicator, and customizable requirements validation."
       dependencies={[
         {
@@ -29,7 +28,8 @@ export default function PasswordPage() {
         },
         {
           term: 'Strength Indicator',
-          explanation: 'Visual progress bar showing password strength (weak, fair, good, strong).',
+          explanation:
+            'Visual progress bar showing password strength (weak, fair, good, strong).',
         },
         {
           term: 'Requirements Validation',
@@ -37,7 +37,8 @@ export default function PasswordPage() {
         },
         {
           term: 'Customizable Rules',
-          explanation: 'Provide custom requirements or use defaults (length, uppercase, lowercase, number, special).',
+          explanation:
+            'Provide custom requirements or use defaults (length, uppercase, lowercase, number, special).',
         },
       ]}
       props={[
@@ -57,7 +58,8 @@ export default function PasswordPage() {
           name: 'requirements',
           type: 'PasswordRequirement[]',
           default: 'DEFAULT_REQUIREMENTS',
-          description: 'Custom password requirements with key, label, and validate function',
+          description:
+            'Custom password requirements with key, label, and validate function',
         },
         {
           name: 'calculateStrength',
@@ -117,7 +119,8 @@ export default function PasswordPage() {
           name: 'color',
           type: '"gray" | "info" | "failure" | "warning" | "success"',
           default: 'Auto (based on strength)',
-          description: 'Color variant for styling. Auto-calculated from strength if not set.',
+          description:
+            'Color variant for styling. Auto-calculated from strength if not set.',
         },
         {
           name: 'disabled',
@@ -130,7 +133,6 @@ export default function PasswordPage() {
         {
           title: 'Basic Usage',
           description: 'Simple password input with show/hide toggle.',
-          code: `<Password label="Password" placeholder="Enter password" />`,
           component: () => {
             return (
               <div class="w-full max-w-sm">
@@ -142,11 +144,6 @@ export default function PasswordPage() {
         {
           title: 'With Strength Indicator',
           description: 'Password input with visual strength meter.',
-          code: `<Password
-  label="Password"
-  placeholder="Enter password"
-  showStrength
-/>`,
           component: () => {
             return (
               <div class="w-full max-w-sm">
@@ -158,15 +155,14 @@ export default function PasswordPage() {
         {
           title: 'With Requirements Checklist',
           description: 'Password input showing validation requirements in real-time.',
-          code: `<Password
-  label="Password"
-  placeholder="Enter password"
-  showRequirements
-/>`,
           component: () => {
             return (
               <div class="w-full max-w-sm">
-                <Password label="Password" placeholder="Enter password" showRequirements />
+                <Password
+                  label="Password"
+                  placeholder="Enter password"
+                  showRequirements
+                />
               </div>
             );
           },
@@ -174,13 +170,6 @@ export default function PasswordPage() {
         {
           title: 'Full Featured',
           description: 'Password input with both strength indicator and requirements.',
-          code: `<Password
-  label="Create Password"
-  placeholder="Enter a strong password"
-  showStrength
-  showRequirements
-  helperText="Choose a password that meets all requirements"
-/>`,
           component: () => {
             return (
               <div class="w-full max-w-sm">
@@ -198,29 +187,6 @@ export default function PasswordPage() {
         {
           title: 'Custom Requirements',
           description: 'Password input with custom validation rules.',
-          code: `const customRequirements: PasswordRequirement[] = [
-  {
-    key: 'minLength',
-    label: 'At least 12 characters',
-    validate: (password) => password.length >= 12,
-  },
-  {
-    key: 'noSpaces',
-    label: 'No spaces allowed',
-    validate: (password) => !password.includes(' '),
-  },
-  {
-    key: 'mixedCase',
-    label: 'Both uppercase and lowercase',
-    validate: (password) => /[a-z]/.test(password) && /[A-Z]/.test(password),
-  },
-];
-
-<Password
-  label="Password"
-  showRequirements
-  requirements={customRequirements}
-/>`,
           component: () => {
             const customRequirements: PasswordRequirement[] = [
               {
@@ -236,8 +202,7 @@ export default function PasswordPage() {
               {
                 key: 'mixedCase',
                 label: 'Both uppercase and lowercase',
-                validate: (password) =>
-                  /[a-z]/.test(password) && /[A-Z]/.test(password),
+                validate: (password) => /[a-z]/.test(password) && /[A-Z]/.test(password),
               },
             ];
             return (
@@ -255,18 +220,6 @@ export default function PasswordPage() {
         {
           title: 'With Callbacks',
           description: 'Track password strength and requirements changes.',
-          code: `const [strength, setStrength] = createSignal<PasswordStrength>('weak');
-const [metCount, setMetCount] = createSignal(0);
-
-<Password
-  label="Password"
-  showStrength
-  onStrengthChange={setStrength}
-  onRequirementsChange={(met) => setMetCount(met.length)}
-/>
-
-<p>Strength: {strength()}</p>
-<p>Requirements met: {metCount()} / 5</p>`,
           component: () => {
             const [strength, setStrength] = createSignal<PasswordStrength>('weak');
             const [metCount, setMetCount] = createSignal(0);
@@ -280,8 +233,15 @@ const [metCount, setMetCount] = createSignal(0);
                   onRequirementsChange={(met) => setMetCount(met.length)}
                 />
                 <div class="text-sm text-gray-600 dark:text-gray-400">
-                  <p>Strength: <span class="font-medium">{strength()}</span></p>
-                  <p>Requirements met: <span class="font-medium">{metCount()} / {DEFAULT_REQUIREMENTS.length}</span></p>
+                  <p>
+                    Strength: <span class="font-medium">{strength()}</span>
+                  </p>
+                  <p>
+                    Requirements met:{' '}
+                    <span class="font-medium">
+                      {metCount()} / {DEFAULT_REQUIREMENTS.length}
+                    </span>
+                  </p>
                 </div>
               </div>
             );
@@ -290,16 +250,6 @@ const [metCount, setMetCount] = createSignal(0);
         {
           title: 'Controlled Value',
           description: 'Control the password value externally.',
-          code: `const [password, setPassword] = createSignal('');
-
-<Password
-  label="Password"
-  value={password()}
-  onInput={(e) => setPassword(e.currentTarget.value)}
-  showStrength
-/>
-
-<Button onClick={() => setPassword('')}>Clear</Button>`,
           component: () => {
             const [password, setPassword] = createSignal('');
             return (
@@ -323,45 +273,47 @@ const [metCount, setMetCount] = createSignal(0);
           },
         },
       ]}
-      usage={`import { Password, DEFAULT_REQUIREMENTS, type PasswordRequirement } from '@exowpee/solidly-pro';
+      usage={`
+        import { Password, DEFAULT_REQUIREMENTS, type PasswordRequirement } from '@exowpee/solidly';
 
-// Basic usage
-<Password label="Password" placeholder="Enter password" />
+        // Basic usage
+        <Password label="Password" placeholder="Enter password" />
 
-// With strength indicator
-<Password label="Password" showStrength />
+        // With strength indicator
+        <Password label="Password" showStrength />
 
-// With requirements checklist
-<Password label="Password" showRequirements />
+        // With requirements checklist
+        <Password label="Password" showRequirements />
 
-// Full featured
-<Password
-  label="Create Password"
-  showStrength
-  showRequirements
-  onStrengthChange={(strength) => console.log(strength)}
-  onRequirementsChange={(met, unmet) => console.log(met, unmet)}
-/>
+        // Full featured
+        <Password
+          label="Create Password"
+          showStrength
+          showRequirements
+          onStrengthChange={(strength) => console.log(strength)}
+          onRequirementsChange={(met, unmet) => console.log(met, unmet)}
+        />
 
-// Custom requirements
-const customRequirements: PasswordRequirement[] = [
-  {
-    key: 'minLength',
-    label: 'At least 12 characters',
-    validate: (password) => password.length >= 12,
-  },
-  {
-    key: 'noSpaces',
-    label: 'No spaces allowed',
-    validate: (password) => !password.includes(' '),
-  },
-];
+        // Custom requirements
+        const customRequirements: PasswordRequirement[] = [
+          {
+            key: 'minLength',
+            label: 'At least 12 characters',
+            validate: (password) => password.length >= 12,
+          },
+          {
+            key: 'noSpaces',
+            label: 'No spaces allowed',
+            validate: (password) => !password.includes(' '),
+          },
+        ];
 
-<Password
-  label="Password"
-  showRequirements
-  requirements={customRequirements}
-/>`}
+        <Password
+          label="Password"
+          showRequirements
+          requirements={customRequirements}
+        />
+      `}
     />
   );
 }

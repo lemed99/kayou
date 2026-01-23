@@ -6,7 +6,7 @@ import {
   BarXAxis,
   BarYAxis,
   ResponsiveContainer,
-} from '@exowpee/solidly-pro';
+} from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -183,7 +183,6 @@ export default function BarChartPage() {
   return (
     <DocPage
       title="BarChart"
-      isPro
       description="D3-based bar chart with composable axes, grid, tooltips, and support for grouped bars."
       dependencies={[
         {
@@ -289,13 +288,7 @@ export default function BarChartPage() {
       examples={[
         {
           title: 'Basic Bar Chart',
-          description: 'Simple bar chart with a single data series.',
-          code: `<BarChart data={salesData} width={500} height={300}>
-  <BarXAxis dataKey="month" />
-  <BarYAxis />
-  <Bar dataKey="revenue" fill="#8884d8" />
-</BarChart>`,
-          component: () => (
+          description: 'Simple bar chart with a single data series.',          component: () => (
             <div class="h-64 w-full">
               <BarChart data={salesData} width={500} height={250}>
                 <BarXAxis dataKey="month" />
@@ -307,16 +300,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Grouped Bars',
-          description: 'Chart with multiple data series displayed as grouped bars.',
-          code: `<BarChart data={salesData} width={500} height={300}>
-  <BarXAxis dataKey="month" />
-  <BarYAxis />
-  <BarCartesianGrid stroke="#eee" />
-  <Bar dataKey="revenue" fill="#8884d8" />
-  <Bar dataKey="profit" fill="#82ca9d" />
-  <BarChartTooltip />
-</BarChart>`,
-          component: () => (
+          description: 'Chart with multiple data series displayed as grouped bars.',          component: () => (
             <div class="h-64 w-full">
               <BarChart data={salesData} width={500} height={250}>
                 <BarXAxis dataKey="month" />
@@ -331,15 +315,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Rounded Bars',
-          description: 'Bars with rounded top corners for a modern look.',
-          code: `<BarChart data={categoryData} width={500} height={300}>
-  <BarXAxis dataKey="category" />
-  <BarYAxis />
-  <BarCartesianGrid strokeDasharray="5 5" />
-  <Bar dataKey="value" fill="#10b981" radius={4} />
-  <BarChartTooltip />
-</BarChart>`,
-          component: () => (
+          description: 'Bars with rounded top corners for a modern look.',          component: () => (
             <div class="h-64 w-full">
               <BarChart data={categoryData} width={500} height={250}>
                 <BarXAxis dataKey="category" />
@@ -353,15 +329,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Custom Tick Formatters',
-          description: 'Format axis labels with custom functions.',
-          code: `<BarChart data={quarterlyData} width={500} height={300}>
-  <BarXAxis dataKey="quarter" />
-  <BarYAxis tickFormatter={(v) => \`$\${v / 1000}k\`} />
-  <BarCartesianGrid stroke="#ddd" />
-  <Bar dataKey="sales" fill="#6366f1" radius={[4, 4, 0, 0]} />
-  <BarChartTooltip />
-</BarChart>`,
-          component: () => (
+          description: 'Format axis labels with custom functions.',          component: () => (
             <div class="h-64 w-full">
               <BarChart data={quarterlyData} width={500} height={250}>
                 <BarXAxis dataKey="quarter" />
@@ -375,25 +343,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Responsive Chart',
-          description: 'Chart that resizes with its container using ResponsiveContainer.',
-          code: `<ResponsiveContainer minHeight={300}>
-  {(size) => (
-    <BarChart
-      data={salesData}
-      width={600}
-      height={300}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <BarXAxis dataKey="month" />
-      <BarYAxis />
-      <BarCartesianGrid />
-      <Bar dataKey="revenue" fill="#8884d8" />
-      <BarChartTooltip />
-    </BarChart>
-  )}
-</ResponsiveContainer>`,
-          component: () => (
+          description: 'Chart that resizes with its container using ResponsiveContainer.',          component: () => (
             <div class="w-full">
               <ResponsiveContainer minHeight={250}>
                 {(size) => (
@@ -417,23 +367,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Custom Tooltip',
-          description: 'Provide a custom tooltip renderer.',
-          code: `<BarChart data={salesData} width={500} height={300}>
-  <BarXAxis dataKey="month" />
-  <BarYAxis />
-  <Bar dataKey="revenue" fill="#8884d8" />
-  <BarChartTooltip
-    content={(data, barKey) => (
-      <div class="bg-white border shadow-lg p-3 rounded">
-        <div class="font-bold">{data.month}</div>
-        <div class="text-purple-600">
-          {barKey}: \${data[barKey]?.toLocaleString()}
-        </div>
-      </div>
-    )}
-  />
-</BarChart>`,
-          component: () => (
+          description: 'Provide a custom tooltip renderer.',          component: () => (
             <div class="h-64 w-full">
               <BarChart data={salesData} width={500} height={250}>
                 <BarXAxis dataKey="month" />
@@ -455,21 +389,7 @@ export default function BarChartPage() {
         },
         {
           title: 'Accessible Chart',
-          description: 'Chart with accessibility attributes for screen readers.',
-          code: `<BarChart
-  data={salesData}
-  width={500}
-  height={300}
-  ariaLabel="Monthly sales comparison for 2024"
-  title="Sales Chart"
-  description="Shows monthly revenue and profit from January to June 2024"
->
-  <BarXAxis dataKey="month" />
-  <BarYAxis />
-  <Bar dataKey="revenue" fill="#8884d8" />
-  <Bar dataKey="profit" fill="#82ca9d" />
-</BarChart>`,
-          component: () => (
+          description: 'Chart with accessibility attributes for screen readers.',          component: () => (
             <div class="h-64 w-full">
               <BarChart
                 data={salesData}
@@ -488,63 +408,65 @@ export default function BarChartPage() {
           ),
         },
       ]}
-      usage={`import {
-  BarChart,
-  BarXAxis,
-  BarYAxis,
-  Bar,
-  BarCartesianGrid,
-  BarChartTooltip,
-} from '@exowpee/solidly-pro';
-import { ResponsiveContainer } from '@exowpee/solidly-pro';
+      usage={`
+        import {
+          BarChart,
+          BarXAxis,
+          BarYAxis,
+          Bar,
+          BarCartesianGrid,
+          BarChartTooltip,
+        } from '@exowpee/solidly';
+        import { ResponsiveContainer } from '@exowpee/solidly';
 
-// Basic usage
-const data = [
-  { month: 'Jan', sales: 4000 },
-  { month: 'Feb', sales: 3000 },
-  { month: 'Mar', sales: 5000 },
-];
+        // Basic usage
+        const data = [
+          { month: 'Jan', sales: 4000 },
+          { month: 'Feb', sales: 3000 },
+          { month: 'Mar', sales: 5000 },
+        ];
 
-<BarChart data={data} width={600} height={400}>
-  <BarXAxis dataKey="month" />
-  <BarYAxis />
-  <Bar dataKey="sales" fill="#8884d8" />
-</BarChart>
+        <BarChart data={data} width={600} height={400}>
+          <BarXAxis dataKey="month" />
+          <BarYAxis />
+          <Bar dataKey="sales" fill="#8884d8" />
+        </BarChart>
 
-// Grouped bars with all features
-<BarChart
-  data={data}
-  width={600}
-  height={400}
-  barGap={0.1}
-  barCategoryGap={0.2}
-  ariaLabel="Sales data visualization"
-  title="Monthly Sales"
->
-  <BarCartesianGrid stroke="#eee" strokeDasharray="5 5" />
-  <BarXAxis dataKey="month" />
-  <BarYAxis tickFormatter={(v) => \`$\${v}\`} />
-  <Bar dataKey="sales" fill="#8884d8" radius={4} />
-  <Bar dataKey="returns" fill="#82ca9d" radius={4} />
-  <BarChartTooltip />
-</BarChart>
+        // Grouped bars with all features
+        <BarChart
+          data={data}
+          width={600}
+          height={400}
+          barGap={0.1}
+          barCategoryGap={0.2}
+          ariaLabel="Sales data visualization"
+          title="Monthly Sales"
+        >
+          <BarCartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <BarXAxis dataKey="month" />
+          <BarYAxis tickFormatter={(v) => \`$\${v}\`} />
+          <Bar dataKey="sales" fill="#8884d8" radius={4} />
+          <Bar dataKey="returns" fill="#82ca9d" radius={4} />
+          <BarChartTooltip />
+        </BarChart>
 
-// Responsive
-<ResponsiveContainer minHeight={400}>
-  {(size) => (
-    <BarChart
-      data={data}
-      width={600}
-      height={400}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <BarXAxis dataKey="month" />
-      <BarYAxis />
-      <Bar dataKey="sales" fill="#8884d8" />
-    </BarChart>
-  )}
-</ResponsiveContainer>`}
+        // Responsive
+        <ResponsiveContainer minHeight={400}>
+          {(size) => (
+            <BarChart
+              data={data}
+              width={600}
+              height={400}
+              rwidth={size.rwidth}
+              rheight={size.rheight}
+            >
+              <BarXAxis dataKey="month" />
+              <BarYAxis />
+              <Bar dataKey="sales" fill="#8884d8" />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      `}
       subComponents={subComponents}
     />
   );

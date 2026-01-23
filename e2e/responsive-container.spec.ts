@@ -11,7 +11,9 @@ test.describe('ResponsiveContainer', () => {
   });
 
   test('should have width and height', async ({ page }) => {
-    const container = page.locator('[class*="responsive"], [class*="container"], div').first();
+    const container = page
+      .locator('[class*="responsive"], [class*="container"], div')
+      .first();
     const boundingBox = await container.boundingBox();
 
     expect(boundingBox).toBeTruthy();

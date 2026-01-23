@@ -1,4 +1,4 @@
-import { expect, test, type Frame } from '@playwright/test';
+import { type Frame, expect, test } from '@playwright/test';
 
 /**
  * Helper to get the preview iframe frame
@@ -42,7 +42,9 @@ test.describe('Dashboard Blocks', () => {
     test('should render stats cards', async ({ page }) => {
       const frame = await getPreviewFrame(page);
       // Look for stat cards with values like $45,231, 2,350, etc.
-      const statsCards = frame.locator('[class*="rounded-xl"]').filter({ hasText: /\$[\d,]+|\d{1,3}(,\d{3})*/ });
+      const statsCards = frame
+        .locator('[class*="rounded-xl"]')
+        .filter({ hasText: /\$[\d,]+|\d{1,3}(,\d{3})*/ });
       const count = await statsCards.count();
       expect(count).toBeGreaterThan(0);
     });
@@ -61,7 +63,9 @@ test.describe('Dashboard Blocks', () => {
 
     test('should have notification bell', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const notificationButton = frame.locator('button').filter({ has: frame.locator('svg') });
+      const notificationButton = frame
+        .locator('button')
+        .filter({ has: frame.locator('svg') });
       const count = await notificationButton.count();
       expect(count).toBeGreaterThan(0);
     });
@@ -75,7 +79,9 @@ test.describe('Dashboard Blocks', () => {
 
     test('should render charts', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const charts = frame.locator('svg').filter({ has: frame.locator('path, line, circle') });
+      const charts = frame
+        .locator('svg')
+        .filter({ has: frame.locator('path, line, circle') });
       const count = await charts.count();
       expect(count).toBeGreaterThan(0);
     });
@@ -88,11 +94,16 @@ test.describe('Dashboard Blocks', () => {
       const frame = await getPreviewFrame(page);
 
       // Look for hamburger menu button (should appear on mobile)
-      const menuButton = frame.locator('button').filter({ has: frame.locator('svg') }).first();
+      const menuButton = frame
+        .locator('button')
+        .filter({ has: frame.locator('svg') })
+        .first();
       await expect(menuButton).toBeVisible();
     });
 
-    test('should hide sidebar on mobile and show drawer on menu click', async ({ page }) => {
+    test('should hide sidebar on mobile and show drawer on menu click', async ({
+      page,
+    }) => {
       // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
       await page.waitForTimeout(500);
@@ -144,7 +155,9 @@ test.describe('Dashboard Blocks', () => {
 
     test('should render metrics cards', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const metricsCards = frame.locator('[class*="rounded"]').filter({ hasText: /\$[\d,]+|[\d,]+%/ });
+      const metricsCards = frame
+        .locator('[class*="rounded"]')
+        .filter({ hasText: /\$[\d,]+|[\d,]+%/ });
       const count = await metricsCards.count();
       expect(count).toBeGreaterThan(0);
     });
@@ -158,14 +171,18 @@ test.describe('Dashboard Blocks', () => {
 
     test('should have date range selector', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const dateSelector = frame.locator('button').filter({ hasText: /days|month|week/i });
+      const dateSelector = frame
+        .locator('button')
+        .filter({ hasText: /days|month|week/i });
       const count = await dateSelector.count();
       expect(count >= 0).toBeTruthy();
     });
 
     test('should have export button', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const exportButton = frame.locator('button').filter({ hasText: /Export|Download/i });
+      const exportButton = frame
+        .locator('button')
+        .filter({ hasText: /Export|Download/i });
       const count = await exportButton.count();
       expect(count >= 0).toBeTruthy();
     });
@@ -205,14 +222,18 @@ test.describe('Dashboard Blocks', () => {
 
     test('should render stats overview', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const stats = frame.locator('[class*="rounded"]').filter({ hasText: /\$[\d,]+|[\d,]+/ });
+      const stats = frame
+        .locator('[class*="rounded"]')
+        .filter({ hasText: /\$[\d,]+|[\d,]+/ });
       const count = await stats.count();
       expect(count).toBeGreaterThan(0);
     });
 
     test('should display greeting or title', async ({ page }) => {
       const frame = await getPreviewFrame(page);
-      const title = frame.locator('h1, h2, [class*="text-2xl"], [class*="text-xl"]').first();
+      const title = frame
+        .locator('h1, h2, [class*="text-2xl"], [class*="text-xl"]')
+        .first();
       await expect(title).toBeVisible();
     });
 

@@ -268,7 +268,7 @@ const features = [
 
 export default function HomePage() {
   return (
-    <div class="px-4 pt-10 pb-24 sm:px-6">
+    <div class="px-4 pb-24 pt-10 sm:px-6">
       {/* Hero Section */}
       <div class="mx-auto max-w-4xl text-center">
         <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300">

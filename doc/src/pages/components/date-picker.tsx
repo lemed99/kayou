@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 
-import type { DateValue } from '@exowpee/solidly-pro';
-import { DatePicker, DatePickerProvider } from '@exowpee/solidly-pro';
+import type { DateValue } from '@exowpee/solidly';
+import { DatePicker, DatePickerProvider } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -11,7 +11,6 @@ export default function DatePickerPage() {
       <DocPage
         title="DatePicker"
         description="Calendar input supporting single, multiple, and range selection with locale-aware formatting. Requires DatePickerProvider."
-        isPro
         dependencies={[
           {
             name: '@solid-primitives/presence',
@@ -31,7 +30,8 @@ export default function DatePickerPage() {
           },
           {
             term: 'Locale',
-            explanation: 'Controls date formatting and day/month names (e.g., "en-US", "fr-FR").',
+            explanation:
+              'Controls date formatting and day/month names (e.g., "en-US", "fr-FR").',
           },
           {
             term: 'Min/Max Constraints',
@@ -48,7 +48,8 @@ export default function DatePickerPage() {
           },
           {
             term: 'Shortcuts',
-            explanation: 'Quick selection buttons (Today, This Week, etc.) via showShortcuts.',
+            explanation:
+              'Quick selection buttons (Today, This Week, etc.) via showShortcuts.',
           },
           {
             term: 'Week Start',
@@ -210,23 +211,13 @@ export default function DatePickerPage() {
             name: 'weekStartsOn',
             type: '0 | 1',
             default: '1',
-            description:
-              'Day the week starts on. 0 for Sunday, 1 for Monday.',
+            description: 'Day the week starts on. 0 for Sunday, 1 for Monday.',
           },
         ]}
         examples={[
           {
             title: 'Single Date Selection',
             description: 'Basic date picker for selecting a single date.',
-            code: `const [date, setDate] = createSignal<DateValue>({});
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Select Date"
-  value={date()}
-  onChange={setDate}
-/>`,
             component: () => {
               const [date, setDate] = createSignal<DateValue>({});
               return (
@@ -243,16 +234,6 @@ export default function DatePickerPage() {
           {
             title: 'Date Range Selection',
             description: 'Select a start and end date for ranges like booking periods.',
-            code: `const [range, setRange] = createSignal<DateValue>({});
-
-<DatePicker
-  type="range"
-  locale="en-US"
-  label="Select Date Range"
-  value={range()}
-  onChange={setRange}
-  helperText="Click to select start date, then end date"
-/>`,
             component: () => {
               const [range, setRange] = createSignal<DateValue>({});
               return (
@@ -270,16 +251,6 @@ export default function DatePickerPage() {
           {
             title: 'Multiple Date Selection',
             description: 'Select multiple individual dates.',
-            code: `const [dates, setDates] = createSignal<DateValue>({});
-
-<DatePicker
-  type="multiple"
-  locale="en-US"
-  label="Select Multiple Dates"
-  value={dates()}
-  onChange={setDates}
-  helperText="Click dates to add or remove them"
-/>`,
             component: () => {
               const [dates, setDates] = createSignal<DateValue>({});
               return (
@@ -297,14 +268,6 @@ export default function DatePickerPage() {
           {
             title: 'With Min/Max Constraints',
             description: 'Restrict selectable dates to a specific range.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Appointment Date"
-  minDate="2026-01-01"
-  maxDate="2026-12-31"
-  helperText="Select a date in 2026"
-/>`,
             component: () => (
               <DatePicker
                 type="single"
@@ -319,13 +282,6 @@ export default function DatePickerPage() {
           {
             title: 'Custom Display Format',
             description: 'Change how dates are displayed in the input.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Birth Date"
-  displayFormat="MM/DD/YYYY"
-  placeholder="MM/DD/YYYY"
-/>`,
             component: () => (
               <DatePicker
                 type="single"
@@ -339,9 +295,6 @@ export default function DatePickerPage() {
           {
             title: 'Different Locales',
             description: 'Date picker adapts to different locales for day/month names.',
-            code: `<DatePicker type="single" locale="fr-FR" label="Date (French)" />
-<DatePicker type="single" locale="de-DE" label="Date (German)" />
-<DatePicker type="single" locale="es-ES" label="Date (Spanish)" />`,
             component: () => (
               <div class="flex flex-col gap-4">
                 <DatePicker type="single" locale="fr-FR" label="Date (French)" />
@@ -353,12 +306,6 @@ export default function DatePickerPage() {
           {
             title: 'Required Field',
             description: 'Mark the date picker as required.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Start Date"
-  required
-/>`,
             component: () => (
               <DatePicker type="single" locale="en-US" label="Start Date" required />
             ),
@@ -366,13 +313,6 @@ export default function DatePickerPage() {
           {
             title: 'Disabled State',
             description: 'Disabled date picker cannot be interacted with.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Locked Date"
-  disabled
-  value={{ date: '2026-01-15' }}
-/>`,
             component: () => (
               <DatePicker
                 type="single"
@@ -386,12 +326,6 @@ export default function DatePickerPage() {
           {
             title: 'Loading State',
             description: 'Show loading spinner while fetching date constraints.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Available Dates"
-  isLoading
-/>`,
             component: () => (
               <DatePicker
                 type="single"
@@ -404,12 +338,6 @@ export default function DatePickerPage() {
           {
             title: 'Popover Position',
             description: 'Control whether the calendar opens above or below the input.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Opens Above"
-  popoverPosition="top"
-/>`,
             component: () => (
               <DatePicker
                 type="single"
@@ -422,22 +350,6 @@ export default function DatePickerPage() {
           {
             title: 'Controlled with Callback',
             description: 'Handle date changes with a callback function.',
-            code: `const [selectedDate, setSelectedDate] = createSignal<DateValue>({});
-const [message, setMessage] = createSignal('');
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Select Date"
-  value={selectedDate()}
-  onChange={(value) => {
-    setSelectedDate(value);
-    if (value.date) {
-      setMessage(\`Selected: \${value.date}\`);
-    }
-  }}
-  helperText={message()}
-/>`,
             component: () => {
               const [selectedDate, setSelectedDate] = createSignal<DateValue>({});
               const [message, setMessage] = createSignal(
@@ -464,17 +376,6 @@ const [message, setMessage] = createSignal('');
             title: 'Date with Time Selection',
             description:
               'Enable time picker to select date, hour, minute, and second. Click "Confirm" to apply.',
-            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Appointment"
-  showTime
-  value={dateTime()}
-  onChange={setDateTime}
-  helperText="Select date and click Confirm"
-/>`,
             component: () => {
               const [dateTime, setDateTime] = createSignal<DateValue>({});
               return (
@@ -493,17 +394,6 @@ const [message, setMessage] = createSignal('');
           {
             title: '12-Hour Time Format',
             description: 'Use 12-hour format with AM/PM selector.',
-            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Meeting Time"
-  showTime
-  timeFormat="12h"
-  value={dateTime()}
-  onChange={setDateTime}
-/>`,
             component: () => {
               const [dateTime, setDateTime] = createSignal<DateValue>({});
               return (
@@ -522,19 +412,6 @@ const [message, setMessage] = createSignal('');
           {
             title: 'Time with Custom Steps',
             description: 'Set minute and second increments for the time picker.',
-            code: `const [dateTime, setDateTime] = createSignal<DateValue>({});
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Slot Booking"
-  showTime
-  minuteStep={15}
-  secondStep={15}
-  value={dateTime()}
-  onChange={setDateTime}
-  helperText="15-minute and 15-second intervals"
-/>`,
             component: () => {
               const [dateTime, setDateTime] = createSignal<DateValue>({});
               return (
@@ -556,16 +433,6 @@ const [message, setMessage] = createSignal('');
             title: 'With Shortcuts (Single)',
             description:
               'Quick selection buttons for common dates like Today and Yesterday.',
-            code: `const [date, setDate] = createSignal<DateValue>({});
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Quick Select"
-  showShortcuts
-  value={date()}
-  onChange={setDate}
-/>`,
             component: () => {
               const [date, setDate] = createSignal<DateValue>({});
               return (
@@ -583,16 +450,6 @@ const [message, setMessage] = createSignal('');
           {
             title: 'With Shortcuts (Range)',
             description: 'Quick selection for date ranges like This Week, Last Month.',
-            code: `const [range, setRange] = createSignal<DateValue>({});
-
-<DatePicker
-  type="range"
-  locale="en-US"
-  label="Report Period"
-  showShortcuts
-  value={range()}
-  onChange={setRange}
-/>`,
             component: () => {
               const [range, setRange] = createSignal<DateValue>({});
               return (
@@ -609,20 +466,8 @@ const [message, setMessage] = createSignal('');
           },
           {
             title: 'Week Starts on Sunday',
-            description: 'Configure the calendar to start the week on Sunday instead of Monday.',
-            code: `<DatePicker
-  type="single"
-  locale="en-US"
-  label="Week starts Sunday"
-  weekStartsOn={0}
-/>
-
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Week starts Monday (default)"
-  weekStartsOn={1}
-/>`,
+            description:
+              'Configure the calendar to start the week on Sunday instead of Monday.',
             component: () => (
               <div class="flex flex-col gap-4">
                 <DatePicker
@@ -641,148 +486,150 @@ const [message, setMessage] = createSignal('');
             ),
           },
         ]}
-        usage={`import { DatePicker, DatePickerProvider } from '@exowpee/solidly';
-import { createSignal } from 'solid-js';
+        usage={`
+        import { DatePicker, DatePickerProvider } from '@exowpee/solidly';
+        import { createSignal } from 'solid-js';
 
-// Wrap your app with DatePickerProvider
-function App() {
-  return (
-    <DatePickerProvider locale="en-US">
-      <YourComponents />
-    </DatePickerProvider>
-  );
-}
+        // Wrap your app with DatePickerProvider
+        function App() {
+          return (
+            <DatePickerProvider locale="en-US">
+              <YourComponents />
+            </DatePickerProvider>
+          );
+        }
 
-// Single date selection
-const [date, setDate] = createSignal<DateValue>({});
+        // Single date selection
+        const [date, setDate] = createSignal<DateValue>({});
 
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Select Date"
-  value={date()}
-  onChange={setDate}
-/>
+        <DatePicker
+          type="single"
+          locale="en-US"
+          label="Select Date"
+          value={date()}
+          onChange={setDate}
+        />
 
-// Date range selection
-const [range, setRange] = createSignal<DateValue>({});
+        // Date range selection
+        const [range, setRange] = createSignal<DateValue>({});
 
-<DatePicker
-  type="range"
-  locale="en-US"
-  label="Date Range"
-  value={range()}
-  onChange={setRange}
-/>
+        <DatePicker
+          type="range"
+          locale="en-US"
+          label="Date Range"
+          value={range()}
+          onChange={setRange}
+        />
 
-// Multiple dates
-const [dates, setDates] = createSignal<DateValue>({});
+        // Multiple dates
+        const [dates, setDates] = createSignal<DateValue>({});
 
-<DatePicker
-  type="multiple"
-  locale="en-US"
-  label="Select Dates"
-  value={dates()}
-  onChange={setDates}
-/>
+        <DatePicker
+          type="multiple"
+          locale="en-US"
+          label="Select Dates"
+          value={dates()}
+          onChange={setDates}
+        />
 
-// With constraints
-<DatePicker
-  type="single"
-  locale="en-US"
-  minDate="2026-01-01"
-  maxDate="2026-12-31"
-/>
+        // With constraints
+        <DatePicker
+          type="single"
+          locale="en-US"
+          minDate="2026-01-01"
+          maxDate="2026-12-31"
+        />
 
-// With time selection (uses dropdowns and Confirm button)
-const [dateTime, setDateTime] = createSignal<DateValue>({});
+        // With time selection (uses dropdowns and Confirm button)
+        const [dateTime, setDateTime] = createSignal<DateValue>({});
 
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Appointment"
-  showTime
-  timeFormat="24h"
-  minuteStep={15}
-  secondStep={15}
-  value={dateTime()}
-  onChange={setDateTime}
-/>
+        <DatePicker
+          type="single"
+          locale="en-US"
+          label="Appointment"
+          showTime
+          timeFormat="24h"
+          minuteStep={15}
+          secondStep={15}
+          value={dateTime()}
+          onChange={setDateTime}
+        />
 
-// With shortcuts
-<DatePicker
-  type="single"
-  locale="en-US"
-  label="Quick Select"
-  showShortcuts
-  value={date()}
-  onChange={setDate}
-/>
+        // With shortcuts
+        <DatePicker
+          type="single"
+          locale="en-US"
+          label="Quick Select"
+          showShortcuts
+          value={date()}
+          onChange={setDate}
+        />
 
-// Week starts on Sunday (US style)
-<DatePicker
-  type="single"
-  locale="en-US"
-  weekStartsOn={0}
-/>
+        // Week starts on Sunday (US style)
+        <DatePicker
+          type="single"
+          locale="en-US"
+          weekStartsOn={0}
+        />
 
-// Week starts on Monday (default, European style)
-<DatePicker
-  type="single"
-  locale="en-US"
-  weekStartsOn={1}
-/>
+        // Week starts on Monday (default, European style)
+        <DatePicker
+          type="single"
+          locale="en-US"
+          weekStartsOn={1}
+        />
 
-// Custom shortcuts in provider
-const customShortcuts = [
-  {
-    id: 'today',
-    label: 'Today',
-    getValue: () => ({ date: new Date().toISOString().split('T')[0] }),
-  },
-  {
-    id: 'next-week',
-    label: 'Next Week',
-    getValue: () => {
-      const start = new Date();
-      start.setDate(start.getDate() + 7 - start.getDay() + 1);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-      return {
-        startDate: start.toISOString().split('T')[0],
-        endDate: end.toISOString().split('T')[0],
-      };
-    },
-  },
-];
+        // Custom shortcuts in provider
+        const customShortcuts = [
+          {
+            id: 'today',
+            label: 'Today',
+            getValue: () => ({ date: new Date().toISOString().split('T')[0] }),
+          },
+          {
+            id: 'next-week',
+            label: 'Next Week',
+            getValue: () => {
+              const start = new Date();
+              start.setDate(start.getDate() + 7 - start.getDay() + 1);
+              const end = new Date(start);
+              end.setDate(end.getDate() + 6);
+              return {
+                startDate: start.toISOString().split('T')[0],
+                endDate: end.toISOString().split('T')[0],
+              };
+            },
+          },
+        ];
 
-<DatePickerProvider locale="en-US" shortcuts={customShortcuts}>
-  <App />
-</DatePickerProvider>
+        <DatePickerProvider locale="en-US" shortcuts={customShortcuts}>
+          <App />
+        </DatePickerProvider>
 
-// DateValue type reference
-interface DateValue {
-  date?: string;         // For single mode (ISO format)
-  startDate?: string;    // For range mode start
-  endDate?: string;      // For range mode end
-  multipleDates?: string[]; // For multiple mode
-  hour?: number;         // Selected hour (0-23)
-  minute?: number;       // Selected minute (0-59)
-  second?: number;       // Selected second (0-59)
-}
+        // DateValue type reference
+        interface DateValue {
+          date?: string;         // For single mode (ISO format)
+          startDate?: string;    // For range mode start
+          endDate?: string;      // For range mode end
+          multipleDates?: string[]; // For multiple mode
+          hour?: number;         // Selected hour (0-23)
+          minute?: number;       // Selected minute (0-59)
+          second?: number;       // Selected second (0-59)
+        }
 
-// DatePickerShortcut type reference
-interface DatePickerShortcut {
-  id: string;            // Unique identifier
-  label: string;         // Display label
-  getValue: () => { date?: string; startDate?: string; endDate?: string };
-}
+        // DatePickerShortcut type reference
+        interface DatePickerShortcut {
+          id: string;            // Unique identifier
+          label: string;         // Display label
+          getValue: () => { date?: string; startDate?: string; endDate?: string };
+        }
 
-// Keyboard Navigation:
-// - Arrow keys: Navigate days/weeks
-// - Enter/Space: Select focused date
-// - Escape: Close calendar
-// - Enter/Space/ArrowDown on input: Open calendar`}
+        // Keyboard Navigation:
+        // - Arrow keys: Navigate days/weeks
+        // - Enter/Space: Select focused date
+        // - Escape: Close calendar
+        // - Enter/Space/ArrowDown on input: Open calendar
+      `}
         relatedHooks={[
           {
             name: 'useFloating',

@@ -102,17 +102,11 @@ export default function TextInputPage() {
         {
           title: 'Basic Input',
           description: 'Simple text input with placeholder.',
-          code: `<TextInput placeholder="Enter your name" />`,
           component: () => <TextInput placeholder="Enter your name" />,
         },
         {
           title: 'With Label and Helper Text',
           description: 'Input with label above and helper text below.',
-          code: `<TextInput
-  label="Email Address"
-  placeholder="you@example.com"
-  helperText="We'll never share your email."
-/>`,
           component: () => (
             <TextInput
               label="Email Address"
@@ -124,9 +118,6 @@ export default function TextInputPage() {
         {
           title: 'Size Variants',
           description: 'Three size options for different contexts.',
-          code: `<TextInput sizing="xs" placeholder="Extra Small" />
-<TextInput sizing="sm" placeholder="Small" />
-<TextInput sizing="md" placeholder="Medium" />`,
           component: () => (
             <>
               <TextInput sizing="xs" placeholder="Extra Small" />
@@ -138,9 +129,6 @@ export default function TextInputPage() {
         {
           title: 'Validation States',
           description: 'Color variants to indicate validation status.',
-          code: `<TextInput color="success" label="Success" value="Valid input" />
-<TextInput color="failure" label="Error" value="Invalid input" helperText="Please check this field" />
-<TextInput color="warning" label="Warning" value="Needs attention" />`,
           component: () => (
             <>
               <TextInput color="success" label="Success" value="Valid input" />
@@ -157,8 +145,6 @@ export default function TextInputPage() {
         {
           title: 'With Addon',
           description: 'Input with a prefix addon for context.',
-          code: `<TextInput addon="https://" placeholder="example.com" />
-<TextInput addon="$" placeholder="0.00" />`,
           component: () => (
             <>
               <TextInput addon="https://" placeholder="example.com" />
@@ -169,19 +155,16 @@ export default function TextInputPage() {
         {
           title: 'Loading State',
           description: 'Shows a spinner while loading.',
-          code: `<TextInput isLoading placeholder="Loading..." />`,
           component: () => <TextInput isLoading placeholder="Loading..." />,
         },
         {
           title: 'Disabled State',
           description: 'Input that cannot be interacted with.',
-          code: `<TextInput disabled value="Disabled input" />`,
           component: () => <TextInput disabled value="Disabled input" />,
         },
         {
           title: 'Required Field',
           description: 'Input marked as required with visual indicator.',
-          code: `<TextInput label="Username" required placeholder="Required field" />`,
           component: () => (
             <TextInput label="Username" required placeholder="Required field" />
           ),
@@ -189,14 +172,6 @@ export default function TextInputPage() {
         {
           title: 'Controlled Input',
           description: 'Interactive example with controlled state.',
-          code: `const [value, setValue] = createSignal('');
-
-<TextInput
-  label="Controlled Input"
-  value={value()}
-  onInput={(e) => setValue(e.currentTarget.value)}
-  helperText={\`You typed: \${value()}\`}
-/>`,
           component: () => {
             const [value, setValue] = createSignal('');
             return (
@@ -210,34 +185,36 @@ export default function TextInputPage() {
           },
         },
       ]}
-      usage={`import { TextInput } from '@exowpee/solidly';
+      usage={`
+        import { TextInput } from '@exowpee/solidly';
 
-// Basic usage
-<TextInput placeholder="Enter text" />
+        // Basic usage
+        <TextInput placeholder="Enter text" />
 
-// With label and helper text
-<TextInput
-  label="Email"
-  placeholder="you@example.com"
-  helperText="We'll never share your email."
-/>
+        // With label and helper text
+        <TextInput
+          label="Email"
+          placeholder="you@example.com"
+          helperText="We'll never share your email."
+        />
 
-// Validation state
-<TextInput
-  color="failure"
-  label="Password"
-  helperText="Password must be at least 8 characters"
-/>
+        // Validation state
+        <TextInput
+          color="failure"
+          label="Password"
+          helperText="Password must be at least 8 characters"
+        />
 
-// With addon
-<TextInput addon="https://" placeholder="example.com" />
+        // With addon
+        <TextInput addon="https://" placeholder="example.com" />
 
-// Controlled input
-const [value, setValue] = createSignal('');
-<TextInput
-  value={value()}
-  onInput={(e) => setValue(e.currentTarget.value)}
-/>`}
+        // Controlled input
+        const [value, setValue] = createSignal('');
+        <TextInput
+          value={value()}
+          onInput={(e) => setValue(e.currentTarget.value)}
+        />
+      `}
     />
   );
 }

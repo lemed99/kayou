@@ -63,7 +63,9 @@ test.describe('PieChart', () => {
   });
 
   test('should render center label for donut chart', async ({ page }) => {
-    const centerLabel = page.locator('svg text[class*="center"], svg text[text-anchor="middle"]');
+    const centerLabel = page.locator(
+      'svg text[class*="center"], svg text[text-anchor="middle"]',
+    );
     const count = await centerLabel.count();
     expect(count).toBeGreaterThanOrEqual(0);
   });

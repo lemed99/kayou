@@ -12,9 +12,8 @@ import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { defaultProps } from '../helpers/defaultProps';
-import { useFloating } from '../hooks';
+import { useFloating, useTheme } from '../hooks';
 import { Placement } from '../hooks/useFloating/types';
-import { useTheme } from '../hooks/useTheme';
 
 /**
  * Placement options for the Tooltip.

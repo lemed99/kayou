@@ -1,10 +1,8 @@
-
 import { Textarea } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
 export default function TextareaPage() {
-
   return (
     <DocPage
       title="Textarea"
@@ -19,11 +17,13 @@ export default function TextareaPage() {
       keyConcepts={[
         {
           term: 'Integrated Field Components',
-          explanation: 'Label and HelperText built in via props with coordinated styling.',
+          explanation:
+            'Label and HelperText built in via props with coordinated styling.',
         },
         {
           term: 'Validation States',
-          explanation: 'Five colors affect border, label, and helper text simultaneously.',
+          explanation:
+            'Five colors affect border, label, and helper text simultaneously.',
         },
         {
           term: 'Loading State',
@@ -90,10 +90,6 @@ export default function TextareaPage() {
         {
           title: 'Basic Textarea',
           description: 'Simple textarea with label.',
-          code: `<Textarea
-  label="Description"
-  placeholder="Enter description..."
-/>`,
           component: () => (
             <Textarea
               label="Description"
@@ -105,11 +101,6 @@ export default function TextareaPage() {
         {
           title: 'With Helper Text',
           description: 'Textarea with helper text below.',
-          code: `<Textarea
-  label="Bio"
-  helperText="Write a short bio about yourself"
-  placeholder="Tell us about yourself..."
-/>`,
           component: () => (
             <Textarea
               label="Bio"
@@ -122,9 +113,6 @@ export default function TextareaPage() {
         {
           title: 'Color Variants',
           description: 'Different color states for validation.',
-          code: `<Textarea label="Success" color="success" helperText="Looks good!" />
-<Textarea label="Warning" color="warning" helperText="Consider revising" />
-<Textarea label="Error" color="failure" helperText="This field is required" />`,
           component: () => (
             <div class="flex flex-col gap-4">
               <Textarea
@@ -152,11 +140,6 @@ export default function TextareaPage() {
         {
           title: 'Required Field',
           description: 'Textarea marked as required.',
-          code: `<Textarea
-  label="Message"
-  required
-  placeholder="Enter your message..."
-/>`,
           component: () => (
             <Textarea
               label="Message"
@@ -169,54 +152,47 @@ export default function TextareaPage() {
         {
           title: 'Loading State',
           description: 'Textarea in loading state.',
-          code: `<Textarea
-  label="Comments"
-  isLoading
-/>`,
           component: () => <Textarea label="Comments" isLoading class="w-full" />,
         },
         {
           title: 'Disabled State',
           description: 'Disabled textarea.',
-          code: `<Textarea
-  label="Notes"
-  disabled
-  value="Cannot edit this"
-/>`,
           component: () => (
             <Textarea label="Notes" disabled value="Cannot edit this" class="w-full" />
           ),
         },
       ]}
-      usage={`import { Textarea } from '@exowpee/solidly';
+      usage={`
+        import { Textarea } from '@exowpee/solidly';
 
-// Basic usage
-<Textarea label="Description" placeholder="Enter description..." />
+        // Basic usage
+        <Textarea label="Description" placeholder="Enter description..." />
 
-// With helper text
-<Textarea
-  label="Bio"
-  helperText="Maximum 500 characters"
-  placeholder="Write your bio..."
-/>
+        // With helper text
+        <Textarea
+          label="Bio"
+          helperText="Maximum 500 characters"
+          placeholder="Write your bio..."
+        />
 
-// Controlled textarea
-const [value, setValue] = createSignal('');
-<Textarea
-  label="Comments"
-  value={value()}
-  onInput={(e) => setValue(e.target.value)}
-/>
+        // Controlled textarea
+        const [value, setValue] = createSignal('');
+        <Textarea
+          label="Comments"
+          value={value()}
+          onInput={(e) => setValue(e.target.value)}
+        />
 
-// Validation states
-<Textarea label="Valid" color="success" helperText="Looks good!" />
-<Textarea label="Error" color="failure" helperText="Required field" />
+        // Validation states
+        <Textarea label="Valid" color="success" helperText="Looks good!" />
+        <Textarea label="Error" color="failure" helperText="Required field" />
 
-// Loading state
-<Textarea label="Loading" isLoading />
+        // Loading state
+        <Textarea label="Loading" isLoading />
 
-// Required field
-<Textarea label="Message" required />`}
+        // Required field
+        <Textarea label="Message" required />
+      `}
     />
   );
 }

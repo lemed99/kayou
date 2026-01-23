@@ -64,15 +64,11 @@ export default function SkeletonPage() {
         {
           title: 'Basic Skeleton',
           description: 'Default skeleton with default dimensions.',
-          code: `<Skeleton />`,
           component: () => <Skeleton />,
         },
         {
           title: 'Custom Dimensions',
           description: 'Skeleton with custom width and height.',
-          code: `<Skeleton width={200} height={20} />
-<Skeleton width="100%" height={16} />
-<Skeleton width={100} height={100} />`,
           component: () => (
             <div class="flex flex-col gap-4">
               <Skeleton width={200} height={20} />
@@ -84,9 +80,6 @@ export default function SkeletonPage() {
         {
           title: 'Gray Shades',
           description: 'Different gray intensities for light mode.',
-          code: `<Skeleton width={150} height={16} gray={100} />
-<Skeleton width={150} height={16} gray={200} />
-<Skeleton width={150} height={16} gray={300} />`,
           component: () => (
             <div class="flex flex-col gap-4">
               <Skeleton width={150} height={16} gray={100} />
@@ -98,14 +91,6 @@ export default function SkeletonPage() {
         {
           title: 'Card Loading State',
           description: 'Simulating a loading card layout.',
-          code: `<div class="flex gap-4">
-  <Skeleton width={64} height={64} />
-  <div class="flex flex-col gap-2">
-    <Skeleton width={200} height={20} />
-    <Skeleton width={150} height={14} />
-    <Skeleton width={180} height={14} />
-  </div>
-</div>`,
           component: () => (
             <div class="flex gap-4">
               <Skeleton width={64} height={64} />
@@ -120,11 +105,6 @@ export default function SkeletonPage() {
         {
           title: 'List Loading State',
           description: 'Multiple skeletons for list items.',
-          code: `<div class="flex flex-col gap-3">
-  <Skeleton width="100%" height={40} />
-  <Skeleton width="100%" height={40} />
-  <Skeleton width="100%" height={40} />
-</div>`,
           component: () => (
             <div class="flex w-64 flex-col gap-3">
               <Skeleton width="100%" height={40} />
@@ -134,30 +114,32 @@ export default function SkeletonPage() {
           ),
         },
       ]}
-      usage={`import { Skeleton } from '@exowpee/solidly';
+      usage={`
+        import { Skeleton } from '@exowpee/solidly';
 
-// Basic usage
-<Skeleton />
+        // Basic usage
+        <Skeleton />
 
-// Custom dimensions (number = pixels)
-<Skeleton width={200} height={20} />
+        // Custom dimensions (number = pixels)
+        <Skeleton width={200} height={20} />
 
-// Percentage width
-<Skeleton width="100%" height={16} />
+        // Percentage width
+        <Skeleton width="100%" height={16} />
 
-// Custom gray shades
-<Skeleton width={150} height={16} gray={200} darkGray={600} />
+        // Custom gray shades
+        <Skeleton width={150} height={16} gray={200} darkGray={600} />
 
-// Loading card layout
-<Show when={loading()} fallback={<CardContent />}>
-  <div class="flex gap-4">
-    <Skeleton width={64} height={64} />
-    <div class="flex flex-col gap-2">
-      <Skeleton width={200} height={20} />
-      <Skeleton width={150} height={14} />
-    </div>
-  </div>
-</Show>`}
+        // Loading card layout
+        <Show when={loading()} fallback={<CardContent />}>
+          <div class="flex gap-4">
+            <Skeleton width={64} height={64} />
+            <div class="flex flex-col gap-2">
+              <Skeleton width={200} height={20} />
+              <Skeleton width={150} height={14} />
+            </div>
+          </div>
+        </Show>
+      `}
     />
   );
 }

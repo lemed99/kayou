@@ -9,7 +9,6 @@ import {
   onMount,
 } from 'solid-js';
 
-import { Diamond01Icon } from '@exowpee/solidly/icons';
 import { A, useLocation, useNavigate } from '@solidjs/router';
 
 // Icons
@@ -81,7 +80,6 @@ interface SearchItem {
   label: string;
   category: string;
   keywords?: string[];
-  isPro?: boolean;
 }
 
 const searchIndex: SearchItem[] = [
@@ -97,18 +95,6 @@ const searchIndex: SearchItem[] = [
     label: 'Installation',
     category: 'Getting Started',
     keywords: ['install', 'setup', 'npm', 'pnpm'],
-  },
-  {
-    path: '/overview/why-solidjs',
-    label: 'Why SolidJS?',
-    category: 'Getting Started',
-    keywords: ['solid', 'framework'],
-  },
-  {
-    path: '/overview/why-solidly',
-    label: 'Why Solidly?',
-    category: 'Getting Started',
-    keywords: ['library', 'components'],
   },
   {
     path: '/overview/contributing',
@@ -141,7 +127,6 @@ const searchIndex: SearchItem[] = [
     label: 'DatePicker',
     category: 'Components',
     keywords: ['date', 'calendar', 'time'],
-    isPro: true,
   },
   {
     path: '/components/label',
@@ -160,7 +145,6 @@ const searchIndex: SearchItem[] = [
     label: 'NumberInput',
     category: 'Components',
     keywords: ['number', 'input', 'numeric'],
-    isPro: true,
   },
   {
     path: '/components/select',
@@ -173,14 +157,12 @@ const searchIndex: SearchItem[] = [
     label: 'SelectWithSearch',
     category: 'Components',
     keywords: ['dropdown', 'search', 'filter'],
-    isPro: true,
   },
   {
     path: '/components/multi-select',
     label: 'MultiSelect',
     category: 'Components',
     keywords: ['multiple', 'tags', 'select'],
-    isPro: true,
   },
   {
     path: '/components/text-input',
@@ -205,7 +187,6 @@ const searchIndex: SearchItem[] = [
     label: 'UploadFile',
     category: 'Components',
     keywords: ['upload', 'file', 'drag', 'drop'],
-    isPro: true,
   },
 
   // Layout Components
@@ -244,7 +225,6 @@ const searchIndex: SearchItem[] = [
     label: 'Sidebar',
     category: 'Components',
     keywords: ['navigation', 'menu', 'side'],
-    isPro: true,
   },
   {
     path: '/components/tooltip',
@@ -293,7 +273,6 @@ const searchIndex: SearchItem[] = [
     label: 'DataTable',
     category: 'Components',
     keywords: ['table', 'grid', 'data', 'sort', 'filter'],
-    isPro: true,
   },
   {
     path: '/components/virtual-list',
@@ -306,14 +285,12 @@ const searchIndex: SearchItem[] = [
     label: 'VirtualGrid',
     category: 'Components',
     keywords: ['grid', 'scroll', 'performance'],
-    isPro: true,
   },
   {
     path: '/components/dynamic-virtual-list',
     label: 'DynamicVirtualList',
     category: 'Components',
     keywords: ['list', 'variable', 'height'],
-    isPro: true,
   },
 
   // Chart Components
@@ -322,21 +299,18 @@ const searchIndex: SearchItem[] = [
     label: 'LineChart',
     category: 'Components',
     keywords: ['chart', 'graph', 'line', 'data'],
-    isPro: true,
   },
   {
     path: '/components/pie-chart',
     label: 'PieChart',
     category: 'Components',
     keywords: ['chart', 'graph', 'pie', 'data'],
-    isPro: true,
   },
   {
     path: '/components/responsive-container',
     label: 'ResponsiveContainer',
     category: 'Components',
     keywords: ['chart', 'responsive', 'container'],
-    isPro: true,
   },
 
   // Hooks
@@ -381,21 +355,18 @@ const searchIndex: SearchItem[] = [
     label: 'useCustomResource',
     category: 'Hooks',
     keywords: ['resource', 'fetch', 'api', 'swr'],
-    isPro: true,
   },
   {
     path: '/hooks/use-date-picker',
     label: 'useDatePicker',
     category: 'Hooks',
     keywords: ['date', 'calendar', 'picker'],
-    isPro: true,
   },
   {
     path: '/hooks/use-dynamic-virtual-list',
     label: 'useDynamicVirtualList',
     category: 'Hooks',
     keywords: ['virtual', 'list', 'scroll'],
-    isPro: true,
   },
 
   // Contexts
@@ -535,32 +506,10 @@ const Navbar: Component = () => {
     },
     { href: '/components/button', label: 'Components', activePaths: ['/components'] },
     { href: '/icons', label: 'Icons', activePaths: ['/icons'] },
-    { href: '/blocks', label: 'Blocks', activePaths: ['/blocks'] },
   ];
 
   return (
     <>
-      {/* Top promotional banner */}
-      {/* <div class="flex h-10 items-center justify-center gap-3 bg-gradient-to-r from-pink-50 via-white to-blue-50 text-sm dark:from-pink-950/20 dark:via-gray-950 dark:to-blue-950/20">
-        <span class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <span>🚀</span>
-          Ship faster with beautiful components
-        </span>
-        <A
-          href="/pro"
-          class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700"
-        >
-          Solidly Pro
-          <svg class="size-3" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fill-rule="evenodd"
-              d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </A>
-      </div> */}
-
       {/* Main navbar */}
       <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-900/80">
         <nav class="mx-auto flex h-full max-w-[90rem] items-center justify-between px-4">
@@ -803,9 +752,6 @@ const Navbar: Component = () => {
                               <span class="font-medium text-gray-900 dark:text-white">
                                 {item.label}
                               </span>
-                              <Show when={item.isPro}>
-                                <Diamond01Icon class="size-4 text-blue-500" />
-                              </Show>
                             </div>
                             <div class="truncate text-xs text-gray-500 dark:text-gray-400">
                               {item.path}

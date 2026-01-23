@@ -15,8 +15,8 @@
     "paths": {
       "@exowpee/solidly": ["../packages/core/src"],
       "@exowpee/solidly/*": ["../packages/core/src/*"],
-      "@exowpee/solidly-pro": ["../packages/pro/src"],
-      "@exowpee/solidly-pro/*": ["../packages/pro/src/*"]
+      "@exowpee/solidly-hooks": ["../packages/hooks/src"],
+      "@exowpee/solidly-icons": ["../packages/icons/src"]
     }
   },
   "include": ["src", "vite.config.mts"],

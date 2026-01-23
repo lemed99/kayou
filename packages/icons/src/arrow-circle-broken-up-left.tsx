@@ -1,0 +1,13 @@
+import { JSX } from 'solid-js';
+
+import { IconProps, IconWrapper } from './components/IconWrapper';
+
+export const ArrowCircleBrokenUpLeftIcon = (props: IconProps): JSX.Element => (
+  <IconWrapper {...props}>
+    <path
+      d="M14.5896 21.6606C11.2534 22.5515 7.54623 21.6883 4.92893 19.071C1.02369 15.1658 1.02369 8.83413 4.92893 4.92889C8.83418 1.02364 15.1658 1.02364 19.0711 4.92889C21.6884 7.54618 22.5515 11.2533 21.6606 14.5895M9.00023 15.0001V9.00006M9.00023 9.00006H15.0002M9.00023 9.00006L19 19"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </IconWrapper>
+);

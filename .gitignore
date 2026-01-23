@@ -1,6 +1,7 @@
 node_modules
 dist
 pnpm-lock.yaml
+pnpm-workspace.yaml
 .DS_Store
 .vscode
 test-results

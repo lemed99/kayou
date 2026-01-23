@@ -10,6 +10,7 @@ import {
   onMount,
 } from 'solid-js';
 
+import { dedent } from '../helpers/dedent';
 import { formatCodeToHTML } from '../helpers/formatCodeToHTML';
 import BaseDocPage, {
   type ExampleDefinition as BaseExampleDefinition,
@@ -63,7 +64,6 @@ interface DocPageProps {
   subComponents?: SubComponentDefinition[];
   examples?: ExampleDefinition[];
   usage?: string;
-  isPro?: boolean;
 }
 
 export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
@@ -95,7 +95,6 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
     <BaseDocPage
       title={props.title}
       description={props.description}
-      isPro={props.isPro}
       visibleSections={visibleSections()}
       exampleTitles={exampleTitles()}
     >
@@ -283,16 +282,16 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead class="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Prop
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Type
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Description
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Default
                   </th>
                 </tr>
@@ -301,7 +300,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                 <For each={propsArray()}>
                   {(prop) => (
                     <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                      <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                         <span class="flex items-center gap-2">
                           {prop.name}
                           <Show when={prop.required}>
@@ -314,7 +313,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                           </Show>
                         </span>
                       </td>
-                      <td class="px-6 py-4 text-xs whitespace-nowrap">
+                      <td class="whitespace-nowrap px-6 py-4 text-xs">
                         <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-gray-700 dark:bg-gray-900/50 dark:text-blue-400">
                           {prop.type}
                         </code>
@@ -322,7 +321,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                       <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                         {prop.description}
                       </td>
-                      <td class="px-6 py-4 text-xs whitespace-nowrap">
+                      <td class="whitespace-nowrap px-6 py-4 text-xs">
                         <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-gray-700 dark:bg-gray-900/50 dark:text-green-400">
                           {prop.default}
                         </code>
@@ -351,16 +350,16 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead class="bg-gray-50 dark:bg-gray-900">
                         <tr>
-                          <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Prop
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Type
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Description
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             Default
                           </th>
                         </tr>
@@ -369,7 +368,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                         <For each={component.props}>
                           {(prop) => (
                             <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                              <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                 <span class="flex items-center gap-2">
                                   {prop.name}
                                   <Show when={prop.required}>
@@ -377,7 +376,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                                   </Show>
                                 </span>
                               </td>
-                              <td class="px-6 py-4 text-xs whitespace-nowrap">
+                              <td class="whitespace-nowrap px-6 py-4 text-xs">
                                 <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-gray-700 dark:bg-gray-900/50 dark:text-blue-400">
                                   {prop.type}
                                 </code>
@@ -385,7 +384,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                               <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                 {prop.description}
                               </td>
-                              <td class="px-6 py-4 text-xs whitespace-nowrap">
+                              <td class="whitespace-nowrap px-6 py-4 text-xs">
                                 <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-gray-700 dark:bg-gray-900/50 dark:text-green-400">
                                   {prop.default}
                                 </code>
@@ -433,6 +432,9 @@ export function CodeBlock(props: { code: string }): JSX.Element {
   const [copied, setCopied] = createSignal(false);
   const [isDark, setIsDark] = createSignal(false);
 
+  // Auto-dedent the code to allow nicely indented template literals in source
+  const code = createMemo(() => (props.code ? dedent`${props.code}` : ''));
+
   onMount(() => {
     const updateTheme = () => {
       setIsDark(document.documentElement.classList.contains('dark'));
@@ -448,12 +450,12 @@ export function CodeBlock(props: { code: string }): JSX.Element {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(props.code);
+      await navigator.clipboard.writeText(code());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const textarea = document.createElement('textarea');
-      textarea.value = props.code;
+      textarea.value = code();
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
@@ -468,7 +470,7 @@ export function CodeBlock(props: { code: string }): JSX.Element {
       <button
         type="button"
         onClick={() => void handleCopy()}
-        class="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-300 dark:bg-gray-700/80 dark:text-gray-300 dark:hover:bg-gray-600"
+        class="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity hover:bg-gray-300 group-hover:opacity-100 dark:bg-gray-700/80 dark:text-gray-300 dark:hover:bg-gray-600"
         aria-label={copied() ? 'Copied!' : 'Copy code'}
       >
         <Show
@@ -500,7 +502,7 @@ export function CodeBlock(props: { code: string }): JSX.Element {
         </Show>
         {copied() ? 'Copied!' : 'Copy'}
       </button>
-      <div innerHTML={formatCodeToHTML(props.code, isDark() ? 'dark' : 'light')} />
+      <div innerHTML={formatCodeToHTML(code(), isDark() ? 'dark' : 'light')} />
     </div>
   );
 }
@@ -508,7 +510,8 @@ export function CodeBlock(props: { code: string }): JSX.Element {
 interface ExampleProps {
   title: string;
   description?: string;
-  code: string;
+  /** Code string to display. Auto-generated by vite-plugin-extract-example-code if not provided. */
+  code?: string;
   component: () => JSX.Element;
 }
 
@@ -568,6 +571,9 @@ export function Example(props: ExampleProps): JSX.Element {
   const [globalIsDark, setGlobalIsDark] = createSignal(false);
   const [viewport, setViewport] = createSignal<ViewportSize>('desktop');
 
+  // Auto-dedent the code to allow nicely indented template literals in source
+  const code = createMemo(() => (props.code ? dedent`${props.code}` : ''));
+
   onMount(() => {
     const updateGlobalTheme = () => {
       setGlobalIsDark(document.documentElement.classList.contains('dark'));
@@ -595,12 +601,12 @@ export function Example(props: ExampleProps): JSX.Element {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(props.code);
+      await navigator.clipboard.writeText(code());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const textarea = document.createElement('textarea');
-      textarea.value = props.code;
+      textarea.value = code();
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
@@ -741,7 +747,7 @@ export function Example(props: ExampleProps): JSX.Element {
         <button
           type="button"
           onClick={() => void handleCopy()}
-          class="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-300 dark:bg-gray-700/80 dark:text-gray-300 dark:hover:bg-gray-600"
+          class="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity hover:bg-gray-300 group-hover:opacity-100 dark:bg-gray-700/80 dark:text-gray-300 dark:hover:bg-gray-600"
           aria-label={copied() ? 'Copied!' : 'Copy code'}
         >
           <Show
@@ -773,9 +779,7 @@ export function Example(props: ExampleProps): JSX.Element {
           </Show>
           {copied() ? 'Copied!' : 'Copy'}
         </button>
-        <div
-          innerHTML={formatCodeToHTML(props.code, globalIsDark() ? 'dark' : 'light')}
-        />
+        <div innerHTML={formatCodeToHTML(code(), globalIsDark() ? 'dark' : 'light')} />
       </div>
     </div>
   );

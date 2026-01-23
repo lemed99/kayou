@@ -80,7 +80,6 @@ export default function CheckboxPage() {
         {
           title: 'Basic Checkbox',
           description: 'Simple checkbox with label.',
-          code: `<Checkbox label="Accept terms and conditions" />`,
           component: () => (
             <Checkbox
               label="Accept terms and conditions"
@@ -92,8 +91,6 @@ export default function CheckboxPage() {
         {
           title: 'Color Variants',
           description: 'Blue and dark color options.',
-          code: `<Checkbox label="Blue checkbox" color="blue" checked />
-<Checkbox label="Dark checkbox" color="dark" checked />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <Checkbox label="Blue checkbox" color="blue" checked />
@@ -104,8 +101,6 @@ export default function CheckboxPage() {
         {
           title: 'Label Position',
           description: 'Label can be positioned left or right.',
-          code: `<Checkbox label="Label on right" labelPosition="right" />
-<Checkbox label="Label on left" labelPosition="left" />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <Checkbox label="Label on right" labelPosition="right" />
@@ -116,8 +111,6 @@ export default function CheckboxPage() {
         {
           title: 'Disabled State',
           description: 'Checkbox in disabled state.',
-          code: `<Checkbox label="Disabled unchecked" disabled />
-<Checkbox label="Disabled checked" disabled checked />`,
           component: () => (
             <div class="flex flex-col gap-2">
               <Checkbox label="Disabled unchecked" disabled />
@@ -126,24 +119,26 @@ export default function CheckboxPage() {
           ),
         },
       ]}
-      usage={`import { Checkbox } from '@exowpee/solidly';
+      usage={`
+        import { Checkbox } from '@exowpee/solidly';
 
-// Basic usage
-<Checkbox label="Remember me" />
+        // Basic usage
+        <Checkbox label="Remember me" />
 
-// Controlled checkbox
-const [checked, setChecked] = createSignal(false);
-<Checkbox
-  label="Subscribe to newsletter"
-  checked={checked()}
-  onChange={(e) => setChecked(e.target.checked)}
-/>
+        // Controlled checkbox
+        const [checked, setChecked] = createSignal(false);
+        <Checkbox
+          label="Subscribe to newsletter"
+          checked={checked()}
+          onChange={(e) => setChecked(e.target.checked)}
+        />
 
-// With color variant
-<Checkbox label="Dark theme" color="dark" />
+        // With color variant
+        <Checkbox label="Dark theme" color="dark" />
 
-// Label on the left
-<Checkbox label="Enable feature" labelPosition="left" />`}
+        // Label on the left
+        <Checkbox label="Enable feature" labelPosition="left" />
+      `}
     />
   );
 }

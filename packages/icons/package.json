@@ -1,0 +1,46 @@
+{
+  "name": "@exowpee/solidly-icons",
+  "version": "1.0.0",
+  "description": "Icon components for @exowpee/solidly",
+  "type": "module",
+  "module": "./dist/index.es.js",
+  "types": "./dist/src/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.es.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "lint": "eslint '**/*.{ts,tsx}' --fix"
+  },
+  "dependencies": {
+    "tailwind-merge": "^3.3.1"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0"
+  },
+  "devDependencies": {
+    "solid-js": "^1.9.9",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.6",
+    "vite-plugin-solid": "^2.11.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exowpee/solidly"
+  },
+  "license": "MIT",
+  "keywords": [
+    "solidjs",
+    "solid",
+    "icons",
+    "svg",
+    "typescript"
+  ]
+}

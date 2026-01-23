@@ -17,7 +17,8 @@ export default function BadgePage() {
       keyConcepts={[
         {
           term: 'Color Variants',
-          explanation: 'Six semantic colors: success, failure, warning, gray, dark, default.',
+          explanation:
+            'Six semantic colors: success, failure, warning, gray, dark, default.',
         },
         {
           term: 'Compact Design',
@@ -58,12 +59,6 @@ export default function BadgePage() {
         {
           title: 'Color Variants',
           description: 'Six color variants for different use cases.',
-          code: `<Badge color="default">Default</Badge>
-<Badge color="gray">Gray</Badge>
-<Badge color="success">Success</Badge>
-<Badge color="warning">Warning</Badge>
-<Badge color="failure">Failure</Badge>
-<Badge color="dark">Dark</Badge>`,
           component: () => (
             <div class="flex flex-wrap gap-2">
               <Badge color="default">Default</Badge>
@@ -78,8 +73,6 @@ export default function BadgePage() {
         {
           title: 'Sizes',
           description: 'Two size options: xs and sm.',
-          code: `<Badge size="xs">Extra Small</Badge>
-<Badge size="sm">Small</Badge>`,
           component: () => (
             <div class="flex items-center gap-2">
               <Badge size="xs">Extra Small</Badge>
@@ -90,9 +83,6 @@ export default function BadgePage() {
         {
           title: 'Status Indicators',
           description: 'Common use case for showing status.',
-          code: `<Badge color="success">Active</Badge>
-<Badge color="warning">Pending</Badge>
-<Badge color="failure">Inactive</Badge>`,
           component: () => (
             <div class="flex gap-2">
               <Badge color="success">Active</Badge>
@@ -102,16 +92,18 @@ export default function BadgePage() {
           ),
         },
       ]}
-      usage={`import { Badge } from '@exowpee/solidly';
+      usage={`
+        import { Badge } from '@exowpee/solidly';
 
-// Basic usage
-<Badge>New</Badge>
+        // Basic usage
+        <Badge>New</Badge>
 
-// With color
-<Badge color="success">Active</Badge>
+        // With color
+        <Badge color="success">Active</Badge>
 
-// With size
-<Badge size="sm" color="warning">Pending</Badge>`}
+        // With size
+        <Badge size="sm" color="warning">Pending</Badge>
+      `}
     />
   );
 }

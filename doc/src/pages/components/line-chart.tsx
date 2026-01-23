@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
   XAxis,
   YAxis,
-} from '@exowpee/solidly-pro';
+} from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -203,7 +203,6 @@ export default function LineChartPage() {
   return (
     <DocPage
       title="LineChart"
-      isPro
       description="D3-based line chart with composable axes, grid, tooltips, and multiple data series."
       dependencies={[
         {
@@ -298,13 +297,7 @@ export default function LineChartPage() {
       examples={[
         {
           title: 'Basic Line Chart',
-          description: 'Simple line chart with a single data series.',
-          code: `<LineChart data={salesData} width={500} height={300}>
-  <XAxis dataKey="month" />
-  <YAxis />
-  <Line dataKey="revenue" stroke="#8884d8" />
-</LineChart>`,
-          component: () => (
+          description: 'Simple line chart with a single data series.',          component: () => (
             <div class="h-64 w-full">
               <LineChart data={salesData} width={500} height={250}>
                 <XAxis dataKey="month" />
@@ -316,16 +309,7 @@ export default function LineChartPage() {
         },
         {
           title: 'Multiple Lines',
-          description: 'Chart with multiple data series for comparison.',
-          code: `<LineChart data={salesData} width={500} height={300}>
-  <XAxis dataKey="month" />
-  <YAxis />
-  <CartesianGrid stroke="#eee" />
-  <Line dataKey="revenue" stroke="#8884d8" />
-  <Line dataKey="profit" stroke="#82ca9d" />
-  <LineChartTooltip />
-</LineChart>`,
-          component: () => (
+          description: 'Chart with multiple data series for comparison.',          component: () => (
             <div class="h-64 w-full">
               <LineChart data={salesData} width={500} height={250}>
                 <XAxis dataKey="month" />
@@ -340,16 +324,7 @@ export default function LineChartPage() {
         },
         {
           title: 'With Dots',
-          description: 'Show data points on the line.',
-          code: `<LineChart data={temperatureData} width={500} height={300}>
-  <XAxis dataKey="day" />
-  <YAxis />
-  <CartesianGrid strokeDasharray="5 5" />
-  <Line dataKey="high" stroke="#ef4444" dot />
-  <Line dataKey="low" stroke="#3b82f6" dot />
-  <LineChartTooltip />
-</LineChart>`,
-          component: () => (
+          description: 'Show data points on the line.',          component: () => (
             <div class="h-64 w-full">
               <LineChart data={temperatureData} width={500} height={250}>
                 <XAxis dataKey="day" />
@@ -364,15 +339,7 @@ export default function LineChartPage() {
         },
         {
           title: 'Custom Tick Formatters',
-          description: 'Format axis labels with custom functions.',
-          code: `<LineChart data={stockData} width={500} height={300}>
-  <XAxis dataKey="date" />
-  <YAxis tickFormatter={(v) => \`$\${v}\`} />
-  <CartesianGrid stroke="#ddd" />
-  <Line dataKey="price" stroke="#10b981" strokeWidth={2} dot />
-  <LineChartTooltip />
-</LineChart>`,
-          component: () => (
+          description: 'Format axis labels with custom functions.',          component: () => (
             <div class="h-64 w-full">
               <LineChart data={stockData} width={500} height={250}>
                 <XAxis dataKey="date" />
@@ -386,25 +353,7 @@ export default function LineChartPage() {
         },
         {
           title: 'Responsive Chart',
-          description: 'Chart that resizes with its container using ResponsiveContainer.',
-          code: `<ResponsiveContainer minHeight={300}>
-  {(size) => (
-    <LineChart
-      data={salesData}
-      width={600}
-      height={300}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <XAxis dataKey="month" />
-      <YAxis />
-      <CartesianGrid />
-      <Line dataKey="revenue" stroke="#8884d8" />
-      <LineChartTooltip />
-    </LineChart>
-  )}
-</ResponsiveContainer>`,
-          component: () => (
+          description: 'Chart that resizes with its container using ResponsiveContainer.',          component: () => (
             <div class="w-full">
               <ResponsiveContainer minHeight={250}>
                 {(size) => (
@@ -428,23 +377,7 @@ export default function LineChartPage() {
         },
         {
           title: 'Custom Tooltip',
-          description: 'Provide a custom tooltip renderer.',
-          code: `<LineChart data={salesData} width={500} height={300}>
-  <XAxis dataKey="month" />
-  <YAxis />
-  <Line dataKey="revenue" stroke="#8884d8" />
-  <LineChartTooltip
-    content={(data) => (
-      <div class="bg-white border shadow-lg p-3 rounded">
-        <div class="font-bold">{data.month}</div>
-        <div class="text-purple-600">
-          Revenue: \${data.revenue?.toLocaleString()}
-        </div>
-      </div>
-    )}
-  />
-</LineChart>`,
-          component: () => (
+          description: 'Provide a custom tooltip renderer.',          component: () => (
             <div class="h-64 w-full">
               <LineChart data={salesData} width={500} height={250}>
                 <XAxis dataKey="month" />
@@ -466,20 +399,7 @@ export default function LineChartPage() {
         },
         {
           title: 'Accessible Chart',
-          description: 'Chart with accessibility attributes for screen readers.',
-          code: `<LineChart
-  data={salesData}
-  width={500}
-  height={300}
-  ariaLabel="Monthly revenue trend for 2024"
-  title="Revenue Chart"
-  description="Shows monthly revenue from January to July 2024"
->
-  <XAxis dataKey="month" />
-  <YAxis />
-  <Line dataKey="revenue" stroke="#8884d8" />
-</LineChart>`,
-          component: () => (
+          description: 'Chart with accessibility attributes for screen readers.',          component: () => (
             <div class="h-64 w-full">
               <LineChart
                 data={salesData}
@@ -497,61 +417,63 @@ export default function LineChartPage() {
           ),
         },
       ]}
-      usage={`import {
-  LineChart,
-  XAxis,
-  YAxis,
-  Line,
-  CartesianGrid,
-  LineChartTooltip,
-} from '@exowpee/solidlyCharts/LineCharts';
-import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
+      usage={`
+        import {
+          LineChart,
+          XAxis,
+          YAxis,
+          Line,
+          CartesianGrid,
+          LineChartTooltip,
+        } from '@exowpee/solidlyCharts/LineCharts';
+        import { ResponsiveContainer } from '@exowpee/solidlyCharts/ResponsiveContainer';
 
-// Basic usage
-const data = [
-  { month: 'Jan', sales: 4000 },
-  { month: 'Feb', sales: 3000 },
-  { month: 'Mar', sales: 5000 },
-];
+        // Basic usage
+        const data = [
+          { month: 'Jan', sales: 4000 },
+          { month: 'Feb', sales: 3000 },
+          { month: 'Mar', sales: 5000 },
+        ];
 
-<LineChart data={data} width={600} height={400}>
-  <XAxis dataKey="month" />
-  <YAxis />
-  <Line dataKey="sales" stroke="#8884d8" />
-</LineChart>
+        <LineChart data={data} width={600} height={400}>
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Line dataKey="sales" stroke="#8884d8" />
+        </LineChart>
 
-// With all features
-<LineChart
-  data={data}
-  width={600}
-  height={400}
-  ariaLabel="Sales data visualization"
-  title="Monthly Sales"
->
-  <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-  <XAxis dataKey="month" />
-  <YAxis tickFormatter={(v) => \`$\${v}\`} />
-  <Line dataKey="sales" stroke="#8884d8" dot />
-  <Line dataKey="returns" stroke="#82ca9d" />
-  <LineChartTooltip />
-</LineChart>
+        // With all features
+        <LineChart
+          data={data}
+          width={600}
+          height={400}
+          ariaLabel="Sales data visualization"
+          title="Monthly Sales"
+        >
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <XAxis dataKey="month" />
+          <YAxis tickFormatter={(v) => \`$\${v}\`} />
+          <Line dataKey="sales" stroke="#8884d8" dot />
+          <Line dataKey="returns" stroke="#82ca9d" />
+          <LineChartTooltip />
+        </LineChart>
 
-// Responsive
-<ResponsiveContainer minHeight={400}>
-  {(size) => (
-    <LineChart
-      data={data}
-      width={600}
-      height={400}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <XAxis dataKey="month" />
-      <YAxis />
-      <Line dataKey="sales" stroke="#8884d8" />
-    </LineChart>
-  )}
-</ResponsiveContainer>`}
+        // Responsive
+        <ResponsiveContainer minHeight={400}>
+          {(size) => (
+            <LineChart
+              data={data}
+              width={600}
+              height={400}
+              rwidth={size.rwidth}
+              rheight={size.rheight}
+            >
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Line dataKey="sales" stroke="#8884d8" />
+            </LineChart>
+          )}
+        </ResponsiveContainer>
+      `}
       subComponents={subComponents}
     />
   );

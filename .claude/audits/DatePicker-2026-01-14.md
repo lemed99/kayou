@@ -14,6 +14,7 @@ The DatePicker component provides single, multiple, and range date selection wit
 ## Recent Updates (2026-01-19)
 
 ### Week Start Configuration
+
 Added `weekStartsOn` prop to configure whether the calendar week starts on Sunday (0) or Monday (1). Defaults to Monday.
 
 ```tsx
@@ -25,6 +26,7 @@ Added `weekStartsOn` prop to configure whether the calendar week starts on Sunda
 ```
 
 ### Time Picker Refactoring
+
 - Replaced Select dropdowns with NumberInput components for hour, minute, and second
 - Added `step` attribute to minute and second inputs using `minuteStep` and `secondStep` props
 - Removed unused `generateTimeOptions` function and related memos

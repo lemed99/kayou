@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { UploadFile } from '@exowpee/solidly-pro';
+import { UploadFile } from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -118,13 +118,7 @@ export default function UploadFilePage() {
       examples={[
         {
           title: 'Basic Upload',
-          description: 'Simple file upload with drag and drop.',
-          code: `<UploadFile
-  dragDropText="Drag and drop your file"
-  chooseFileText="Browse files"
-  onChange={(file) => console.log('File selected:', file)}
-/>`,
-          component: () => {
+          description: 'Simple file upload with drag and drop.',          component: () => {
             const [file, setFile] = createSignal<File | null>(null);
             return (
               <div class="space-y-2">
@@ -140,14 +134,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'With Helper Text',
-          description: 'Upload area with helpful instructions.',
-          code: `<UploadFile
-  dragDropText="Drag and drop"
-  chooseFileText="Choose file"
-  helperText="PNG, JPG or PDF (max 5MB)"
-  onChange={handleChange}
-/>`,
-          component: () => (
+          description: 'Upload area with helpful instructions.',          component: () => (
             <UploadFile
               dragDropText="Drag and drop"
               chooseFileText="Choose file"
@@ -158,15 +145,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'Image Upload Only',
-          description: 'Restrict uploads to image files.',
-          code: `<UploadFile
-  dragDropText="Drop your image here"
-  chooseFileText="Select image"
-  accept="image/*"
-  helperText="Only image files are allowed"
-  onChange={handleChange}
-/>`,
-          component: () => (
+          description: 'Restrict uploads to image files.',          component: () => (
             <UploadFile
               dragDropText="Drop your image here"
               chooseFileText="Select image"
@@ -178,16 +157,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'Multiple Files',
-          description: 'Allow selecting multiple files with a maximum count.',
-          code: `<UploadFile
-  dragDropText="Drop files here"
-  chooseFileText="Select files"
-  multiple
-  maxLength={5}
-  helperText="You can upload up to 5 files"
-  onChange={(files) => console.log('Files:', files)}
-/>`,
-          component: () => (
+          description: 'Allow selecting multiple files with a maximum count.',          component: () => (
             <UploadFile
               dragDropText="Drop files here"
               chooseFileText="Select files"
@@ -200,16 +170,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'With Size Limit',
-          description: 'Limit file size to 2MB.',
-          code: `<UploadFile
-  dragDropText="Drag and drop"
-  chooseFileText="Browse"
-  maxSize={2 * 1024 * 1024}
-  helperText="Maximum file size: 2MB"
-  maxSizeError={(file) => \`\${file.name} is too large. Max 2MB allowed.\`}
-  onChange={handleChange}
-/>`,
-          component: () => (
+          description: 'Limit file size to 2MB.',          component: () => (
             <UploadFile
               dragDropText="Drag and drop"
               chooseFileText="Browse"
@@ -222,16 +183,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'PDF Documents Only',
-          description: 'Accept only PDF files with custom error message.',
-          code: `<UploadFile
-  dragDropText="Drop PDF here"
-  chooseFileText="Select PDF"
-  accept=".pdf,application/pdf"
-  helperText="Only PDF documents are accepted"
-  fileTypeError={(file) => \`\${file.name} is not a PDF file\`}
-  onChange={handleChange}
-/>`,
-          component: () => (
+          description: 'Accept only PDF files with custom error message.',          component: () => (
             <UploadFile
               dragDropText="Drop PDF here"
               chooseFileText="Select PDF"
@@ -244,23 +196,7 @@ export default function UploadFilePage() {
         },
         {
           title: 'Complete Example',
-          description: 'Full-featured upload with all validations.',
-          code: `<UploadFile
-  dragDropText="Drag and drop files"
-  chooseFileText="Browse files"
-  multiple
-  maxLength={3}
-  maxSize={5 * 1024 * 1024}
-  accept="image/*,.pdf"
-  helperText="Images or PDFs, max 5MB each, up to 3 files"
-  maxLengthError="You can only upload 3 files"
-  maxSizeError={(f) => \`\${f.name} exceeds 5MB limit\`}
-  fileTypeError={(f) => \`\${f.name} must be an image or PDF\`}
-  onChange={(files) => {
-    console.log('Files:', files);
-  }}
-/>`,
-          component: () => (
+          description: 'Full-featured upload with all validations.',          component: () => (
             <UploadFile
               dragDropText="Drag and drop files"
               chooseFileText="Browse files"
@@ -277,47 +213,49 @@ export default function UploadFilePage() {
           ),
         },
       ]}
-      usage={`import { UploadFile } from '@exowpee/solidly;
+      usage={`
+        import { UploadFile } from '@exowpee/solidly;
 
-// Basic usage
-<UploadFile
-  dragDropText="Drag and drop"
-  chooseFileText="Choose file"
-  onChange={(file) => handleFile(file)}
-/>
+        // Basic usage
+        <UploadFile
+          dragDropText="Drag and drop"
+          chooseFileText="Choose file"
+          onChange={(file) => handleFile(file)}
+        />
 
-// With file type and size restrictions
-<UploadFile
-  dragDropText="Drop image here"
-  chooseFileText="Browse"
-  accept="image/*"
-  maxSize={5 * 1024 * 1024}
-  helperText="Images only, max 5MB"
-  onChange={(file) => uploadImage(file)}
-/>
+        // With file type and size restrictions
+        <UploadFile
+          dragDropText="Drop image here"
+          chooseFileText="Browse"
+          accept="image/*"
+          maxSize={5 * 1024 * 1024}
+          helperText="Images only, max 5MB"
+          onChange={(file) => uploadImage(file)}
+        />
 
-// Multiple files with limit
-<UploadFile
-  dragDropText="Drop files"
-  chooseFileText="Select files"
-  multiple
-  maxLength={10}
-  onChange={(files) => {
-    // files is FileList when multiple=true
-    Array.from(files).forEach(uploadFile);
-  }}
-/>
+        // Multiple files with limit
+        <UploadFile
+          dragDropText="Drop files"
+          chooseFileText="Select files"
+          multiple
+          maxLength={10}
+          onChange={(files) => {
+            // files is FileList when multiple=true
+            Array.from(files).forEach(uploadFile);
+          }}
+        />
 
-// With custom error messages
-<UploadFile
-  dragDropText="Drop documents"
-  chooseFileText="Browse"
-  accept=".pdf,.doc,.docx"
-  maxSize={10 * 1024 * 1024}
-  fileTypeError={(file) => \`\${file.name}: Only PDF and Word documents allowed\`}
-  maxSizeError={(file) => \`\${file.name}: File must be under 10MB\`}
-  onChange={handleDocuments}
-/>`}
+        // With custom error messages
+        <UploadFile
+          dragDropText="Drop documents"
+          chooseFileText="Browse"
+          accept=".pdf,.doc,.docx"
+          maxSize={10 * 1024 * 1024}
+          fileTypeError={(file) => \`\${file.name}: Only PDF and Word documents allowed\`}
+          maxSizeError={(file) => \`\${file.name}: File must be under 10MB\`}
+          onChange={handleDocuments}
+        />
+      `}
     />
   );
 }

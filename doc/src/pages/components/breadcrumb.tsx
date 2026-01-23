@@ -46,11 +46,6 @@ export default function BreadcrumbPage() {
         {
           title: 'Basic Breadcrumb',
           description: 'Simple breadcrumb navigation with links.',
-          code: `<Breadcrumb>
-  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-  <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
-  <Breadcrumb.Item>Current Page</Breadcrumb.Item>
-</Breadcrumb>`,
           component: () => (
             <Breadcrumb>
               <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -62,11 +57,6 @@ export default function BreadcrumbPage() {
         {
           title: 'With Current Page',
           description: 'Using isCurrent prop to mark the current page.',
-          code: `<Breadcrumb>
-  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-  <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-  <Breadcrumb.Item isCurrent>Profile</Breadcrumb.Item>
-</Breadcrumb>`,
           component: () => (
             <Breadcrumb>
               <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -78,11 +68,6 @@ export default function BreadcrumbPage() {
         {
           title: 'All Links',
           description: 'Breadcrumb where all items are clickable.',
-          code: `<Breadcrumb>
-  <Breadcrumb.Item href="/">Dashboard</Breadcrumb.Item>
-  <Breadcrumb.Item href="/users">Users</Breadcrumb.Item>
-  <Breadcrumb.Item href="/users/123">John Doe</Breadcrumb.Item>
-</Breadcrumb>`,
           component: () => (
             <Breadcrumb>
               <Breadcrumb.Item href="/">Dashboard</Breadcrumb.Item>
@@ -92,28 +77,30 @@ export default function BreadcrumbPage() {
           ),
         },
       ]}
-      usage={`import { Breadcrumb } from '@exowpee/solidly';
+      usage={`
+        import { Breadcrumb } from '@exowpee/solidly';
 
-// Basic usage
-<Breadcrumb>
-  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-  <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
-  <Breadcrumb.Item>Details</Breadcrumb.Item>
-</Breadcrumb>
+        // Basic usage
+        <Breadcrumb>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+          <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
+          <Breadcrumb.Item>Details</Breadcrumb.Item>
+        </Breadcrumb>
 
-// With custom link component (e.g., SolidJS Router)
-import { Link } from '@solidjs/router';
+        // With custom link component (e.g., SolidJS Router)
+        import { Link } from '@solidjs/router';
 
-<Breadcrumb>
-  <Breadcrumb.Item href="/" as={Link}>Home</Breadcrumb.Item>
-  <Breadcrumb.Item href="/about" as={Link}>About</Breadcrumb.Item>
-</Breadcrumb>
+        <Breadcrumb>
+          <Breadcrumb.Item href="/" as={Link}>Home</Breadcrumb.Item>
+          <Breadcrumb.Item href="/about" as={Link}>About</Breadcrumb.Item>
+        </Breadcrumb>
 
-// Marking current page
-<Breadcrumb>
-  <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-  <Breadcrumb.Item isCurrent>Current</Breadcrumb.Item>
-</Breadcrumb>`}
+        // Marking current page
+        <Breadcrumb>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+          <Breadcrumb.Item isCurrent>Current</Breadcrumb.Item>
+        </Breadcrumb>
+      `}
     />
   );
 }

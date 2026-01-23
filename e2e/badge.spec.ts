@@ -10,7 +10,9 @@ test.describe('Badge', () => {
   test('should render badge components', async ({ page }) => {
     const badges = page
       .locator('span')
-      .filter({ hasText: /Default|Gray|Success|Warning|Failure|Dark|Active|Pending|Inactive/i });
+      .filter({
+        hasText: /Default|Gray|Success|Warning|Failure|Dark|Active|Pending|Inactive/i,
+      });
     const count = await badges.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -36,35 +38,50 @@ test.describe('Badge', () => {
   });
 
   test('should render gray color variant', async ({ page }) => {
-    const grayBadge = page.locator('span').filter({ hasText: /^Gray$/i }).first();
+    const grayBadge = page
+      .locator('span')
+      .filter({ hasText: /^Gray$/i })
+      .first();
     if (await grayBadge.isVisible()) {
       await expect(grayBadge).toBeVisible();
     }
   });
 
   test('should render success color variant', async ({ page }) => {
-    const successBadge = page.locator('span').filter({ hasText: /^Success$/i }).first();
+    const successBadge = page
+      .locator('span')
+      .filter({ hasText: /^Success$/i })
+      .first();
     if (await successBadge.isVisible()) {
       await expect(successBadge).toBeVisible();
     }
   });
 
   test('should render warning color variant', async ({ page }) => {
-    const warningBadge = page.locator('span').filter({ hasText: /^Warning$/i }).first();
+    const warningBadge = page
+      .locator('span')
+      .filter({ hasText: /^Warning$/i })
+      .first();
     if (await warningBadge.isVisible()) {
       await expect(warningBadge).toBeVisible();
     }
   });
 
   test('should render failure color variant', async ({ page }) => {
-    const failureBadge = page.locator('span').filter({ hasText: /^Failure$/i }).first();
+    const failureBadge = page
+      .locator('span')
+      .filter({ hasText: /^Failure$/i })
+      .first();
     if (await failureBadge.isVisible()) {
       await expect(failureBadge).toBeVisible();
     }
   });
 
   test('should render dark color variant', async ({ page }) => {
-    const darkBadge = page.locator('span').filter({ hasText: /^Dark$/i }).first();
+    const darkBadge = page
+      .locator('span')
+      .filter({ hasText: /^Dark$/i })
+      .first();
     if (await darkBadge.isVisible()) {
       await expect(darkBadge).toBeVisible();
     }
@@ -90,22 +107,34 @@ test.describe('Badge', () => {
   // ==================== Size Variants ====================
 
   test('should render extra small size variant', async ({ page }) => {
-    const xsBadge = page.locator('span').filter({ hasText: /Extra Small/i }).first();
+    const xsBadge = page
+      .locator('span')
+      .filter({ hasText: /Extra Small/i })
+      .first();
     if (await xsBadge.isVisible()) {
       await expect(xsBadge).toBeVisible();
     }
   });
 
   test('should render small size variant', async ({ page }) => {
-    const smBadge = page.locator('span').filter({ hasText: /^Small$/i }).first();
+    const smBadge = page
+      .locator('span')
+      .filter({ hasText: /^Small$/i })
+      .first();
     if (await smBadge.isVisible()) {
       await expect(smBadge).toBeVisible();
     }
   });
 
   test('badges should have different sizes', async ({ page }) => {
-    const xsBadge = page.locator('span').filter({ hasText: /Extra Small/i }).first();
-    const smBadge = page.locator('span').filter({ hasText: /^Small$/i }).first();
+    const xsBadge = page
+      .locator('span')
+      .filter({ hasText: /Extra Small/i })
+      .first();
+    const smBadge = page
+      .locator('span')
+      .filter({ hasText: /^Small$/i })
+      .first();
 
     if ((await xsBadge.isVisible()) && (await smBadge.isVisible())) {
       const xsBox = await xsBadge.boundingBox();
@@ -121,21 +150,30 @@ test.describe('Badge', () => {
   // ==================== Status Indicators ====================
 
   test('should render active status badge', async ({ page }) => {
-    const activeBadge = page.locator('span').filter({ hasText: /^Active$/i }).first();
+    const activeBadge = page
+      .locator('span')
+      .filter({ hasText: /^Active$/i })
+      .first();
     if (await activeBadge.isVisible()) {
       await expect(activeBadge).toBeVisible();
     }
   });
 
   test('should render pending status badge', async ({ page }) => {
-    const pendingBadge = page.locator('span').filter({ hasText: /^Pending$/i }).first();
+    const pendingBadge = page
+      .locator('span')
+      .filter({ hasText: /^Pending$/i })
+      .first();
     if (await pendingBadge.isVisible()) {
       await expect(pendingBadge).toBeVisible();
     }
   });
 
   test('should render inactive status badge', async ({ page }) => {
-    const inactiveBadge = page.locator('span').filter({ hasText: /^Inactive$/i }).first();
+    const inactiveBadge = page
+      .locator('span')
+      .filter({ hasText: /^Inactive$/i })
+      .first();
     if (await inactiveBadge.isVisible()) {
       await expect(inactiveBadge).toBeVisible();
     }
@@ -223,7 +261,9 @@ test.describe('Badge', () => {
 
       if (firstBox && secondBox) {
         // There should be some space between badges
-        expect(Math.abs(secondBox.x - (firstBox.x + firstBox.width))).toBeGreaterThanOrEqual(0);
+        expect(
+          Math.abs(secondBox.x - (firstBox.x + firstBox.width)),
+        ).toBeGreaterThanOrEqual(0);
       }
     }
   });

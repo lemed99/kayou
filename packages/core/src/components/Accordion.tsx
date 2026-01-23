@@ -9,10 +9,9 @@ import {
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
+import { ChevronRightIcon } from '@exowpee/solidly-icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
-
-import { ChevronRightIcon } from '../icons';
 
 /**
  * Data structure for each accordion panel.
@@ -147,7 +146,13 @@ const Accordion = (props: AccordionProps): JSX.Element => {
   const isSeparated = () => !!props.gap;
 
   return (
-    <div class={twMerge('w-full', isSeparated() && `flex flex-col gap-${props.gap}`, props.class)}>
+    <div
+      class={twMerge(
+        'w-full',
+        isSeparated() && `flex flex-col gap-${props.gap}`,
+        props.class,
+      )}
+    >
       <For each={panels()}>
         {(panel) => (
           <Panel
@@ -230,10 +235,10 @@ const Panel = (props: PanelProps): JSX.Element => {
     <div
       class={twMerge(
         'border-gray-200 dark:border-gray-700',
-        props.isSeparated
-          ? 'rounded-lg border'
-          : 'border-b',
-        !props.isSimple && !props.isSeparated && 'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
+        props.isSeparated ? 'rounded-lg border' : 'border-b',
+        !props.isSimple &&
+          !props.isSeparated &&
+          'border-x first:rounded-t-lg first:border-t last:rounded-b-lg',
         props.panel.class,
       )}
       id={itemId()}

@@ -15,11 +15,13 @@ export default function PaginationPage() {
       keyConcepts={[
         {
           term: 'Controlled Component',
-          explanation: 'Provide current page, total, and onChange callback for data fetching.',
+          explanation:
+            'Provide current page, total, and onChange callback for data fetching.',
         },
         {
           term: 'Direct Page Input',
-          explanation: 'Type page number directly; validates bounds before triggering onChange.',
+          explanation:
+            'Type page number directly; validates bounds before triggering onChange.',
         },
         {
           term: 'Navigation Buttons',
@@ -50,59 +52,44 @@ export default function PaginationPage() {
         {
           title: 'Basic Pagination',
           description: 'Simple pagination with 10 pages.',
-          code: `const [page, setPage] = createSignal(1);
-
-<Pagination
-  total={10}
-  page={page()}
-  onChange={setPage}
-/>`,
           component: () => <Pagination total={10} page={page1()} onChange={setPage1} />,
         },
         {
           title: 'Middle Page',
           description: 'Pagination starting at page 5.',
-          code: `<Pagination
-  total={20}
-  page={5}
-  onChange={handleChange}
-/>`,
           component: () => <Pagination total={20} page={page2()} onChange={setPage2} />,
         },
         {
           title: 'Single Page',
           description: 'Pagination with only one page (buttons disabled).',
-          code: `<Pagination
-  total={1}
-  page={1}
-  onChange={handleChange}
-/>`,
           component: () => <Pagination total={1} page={1} onChange={() => {}} />,
         },
       ]}
-      usage={`import { Pagination } from '@exowpee/solidly';
+      usage={`
+        import { Pagination } from '@exowpee/solidly';
 
-// Basic usage
-const [page, setPage] = createSignal(1);
+        // Basic usage
+        const [page, setPage] = createSignal(1);
 
-<Pagination
-  total={10}
-  page={page()}
-  onChange={setPage}
-/>
+        <Pagination
+          total={10}
+          page={page()}
+          onChange={setPage}
+        />
 
-// With data fetching
-const [page, setPage] = createSignal(1);
-const [data] = createResource(() => page(), fetchPageData);
+        // With data fetching
+        const [page, setPage] = createSignal(1);
+        const [data] = createResource(() => page(), fetchPageData);
 
-<Pagination
-  total={totalPages()}
-  page={page()}
-  onChange={(newPage) => {
-    setPage(newPage);
-    // Data will refetch automatically
-  }}
-/>`}
+        <Pagination
+          total={totalPages()}
+          page={page()}
+          onChange={(newPage) => {
+            setPage(newPage);
+            // Data will refetch automatically
+          }}
+        />
+      `}
     />
   );
 }

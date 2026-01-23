@@ -4,7 +4,7 @@ import {
   GitPullRequestIcon,
   HeartIcon,
   MessageSquare01Icon,
-} from '@exowpee/solidly/icons';
+} from '@exowpee/solidly-icons';
 
 import { formatCodeToHTML } from '../../helpers/formatCodeToHTML';
 

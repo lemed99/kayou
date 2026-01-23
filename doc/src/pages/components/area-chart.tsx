@@ -6,7 +6,7 @@ import {
   AreaXAxis,
   AreaYAxis,
   ResponsiveContainer,
-} from '@exowpee/solidly-pro';
+} from '@exowpee/solidly';
 
 import DocPage from '../../components/DocPage';
 
@@ -218,7 +218,6 @@ export default function AreaChartPage() {
   return (
     <DocPage
       title="AreaChart"
-      isPro
       description="D3-based area chart with composable axes, grid, tooltips, and multiple data series with filled areas."
       dependencies={[
         {
@@ -240,15 +239,18 @@ export default function AreaChartPage() {
       keyConcepts={[
         {
           term: 'Compound Components',
-          explanation: 'Composable children (AreaXAxis, AreaYAxis, Area) share state via context.',
+          explanation:
+            'Composable children (AreaXAxis, AreaYAxis, Area) share state via context.',
         },
         {
           term: 'Filled Areas',
-          explanation: 'Areas are filled from the data line down to the baseline with opacity.',
+          explanation:
+            'Areas are filled from the data line down to the baseline with opacity.',
         },
         {
           term: 'Curve Types',
-          explanation: 'Supports monotone (smooth), linear (straight), and step interpolation.',
+          explanation:
+            'Supports monotone (smooth), linear (straight), and step interpolation.',
         },
         {
           term: 'Multiple Series',
@@ -319,11 +321,6 @@ export default function AreaChartPage() {
         {
           title: 'Basic Area Chart',
           description: 'Simple area chart with a single data series.',
-          code: `<AreaChart data={salesData} width={500} height={300}>
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis />
-  <Area dataKey="revenue" fill="#8884d8" />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={salesData} width={500} height={250}>
@@ -337,14 +334,6 @@ export default function AreaChartPage() {
         {
           title: 'Multiple Areas',
           description: 'Chart with multiple data series for comparison.',
-          code: `<AreaChart data={salesData} width={500} height={300}>
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis />
-  <AreaCartesianGrid stroke="#eee" />
-  <Area dataKey="revenue" fill="#8884d8" fillOpacity={0.5} />
-  <Area dataKey="profit" fill="#82ca9d" fillOpacity={0.5} />
-  <AreaChartTooltip />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={salesData} width={500} height={250}>
@@ -361,14 +350,6 @@ export default function AreaChartPage() {
         {
           title: 'With Dots',
           description: 'Show data points on the area.',
-          code: `<AreaChart data={temperatureData} width={500} height={300}>
-  <AreaXAxis dataKey="day" />
-  <AreaYAxis />
-  <AreaCartesianGrid strokeDasharray="5 5" />
-  <Area dataKey="high" fill="#ef4444" fillOpacity={0.4} dot />
-  <Area dataKey="low" fill="#3b82f6" fillOpacity={0.4} dot />
-  <AreaChartTooltip />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={temperatureData} width={500} height={250}>
@@ -385,13 +366,6 @@ export default function AreaChartPage() {
         {
           title: 'Step Interpolation',
           description: 'Use step curve for discrete data changes.',
-          code: `<AreaChart data={trafficData} width={500} height={300}>
-  <AreaXAxis dataKey="hour" />
-  <AreaYAxis />
-  <AreaCartesianGrid stroke="#ddd" />
-  <Area dataKey="visitors" fill="#10b981" type="step" />
-  <AreaChartTooltip />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={trafficData} width={500} height={250}>
@@ -407,20 +381,18 @@ export default function AreaChartPage() {
         {
           title: 'Custom Tick Formatters',
           description: 'Format axis labels with custom functions.',
-          code: `<AreaChart data={trafficData} width={500} height={300}>
-  <AreaXAxis dataKey="hour" />
-  <AreaYAxis tickFormatter={(v) => \`\${v} users\`} />
-  <AreaCartesianGrid stroke="#ddd" />
-  <Area dataKey="visitors" fill="#6366f1" fillOpacity={0.7} strokeWidth={2} />
-  <AreaChartTooltip />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={trafficData} width={500} height={250}>
                 <AreaXAxis dataKey="hour" />
                 <AreaYAxis tickFormatter={(v) => `${v}`} />
                 <AreaCartesianGrid stroke="#ddd" />
-                <Area dataKey="visitors" fill="#6366f1" fillOpacity={0.7} strokeWidth={2} />
+                <Area
+                  dataKey="visitors"
+                  fill="#6366f1"
+                  fillOpacity={0.7}
+                  strokeWidth={2}
+                />
                 <AreaChartTooltip />
               </AreaChart>
             </div>
@@ -429,23 +401,6 @@ export default function AreaChartPage() {
         {
           title: 'Responsive Chart',
           description: 'Chart that resizes with its container using ResponsiveContainer.',
-          code: `<ResponsiveContainer minHeight={300}>
-  {(size) => (
-    <AreaChart
-      data={salesData}
-      width={600}
-      height={300}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <AreaXAxis dataKey="month" />
-      <AreaYAxis />
-      <AreaCartesianGrid />
-      <Area dataKey="revenue" fill="#8884d8" />
-      <AreaChartTooltip />
-    </AreaChart>
-  )}
-</ResponsiveContainer>`,
           component: () => (
             <div class="w-full">
               <ResponsiveContainer minHeight={250}>
@@ -471,21 +426,6 @@ export default function AreaChartPage() {
         {
           title: 'Custom Tooltip',
           description: 'Provide a custom tooltip renderer.',
-          code: `<AreaChart data={salesData} width={500} height={300}>
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis />
-  <Area dataKey="revenue" fill="#8884d8" />
-  <AreaChartTooltip
-    content={(data) => (
-      <div class="bg-white border shadow-lg p-3 rounded">
-        <div class="font-bold">{data.month}</div>
-        <div class="text-purple-600">
-          Revenue: \${data.revenue?.toLocaleString()}
-        </div>
-      </div>
-    )}
-  />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart data={salesData} width={500} height={250}>
@@ -509,18 +449,6 @@ export default function AreaChartPage() {
         {
           title: 'Accessible Chart',
           description: 'Chart with accessibility attributes for screen readers.',
-          code: `<AreaChart
-  data={salesData}
-  width={500}
-  height={300}
-  ariaLabel="Monthly revenue trend for 2024"
-  title="Revenue Chart"
-  description="Shows monthly revenue from January to July 2024"
->
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis />
-  <Area dataKey="revenue" fill="#8884d8" />
-</AreaChart>`,
           component: () => (
             <div class="h-64 w-full">
               <AreaChart
@@ -539,61 +467,63 @@ export default function AreaChartPage() {
           ),
         },
       ]}
-      usage={`import {
-  AreaChart,
-  AreaXAxis,
-  AreaYAxis,
-  Area,
-  AreaCartesianGrid,
-  AreaChartTooltip,
-} from '@exowpee/solidly-pro';
-import { ResponsiveContainer } from '@exowpee/solidly-pro';
+      usage={`
+        import {
+          AreaChart,
+          AreaXAxis,
+          AreaYAxis,
+          Area,
+          AreaCartesianGrid,
+          AreaChartTooltip,
+        } from '@exowpee/solidly';
+        import { ResponsiveContainer } from '@exowpee/solidly';
 
-// Basic usage
-const data = [
-  { month: 'Jan', sales: 4000 },
-  { month: 'Feb', sales: 3000 },
-  { month: 'Mar', sales: 5000 },
-];
+        // Basic usage
+        const data = [
+          { month: 'Jan', sales: 4000 },
+          { month: 'Feb', sales: 3000 },
+          { month: 'Mar', sales: 5000 },
+        ];
 
-<AreaChart data={data} width={600} height={400}>
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis />
-  <Area dataKey="sales" fill="#8884d8" />
-</AreaChart>
+        <AreaChart data={data} width={600} height={400}>
+          <AreaXAxis dataKey="month" />
+          <AreaYAxis />
+          <Area dataKey="sales" fill="#8884d8" />
+        </AreaChart>
 
-// With all features
-<AreaChart
-  data={data}
-  width={600}
-  height={400}
-  ariaLabel="Sales data visualization"
-  title="Monthly Sales"
->
-  <AreaCartesianGrid stroke="#eee" strokeDasharray="5 5" />
-  <AreaXAxis dataKey="month" />
-  <AreaYAxis tickFormatter={(v) => \`$\${v}\`} />
-  <Area dataKey="sales" fill="#8884d8" fillOpacity={0.6} dot />
-  <Area dataKey="returns" fill="#82ca9d" fillOpacity={0.6} />
-  <AreaChartTooltip />
-</AreaChart>
+        // With all features
+        <AreaChart
+          data={data}
+          width={600}
+          height={400}
+          ariaLabel="Sales data visualization"
+          title="Monthly Sales"
+        >
+          <AreaCartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <AreaXAxis dataKey="month" />
+          <AreaYAxis tickFormatter={(v) => \`$\${v}\`} />
+          <Area dataKey="sales" fill="#8884d8" fillOpacity={0.6} dot />
+          <Area dataKey="returns" fill="#82ca9d" fillOpacity={0.6} />
+          <AreaChartTooltip />
+        </AreaChart>
 
-// Responsive
-<ResponsiveContainer minHeight={400}>
-  {(size) => (
-    <AreaChart
-      data={data}
-      width={600}
-      height={400}
-      rwidth={size.rwidth}
-      rheight={size.rheight}
-    >
-      <AreaXAxis dataKey="month" />
-      <AreaYAxis />
-      <Area dataKey="sales" fill="#8884d8" />
-    </AreaChart>
-  )}
-</ResponsiveContainer>`}
+        // Responsive
+        <ResponsiveContainer minHeight={400}>
+          {(size) => (
+            <AreaChart
+              data={data}
+              width={600}
+              height={400}
+              rwidth={size.rwidth}
+              rheight={size.rheight}
+            >
+              <AreaXAxis dataKey="month" />
+              <AreaYAxis />
+              <Area dataKey="sales" fill="#8884d8" />
+            </AreaChart>
+          )}
+        </ResponsiveContainer>
+      `}
       subComponents={subComponents}
     />
   );

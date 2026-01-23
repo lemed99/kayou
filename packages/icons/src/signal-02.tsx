@@ -1,0 +1,13 @@
+import { JSX } from 'solid-js';
+
+import { IconProps, IconWrapper } from './components/IconWrapper';
+
+export const Signal02Icon = (props: IconProps): JSX.Element => (
+  <IconWrapper {...props}>
+    <path
+      d="M16.2429 5.75732C18.586 8.10047 18.586 11.8995 16.2429 14.2426M7.75758 14.2426C5.41443 11.8995 5.41443 8.10047 7.75758 5.75732M4.92893 17.0711C1.02369 13.1658 1.02369 6.8342 4.92893 2.92896M19.0715 2.92896C22.9768 6.8342 22.9768 13.1658 19.0715 17.0711M12.0002 12C13.1048 12 14.0002 11.1046 14.0002 10C14.0002 8.89543 13.1048 8 12.0002 8C10.8957 8 10.0002 8.89543 10.0002 10C10.0002 11.1046 10.8957 12 12.0002 12ZM12.0002 12V21"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </IconWrapper>
+);

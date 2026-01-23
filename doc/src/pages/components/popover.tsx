@@ -144,16 +144,6 @@ export default function PopoverPage() {
         {
           title: 'Basic Popover',
           description: 'Click the button to toggle the popover. Press Escape to close.',
-          code: `<Popover
-  content={
-    <div class="p-4">
-      <h4 class="font-semibold">Popover Title</h4>
-      <p class="text-sm text-gray-600">This is the popover content.</p>
-    </div>
-  }
->
-  <Button>Click me</Button>
-</Popover>`,
           component: () => (
             <Popover
               content={
@@ -172,16 +162,6 @@ export default function PopoverPage() {
         {
           title: 'Hover Trigger',
           description: 'Popover opens on hover instead of click.',
-          code: `<Popover
-  onHover
-  content={
-    <div class="p-3">
-      <p class="text-sm">Hover to see this content!</p>
-    </div>
-  }
->
-  <Button color="light">Hover over me</Button>
-</Popover>`,
           component: () => (
             <Popover
               onHover
@@ -198,10 +178,6 @@ export default function PopoverPage() {
         {
           title: 'Different Positions',
           description: 'Popover can be positioned in various directions.',
-          code: `<Popover position="top" content={...}>Top</Popover>
-<Popover position="right" content={...}>Right</Popover>
-<Popover position="bottom" content={...}>Bottom</Popover>
-<Popover position="left" content={...}>Left</Popover>`,
           component: () => (
             <div class="flex flex-wrap gap-2">
               <Popover
@@ -234,20 +210,6 @@ export default function PopoverPage() {
         {
           title: 'With Interactive Content',
           description: 'Popover with buttons and interactive elements.',
-          code: `<Popover
-  content={
-    <div class="p-4 w-64">
-      <h4 class="font-semibold mb-2">Confirm Action</h4>
-      <p class="text-sm text-gray-600 mb-4">Are you sure?</p>
-      <div class="flex gap-2">
-        <Button size="sm" color="light">Cancel</Button>
-        <Button size="sm" color="failure">Delete</Button>
-      </div>
-    </div>
-  }
->
-  <Button color="failure">Delete Item</Button>
-</Popover>`,
           component: () => (
             <Popover
               aria-label="Confirm deletion"
@@ -276,21 +238,6 @@ export default function PopoverPage() {
           title: 'Controlled Mode',
           description:
             'Control the popover state externally with isOpen and onOpenChange.',
-          code: `const [open, setOpen] = createSignal(false);
-
-<Button onClick={() => setOpen(true)}>Open Popover</Button>
-<Popover
-  isOpen={open()}
-  onOpenChange={setOpen}
-  content={
-    <div class="p-4">
-      <p>Controlled popover</p>
-      <Button onClick={() => setOpen(false)}>Close</Button>
-    </div>
-  }
->
-  <span class="text-sm text-gray-500">Trigger area</span>
-</Popover>`,
           component: () => (
             <div class="flex items-center gap-4">
               <Button onClick={() => setControlledOpen(true)}>Open Popover</Button>
@@ -319,9 +266,6 @@ export default function PopoverPage() {
         {
           title: 'With Custom Offset',
           description: 'Adjust the distance between trigger and popover.',
-          code: `<Popover offset={20} content={<div class="p-3">20px offset</div>}>
-  <Button>Large Offset</Button>
-</Popover>`,
           component: () => (
             <div class="flex gap-4">
               <Popover
@@ -344,18 +288,6 @@ export default function PopoverPage() {
         {
           title: 'Menu-like Popover',
           description: 'Popover styled as a dropdown menu.',
-          code: `<Popover
-  position="bottom-start"
-  content={
-    <div class="py-1 w-48">
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100">Edit</button>
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100">Duplicate</button>
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100">Delete</button>
-    </div>
-  }
->
-  <Button>Options</Button>
-</Popover>`,
           component: () => (
             <Popover
               position="bottom-start"
@@ -391,9 +323,6 @@ export default function PopoverPage() {
         {
           title: 'Disabled Popover',
           description: 'The hidden prop prevents the popover from opening.',
-          code: `<Popover hidden content={<div>Won't show</div>}>
-  <Button disabled>Disabled</Button>
-</Popover>`,
           component: () => (
             <Popover
               hidden
@@ -404,38 +333,40 @@ export default function PopoverPage() {
           ),
         },
       ]}
-      usage={`import { Popover } from '@exowpee/solidly';
+      usage={`
+        import { Popover } from '@exowpee/solidly';
 
-// Basic click-triggered popover
-<Popover content={<div class="p-4">Content here</div>}>
-  <Button>Open Popover</Button>
-</Popover>
+        // Basic click-triggered popover
+        <Popover content={<div class="p-4">Content here</div>}>
+          <Button>Open Popover</Button>
+        </Popover>
 
-// Hover-triggered popover
-<Popover onHover content={<div>Tooltip-like content</div>}>
-  <span>Hover me</span>
-</Popover>
+        // Hover-triggered popover
+        <Popover onHover content={<div>Tooltip-like content</div>}>
+          <span>Hover me</span>
+        </Popover>
 
-// Controlled mode
-const [open, setOpen] = createSignal(false);
-<Popover
-  isOpen={open()}
-  onOpenChange={setOpen}
-  onClose={() => console.log('closed')}
-  content={<div>Controlled content</div>}
->
-  <Button>Trigger</Button>
-</Popover>
+        // Controlled mode
+        const [open, setOpen] = createSignal(false);
+        <Popover
+          isOpen={open()}
+          onOpenChange={setOpen}
+          onClose={() => console.log('closed')}
+          content={<div>Controlled content</div>}
+        >
+          <Button>Trigger</Button>
+        </Popover>
 
-// Different positions
-<Popover position="top" content={...}>...</Popover>
-<Popover position="right-start" content={...}>...</Popover>
-<Popover position="bottom-end" content={...}>...</Popover>
+        // Different positions
+        <Popover position="top" content={...}>...</Popover>
+        <Popover position="right-start" content={...}>...</Popover>
+        <Popover position="bottom-end" content={...}>...</Popover>
 
-// Keyboard navigation
-// - Enter/Space: Toggle popover (click mode only)
-// - Escape: Close popover
-// - Tab: Navigate focusable elements inside popover`}
+        // Keyboard navigation
+        // - Enter/Space: Toggle popover (click mode only)
+        // - Escape: Close popover
+        // - Tab: Navigate focusable elements inside popover
+      `}
       relatedHooks={[
         {
           name: 'useFloating',

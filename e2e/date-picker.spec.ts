@@ -298,7 +298,10 @@ test.describe('DatePicker - Time Selection', () => {
     const calendar = page.locator('[role="dialog"]').first();
 
     // Select a date
-    const dayButton = calendar.locator('[role="gridcell"]').filter({ hasText: /^15$/ }).first();
+    const dayButton = calendar
+      .locator('[role="gridcell"]')
+      .filter({ hasText: /^15$/ })
+      .first();
     await dayButton.click();
 
     // Set time
@@ -372,7 +375,7 @@ test.describe('DatePicker - Visual States', () => {
     await page.goto('/components/date-picker');
   });
 
-  test('should highlight today\'s date', async ({ page }) => {
+  test("should highlight today's date", async ({ page }) => {
     const firstDatePicker = page.locator('[role="combobox"]').first();
     await firstDatePicker.click();
 

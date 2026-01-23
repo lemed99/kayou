@@ -8,10 +8,16 @@
     "dev": "vite"
   },
   "devDependencies": {
+    "@babel/generator": "^7.28.6",
+    "@babel/parser": "^7.28.6",
+    "@babel/traverse": "^7.28.6",
+    "@babel/types": "^7.28.6",
     "@eslint/js": "^9.33.0",
     "@mdx-js/rollup": "^3.1.1",
     "@tailwindcss/vite": "^4.0.7",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/babel__generator": "^7.27.0",
+    "@types/babel__traverse": "^7.28.0",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-solid": "^0.14.5",
@@ -30,7 +36,8 @@
   },
   "dependencies": {
     "@exowpee/solidly": "workspace:*",
-    "@exowpee/solidly-pro": "workspace:*",
+    "@exowpee/solidly-hooks": "workspace:*",
+    "@exowpee/solidly-icons": "workspace:*",
     "@formatjs/intl": "^3.1.6",
     "@solidjs/router": "^0.15.3",
     "solid-js": "^1.9.5",

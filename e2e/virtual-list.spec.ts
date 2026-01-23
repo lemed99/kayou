@@ -7,18 +7,24 @@ test.describe('VirtualList', () => {
 
   test('should render virtual list container', async ({ page }) => {
     // VirtualList uses role="listbox" when specified, or is just a scrollable div
-    const container = page.locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
     await expect(container).toBeVisible();
   });
 
   test('should render visible items only', async ({ page }) => {
     // Virtual list renders only visible items
-    const items = page.locator('[role="listbox"] > div, [class*="overflow-auto"] > div').first();
+    const items = page
+      .locator('[role="listbox"] > div, [class*="overflow-auto"] > div')
+      .first();
     await expect(items).toBeVisible();
   });
 
   test('should scroll smoothly', async ({ page }) => {
-    const container = page.locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -39,7 +45,9 @@ test.describe('VirtualList', () => {
   });
 
   test('should update on scroll', async ({ page }) => {
-    const container = page.locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -55,7 +63,9 @@ test.describe('VirtualList', () => {
   });
 
   test('should maintain scroll position', async ({ page }) => {
-    const container = page.locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]').first();
+    const container = page
+      .locator('[role="listbox"], [class*="overflow-auto"], [class*="overflow-y-auto"]')
+      .first();
 
     if (await container.isVisible()) {
       await container.evaluate((el) => {
@@ -109,7 +119,9 @@ test.describe('VirtualList', () => {
   });
 
   test('should render item content correctly', async ({ page }) => {
-    const item = page.locator('[role="listbox"] > div > div, [class*="overflow-auto"] > div > div').first();
+    const item = page
+      .locator('[role="listbox"] > div > div, [class*="overflow-auto"] > div > div')
+      .first();
 
     if (await item.isVisible()) {
       const content = await item.textContent();

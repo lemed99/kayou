@@ -112,7 +112,9 @@ test.describe('MultiSelect', () => {
   });
 
   test('should clear all selections', async ({ page }) => {
-    const clearButton = page.locator('button[aria-label*="clear" i], button[aria-label*="Clear" i]').first();
+    const clearButton = page
+      .locator('button[aria-label*="clear" i], button[aria-label*="Clear" i]')
+      .first();
 
     if (await clearButton.isVisible()) {
       await clearButton.click();

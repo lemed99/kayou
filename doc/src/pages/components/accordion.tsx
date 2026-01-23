@@ -37,11 +37,13 @@ export default function AccordionPage() {
         },
         {
           term: 'Gap Mode',
-          explanation: 'Setting a gap displays panels as individual cards with space between them.',
+          explanation:
+            'Setting a gap displays panels as individual cards with space between them.',
         },
         {
           term: 'Exclusive Mode',
-          explanation: 'When exclusive is true, only one panel can be open at a time. Opening a panel closes others.',
+          explanation:
+            'When exclusive is true, only one panel can be open at a time. Opening a panel closes others.',
         },
       ]}
       props={[
@@ -74,13 +76,15 @@ export default function AccordionPage() {
           name: 'gap',
           type: 'string',
           default: '-',
-          description: 'Gap between panels (Tailwind spacing value). When set, panels display as separate cards.',
+          description:
+            'Gap between panels (Tailwind spacing value). When set, panels display as separate cards.',
         },
         {
           name: 'exclusive',
           type: 'boolean',
           default: 'false',
-          description: 'When true, only one panel can be open at a time. Opening a panel closes any other open panel.',
+          description:
+            'When true, only one panel can be open at a time. Opening a panel closes any other open panel.',
         },
         {
           name: 'openPanels',
@@ -106,25 +110,6 @@ export default function AccordionPage() {
           title: 'Basic Usage',
           description:
             'Simple accordion with default styling. Panels can be opened and closed independently.',
-          code: `const panels: PanelData[] = [
-  {
-    itemKey: 'panel-1',
-    title: <span>What is SolidJS?</span>,
-    content: <p>SolidJS is a declarative JavaScript library for building user interfaces.</p>,
-  },
-  {
-    itemKey: 'panel-2',
-    title: <span>Why use SolidJS?</span>,
-    content: <p>It offers fine-grained reactivity and excellent performance.</p>,
-  },
-  {
-    itemKey: 'panel-3',
-    title: <span>How does it compare to React?</span>,
-    content: <p>SolidJS compiles away the virtual DOM for faster runtime performance.</p>,
-  },
-];
-
-<Accordion panels={panels} />`,
           component: () => {
             const panels: PanelData[] = [
               {
@@ -161,7 +146,6 @@ export default function AccordionPage() {
           title: 'Styled Variant',
           description:
             'Set isSimple to false for bordered panels with background highlights.',
-          code: `<Accordion panels={panels} isSimple={false} />`,
           component: () => {
             const panels: PanelData[] = [
               {
@@ -193,7 +177,6 @@ export default function AccordionPage() {
           title: 'Separated Cards',
           description:
             'Set a gap to display each panel as a separate card. Useful for distinct content sections.',
-          code: `<Accordion panels={panels} gap="4" />`,
           component: () => {
             const panels: PanelData[] = [
               {
@@ -206,9 +189,7 @@ export default function AccordionPage() {
               {
                 itemKey: 'sep-2',
                 title: <span class="font-medium">Notification Preferences</span>,
-                content: (
-                  <p>Configure email, push, and SMS notification settings.</p>
-                ),
+                content: <p>Configure email, push, and SMS notification settings.</p>,
               },
               {
                 itemKey: 'sep-3',
@@ -223,7 +204,6 @@ export default function AccordionPage() {
           title: 'Exclusive Mode',
           description:
             'Only one panel can be open at a time. Opening a panel automatically closes others.',
-          code: `<Accordion panels={panels} exclusive />`,
           component: () => {
             const panels: PanelData[] = [
               {
@@ -253,20 +233,6 @@ export default function AccordionPage() {
           title: 'Controlled Mode',
           description:
             'Manage open/closed state externally for full control over panel behavior.',
-          code: `const [openPanels, setOpenPanels] = createStore<Record<string, boolean>>({
-  'ctrl-1': true, // First panel starts open
-});
-
-<Accordion
-  panels={panels}
-  openPanels={openPanels}
-  onOpenChange={setOpenPanels}
-/>
-
-// Toggle programmatically
-<Button onClick={() => setOpenPanels('ctrl-2', true)}>
-  Open Panel 2
-</Button>`,
           component: () => {
             const [openPanels, setOpenPanels] = createStore<Record<string, boolean>>({
               'ctrl-1': true,
@@ -306,17 +272,6 @@ export default function AccordionPage() {
           title: 'Highlighted Panel',
           description:
             'Highlight a specific panel and scroll it into view. Useful for search or navigation.',
-          code: `const [highlighted, setHighlighted] = createSignal<string | undefined>();
-
-<Accordion
-  panels={panels}
-  highlightedKey={highlighted()}
-  highlightedClass="bg-yellow-200 dark:bg-yellow-800"
-/>
-
-<Button onClick={() => setHighlighted('panel-3')}>
-  Highlight Panel 3
-</Button>`,
           component: () => {
             const [highlighted, setHighlighted] = createSignal<string | undefined>();
             const panels: PanelData[] = [
@@ -365,18 +320,6 @@ export default function AccordionPage() {
           title: 'Custom Panel Styling',
           description:
             'Each panel can have custom classes for the container, title, and content areas.',
-          code: `const panels: PanelData[] = [
-  {
-    itemKey: 'custom-1',
-    title: <span>Custom Styled Panel</span>,
-    content: <p>This panel has custom styling applied.</p>,
-    class: 'border-blue-500',
-    titleClass: 'bg-blue-50 dark:bg-blue-900/30',
-    contentClass: 'bg-blue-50/50 dark:bg-blue-900/20',
-  },
-];
-
-<Accordion panels={panels} isSimple={false} />`,
           component: () => {
             const panels: PanelData[] = [
               {
@@ -406,45 +349,48 @@ export default function AccordionPage() {
           },
         },
       ]}
-      usage={`import Accordion, { type PanelData } from '@exowpee/solidly/Accordion';
+      usage={`
+        import Accordion, { type PanelData } from '@exowpee/solidly/Accordion';
 
-// Define panel data
-const panels: PanelData[] = [
-  {
-    itemKey: 'faq-1',
-    title: <span>Question Title</span>,
-    content: <p>Answer content here</p>,
-  },
-  // ... more panels
-];
+        // Define panel data
+        const panels: PanelData[] = [
+          {
+            itemKey: 'faq-1',
+            title: <span>Question Title</span>,
+            content: <p>Answer content here</p>,
+          },
+          // ... more panels
+        ];
 
-// Basic uncontrolled usage
-<Accordion panels={panels} />
+        // Basic uncontrolled usage
+        <Accordion panels={panels} />
 
-// Styled variant with borders
-<Accordion panels={panels} isSimple={false} />
+        // Styled variant with borders
+        <Accordion panels={panels} isSimple={false} />
 
-// Separated cards with gap
-<Accordion panels={panels} gap="4" />
+        // Separated cards with gap
+        <Accordion panels={panels} gap="4" />
 
-// Exclusive mode (only one panel open at a time)
-<Accordion panels={panels} exclusive />
+        // Exclusive mode (only one panel open at a time)
+        <Accordion panels={panels} exclusive />
 
-// Controlled mode
-const [openPanels, setOpenPanels] = createStore({});
+        // Controlled mode
+        const [openPanels, setOpenPanels] = createStore({});
 
-<Accordion
-  panels={panels}
-  openPanels={openPanels}
-  onOpenChange={setOpenPanels}
-/>
+        <Accordion
+          panels={panels}
+          openPanels={openPanels}
+          onOpenChange={setOpenPanels}
+        />
 
-// With highlighted panel
-<Accordion
-  panels={panels}
-  highlightedKey={searchResult}
-  highlightedClass="bg-yellow-200"
-/>`}
+        // With highlighted panel
+        <Accordion
+          panels={panels}
+          highlightedKey={searchResult}
+          highlightedClass="bg-yellow-200"
+        />
+
+      `}
     />
   );
 }

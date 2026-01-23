@@ -1,5 +1,5 @@
 export { defaultProps } from './defaultProps';
-export { cache, getCacheRow, insertOrUpdateCacheRow } from './indexedDB';
+export { cache, getCacheRow, insertOrUpdateCacheRow } from '@exowpee/solidly-hooks';
 export { preventBackgroundScroll } from './preventBackgroundScroll';
 
 // Date utilities
