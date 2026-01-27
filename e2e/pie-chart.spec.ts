@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('PieChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/pie-chart');
+    await page.goto('/ui/pie-chart');
   });
 
   test('should render chart container', async ({ page }) => {
@@ -27,8 +27,7 @@ test.describe('PieChart', () => {
     if (await slice.isVisible()) {
       await slice.hover();
 
-      // Tooltip may appear
-      const tooltip = page.locator('[role="tooltip"], [class*="tooltip"]');
+      // Tooltip may appear - just wait for any potential tooltip
       await page.waitForTimeout(200);
     }
   });

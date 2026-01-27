@@ -1,4 +1,4 @@
-# Project Context: @exowpee/solidly
+# Project Context: @kayou/ui
 
 Last Updated: 2026-01-13
 Total Components: 31
@@ -10,7 +10,7 @@ Test Coverage: 0%
 ## Project Overview
 
 **Purpose:** A UI component library built with SolidJS
-**Package Name:** @exowpee/solidly
+**Package Name:** @kayou/ui
 **Version:** 0.1.12
 **Target Users:** Developers building with SolidJS
 **Design Philosophy:** Flowbite-inspired components with Tailwind CSS styling
@@ -216,19 +216,19 @@ src/
 ## Export Structure
 
 ```typescript
-// Main entry: @exowpee/solidly
+// Main entry: @kayou/ui
 export { Accordion, Alert, Badge, ... } from './components'
 
-// Hooks: @exowpee/solidlyhooks
+// Hooks: @kayou/uihooks
 export { useCustomResource, useDatePicker, ... } from './hooks'
 
-// Context: @exowpee/solidlycontext
+// Context: @kayou/uicontext
 export { ThemeProvider, ToastProvider, ... } from './context'
 
-// Helpers: @exowpee/solidlyhelpers
+// Helpers: @kayou/uihelpers
 export { defaultProps, cache, ... } from './helpers'
 
-// Icons: @exowpee/solidlyicons
+// Icons: @kayou/uiicons
 export { ... } from './icons'
 ```
 

@@ -2,7 +2,7 @@
 name: solidjs-component-fixer
 version: 2.0.0
 description: Automated fix system for SolidJS component issues. Reads audit reports and applies fixes in priority order with atomic commits. Integrates with solidjs-component-auditor.
-author: @exowpee/solidly
+author: @kayou/ui
 tags: [solidjs, fix, refactor, typescript, accessibility]
 ---
 

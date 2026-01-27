@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('MultiSelect', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/multi-select');
+    await page.goto('/ui/multi-select');
   });
 
   test('should render multi-select input', async ({ page }) => {

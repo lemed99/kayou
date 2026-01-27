@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Textarea', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/textarea');
+    await page.goto('/ui/textarea');
   });
 
   test('should render textarea', async ({ page }) => {

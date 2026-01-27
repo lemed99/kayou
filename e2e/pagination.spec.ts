@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Pagination', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/pagination');
+    await page.goto('/ui/pagination');
   });
 
   test('should render pagination component', async ({ page }) => {

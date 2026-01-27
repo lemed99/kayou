@@ -1,7 +1,7 @@
 {
-  "name": "@exowpee/solidly-icons",
+  "name": "@kayou/icons",
   "version": "1.0.0",
-  "description": "Icon components for @exowpee/solidly",
+  "description": "Icon components for @kayou/ui",
   "type": "module",
   "module": "./dist/index.es.js",
   "types": "./dist/src/index.d.ts",
@@ -33,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/exowpee/solidly"
+    "url": "https://github.com/exowpee/kayou"
   },
   "license": "MIT",
   "keywords": [

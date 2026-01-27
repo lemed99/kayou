@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Checkbox', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/checkbox');
+    await page.goto('/ui/checkbox');
   });
 
   // ==================== Basic Rendering ====================
@@ -301,12 +301,11 @@ test.describe('Checkbox', () => {
     // Each checkbox should be independently toggleable
     if (count >= 2) {
       const first = checkboxes.nth(0);
-      const second = checkboxes.nth(1);
 
       const firstInitial = await first.isChecked();
       await first.click();
 
-      // First changed, second unchanged
+      // First changed
       expect(await first.isChecked()).toBe(!firstInitial);
     }
   });

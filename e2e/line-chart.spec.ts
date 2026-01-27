@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('LineChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/line-chart');
+    await page.goto('/ui/line-chart');
   });
 
   test('should render chart container', async ({ page }) => {
@@ -40,9 +40,7 @@ test.describe('LineChart', () => {
       // Hover over the chart
       await chart.hover();
 
-      // Tooltip may appear
-      const tooltip = page.locator('[role="tooltip"], [class*="tooltip"]');
-      // Tooltip visibility depends on implementation
+      // Tooltip may appear - just wait for any potential tooltip
       await page.waitForTimeout(100);
     }
   });

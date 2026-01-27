@@ -1,4 +1,4 @@
-// Hooks - @exowpee/solidly-hooks
+// Hooks - @kayou/hooks
 export {
   useMutation,
   type Mutation,
@@ -13,3 +13,32 @@ export {
   type CustomResourceProps,
 } from './useCustomResource';
 export { useTheme } from './useTheme';
+export { useToast } from './useToast';
+export { useFloating } from './useFloating';
+export { useVirtualList } from './useVirtualList';
+export { useDynamicVirtualList } from './useDynamicVirtualList';
+
+// useFloating types
+export type {
+  Alignment,
+  ArrowPosition,
+  BackgroundScrollBehavior,
+  Dimensions,
+  FloatingPosition,
+  Placement,
+  UseFloatingOptions,
+  UseFloatingReturn,
+} from './useFloating/types';
+
+// useFloating utilities
+export {
+  canFitWithinContainer,
+  computeArrowPosition,
+  computePosition,
+  getAllScrollableAncestors,
+  getElementRect,
+  getScrollableAncestor,
+  getViewportRect,
+  hasFixedAncestor,
+  isElementVisibleInAncestors,
+} from './useFloating/utils';

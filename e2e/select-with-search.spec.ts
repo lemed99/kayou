@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('SelectWithSearch', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/select-with-search');
+    await page.goto('/ui/select-with-search');
   });
 
   test('should render select input', async ({ page }) => {

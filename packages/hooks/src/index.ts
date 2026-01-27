@@ -1,4 +1,4 @@
-// @exowpee/solidly-hooks - Utility hooks and contexts for SolidJS
+// @kayou/hooks - Utility hooks and contexts for SolidJS
 
 // Hooks
 export {
@@ -6,12 +6,33 @@ export {
   useIntl,
   useCustomResource,
   useTheme,
+  useToast,
+  useFloating,
+  useVirtualList,
+  useDynamicVirtualList,
   type Mutation,
   type MutationOptions,
   type MutationProps,
   type MutationTriggerOptions,
   type CustomResource,
   type CustomResourceProps,
+  type Alignment,
+  type ArrowPosition,
+  type BackgroundScrollBehavior,
+  type Dimensions,
+  type FloatingPosition,
+  type Placement,
+  type UseFloatingOptions,
+  type UseFloatingReturn,
+  canFitWithinContainer,
+  computeArrowPosition,
+  computePosition,
+  getAllScrollableAncestors,
+  getElementRect,
+  getScrollableAncestor,
+  getViewportRect,
+  hasFixedAncestor,
+  isElementVisibleInAncestors,
 } from './hooks';
 
 // Contexts and Providers
@@ -22,6 +43,11 @@ export {
   CustomResourceProvider,
   ThemeContext,
   ThemeProvider,
+  ToastContext,
+  ToastProvider,
+  PortalContainerContext,
+  PortalContainerProvider,
+  usePortalContainer,
   type IntlProviderProps,
   type CustomResourceContextValue,
   type CustomResourceProviderProps,
@@ -29,7 +55,11 @@ export {
   type ResourceOptions,
   type ThemeContextType,
   type ThemeType,
+  type ToastAPI,
+  type ToastMethodProps,
+  type PortalContainerContextValue,
+  type PortalContainerProviderProps,
 } from './context';
 
 // Helpers (for advanced use cases)
-export { cache, getCacheRow, insertOrUpdateCacheRow } from './helpers';
+export { cache, getCacheRow, insertOrUpdateCacheRow, preventBackgroundScroll } from './helpers';

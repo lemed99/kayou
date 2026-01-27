@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('DynamicVirtualList', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/dynamic-virtual-list');
+    await page.goto('/ui/dynamic-virtual-list');
   });
 
   test('should render dynamic virtual list container', async ({ page }) => {

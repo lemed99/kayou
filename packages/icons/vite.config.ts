@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: './src/index.ts',
-      name: 'solidly-icons',
+      name: 'kayou-icons',
       fileName: () => 'index.es.js',
       formats: ['es'],
     },

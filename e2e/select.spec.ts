@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Select', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/select');
+    await page.goto('/ui/select');
   });
 
   test('should render select component', async ({ page }) => {

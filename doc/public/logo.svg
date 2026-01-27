@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <mask id="k">
+      <rect width="64" height="64" fill="white"/>
+      <!-- Vertical stem -->
+      <rect x="20" y="16" width="7" height="32" rx="1.5" fill="black"/>
+      <!-- Upper arm -->
+      <path d="M27 30 L27 24 L42 16 L46 20 Z" fill="black"/>
+      <!-- Lower arm -->
+      <path d="M27 34 L27 40 L42 48 L46 44 Z" fill="black"/>
+    </mask>
+  </defs>
+  <!-- Pebble: slightly organic, heavier at bottom -->
+  <ellipse cx="32" cy="33" rx="28" ry="27" fill="#18181b" mask="url(#k)"/>
+</svg>

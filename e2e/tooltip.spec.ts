@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Tooltip', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/tooltip');
+    await page.goto('/ui/tooltip');
   });
 
   test('should render tooltip trigger', async ({ page }) => {

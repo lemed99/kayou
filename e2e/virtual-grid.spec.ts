@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('VirtualGrid', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/virtual-grid');
+    await page.goto('/ui/virtual-grid');
   });
 
   test('should render virtual grid container', async ({ page }) => {
@@ -33,8 +33,6 @@ test.describe('VirtualGrid', () => {
       .first();
 
     if (await container.isVisible()) {
-      const initialScroll = await container.evaluate((el) => el.scrollTop);
-
       await container.evaluate((el) => {
         el.scrollTop = 500;
       });

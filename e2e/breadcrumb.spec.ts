@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Breadcrumb', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/breadcrumb');
+    await page.goto('/ui/breadcrumb');
   });
 
   // ==================== Basic Rendering ====================

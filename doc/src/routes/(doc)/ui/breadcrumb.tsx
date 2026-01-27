@@ -1,0 +1,111 @@
+import { Breadcrumb } from '@kayou/ui';
+import DocPage from '../../../components/DocPage';
+
+export default function BreadcrumbPage() {
+  return (
+    <DocPage
+      title="Breadcrumb"
+      description="Navigation trail showing page hierarchy with support for custom link components."
+      dependencies={[
+        {
+          name: 'tailwind-merge',
+          url: 'https://github.com/dcastil/tailwind-merge',
+          usage: 'Merges Tailwind CSS classes without conflicts',
+        },
+      ]}
+      keyConcepts={[
+        {
+          term: 'Hierarchical Navigation',
+          explanation: 'Items represent hierarchy levels from root to current page.',
+        },
+        {
+          term: 'Current Page Indicator',
+          explanation: 'Last item styled differently with aria-current="page".',
+        },
+        {
+          term: 'Router Integration',
+          explanation: '"as" prop enables custom link components for SPA navigation.',
+        },
+      ]}
+      props={[
+        {
+          name: 'children',
+          type: 'JSX.Element',
+          default: '-',
+          description: 'Breadcrumb.Item elements',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          default: '-',
+          description: 'Additional CSS classes for the nav element',
+        },
+        {
+          name: 'ariaLabels',
+          type: 'Partial<BreadcrumbAriaLabels>',
+          default: 'DEFAULT_BREADCRUMB_ARIA_LABELS',
+          description: 'Accessibility labels for screen readers',
+        },
+      ]}
+      subComponents={[
+        {
+          name: 'BreadcrumbAriaLabels',
+          kind: 'type',
+          description: 'Aria labels for the Breadcrumb component',
+          props: [
+            {
+              name: 'breadcrumb',
+              type: 'string',
+              default: '"Breadcrumb"',
+              description: 'Label for the breadcrumb nav element',
+            },
+          ],
+        },
+      ]}
+      examples={[
+        {
+          title: 'Basic Breadcrumb',
+          description: 'Simple breadcrumb navigation with links.',
+          component: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+              <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
+              <Breadcrumb.Item>Current Page</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        },
+        {
+          title: 'With Current Page',
+          description: 'Using isCurrent prop to mark the current page.',
+          component: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+              <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
+              <Breadcrumb.Item isCurrent>Profile</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        },
+        {
+          title: 'All Links',
+          description: 'Breadcrumb where all items are clickable.',
+          component: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item href="/">Dashboard</Breadcrumb.Item>
+              <Breadcrumb.Item href="/users">Users</Breadcrumb.Item>
+              <Breadcrumb.Item href="/users/123">John Doe</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        },
+      ]}
+      usage={`
+        import { Breadcrumb } from '@kayou/ui';
+
+        <Breadcrumb>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+          <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
+          <Breadcrumb.Item isCurrent>Details</Breadcrumb.Item>
+        </Breadcrumb>
+      `}
+    />
+  );
+}

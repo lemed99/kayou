@@ -1,21 +1,11 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 @source "../../packages";
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 html,
 :host {
   font-family: 'Ubuntu', system-ui, sans-serif;
-}
-
-/* Base dark mode styles */
-html {
-  background-color: theme('colors.white');
-  color: theme('colors.gray.900');
-}
-
-html.dark {
-  background-color: theme('colors.gray.950');
-  color: theme('colors.white');
 }
 
 /* Smooth color transitions */
@@ -26,3 +16,65 @@ body,
     background-color 0.2s ease,
     color 0.2s ease;
 }
+
+/* Code syntax highlighting - CSS variables for theme support */
+:root {
+  --code-keyword: #e53ded;
+  --code-comment: #266626;
+  --code-string: #8c1a1a;
+  --code-number: #006666;
+  --code-operator: #4b4b4b;
+  --code-punctuation: #4b4b4b;
+  --code-identifier: #002c99;
+  --code-solidjs: #6c4a00;
+  --code-jsx-tag: #9b3535;
+  --code-jsx-attr: #a04747;
+  --code-jsx-expr: #0033b3;
+  --code-default: #333333;
+  --code-bg: #fafafa; /* neutral-50 */
+}
+
+.dark {
+  --code-keyword: #c792ea;
+  --code-comment: #676e95;
+  --code-string: #c3e88d;
+  --code-number: #f78c6c;
+  --code-operator: #89ddff;
+  --code-punctuation: #89ddff;
+  --code-identifier: #82aaff;
+  --code-solidjs: #ffcb6b;
+  --code-jsx-tag: #f07178;
+  --code-jsx-attr: #ffcb6b;
+  --code-jsx-expr: #82aaff;
+  --code-default: #eeffff;
+  --code-bg: #171717; /* neutral-900 */
+}
+
+/* Code block container */
+.code-block {
+  white-space: pre;
+  tab-size: 4;
+  background-color: var(--code-bg);
+  line-height: 1.625;
+  padding: 1rem;
+  overflow: auto;
+  font-size: 0.875rem;
+}
+
+.code-block code {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Token classes */
+.code-keyword { color: var(--code-keyword); }
+.code-comment { color: var(--code-comment); }
+.code-string { color: var(--code-string); }
+.code-number { color: var(--code-number); }
+.code-operator { color: var(--code-operator); }
+.code-punctuation { color: var(--code-punctuation); }
+.code-identifier { color: var(--code-identifier); }
+.code-solidjs { color: var(--code-solidjs); }
+.code-jsx-tag { color: var(--code-jsx-tag); }
+.code-jsx-attr { color: var(--code-jsx-attr); }
+.code-jsx-expr { color: var(--code-jsx-expr); }
+.code-default { color: var(--code-default); }

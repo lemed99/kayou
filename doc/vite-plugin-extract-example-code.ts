@@ -2,6 +2,7 @@ import _generate from '@babel/generator';
 import { parse } from '@babel/parser';
 import _traverse from '@babel/traverse';
 import * as t from '@babel/types';
+import * as prettier from 'prettier';
 import type { Plugin } from 'vite';
 
 // Handle ESM/CJS interop for Babel packages
@@ -45,9 +46,12 @@ export default function extractExampleCode(): Plugin {
     name: 'extract-example-code',
     enforce: 'pre',
 
-    transform(code, id) {
-      // Only process component doc pages
-      if (!id.includes('/pages/') || !id.endsWith('.tsx')) {
+    async transform(code, id) {
+      // Strip query string for file extension check
+      const cleanId = id.split('?')[0];
+
+      // Only process component doc pages (handle both direct .tsx and query-string versions)
+      if (!cleanId.includes('/routes/') || !cleanId.endsWith('.tsx')) {
         return null;
       }
 
@@ -64,9 +68,10 @@ export default function extractExampleCode(): Plugin {
         });
 
         let modified = false;
+        const extractedCodes: { example: t.ObjectExpression; rawCode: string }[] = [];
 
         /**
-         * Process an array of example objects and inject `code` properties
+         * Process an array of example objects and collect raw code for formatting
          */
         const processExamplesArray = (examples: t.ArrayExpression) => {
           for (const example of examples.elements) {
@@ -96,19 +101,19 @@ export default function extractExampleCode(): Plugin {
             }
 
             const arrowFn = componentProp.value;
-            let extractedCode: string;
+            let rawCode: string;
 
             if (t.isJSXElement(arrowFn.body) || t.isJSXFragment(arrowFn.body)) {
               // Direct return: () => <div>...</div> or () => <>...</>
-              extractedCode = extractFromSource(code, arrowFn.body);
+              rawCode = generateCode(arrowFn.body);
             } else if (t.isBlockStatement(arrowFn.body)) {
               // Block with statements: () => { const x = 1; return <div/>; }
-              extractedCode = extractBlockFromSource(code, arrowFn.body);
+              rawCode = generateBlockCode(arrowFn.body);
             } else if (t.isParenthesizedExpression(arrowFn.body)) {
               // Parenthesized: () => (<div>...</div>)
               const inner = arrowFn.body.expression;
               if (t.isJSXElement(inner) || t.isJSXFragment(inner)) {
-                extractedCode = extractFromSource(code, inner);
+                rawCode = generateCode(inner);
               } else {
                 continue;
               }
@@ -116,11 +121,7 @@ export default function extractExampleCode(): Plugin {
               continue;
             }
 
-            // Add the `code` property to the example object
-            example.properties.push(
-              t.objectProperty(t.identifier('code'), t.stringLiteral(extractedCode)),
-            );
-
+            extractedCodes.push({ example, rawCode });
             modified = true;
           }
         };
@@ -155,6 +156,14 @@ export default function extractExampleCode(): Plugin {
         });
 
         if (modified) {
+          // Format all extracted code snippets with Prettier
+          for (const { example, rawCode } of extractedCodes) {
+            const formattedCode = await formatWithPrettier(rawCode);
+            example.properties.push(
+              t.objectProperty(t.identifier('code'), t.stringLiteral(formattedCode)),
+            );
+          }
+
           const output = generate(ast, {}, code);
           return {
             code: output.code,
@@ -173,10 +182,11 @@ export default function extractExampleCode(): Plugin {
 }
 
 /**
- * Extract code from a node by slicing the original source.
- * Preserves the user's formatting exactly, adjusting for the node's column offset.
+ * Generate code from a JSX node using Babel's generator.
+ * This is more reliable than slicing source when pre-processing
+ * modifies whitespace (e.g., SolidStart/Vinxi transformations).
  */
-function extractFromSource(source: string, node: t.Node): string {
+function generateCode(node: t.Node): string {
   if (t.isJSXFragment(node)) {
     // For fragments, extract only meaningful children without the wrapper
     const fragment = node;
@@ -188,28 +198,26 @@ function extractFromSource(source: string, node: t.Node): string {
     );
 
     if (children.length > 0) {
-      const childrenCode = children
-        .map((child) => sliceAndDedent(source, child.start!, child.end!))
-        .join('\n');
+      const childrenCode = children.map((child) => generate(child).code).join('\n');
       return childrenCode;
     }
   }
 
-  return sliceAndDedent(source, node.start!, node.end!);
+  return generate(node).code;
 }
 
 /**
- * Extract code from a block statement by slicing each statement from the source.
+ * Generate code from a block statement.
  * For return statements, extracts only the returned expression.
  */
-function extractBlockFromSource(source: string, block: t.BlockStatement): string {
+function generateBlockCode(block: t.BlockStatement): string {
   const parts: string[] = [];
 
   for (const stmt of block.body) {
     if (t.isReturnStatement(stmt) && stmt.argument) {
-      parts.push(sliceAndDedent(source, stmt.argument.start!, stmt.argument.end!));
+      parts.push(generate(stmt.argument).code);
     } else {
-      parts.push(sliceAndDedent(source, stmt.start!, stmt.end!));
+      parts.push(generate(stmt).code);
     }
   }
 
@@ -217,32 +225,93 @@ function extractBlockFromSource(source: string, block: t.BlockStatement): string
 }
 
 /**
- * Slice source code between two positions and dedent based on the
- * column offset of the start position.
- *
- * The first line in the slice has no leading whitespace (starts at `start`),
- * while subsequent lines retain their full source indentation. We calculate
- * how many columns the node is indented in the source and strip that from
- * all subsequent lines to produce correctly relative indentation.
+ * Format code snippet with Prettier for consistent indentation and prop wrapping.
  */
-function sliceAndDedent(source: string, start: number, end: number): string {
-  const raw = source.slice(start, end);
+async function formatWithPrettier(code: string): Promise<string> {
+  try {
+    // First, format the raw code directly as a JSX fragment
+    // This ensures proper prop wrapping and indentation
+    const formatted = await prettier.format(code, {
+      parser: 'babel-ts',
+      printWidth: 55, // Shorter to encourage prop wrapping
+      tabWidth: 2,
+      useTabs: false,
+      semi: true,
+      singleQuote: false,
+      jsxSingleQuote: false,
+      trailingComma: 'all',
+    });
 
-  // Find the beginning of the line containing `start`
-  let lineStart = start;
-  while (lineStart > 0 && source[lineStart - 1] !== '\n') {
-    lineStart--;
+    // Remove trailing semicolon that Prettier adds (JSX snippets don't need it)
+    return formatted.trim().replace(/;$/, '');
+  } catch {
+    // If direct formatting fails (e.g., multiple JSX roots), wrap in fragment
+    try {
+      const wrapped = `<>\n${code}\n</>`;
+      const formatted = await prettier.format(wrapped, {
+        parser: 'babel-ts',
+        printWidth: 55,
+        tabWidth: 2,
+        useTabs: false,
+        semi: true,
+        singleQuote: false,
+        jsxSingleQuote: false,
+        trailingComma: 'all',
+      });
+
+      // Extract content by removing the fragment wrapper lines
+      const lines = formatted.trim().split('\n');
+
+      // Check if first/last lines are the fragment markers
+      if (lines[0].trim() === '<>' && lines[lines.length - 1].trim() === '</>') {
+        const contentLines = lines.slice(1, -1);
+        return dedentCode(contentLines.join('\n'));
+      }
+
+      // Fallback: try regex extraction
+      const match = formatted.match(/<>\n?([\s\S]*?)\n?<\/>/);
+      if (match) {
+        // Split into lines and remove empty first/last lines before dedenting
+        const contentLines = match[1].split('\n');
+        while (contentLines.length > 0 && contentLines[0].trim() === '') {
+          contentLines.shift();
+        }
+        while (contentLines.length > 0 && contentLines[contentLines.length - 1].trim() === '') {
+          contentLines.pop();
+        }
+        return dedentCode(contentLines.join('\n'));
+      }
+    } catch {
+      // Ignore secondary error
+    }
+
+    // Fallback: return original code
+    return code;
   }
-  const nodeIndent = start - lineStart;
+}
 
-  if (nodeIndent === 0) return raw;
+/**
+ * Remove common leading indentation from all lines.
+ */
+function dedentCode(code: string): string {
+  const lines = code.split('\n');
+  if (lines.length <= 1) return code;
 
-  const lines = raw.split('\n');
+  // Find minimum indentation (ignoring empty lines)
+  let minIndent = Infinity;
+  for (const line of lines) {
+    if (line.trim().length === 0) continue;
+    const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
+    minIndent = Math.min(minIndent, indent);
+  }
+
+  if (minIndent === 0 || minIndent === Infinity) return code;
+
+  // Remove the common indentation
   return lines
-    .map((line, i) => {
-      if (i === 0) return line;
+    .map((line) => {
       if (line.trim().length === 0) return '';
-      return line.length >= nodeIndent ? line.slice(nodeIndent) : line.trimStart();
+      return line.slice(minIndent);
     })
     .join('\n');
 }

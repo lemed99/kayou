@@ -3,67 +3,23 @@ import {
   For,
   Show,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   onMount,
 } from 'solid-js';
 
+import {
+  Menu01Icon,
+  Moon01Icon,
+  SearchRefractionIcon,
+  SunIcon,
+  XCloseIcon,
+} from '@kayou/icons';
 import { A, useLocation, useNavigate } from '@solidjs/router';
 
-// Icons
-const SearchIcon = () => (
-  <svg
-    class="size-4"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke-width="2"
-    stroke="currentColor"
-  >
-    <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-    />
-  </svg>
-);
+import { type SearchDocument, searchDocs } from '../utils/search';
 
-const MoonIcon = () => (
-  <svg
-    class="size-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke-width="1.5"
-    stroke="currentColor"
-  >
-    <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-    />
-  </svg>
-);
-
-const SunIcon = () => (
-  <svg
-    class="size-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke-width="1.5"
-    stroke="currentColor"
-  >
-    <circle cx="12" cy="12" r="5" />
-    <line x1="12" y1="1" x2="12" y2="3" />
-    <line x1="12" y1="21" x2="12" y2="23" />
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-    <line x1="1" y1="12" x2="3" y2="12" />
-    <line x1="21" y1="12" x2="23" y2="12" />
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-  </svg>
-);
-
+// GitHub icon not available in @kayou/icons
 const GitHubIcon = () => (
   <svg class="size-5" fill="currentColor" viewBox="0 0 24 24">
     <path
@@ -74,333 +30,6 @@ const GitHubIcon = () => (
   </svg>
 );
 
-// Search index data
-interface SearchItem {
-  path: string;
-  label: string;
-  category: string;
-  keywords?: string[];
-}
-
-const searchIndex: SearchItem[] = [
-  // Getting Started
-  {
-    path: '/overview/quickstart',
-    label: 'Introduction',
-    category: 'Getting Started',
-    keywords: ['start', 'begin', 'intro'],
-  },
-  {
-    path: '/overview/installation',
-    label: 'Installation',
-    category: 'Getting Started',
-    keywords: ['install', 'setup', 'npm', 'pnpm'],
-  },
-  {
-    path: '/overview/contributing',
-    label: 'Contributing',
-    category: 'Getting Started',
-    keywords: ['contribute', 'help'],
-  },
-  {
-    path: '/overview/license',
-    label: 'License',
-    category: 'Getting Started',
-    keywords: ['mit', 'open source'],
-  },
-
-  // Form Components
-  {
-    path: '/components/button',
-    label: 'Button',
-    category: 'Components',
-    keywords: ['click', 'action', 'submit'],
-  },
-  {
-    path: '/components/checkbox',
-    label: 'Checkbox',
-    category: 'Components',
-    keywords: ['check', 'toggle', 'select'],
-  },
-  {
-    path: '/components/date-picker',
-    label: 'DatePicker',
-    category: 'Components',
-    keywords: ['date', 'calendar', 'time'],
-  },
-  {
-    path: '/components/label',
-    label: 'Label',
-    category: 'Components',
-    keywords: ['text', 'form'],
-  },
-  {
-    path: '/components/helper-text',
-    label: 'HelperText',
-    category: 'Components',
-    keywords: ['help', 'hint', 'description'],
-  },
-  {
-    path: '/components/number-input',
-    label: 'NumberInput',
-    category: 'Components',
-    keywords: ['number', 'input', 'numeric'],
-  },
-  {
-    path: '/components/select',
-    label: 'Select',
-    category: 'Components',
-    keywords: ['dropdown', 'choose', 'option'],
-  },
-  {
-    path: '/components/select-with-search',
-    label: 'SelectWithSearch',
-    category: 'Components',
-    keywords: ['dropdown', 'search', 'filter'],
-  },
-  {
-    path: '/components/multi-select',
-    label: 'MultiSelect',
-    category: 'Components',
-    keywords: ['multiple', 'tags', 'select'],
-  },
-  {
-    path: '/components/text-input',
-    label: 'TextInput',
-    category: 'Components',
-    keywords: ['text', 'input', 'field'],
-  },
-  {
-    path: '/components/textarea',
-    label: 'Textarea',
-    category: 'Components',
-    keywords: ['text', 'multiline', 'input'],
-  },
-  {
-    path: '/components/toggle-switch',
-    label: 'ToggleSwitch',
-    category: 'Components',
-    keywords: ['toggle', 'switch', 'on', 'off'],
-  },
-  {
-    path: '/components/upload-file',
-    label: 'UploadFile',
-    category: 'Components',
-    keywords: ['upload', 'file', 'drag', 'drop'],
-  },
-
-  // Layout Components
-  {
-    path: '/components/accordion',
-    label: 'Accordion',
-    category: 'Components',
-    keywords: ['collapse', 'expand', 'panel'],
-  },
-  {
-    path: '/components/drawer',
-    label: 'Drawer',
-    category: 'Components',
-    keywords: ['sidebar', 'slide', 'panel'],
-  },
-  {
-    path: '/components/modal',
-    label: 'Modal',
-    category: 'Components',
-    keywords: ['dialog', 'popup', 'overlay'],
-  },
-  {
-    path: '/components/pagination',
-    label: 'Pagination',
-    category: 'Components',
-    keywords: ['page', 'navigate', 'list'],
-  },
-  {
-    path: '/components/popover',
-    label: 'Popover',
-    category: 'Components',
-    keywords: ['popup', 'tooltip', 'hover'],
-  },
-  {
-    path: '/components/sidebar',
-    label: 'Sidebar',
-    category: 'Components',
-    keywords: ['navigation', 'menu', 'side'],
-  },
-  {
-    path: '/components/tooltip',
-    label: 'Tooltip',
-    category: 'Components',
-    keywords: ['hint', 'hover', 'info'],
-  },
-
-  // Feedback Components
-  {
-    path: '/components/alert',
-    label: 'Alert',
-    category: 'Components',
-    keywords: ['message', 'notification', 'warning'],
-  },
-  {
-    path: '/components/badge',
-    label: 'Badge',
-    category: 'Components',
-    keywords: ['tag', 'label', 'status'],
-  },
-  {
-    path: '/components/skeleton',
-    label: 'Skeleton',
-    category: 'Components',
-    keywords: ['loading', 'placeholder'],
-  },
-  {
-    path: '/components/spinner',
-    label: 'Spinner',
-    category: 'Components',
-    keywords: ['loading', 'progress'],
-  },
-
-  // Navigation Components
-  {
-    path: '/components/breadcrumb',
-    label: 'Breadcrumb',
-    category: 'Components',
-    keywords: ['navigation', 'path', 'trail'],
-  },
-
-  // Data Display Components
-  {
-    path: '/components/data-table',
-    label: 'DataTable',
-    category: 'Components',
-    keywords: ['table', 'grid', 'data', 'sort', 'filter'],
-  },
-  {
-    path: '/components/virtual-list',
-    label: 'VirtualList',
-    category: 'Components',
-    keywords: ['list', 'scroll', 'performance'],
-  },
-  {
-    path: '/components/virtual-grid',
-    label: 'VirtualGrid',
-    category: 'Components',
-    keywords: ['grid', 'scroll', 'performance'],
-  },
-  {
-    path: '/components/dynamic-virtual-list',
-    label: 'DynamicVirtualList',
-    category: 'Components',
-    keywords: ['list', 'variable', 'height'],
-  },
-
-  // Chart Components
-  {
-    path: '/components/line-chart',
-    label: 'LineChart',
-    category: 'Components',
-    keywords: ['chart', 'graph', 'line', 'data'],
-  },
-  {
-    path: '/components/pie-chart',
-    label: 'PieChart',
-    category: 'Components',
-    keywords: ['chart', 'graph', 'pie', 'data'],
-  },
-  {
-    path: '/components/responsive-container',
-    label: 'ResponsiveContainer',
-    category: 'Components',
-    keywords: ['chart', 'responsive', 'container'],
-  },
-
-  // Hooks
-  {
-    path: '/hooks/use-debounce',
-    label: 'useDebounce',
-    category: 'Hooks',
-    keywords: ['debounce', 'delay', 'throttle'],
-  },
-  {
-    path: '/hooks/use-floating',
-    label: 'useFloating',
-    category: 'Hooks',
-    keywords: ['floating', 'position', 'tooltip', 'popover'],
-  },
-  {
-    path: '/hooks/use-intl',
-    label: 'useIntl',
-    category: 'Hooks',
-    keywords: ['internationalization', 'i18n', 'translate'],
-  },
-  {
-    path: '/hooks/use-mutation',
-    label: 'useMutation',
-    category: 'Hooks',
-    keywords: ['mutation', 'api', 'post', 'fetch'],
-  },
-  {
-    path: '/hooks/use-theme',
-    label: 'useTheme',
-    category: 'Hooks',
-    keywords: ['theme', 'dark', 'light', 'mode'],
-  },
-  {
-    path: '/hooks/use-toast',
-    label: 'useToast',
-    category: 'Hooks',
-    keywords: ['toast', 'notification', 'message'],
-  },
-  {
-    path: '/hooks/use-custom-resource',
-    label: 'useCustomResource',
-    category: 'Hooks',
-    keywords: ['resource', 'fetch', 'api', 'swr'],
-  },
-  {
-    path: '/hooks/use-date-picker',
-    label: 'useDatePicker',
-    category: 'Hooks',
-    keywords: ['date', 'calendar', 'picker'],
-  },
-  {
-    path: '/hooks/use-dynamic-virtual-list',
-    label: 'useDynamicVirtualList',
-    category: 'Hooks',
-    keywords: ['virtual', 'list', 'scroll'],
-  },
-
-  // Contexts
-  {
-    path: '/contexts/intl-provider',
-    label: 'IntlProvider',
-    category: 'Contexts',
-    keywords: ['i18n', 'internationalization', 'locale'],
-  },
-  {
-    path: '/contexts/theme-provider',
-    label: 'ThemeProvider',
-    category: 'Contexts',
-    keywords: ['theme', 'dark', 'light'],
-  },
-  {
-    path: '/contexts/toast-provider',
-    label: 'ToastProvider',
-    category: 'Contexts',
-    keywords: ['toast', 'notification'],
-  },
-  {
-    path: '/contexts/custom-resource-provider',
-    label: 'CustomResourceProvider',
-    category: 'Contexts',
-    keywords: ['resource', 'fetch', 'cache'],
-  },
-  {
-    path: '/contexts/date-picker-provider',
-    label: 'DatePickerProvider',
-    category: 'Contexts',
-    keywords: ['date', 'calendar', 'locale'],
-  },
-];
 
 const Navbar: Component = () => {
   const location = useLocation();
@@ -410,23 +39,18 @@ const Navbar: Component = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal('');
   const [selectedIndex, setSelectedIndex] = createSignal(0);
+  const [searchResults, setSearchResults] = createSignal<SearchDocument[]>([]);
 
-  // Filter search results based on query
-  const searchResults = createMemo(() => {
-    const query = searchQuery().toLowerCase().trim();
-    if (!query) return [];
-
-    return searchIndex.filter((item) => {
-      const labelMatch = item.label.toLowerCase().includes(query);
-      const categoryMatch = item.category.toLowerCase().includes(query);
-      const keywordMatch = item.keywords?.some((kw) => kw.toLowerCase().includes(query));
-      return labelMatch || categoryMatch || keywordMatch;
-    });
-  });
-
-  // Reset selected index when search query changes
+  // Perform search with Orama when query changes
   createEffect(() => {
-    searchQuery();
+    const query = searchQuery().trim();
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results = searchDocs(query);
+    setSearchResults(results);
     setSelectedIndex(0);
   });
 
@@ -502,42 +126,43 @@ const Navbar: Component = () => {
     {
       href: '/overview/quickstart',
       label: 'Docs',
-      activePaths: ['/overview', '/hooks', '/contexts'],
+      activePaths: ['/overview', '/hooks'],
     },
-    { href: '/components/button', label: 'Components', activePaths: ['/components'] },
+    { href: '/ui/button', label: 'Components', activePaths: ['/ui'] },
     { href: '/icons', label: 'Icons', activePaths: ['/icons'] },
   ];
 
   return (
     <>
       {/* Main navbar */}
-      <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-900/80">
+      <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900">
         <nav class="mx-auto flex h-full max-w-[90rem] items-center justify-between px-4">
           {/* Left: Logo + Version */}
           <div class="flex items-center gap-3">
             <A href="/" class="flex items-center gap-2">
               <div class="flex size-8 items-center justify-center">
-                <svg class="size-7" viewBox="0 0 32 32" fill="none">
-                  {/* Building Blocks Logo - Isometric stacked cubes */}
-                  {/* Bottom left block */}
-                  <path d="M4 20l6-3.5v7L4 27v-7z" fill="#818CF8" />
-                  <path d="M10 16.5l6 3.5v7l-6-3.5v-7z" fill="#6366F1" />
-                  <path d="M4 20l6-3.5 6 3.5-6 3.5-6-3.5z" fill="#A5B4FC" />
-
-                  {/* Bottom right block */}
-                  <path d="M16 20l6-3.5v7l-6 3.5v-7z" fill="#818CF8" />
-                  <path d="M22 16.5l6 3.5v7l-6-3.5v-7z" fill="#6366F1" />
-                  <path d="M16 20l6-3.5 6 3.5-6 3.5-6-3.5z" fill="#A5B4FC" />
-
-                  {/* Top block */}
-                  <path d="M10 13l6-3.5v7l-6 3.5v-7z" fill="#C084FC" />
-                  <path d="M16 9.5l6 3.5v7l-6-3.5v-7z" fill="#A855F7" />
-                  <path d="M10 13l6-3.5 6 3.5-6 3.5-6-3.5z" fill="#E9D5FF" />
+                <svg class="size-7" viewBox="0 0 64 64" fill="none">
+                  <defs>
+                    <mask id="k">
+                      <rect width="64" height="64" fill="white" />
+                      <rect x="20" y="16" width="7" height="32" rx="1.5" fill="black" />
+                      <path d="M27 30 L27 24 L42 16 L46 20 Z" fill="black" />
+                      <path d="M27 34 L27 40 L42 48 L46 44 Z" fill="black" />
+                    </mask>
+                  </defs>
+                  <ellipse
+                    cx="32"
+                    cy="33"
+                    rx="28"
+                    ry="27"
+                    class="fill-gray-900 dark:fill-white"
+                    mask="url(#k)"
+                  />
                 </svg>
               </div>
-              <span class="text-xl font-bold text-gray-900 dark:text-white">Solidly</span>
+              <span class="text-xl font-bold text-gray-900 dark:text-white">Kayou</span>
             </A>
-            <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+            <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
               v1.0.0
             </span>
           </div>
@@ -552,7 +177,7 @@ const Navbar: Component = () => {
                     class={`text-sm font-medium transition-colors ${
                       isActive(link.href, link.activePaths)
                         ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-white'
                     }`}
                   >
                     {link.label}
@@ -567,21 +192,21 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
-                class="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400 dark:hover:bg-gray-700"
+                class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400 dark:hover:bg-neutral-700"
               >
-                <SearchIcon />
+                <SearchRefractionIcon class="size-4" />
                 <span class="hidden sm:inline">Search</span>
-                <kbd class="ml-2 hidden rounded border border-gray-300 bg-white px-1.5 py-0.5 text-xs font-medium text-gray-400 sm:inline-flex dark:border-gray-600 dark:bg-gray-700">
+                <kbd class="ml-2 hidden rounded border border-gray-300 bg-white px-1.5 py-0.5 text-xs font-medium text-gray-400 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
                   ⌘K
                 </kbd>
               </button>
 
               {/* GitHub Link with Stars */}
               <a
-                href="https://github.com/exowpee/solidly"
+                href="https://github.com/exowpee/kayou"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="hidden items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 sm:flex dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="hidden items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 sm:flex dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <GitHubIcon />
                 <span class="font-medium">1.2K</span>
@@ -591,11 +216,11 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                class="inline-grid size-9 place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
                 aria-label={isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                <Show when={isDarkMode()} fallback={<MoonIcon />}>
-                  <SunIcon />
+                <Show when={isDarkMode()} fallback={<Moon01Icon class="size-5" />}>
+                  <SunIcon class="size-5" />
                 </Show>
               </button>
 
@@ -603,41 +228,15 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
-                class="inline-grid size-9 place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 lg:hidden dark:text-neutral-400 dark:hover:bg-neutral-800"
                 aria-label={isMobileMenuOpen() ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen()}
               >
                 <Show
                   when={isMobileMenuOpen()}
-                  fallback={
-                    <svg
-                      class="size-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                      />
-                    </svg>
-                  }
+                  fallback={<Menu01Icon class="size-5" />}
                 >
-                  <svg
-                    class="size-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6 18 18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <XCloseIcon class="size-5" />
                 </Show>
               </button>
             </div>
@@ -646,7 +245,7 @@ const Navbar: Component = () => {
 
         {/* Mobile Menu */}
         <Show when={isMobileMenuOpen()}>
-          <div class="border-t border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-gray-800 dark:bg-gray-900">
+          <div class="border-t border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-neutral-800 dark:bg-neutral-900">
             <div class="flex flex-col gap-4">
               <For each={navLinks}>
                 {(link) => (
@@ -656,7 +255,7 @@ const Navbar: Component = () => {
                     class={`flex items-center rounded-lg text-base font-medium transition-colors ${
                       isActive(link.href, link.activePaths)
                         ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400'
-                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                        : 'text-gray-600 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
                     }`}
                   >
                     {link.label}
@@ -678,18 +277,18 @@ const Navbar: Component = () => {
               setSearchQuery('');
             }}
           />
-          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-900">
-            <div class="relative border-b border-gray-200 p-4 dark:border-gray-700">
+          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900">
+            <div class="relative border-b border-gray-200 p-4 dark:border-neutral-800">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-7">
-                <SearchIcon />
+                <SearchRefractionIcon class="size-4" />
               </div>
               <input
+                ref={(el) => setTimeout(() => el.focus(), 0)}
                 type="text"
                 placeholder="Search documentation..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                autofocus
-                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
+                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
               />
             </div>
 
@@ -698,7 +297,7 @@ const Navbar: Component = () => {
               <Show
                 when={searchQuery().trim()}
                 fallback={
-                  <div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <div class="p-4 text-center text-sm text-gray-500 dark:text-neutral-400">
                     Type to search components, hooks, and docs...
                   </div>
                 }
@@ -706,7 +305,7 @@ const Navbar: Component = () => {
                 <Show
                   when={searchResults().length > 0}
                   fallback={
-                    <div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div class="p-4 text-center text-sm text-gray-500 dark:text-neutral-400">
                       No results found for "{searchQuery()}"
                     </div>
                   }
@@ -720,7 +319,7 @@ const Navbar: Component = () => {
                             searchResults()[index() - 1].category !== item.category
                           }
                         >
-                          <div class="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:bg-gray-900 dark:text-gray-400">
+                          <div class="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
                             {item.category}
                           </div>
                         </Show>
@@ -728,10 +327,10 @@ const Navbar: Component = () => {
                           type="button"
                           onClick={() => navigateToResult(item.path)}
                           onMouseEnter={() => setSelectedIndex(index())}
-                          class={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
+                          class={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors ${
                             selectedIndex() === index()
                               ? 'bg-blue-50 dark:bg-blue-900/30'
-                              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                              : 'hover:bg-gray-50 dark:hover:bg-neutral-800'
                           }`}
                         >
                           <span
@@ -742,7 +341,7 @@ const Navbar: Component = () => {
                                   ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                                   : item.category === 'Contexts'
                                     ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
+                                    : 'bg-gray-100 text-gray-600 dark:bg-neutral-900 dark:text-neutral-400'
                             }`}
                           >
                             {item.label.charAt(0)}
@@ -753,12 +352,12 @@ const Navbar: Component = () => {
                                 {item.label}
                               </span>
                             </div>
-                            <div class="truncate text-xs text-gray-500 dark:text-gray-400">
+                            <div class="truncate text-xs text-gray-500 dark:text-neutral-400">
                               {item.path}
                             </div>
                           </div>
                           <Show when={selectedIndex() === index()}>
-                            <kbd class="shrink-0 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-400 dark:border-gray-600 dark:bg-gray-700">
+                            <kbd class="shrink-0 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-400 dark:border-neutral-700 dark:bg-neutral-800">
                               ↵
                             </kbd>
                           </Show>
@@ -771,19 +370,19 @@ const Navbar: Component = () => {
             </div>
 
             {/* Footer */}
-            <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
-              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-gray-600 dark:bg-gray-700">
+            <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-neutral-800">
+              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
+                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   ↑↓
                 </kbd>
                 <span>Navigate</span>
-                <kbd class="ml-2 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-gray-600 dark:bg-gray-700">
+                <kbd class="ml-2 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   ↵
                 </kbd>
                 <span>Select</span>
               </div>
-              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-gray-600 dark:bg-gray-700">
+              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
+                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   Esc
                 </kbd>
                 <span>Close</span>

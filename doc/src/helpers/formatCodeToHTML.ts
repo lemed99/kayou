@@ -370,46 +370,23 @@ class CodeTokenizer {
   }
 }
 
-type Theme = {
-  [key in TokenType]?: string;
+// Map token types to CSS class names
+const tokenClassMap: Record<TokenType, string> = {
+  [TokenType.Keyword]: 'code-keyword',
+  [TokenType.Comment]: 'code-comment',
+  [TokenType.String]: 'code-string',
+  [TokenType.Number]: 'code-number',
+  [TokenType.Operator]: 'code-operator',
+  [TokenType.Punctuation]: 'code-punctuation',
+  [TokenType.Identifier]: 'code-identifier',
+  [TokenType.SolidJSFunction]: 'code-solidjs',
+  [TokenType.JSXTag]: 'code-jsx-tag',
+  [TokenType.JSXAttribute]: 'code-jsx-attr',
+  [TokenType.JSXExpression]: 'code-jsx-expr',
+  [TokenType.Default]: 'code-default',
 };
 
-const lightTheme: Theme = {
-  [TokenType.Keyword]: '#e53ded',
-  [TokenType.Comment]: '#266626',
-  [TokenType.String]: '#8C1A1A',
-  [TokenType.Number]: '#006666',
-  [TokenType.Operator]: '#4B4B4B',
-  [TokenType.Punctuation]: '#4B4B4B',
-  [TokenType.Identifier]: '#002C99',
-  [TokenType.SolidJSFunction]: '#6C4A00',
-  [TokenType.JSXTag]: '#9B3535',
-  [TokenType.JSXAttribute]: '#A04747',
-  [TokenType.JSXExpression]: '#0033B3',
-  [TokenType.Default]: '#333333',
-};
-
-const darkTheme: Theme = {
-  [TokenType.Keyword]: '#c792ea',
-  [TokenType.Comment]: '#676e95',
-  [TokenType.String]: '#c3e88d',
-  [TokenType.Number]: '#f78c6c',
-  [TokenType.Operator]: '#89ddff',
-  [TokenType.Punctuation]: '#89ddff',
-  [TokenType.Identifier]: '#82aaff',
-  [TokenType.SolidJSFunction]: '#ffcb6b',
-  [TokenType.JSXTag]: '#f07178',
-  [TokenType.JSXAttribute]: '#ffcb6b',
-  [TokenType.JSXExpression]: '#82aaff',
-  [TokenType.Default]: '#eeffff',
-};
-
-const themes = {
-  light: lightTheme,
-  dark: darkTheme,
-};
-
-function formatTokensToHTML(tokens: Token[][], theme: Theme, isDark: boolean): string {
+function formatTokensToHTML(tokens: Token[][]): string {
   let codeContent = '';
 
   tokens.forEach((line, index) => {
@@ -429,8 +406,8 @@ function formatTokensToHTML(tokens: Token[][], theme: Theme, isDark: boolean): s
         codeContent += whitespace;
       }
 
-      const color = theme[token.type] || theme[TokenType.Default];
-      codeContent += `<span style="color: ${color}">${escapeHTML(token.value)}</span>`;
+      const className = tokenClassMap[token.type] || tokenClassMap[TokenType.Default];
+      codeContent += `<span class="${className}">${escapeHTML(token.value)}</span>`;
 
       // Update position after this token
       currentPos = token.column + token.value.length;
@@ -442,8 +419,7 @@ function formatTokensToHTML(tokens: Token[][], theme: Theme, isDark: boolean): s
     }
   });
 
-  const bgClass = isDark ? 'bg-gray-900' : 'bg-gray-50';
-  return `<pre class="whitespace-pre [tab-size:4] ${bgClass} leading-relaxed p-4 overflow-auto text-sm"><code style="font-family: IBM Plex Mono, 'monospace'">${codeContent}</code></pre>`;
+  return `<pre class="code-block"><code>${codeContent}</code></pre>`;
 }
 
 /**
@@ -458,13 +434,8 @@ function escapeHTML(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function formatCodeToHTML(
-  code: string,
-  themeMode: 'light' | 'dark' = 'light',
-): string {
+export function formatCodeToHTML(code: string): string {
   const tokenizer = new CodeTokenizer();
   const tokens = tokenizer.tokenize(code);
-  const theme = themes[themeMode];
-  const isDark = themeMode === 'dark';
-  return formatTokensToHTML(tokens, theme, isDark);
+  return formatTokensToHTML(tokens);
 }

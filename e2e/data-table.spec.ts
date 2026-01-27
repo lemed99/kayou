@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('DataTable', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/data-table');
+    await page.goto('/ui/data-table');
   });
 
   // ==================== Basic Rendering ====================

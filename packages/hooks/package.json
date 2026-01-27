@@ -1,5 +1,5 @@
 {
-  "name": "@exowpee/solidly-hooks",
+  "name": "@kayou/hooks",
   "version": "1.0.0",
   "description": "Utility hooks and contexts for SolidJS applications",
   "type": "module",
@@ -21,22 +21,32 @@
   },
   "peerDependencies": {
     "@formatjs/intl": "^3.1.0",
-    "solid-js": "^1.9.0"
+    "@solid-primitives/presence": "^0.1.2",
+    "solid-js": "^1.9.0",
+    "tailwind-merge": "^3.3.1"
   },
   "peerDependenciesMeta": {
     "@formatjs/intl": {
       "optional": true
+    },
+    "@solid-primitives/presence": {
+      "optional": true
+    },
+    "tailwind-merge": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@solid-primitives/presence": "^0.1.2",
     "solid-js": "^1.9.9",
+    "tailwind-merge": "^3.4.0",
     "typescript": "^5.9.2",
     "vite": "^6.3.6",
     "vite-plugin-solid": "^2.11.8"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/exowpee/solidly"
+    "url": "https://github.com/exowpee/kayou"
   },
   "license": "MIT",
   "keywords": [

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('TextInput', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/text-input');
+    await page.goto('/ui/text-input');
   });
 
   test('should render text input', async ({ page }) => {

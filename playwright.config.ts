@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright configuration for e2e testing the Solidly component library.
+ * Playwright configuration for e2e testing the Kayou UI component library.
  * Tests run against the documentation site.
  *
  * @see https://playwright.dev/docs/test-configuration

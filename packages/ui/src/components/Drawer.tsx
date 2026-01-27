@@ -1,0 +1,203 @@
+import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
+import { Portal } from 'solid-js/web';
+
+import { preventBackgroundScroll } from '@kayou/hooks';
+import { XCloseIcon } from '@kayou/icons';
+import { createPresence } from '@solid-primitives/presence';
+import { twMerge } from 'tailwind-merge';
+
+export interface DrawerAriaLabels {
+  close: string;
+}
+
+export const DEFAULT_DRAWER_ARIA_LABELS: DrawerAriaLabels = {
+  close: 'Close',
+};
+
+/**
+ * Position options for the Drawer component.
+ */
+export type DrawerPosition = 'right' | 'left' | 'top' | 'bottom';
+
+/**
+ * Props for the Drawer component.
+ */
+export interface DrawerProps
+  extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
+  children?: JSX.Element;
+  /**
+   * Whether the drawer is visible.
+   * @default false
+   */
+  show?: boolean;
+  /**
+   * Position from which the drawer slides in.
+   * @default 'right'
+   */
+  position?: DrawerPosition;
+  /**
+   * Width of the drawer (for left/right positions).
+   */
+  width?: string;
+  /**
+   * Height of the drawer (for top/bottom positions).
+   */
+  height?: string;
+  /**
+   * Callback fired when the drawer is closed.
+   */
+  onClose: (event: MouseEvent) => void;
+  /**
+   * Whether to show rounded edges on the drawer.
+   * @default false
+   */
+  roundedEdges?: boolean;
+  /**
+   * Whether to show the header with close button.
+   * @default false
+   */
+  showHeader?: boolean;
+  /**
+   * Additional CSS classes for the body content.
+   */
+  bodyClass?: string;
+  /**
+   * Labels for i18n support.
+   */
+  ariaLabels?: Partial<DrawerAriaLabels>;
+}
+
+const theme = {
+  backdrop: {
+    base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
+    show: 'bg-gray-800/50 dark:bg-neutral-900/80',
+  },
+  content: {
+    positions: {
+      top: 'top-0 left-0 right-0 w-full',
+      bottom: 'bottom-0 left-0 right-0 w-full',
+      left: 'left-0 top-0 h-full',
+      right: 'right-0 top-0 h-full',
+    },
+    base: 'fixed z-[91]',
+    inner: {
+      base: 'relative bg-white w-full h-full dark:bg-neutral-700 overflow-auto',
+      positions: {
+        top: 'rounded-b-lg',
+        bottom: 'rounded-t-lg',
+        left: 'rounded-r-lg',
+        right: 'rounded-l-lg',
+      },
+    },
+  },
+  body: {
+    base: 'p-6',
+    popup: 'pt-0',
+  },
+  header: {
+    base: 'flex items-start justify-between rounded-t dark:border-neutral-700 border-b p-5',
+    popup: '!p-2 !border-b-0',
+    close: {
+      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-600 dark:hover:text-white',
+      icon: 'size-5',
+    },
+  },
+};
+
+/**
+ * Drawer component that slides in from the edge of the screen.
+ * Uses role="dialog" and aria-modal for accessibility.
+ */
+const Drawer = (props: DrawerProps): JSX.Element => {
+  const a = createMemo(() => ({ ...DEFAULT_DRAWER_ARIA_LABELS, ...props.ariaLabels }));
+  const [drawerEl, setDrawerEl] = createSignal<HTMLDivElement | undefined>();
+
+  const getSizeClasses = () => {
+    if (props.position === 'top' || props.position === 'bottom') {
+      return props.height ?? 'h-full md:h-fit';
+    }
+    return props.width ?? 'w-full md:w-fit';
+  };
+
+  createEffect(() => {
+    if (props.show && drawerEl()) {
+      preventBackgroundScroll(drawerEl()!);
+    }
+  });
+
+  const position = createMemo(() => props.position || 'right');
+
+  const { isVisible, isMounted } = createPresence(() => props.show, {
+    transitionDuration: 500,
+  });
+
+  const translateDirection = createMemo(() => {
+    switch (position()) {
+      case 'right':
+        return 'translate(100%, 0)';
+      case 'left':
+        return 'translate(-100%, 0)';
+      case 'top':
+        return 'translate(0, -100%)';
+      case 'bottom':
+        return 'translate(0, 100%)';
+      default:
+        return 'translate(0, 0)';
+    }
+  });
+
+  return (
+    <Show when={isMounted()}>
+      <Portal>
+        <div
+          class={twMerge(theme.backdrop.base, theme.backdrop.show)}
+          style={{
+            transition: 'all .5s cubic-bezier(.32, .72, 0, 1)',
+            opacity: isVisible() ? '1' : '0',
+          }}
+          onClick={(e) => props?.onClose(e)}
+        />
+        <div
+          ref={setDrawerEl}
+          class={twMerge(
+            theme.content.base,
+            theme.content.positions[position()],
+            props.class,
+            getSizeClasses(),
+          )}
+          style={{
+            transition: 'transform .5s cubic-bezier(.32, .72, 0, 1)',
+            transform: isVisible() ? 'translate(0, 0)' : translateDirection(),
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            class={twMerge(
+              theme.content.inner.base,
+              props.roundedEdges ? theme.content.inner.positions[position()] : '',
+            )}
+          >
+            <Show when={props.showHeader}>
+              <div class={twMerge(theme.header.base, theme.header.popup)}>
+                <button
+                  aria-label={a().close}
+                  class={theme.header.close.base}
+                  type="button"
+                  onClick={(e) => props.onClose(e)}
+                >
+                  <XCloseIcon class={theme.header.close.icon} />
+                </button>
+              </div>
+            </Show>
+            <div class={twMerge(theme.body.base, theme.body.popup, props.bodyClass)}>
+              {props.children}
+            </div>
+          </div>
+        </div>
+      </Portal>
+    </Show>
+  );
+};
+
+export default Drawer;

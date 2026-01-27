@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('ResponsiveContainer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/responsive-container');
+    await page.goto('/ui/responsive-container');
   });
 
   test('should render container', async ({ page }) => {
@@ -23,7 +23,6 @@ test.describe('ResponsiveContainer', () => {
 
   test('should resize with viewport', async ({ page }) => {
     const container = page.locator('[class*="responsive"], div').first();
-    const initialBox = await container.boundingBox();
 
     // Resize viewport
     await page.setViewportSize({ width: 800, height: 600 });

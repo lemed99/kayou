@@ -7,12 +7,19 @@ export default defineConfig({
   build: {
     lib: {
       entry: './src/index.ts',
-      name: 'solidly-hooks',
+      name: 'kayou-hooks',
       fileName: () => 'index.es.js',
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['solid-js', 'solid-js/web', 'solid-js/store', '@formatjs/intl'],
+      external: [
+        'solid-js',
+        'solid-js/web',
+        'solid-js/store',
+        '@formatjs/intl',
+        '@solid-primitives/presence',
+        'tailwind-merge',
+      ],
       output: {
         globals: {
           'solid-js': 'SolidJS',

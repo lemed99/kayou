@@ -7,18 +7,19 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vinxi/types/client"],
     "noEmit": true,
     "isolatedModules": true,
     "strict": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@exowpee/solidly": ["../packages/core/src"],
-      "@exowpee/solidly/*": ["../packages/core/src/*"],
-      "@exowpee/solidly-hooks": ["../packages/hooks/src"],
-      "@exowpee/solidly-icons": ["../packages/icons/src"]
+      "@kayou/ui": ["../packages/ui/src"],
+      "@kayou/ui/*": ["../packages/ui/src/*"],
+      "@kayou/hooks": ["../packages/hooks/src"],
+      "@kayou/icons": ["../packages/icons/src"]
     }
   },
-  "include": ["src", "vite.config.mts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "app.config.ts", "vite-plugin-extract-example-code.ts"],
+  "exclude": ["node_modules", ".output", ".vinxi"]
 }

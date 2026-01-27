@@ -1,4 +1,4 @@
-# Component Conventions for @exowpee/solidly
+# Component Conventions for @kayou/ui
 
 ## File Structure
 

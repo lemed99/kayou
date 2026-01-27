@@ -49,7 +49,7 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
     purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
     orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-    gray: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
+    gray: 'bg-gray-100 text-gray-700 dark:bg-neutral-900 dark:text-neutral-300',
   };
 
   // Extract headings from content and build TOC
@@ -85,6 +85,9 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
     const initialHash = window.location.hash.slice(1);
     if (initialHash) {
       setVisibleSections(new Set([initialHash]));
+      requestAnimationFrame(() => {
+        document.getElementById(initialHash)?.scrollIntoView({ behavior: 'instant' });
+      });
     }
   });
 
@@ -146,7 +149,7 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
             {props.title}
           </h1>
           {props.description && (
-            <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+            <p class="mt-4 text-lg text-gray-600 dark:text-neutral-400">
               {props.description}
             </p>
           )}
@@ -172,7 +175,12 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
                         visibleSections().has(item.id) ? 'location' : undefined
                       }
                       href={`#${item.id}`}
-                      class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:aria-[current]:text-white"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        history.replaceState(null, '', `#${item.id}`);
+                      }}
+                      class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-neutral-400 dark:hover:text-white dark:aria-[current]:text-white"
                     >
                       {item.text}
                     </a>

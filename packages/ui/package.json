@@ -1,0 +1,83 @@
+{
+  "name": "@kayou/ui",
+  "version": "1.0.0",
+  "description": "A complete, opinionated UI component library for SolidJS",
+  "type": "module",
+  "module": "./dist/index.es.js",
+  "types": "./dist/src/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.es.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "lint": "eslint '**/*.{ts,tsx}' --fix"
+  },
+  "peerDependencies": {
+    "@formatjs/intl": "^3.1.0",
+    "solid-js": "^1.9.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@formatjs/intl": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@kayou/hooks": "workspace:*",
+    "@kayou/icons": "workspace:*",
+    "@solid-primitives/presence": "^0.1.2",
+    "@tiptap/core": "^3.16.0",
+    "@tiptap/extension-character-count": "^3.16.0",
+    "@tiptap/extension-highlight": "^3.16.0",
+    "@tiptap/extension-image": "^3.16.0",
+    "@tiptap/extension-link": "^3.16.0",
+    "@tiptap/extension-placeholder": "^3.16.0",
+    "@tiptap/extension-subscript": "^3.16.0",
+    "@tiptap/extension-superscript": "^3.16.0",
+    "@tiptap/extension-task-item": "^3.16.0",
+    "@tiptap/extension-task-list": "^3.16.0",
+    "@tiptap/extension-text-align": "^3.16.0",
+    "@tiptap/extension-underline": "^3.16.0",
+    "@tiptap/pm": "^3.16.0",
+    "@tiptap/starter-kit": "^3.16.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.7",
+    "solid-js": "^1.9.9",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.6",
+    "vite-plugin-solid": "^2.11.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exowpee/kayou"
+  },
+  "license": "MIT",
+  "keywords": [
+    "solidjs",
+    "solid",
+    "ui",
+    "components",
+    "tailwindcss",
+    "typescript",
+    "enterprise",
+    "datatable",
+    "charts",
+    "rich-text-editor"
+  ]
+}

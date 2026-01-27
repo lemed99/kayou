@@ -1,57 +1,37 @@
-import { type Component, type JSX, Show, Suspense } from 'solid-js';
+import { type JSX, Show, Suspense } from 'solid-js';
 
-import { ToastProvider } from '@exowpee/solidly/context';
-import { useLocation } from '@solidjs/router';
+import { type RouteSectionProps, Router, useLocation } from '@solidjs/router';
+import { FileRoutes } from '@solidjs/start/router';
 
 import Navbar from './components/Navbar';
-import DocLayout from './layouts/DocLayout';
+import './index.css';
 
-const App: Component<{ children: JSX.Element }> = (props): JSX.Element => {
+// Root layout component
+function RootLayout(props: RouteSectionProps): JSX.Element {
   const location = useLocation();
 
   // Check if we're on the preview page (no chrome)
   const isPreviewPage = () => location.pathname.startsWith('/preview');
 
-  // Check if we're on a docs page (has sidebar)
-  const isDocsPage = () => {
-    const path = location.pathname;
-    return (
-      path.startsWith('/components') ||
-      path.startsWith('/hooks') ||
-      path.startsWith('/contexts') ||
-      path.startsWith('/overview')
-    );
-  };
-
-  // Determine which layout to use
-  const getLayout = (children: JSX.Element) => {
-    if (isDocsPage()) {
-      return <DocLayout>{children}</DocLayout>;
-    }
-    return children;
-  };
-
   return (
     <Show
       when={!isPreviewPage()}
-      fallback={
-        // Preview pages render without any chrome
-        <Suspense>{props.children}</Suspense>
-      }
+      fallback={<Suspense>{props.children}</Suspense>}
     >
-      <ToastProvider methods={{}}>
-        <div class="min-h-dvh bg-white dark:bg-gray-900">
-          {/* Global Navbar (includes banner) */}
+        <div class="min-h-dvh">
           <Navbar />
-
-          {/* Main Content Area */}
           <main>
-            <Suspense>{getLayout(props.children)}</Suspense>
+            <Suspense>{props.children}</Suspense>
           </main>
         </div>
-      </ToastProvider>
     </Show>
   );
-};
+}
 
-export default App;
+export default function App() {
+  return (
+    <Router root={RootLayout}>
+      <FileRoutes />
+    </Router>
+  );
+}

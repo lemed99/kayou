@@ -2,7 +2,7 @@
 name: commit-and-push
 version: 1.0.0
 description: Smart commit and push workflow that generates concise commit messages, updates CHANGELOG.md, and pushes to remote.
-author: @exowpee/solidly
+author: @kayou/ui
 tags: [git, commit, push, changelog, workflow]
 ---
 

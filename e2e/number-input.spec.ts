@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('NumberInput', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/number-input');
+    await page.goto('/ui/number-input');
   });
 
   test('should render number input', async ({ page }) => {

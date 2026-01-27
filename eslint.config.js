@@ -8,7 +8,14 @@ const tsParser = tseslint.parser;
 
 export default [
   {
-    ignores: ['**/dist', '**/node_modules', 'dev'],
+    ignores: [
+      '**/dist',
+      '**/node_modules',
+      'dev',
+      'generate-icons.ts',
+      'playwright.config.ts',
+      'packages/mcp/scripts/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -19,8 +26,10 @@ export default [
       parser: tsParser,
       parserOptions: {
         project: [
-          './packages/core/tsconfig.json',
-          './packages/pro/tsconfig.json',
+          './packages/hooks/tsconfig.json',
+          './packages/icons/tsconfig.json',
+          './packages/mcp/tsconfig.json',
+          './packages/ui/tsconfig.json',
           './doc/tsconfig.json',
           './e2e/tsconfig.json',
         ],

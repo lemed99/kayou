@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('HelperText', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/helper-text');
+    await page.goto('/ui/helper-text');
   });
 
   test('should render helper text components', async ({ page }) => {

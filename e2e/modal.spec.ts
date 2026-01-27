@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Modal', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/modal');
+    await page.goto('/ui/modal');
   });
 
   test('should render modal trigger button', async ({ page }) => {

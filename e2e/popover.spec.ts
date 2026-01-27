@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Popover', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/components/popover');
+    await page.goto('/ui/popover');
   });
 
   test('should render popover trigger', async ({ page }) => {

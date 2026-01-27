@@ -6,3 +6,10 @@ pnpm-workspace.yaml
 .vscode
 test-results
 playwright-report
+
+# Build artifacts (generated .d.ts files in src folders)
+**/src/**/*.d.ts
+
+# SolidStart / Vinxi
+.output
+.vinxi
