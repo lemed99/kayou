@@ -251,6 +251,18 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
     }
   };
 
+  const handleFocusIn = () => {
+    if (!merged.hidden && merged.onHover) {
+      setOpen(true);
+    }
+  };
+
+  const handleFocusOut = () => {
+    if (!merged.hidden && merged.onHover) {
+      setOpen(false);
+    }
+  };
+
   return (
     <div class={twMerge('relative', props.wrapperClass)}>
       <div
@@ -268,6 +280,8 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
         onKeyDown={handleTriggerKeyDown}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onFocusIn={handleFocusIn}
+        onFocusOut={handleFocusOut}
       >
         {merged.children}
       </div>

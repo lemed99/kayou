@@ -789,7 +789,7 @@ export function Example(props: ExampleProps): JSX.Element {
                 viewport() !== 'desktop' ? VIEWPORT_WIDTHS[viewport()] : undefined,
             }}
           >
-            <div class="bg-white px-4 py-6 dark:bg-neutral-900">
+            <div class="bg-white px-4 py-6 dark:bg-neutral-950">
               <Show when={props.description}>
                 <p class="mb-4 text-gray-700 dark:text-gray-300">{props.description}</p>
               </Show>

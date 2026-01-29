@@ -3,10 +3,15 @@ import { JSX, Show, createMemo, createSignal, splitProps } from 'solid-js';
 import { SearchRefractionIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
-import { ChevronDownButton, ClearContentButton, optionClass } from '../../helpers';
+import { ChevronDownButton, ClearContentButton } from '../../shared';
 import Checkbox from '../Checkbox';
 import TextInput, { type TextInputProps } from '../TextInput';
-import useSelect, { type SelectLabels, type SelectAriaLabels, DEFAULT_SELECT_ARIA_LABELS } from './useSelect';
+import { optionClass } from './selectUtils';
+import useSelect, {
+  DEFAULT_SELECT_ARIA_LABELS,
+  type SelectAriaLabels,
+  type SelectLabels,
+} from './useSelect';
 
 interface Option {
   value: string;
@@ -14,7 +19,8 @@ interface Option {
   labelWrapper?: (label: string) => JSX.Element;
 }
 
-export interface MultiSelectProps extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
+export interface MultiSelectProps
+  extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
   /** Array of options to display in the dropdown */
   options: Option[];
 

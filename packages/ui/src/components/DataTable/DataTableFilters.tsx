@@ -14,7 +14,7 @@ import {
 import { FilterFunnel01Icon, InfoCircleIcon, PlusIcon, XCloseIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
-import { type Option } from '../../helpers';
+import { type Option } from '../../shared';
 import Button from '../Button';
 import DatePicker from '../DatePicker';
 import NumberInput from '../NumberInput';
@@ -347,7 +347,10 @@ export interface DataTableFiltersProps<T> {
 
 export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Element {
   const l = createMemo(() => ({ ...DEFAULT_DATA_TABLE_FILTERS_LABELS, ...props.labels }));
-  const a = createMemo(() => ({ ...DEFAULT_DATA_TABLE_FILTERS_ARIA_LABELS, ...props.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_DATA_TABLE_FILTERS_ARIA_LABELS,
+    ...props.ariaLabels,
+  }));
   // Draft filters - local state for editing before submit
   const [draftFilters, setDraftFilters] = createSignal<DraftFilter[]>([]);
   const [isOpen, setIsOpen] = createSignal(false);

@@ -188,6 +188,7 @@ export default function SelectPage() {
                 options={countryOptions}
                 placeholder="Choose a country"
                 onSelect={(opt) => setSelected2(opt?.value)}
+                optionRowHeight={32}
               />
             </div>
           ),

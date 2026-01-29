@@ -1,8 +1,11 @@
-import { JSX, createSignal, splitProps } from 'solid-js';
+import { JSX, createEffect, createSignal, splitProps } from 'solid-js';
 
-import { ChevronDownButton, OptionLabel, optionClass } from '../../helpers/selectUtils';
-import useSelect from './useSelect';
+import { type BackgroundScrollBehavior } from '@kayou/hooks';
+
+import { ChevronDownButton } from '../../shared';
 import TextInput, { TextInputProps } from '../TextInput';
+import { OptionLabel, optionClass } from './selectUtils';
+import useSelect from './useSelect';
 
 /**
  * Option item for the Select component.
@@ -28,6 +31,8 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   value?: string;
   /** Height of each option row in pixels. */
   optionRowHeight?: number;
+  /** How to handle background scroll when dropdown is open. @default 'close' */
+  backgroundScrollBehavior?: BackgroundScrollBehavior;
 }
 
 /**
@@ -43,6 +48,7 @@ export default function Select(props: SelectProps): JSX.Element {
     'helperText',
     'label',
     'required',
+    'backgroundScrollBehavior',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
@@ -54,19 +60,40 @@ export default function Select(props: SelectProps): JSX.Element {
     setHighlightedOption,
     selectedOption,
     handleKeyDown,
+    isOpen,
+    listboxId,
   } = useSelect(local, 'select');
+
+  const getOptionId = (option: SelectOption | null) =>
+    option ? `${listboxId}-option-${option.value}` : undefined;
+
+  // Manually sync aria-expanded to the DOM since prop drilling through
+  // splitProps/spread can break SolidJS fine-grained reactivity
+  createEffect(() => {
+    const open = isOpen();
+    const el = inputRef();
+    if (el) {
+      el.setAttribute('aria-expanded', String(open));
+    }
+  });
 
   return (
     <Layout
       inputComponent={
         <div>
           <TextInput
+            {...otherProps}
             ref={setInputRef}
             required={local.required}
             value={selectedOption()?.label || ''}
             placeholder={props.placeholder}
             class="w-full"
             onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-expanded={isOpen()}
+            aria-controls={listboxId}
+            aria-activedescendant={getOptionId(highlightedOption())}
+            aria-haspopup="listbox"
             style={{
               'caret-color': 'transparent',
               'padding-right': '36px',
@@ -75,7 +102,6 @@ export default function Select(props: SelectProps): JSX.Element {
                 ? local.style
                 : {}),
             }}
-            {...otherProps}
           />
 
           <ChevronDownButton
@@ -86,6 +112,9 @@ export default function Select(props: SelectProps): JSX.Element {
       }
       optionsComponent={(option) => (
         <div
+          id={getOptionId(option)}
+          role="option"
+          aria-selected={selectedOption()?.value === option.value}
           class={optionClass(option, highlightedOption())}
           onClick={() => handleOptionClick(option)}
           onMouseEnter={() => setHighlightedOption(option)}

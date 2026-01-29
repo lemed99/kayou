@@ -621,6 +621,7 @@ function App() {
                   locale="en-US"
                   label="Appointment"
                   showTime
+                  showSeconds
                   value={dateTime()}
                   onChange={setDateTime}
                   helperText="Select date and click Confirm"
@@ -695,6 +696,42 @@ function App() {
                   locale="en-US"
                   label="Report Period"
                   showShortcuts
+                  value={range()}
+                  onChange={setRange}
+                />
+              );
+            },
+          },
+          {
+            title: 'With Footer (Single)',
+            description:
+              'Footer with Cancel/Apply buttons. Date selection does not trigger onChange until Apply is clicked.',
+            component: () => {
+              const [date, setDate] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="single"
+                  locale="en-US"
+                  label="Select with Footer"
+                  showFooter
+                  value={date()}
+                  onChange={setDate}
+                />
+              );
+            },
+          },
+          {
+            title: 'With Footer (Range)',
+            description:
+              'Range selection with footer. Both start and end dates must be selected, then confirmed with Apply.',
+            component: () => {
+              const [range, setRange] = createSignal<DateValue>({});
+              return (
+                <DatePicker
+                  type="range"
+                  locale="en-US"
+                  label="Range with Footer"
+                  showFooter
                   value={range()}
                   onChange={setRange}
                 />

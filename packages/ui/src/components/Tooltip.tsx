@@ -226,8 +226,8 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
         ref={refs.setReference}
         onMouseEnter={handleShow}
         onMouseLeave={handleHide}
-        onFocus={handleShow}
-        onBlur={handleHide}
+        onFocusIn={handleShow}
+        onFocusOut={handleHide}
         aria-describedby={showTooltip() && !props.hidden ? tooltipId : undefined}
       >
         {props.children}

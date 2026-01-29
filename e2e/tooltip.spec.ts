@@ -62,12 +62,34 @@ test.describe('Tooltip', () => {
     expect(bodyContent).toBeTruthy();
   });
 
-  test('should show tooltip on keyboard focus', async ({ page }) => {
-    const trigger = page.locator('button').first();
-    await trigger.focus();
-    await page.waitForTimeout(500);
+  test('should show tooltip when anchor is focused via keyboard', async ({ page }) => {
+    // Wait for page to be fully loaded and interactive
+    await page.waitForLoadState('networkidle');
 
-    // Tooltip may appear on focus - just verify no error
+    const trigger = page.locator('button', { hasText: 'Hover me' });
+    await expect(trigger).toBeVisible();
+    await trigger.scrollIntoViewIfNeeded();
+
+    // Click nearby to set focus context, then tab into the button
+    await trigger.evaluate((el) => el.focus());
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should hide tooltip when anchor loses focus via keyboard', async ({ page }) => {
+    await page.waitForLoadState('networkidle');
+
+    const trigger = page.locator('button', { hasText: 'Hover me' });
+    await expect(trigger).toBeVisible();
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.evaluate((el) => el.focus());
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+
+    await trigger.evaluate((el) => el.blur());
+    await expect(tooltip).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should support different placements', async ({ page }) => {

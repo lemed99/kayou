@@ -1,8 +1,9 @@
 import { JSX, Show, splitProps } from 'solid-js';
 
-import { ClearContentButton, type Option, OptionLabel, optionClass } from '../../helpers';
-import useSelect from './useSelect';
+import { ClearContentButton, type Option } from '../../shared';
 import TextInput, { type TextInputProps } from '../TextInput';
+import { OptionLabel, optionClass } from './selectUtils';
+import useSelect from './useSelect';
 
 export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> {
   /** Array of options to display in the dropdown. */

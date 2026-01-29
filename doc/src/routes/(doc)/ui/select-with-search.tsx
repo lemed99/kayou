@@ -237,7 +237,7 @@ export default function SelectWithSearchPage() {
                 onSelect={(opt) => setSelected(opt || null)}
                 autoFillSearchKey
                 placeholder="Search countries..."
-                optionRowHeight={32}
+                // optionRowHeight={32}
               />
             );
           },

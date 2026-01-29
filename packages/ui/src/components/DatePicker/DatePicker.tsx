@@ -1,63 +1,51 @@
 import {
-  For,
   JSX,
-  Match,
   Show,
-  Switch,
   createEffect,
   createMemo,
   createSignal,
   createUniqueId,
+  on,
   onCleanup,
 } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 
 import { type BackgroundScrollBehavior, type Placement, useFloating } from '@kayou/hooks';
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+import { ChevronDownButton, ClearContentButton } from '../../shared';
+import Button from '../Button';
+import HelperText from '../HelperText';
+import Label from '../Label';
+import TextInput from '../TextInput';
+import Calendar from './Calendar';
+import type { DatePickerShortcut } from './DatePickerContext';
+import Shortcuts from './Shortcuts';
+import TimePicker from './TimePicker';
 import {
-  ChevronDownButton,
-  ClearContentButton,
   addMonths,
   formatDate,
-  getDaysShort,
-  getMonthsShort,
   isDateValid,
   isInRange,
   isSameDay,
   parseDate,
+  startOfDay,
   toISO,
-} from '../../helpers';
-import Button from '../Button';
-import HelperText from '../HelperText';
-import Label from '../Label';
-import NumberInput from '../NumberInput';
-import Select from '../Select';
-import TextInput from '../TextInput';
+} from './dates';
 import { useDatePicker } from './useDatePicker';
 
-/**
- * Shortcut definition for quick date selection.
- * Re-exported from context for component-level use.
- */
-export interface DatePickerShortcut {
-  /** Unique identifier for the shortcut. */
-  id: string;
-  /** Display label for the shortcut. */
-  label: string;
-  /** Function that returns the date value when shortcut is clicked. */
-  getValue: () => { date?: string; startDate?: string; endDate?: string };
-}
+export type { DatePickerShortcut };
 
 export interface DatePickerLabels {
-  done: string;
+  cancel: string;
+  apply: string;
 }
 
 export const DEFAULT_DATE_PICKER_LABELS: DatePickerLabels = {
-  done: 'Done',
+  cancel: 'Cancel',
+  apply: 'Apply',
 };
 
 export interface DatePickerAriaLabels {
@@ -67,12 +55,21 @@ export interface DatePickerAriaLabels {
   selectYear: string;
   enterCustomYear: string;
   confirmYear: string;
+  customYearGroup: string;
   hour: string;
   minute: string;
   second: string;
   chooseDate: string;
   selectDate: string;
   calendar: string;
+  shortcuts: string;
+  timePicker: string;
+  dateNotAvailable: string;
+  dateBeforeMin: string;
+  dateAfterMax: string;
+  rangeStartSelected: string;
+  monthSelectorOpened: string;
+  yearSelectorOpened: string;
 }
 
 export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
@@ -82,22 +79,22 @@ export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
   selectYear: 'Select year',
   enterCustomYear: 'Enter custom year',
   confirmYear: 'Confirm year',
+  customYearGroup: 'Enter a custom year',
   hour: 'Hour',
   minute: 'Minute',
   second: 'Second',
   chooseDate: 'Choose date',
   selectDate: 'Select date',
   calendar: 'Calendar',
+  shortcuts: 'Quick date selection',
+  timePicker: 'Time selection',
+  dateNotAvailable: 'This date is not available',
+  dateBeforeMin: 'This date is before the minimum allowed date',
+  dateAfterMax: 'This date is after the maximum allowed date',
+  rangeStartSelected: 'Start date selected. Now choose an end date.',
+  monthSelectorOpened: 'Month selector opened. Use arrow keys to navigate.',
+  yearSelectorOpened: 'Year selector opened. Use arrow keys to navigate.',
 };
-
-/** Number of cells in a 6-week calendar grid (7 days * 6 weeks) */
-const CALENDAR_GRID_SIZE = 42;
-
-/** Minimum valid year for date selection (Unix epoch year) */
-const MIN_YEAR = 1970;
-
-/** Number of years to show in the year selector (last 10 years from current year + 1) */
-const YEAR_RANGE_SIZE = 10;
 
 /**
  * Value object for the DatePicker component.
@@ -172,619 +169,34 @@ export interface DatePickerProps {
   minuteStep?: number;
   /** Second step increment. @default 1 */
   secondStep?: number;
+  /** Show seconds input in time picker. @default false */
+  showSeconds?: boolean;
+  /** Show footer with Cancel/Apply buttons. When true, date selection doesn't trigger onChange until Apply is clicked. */
+  showFooter?: boolean;
   /** Show shortcuts panel on the left side of the calendar. */
   showShortcuts?: boolean;
   /** Custom shortcuts to use for this instance. Overrides provider shortcuts. */
   shortcuts?: DatePickerShortcut[];
   /** Day the week starts on. 0 = Sunday, 1 = Monday. @default 1 */
   weekStartsOn?: 0 | 1;
-  /** How to handle background scroll when calendar is open. @default 'close' */
+  /** How to handle background scroll when calendar is open. @default 'prevent' */
   backgroundScrollBehavior?: BackgroundScrollBehavior;
   /** Visible text labels for UI elements. */
   labels?: Partial<DatePickerLabels>;
   /** Aria labels for accessibility. */
   ariaLabels?: Partial<DatePickerAriaLabels>;
+  /** Callback fired when the input gains focus. */
+  onFocus?: () => void;
+  /** Callback fired when the input loses focus. */
+  onBlur?: () => void;
+  /** Name attribute for form integration. */
+  name?: string;
+  /** Function to determine if a specific date should be disabled. */
+  disabledDates?: (date: Date) => boolean;
 }
 
-/**
- * Props for the internal Calendar component.
- */
-export interface CalendarProps {
-  /** Accessor for the current date being viewed in the calendar. */
-  currentDate: () => Date;
-  /** Function to update the current viewed date. */
-  setCurrentDate: (date: Date) => void;
-  /** Function called when a date is selected. */
-  selectDate: (date: Date) => void;
-  /** Accessor for the selection type (single, multiple, range). */
-  type: () => string;
-  /** Locale for date/month names. */
-  locale: string;
-  /** Function to check if a date is selected (for single/multiple modes). */
-  isSingletonDateSelected: (date: Date) => boolean;
-  /** Function to check if a date is a range start/end. */
-  isRangeDateSelected: (date: Date) => { start: boolean; end: boolean };
-  /** Function to check if a date falls within the selected range. */
-  isDateInRange: (date: Date) => boolean;
-  /** Function to check if a date is disabled. */
-  isDateDisabled: (date: Date) => boolean;
-  /** Minimum selectable date. */
-  minDate?: Date;
-  /** Maximum selectable date. */
-  maxDate?: Date;
-  /** Additional CSS classes for the calendar. */
-  calendarClass?: string;
-  /** Callback for keyboard events. */
-  onKeyDown?: (e: KeyboardEvent) => void;
-  /** Ref setter for the calendar container. */
-  ref?: (el: HTMLDivElement) => void;
-  /** Accessor for the currently focused date (keyboard navigation). */
-  focusedDate?: () => Date | null;
-  /** Day the week starts on. 0 = Sunday, 1 = Monday. */
-  weekStartsOn: 0 | 1;
-  /** Aria labels for accessibility. */
-  ariaLabels: DatePickerAriaLabels;
-}
-
-/**
- * Returns the start of day (midnight) for a given date.
- * Used for day-level date comparisons.
- */
-const startOfDay = (date: Date): Date => {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-};
-
-/**
- * Generates an array of 42 dates (6 weeks) for the calendar grid,
- * starting from the first day of the week before the first day of the month.
- * @param date - The date representing the month to generate
- * @param weekStartsOn - 0 for Sunday, 1 for Monday
- */
-const getSixWeeksMergedDaysInMonth = (date: Date, weekStartsOn: 0 | 1): Date[] => {
-  const { monthCache, setMonthCache } = useDatePicker();
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const key = `${year}-${month}-${weekStartsOn}`;
-
-  const cached = monthCache[key];
-  if (cached) {
-    return cached.map((d) => parseDate(d));
-  }
-
-  const firstDay = new Date(year, month, 1);
-  const startDate = new Date(firstDay);
-  const dayOfWeek = firstDay.getDay();
-
-  // Calculate days to go back to reach the start of the week
-  let daysToSubtract: number;
-  if (weekStartsOn === 1) {
-    // Monday start: Sunday (0) -> 6, Monday (1) -> 0, etc.
-    daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  } else {
-    // Sunday start: Sunday (0) -> 0, Monday (1) -> 1, etc.
-    daysToSubtract = dayOfWeek;
-  }
-  startDate.setDate(startDate.getDate() - daysToSubtract);
-
-  const days: Date[] = [];
-  const currentDate = startDate;
-
-  for (let i = 0; i < CALENDAR_GRID_SIZE; i++) {
-    days.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  setMonthCache(
-    key,
-    days.map((d) => toISO(d)),
-  );
-  return days;
-};
-
-/**
- * Internal calendar grid component for DatePicker.
- * Renders month/year navigation and day selection grid.
- */
-const Calendar = (props: CalendarProps) => {
-  const [showMonthSelector, setShowMonthSelector] = createSignal(false);
-  const [showYearSelector, setShowYearSelector] = createSignal(false);
-  const [customYear, setCustomYear] = createSignal('');
-
-  const days = createMemo(() =>
-    getSixWeeksMergedDaysInMonth(props.currentDate(), props.weekStartsOn),
-  );
-
-  // Get day headers in correct order based on weekStartsOn
-  const dayHeaders = createMemo(() => {
-    const allDays = getDaysShort(props.locale); // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
-    if (props.weekStartsOn === 0) {
-      // Rotate to start from Sunday: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
-      return [allDays[6], ...allDays.slice(0, 6)];
-    }
-    return allDays;
-  });
-
-  const handleDateClick = (date: Date) => {
-    if (props.isDateDisabled(date)) return;
-    props.selectDate(date);
-  };
-
-  const navigateMonth = (direction: number) => {
-    props.setCurrentDate(addMonths(props.currentDate(), direction));
-  };
-
-  const isCurrentMonth = (date: Date) => {
-    return date.getMonth() === props.currentDate().getMonth();
-  };
-
-  const handleMonthSelect = (monthIndex: number) => {
-    const newDate = new Date(props.currentDate());
-    newDate.setMonth(monthIndex);
-    props.setCurrentDate(newDate);
-    setShowMonthSelector(false);
-  };
-
-  const handleYearSelect = (year: number) => {
-    const newDate = new Date(props.currentDate());
-    newDate.setFullYear(year);
-    props.setCurrentDate(newDate);
-    setShowYearSelector(false);
-  };
-
-  const handleCustomYearSubmit = (e: Event) => {
-    e.preventDefault();
-    const year = parseInt(customYear());
-    if (!isNaN(year) && year >= MIN_YEAR) {
-      handleYearSelect(year);
-      setCustomYear('');
-    }
-  };
-
-  /**
-   * Returns the last 10 years from current year + 1.
-   * Example: If current year is 2026, returns [2018, 2019, ..., 2026, 2027]
-   */
-  const getYearRange = (): number[] => {
-    const currentYear = new Date().getFullYear();
-    const endYear = currentYear + 1;
-    const startYear = endYear - YEAR_RANGE_SIZE + 1;
-    const years: number[] = [];
-    for (let i = startYear; i <= endYear; i++) {
-      if (i >= MIN_YEAR) {
-        years.push(i);
-      }
-    }
-    return years;
-  };
-
-  const isSelected = (date: Date) => props.isSingletonDateSelected(date);
-  const rangeSelection = (date: Date) => props.isRangeDateSelected(date);
-  const isInCurrentMonth = (date: Date) => isCurrentMonth(date);
-  const isInDateRange = (date: Date) => props.isDateInRange(date);
-  const isDisabled = (date: Date) => props.isDateDisabled(date);
-  const isToday = (date: Date) => isSameDay(date, new Date());
-
-  // Convert focused date to ISO string for reactive comparison
-  const focusedDateISO = createMemo(() => {
-    const fd = props.focusedDate?.();
-    return fd ? toISO(fd) : null;
-  });
-
-  /**
-   * Formats a date for aria-label on day buttons.
-   */
-  const getDateAriaLabel = (date: Date): string => {
-    return date.toLocaleDateString(props.locale, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  return (
-    <div
-      ref={props.ref}
-      class={twMerge(
-        'w-full focus:outline-none md:w-[292px] md:min-w-[292px]',
-        props.calendarClass,
-      )}
-      role="grid"
-      aria-label={props.ariaLabels.calendar}
-      tabIndex={0}
-      onKeyDown={(e) => props.onKeyDown?.(e)}
-    >
-      <div class="flex items-center space-x-1.5 rounded-md border border-gray-300 px-2 py-1.5 dark:border-neutral-800">
-        <Show when={!showMonthSelector() && !showYearSelector()}>
-          <div class="flex-none">
-            <button
-              type="button"
-              onClick={() => navigateMonth(-1)}
-              aria-label={props.ariaLabels.previousMonth}
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-            >
-              <ChevronLeftIcon class="size-5" />
-            </button>
-          </div>
-        </Show>
-        <div class="flex flex-1 items-center space-x-1.5">
-          <div class="w-1/2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowYearSelector(false);
-                setShowMonthSelector(!showMonthSelector());
-              }}
-              aria-label={props.ariaLabels.selectMonth}
-              aria-expanded={showMonthSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-            >
-              {getMonthsShort(props.locale)[props.currentDate().getMonth()]}
-            </button>
-          </div>
-          <div class="w-1/2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowMonthSelector(false);
-                setShowYearSelector(!showYearSelector());
-              }}
-              aria-label={props.ariaLabels.selectYear}
-              aria-expanded={showYearSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-            >
-              {props.currentDate().getFullYear()}
-            </button>
-          </div>
-        </div>
-        <Show when={!showMonthSelector() && !showYearSelector()}>
-          <div class="flex-none">
-            <button
-              type="button"
-              onClick={() => navigateMonth(1)}
-              aria-label={props.ariaLabels.nextMonth}
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-            >
-              <ChevronRightIcon class="size-5" />
-            </button>
-          </div>
-        </Show>
-      </div>
-
-      <Switch
-        fallback={
-          <div class="my-0.5">
-            <div
-              class="grid grid-cols-7 border-b border-gray-300 py-2 dark:border-neutral-800"
-              role="row"
-            >
-              <For each={dayHeaders()}>
-                {(day) => (
-                  <div
-                    class="text-center capitalize tracking-wide text-gray-500 dark:text-neutral-400"
-                    role="columnheader"
-                    aria-label={day}
-                  >
-                    {day}
-                  </div>
-                )}
-              </For>
-            </div>
-            <div class="mt-1 grid grid-cols-7 gap-x-0.5 gap-y-0.5" role="rowgroup">
-              <For each={days()}>
-                {(date) => {
-                  // These are static per date item
-                  const selected = isSelected(date);
-                  const disabled = isDisabled(date);
-                  const rangeState = rangeSelection(date);
-                  const inCurrentMonth = isInCurrentMonth(date);
-                  const today = isToday(date);
-                  const inRange = isInDateRange(date);
-                  const dateISO = toISO(date);
-
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => handleDateClick(date)}
-                      disabled={disabled}
-                      role="gridcell"
-                      aria-label={getDateAriaLabel(date)}
-                      aria-selected={selected || rangeState.start || rangeState.end}
-                      aria-disabled={disabled}
-                      tabIndex={focusedDateISO() === dateISO ? 0 : -1}
-                      class="flex h-10 w-10 cursor-pointer items-center justify-center"
-                      classList={{
-                        'text-gray-400': !inCurrentMonth,
-                        'text-blue-500': today && !selected && inCurrentMonth,
-                        'bg-blue-500 text-white font-medium rounded-lg':
-                          selected && inCurrentMonth,
-                        'bg-blue-500 text-white font-medium rounded-l-lg rounded-r-none':
-                          rangeState.start && inCurrentMonth && !selected,
-                        'bg-blue-500 text-white font-medium rounded-r-lg rounded-l-none':
-                          rangeState.end && inCurrentMonth && !selected,
-                        'bg-blue-100 dark:bg-blue-900/40':
-                          inRange && !selected && inCurrentMonth,
-                        'cursor-not-allowed! opacity-50': disabled,
-                        'border-2 border-gray-700 border-dashed':
-                          focusedDateISO() === dateISO,
-                        'transition-[scale] hover:scale-[1.5]':
-                          !selected &&
-                          !inRange &&
-                          !rangeState.start &&
-                          !rangeState.end &&
-                          !disabled,
-                      }}
-                    >
-                      {date.getDate()}
-                    </button>
-                  );
-                }}
-              </For>
-            </div>
-          </div>
-        }
-      >
-        <Match when={showMonthSelector()}>
-          <div class="px-0.5 sm:px-2" role="listbox" aria-label={props.ariaLabels.selectMonth}>
-            <div class="mb-[3px] mt-2 grid w-full grid-cols-2 gap-x-2 gap-y-1">
-              <For each={getMonthsShort(props.locale)}>
-                {(month, index) => (
-                  <button
-                    type="button"
-                    onClick={() => handleMonthSelect(index())}
-                    role="option"
-                    aria-selected={index() === props.currentDate().getMonth()}
-                    class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
-                      index() === props.currentDate().getMonth()
-                        ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
-                        : '',
-                    )}
-                  >
-                    {month}
-                  </button>
-                )}
-              </For>
-            </div>
-          </div>
-        </Match>
-        <Match when={showYearSelector()}>
-          <div class="px-0.5 sm:px-2" role="listbox" aria-label={props.ariaLabels.selectYear}>
-            <div class="mb-[3px] mt-2 grid w-full grid-cols-2 gap-x-2 gap-y-1">
-              <For each={getYearRange()}>
-                {(year) => (
-                  <button
-                    type="button"
-                    onClick={() => handleYearSelect(year)}
-                    role="option"
-                    aria-selected={year === props.currentDate().getFullYear()}
-                    class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
-                      year === props.currentDate().getFullYear()
-                        ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
-                        : '',
-                    )}
-                  >
-                    {year}
-                  </button>
-                )}
-              </For>
-            </div>
-          </div>
-          <form onSubmit={handleCustomYearSubmit} class="mt-[9px] flex w-full gap-1">
-            <NumberInput
-              value={customYear()}
-              onChange={(e) => setCustomYear(e.currentTarget.value)}
-              placeholder="20..."
-              min={MIN_YEAR}
-              aria-label={props.ariaLabels.enterCustomYear}
-            />
-            <Button type="submit" size="md" aria-label={props.ariaLabels.confirmYear}>
-              <CheckIcon class="size-5" />
-            </Button>
-          </form>
-        </Match>
-      </Switch>
-    </div>
-  );
-};
-
-/**
- * Props for the internal TimePicker component.
- */
-interface TimePickerProps {
-  hour: () => number;
-  minute: () => number;
-  second: () => number;
-  onHourChange: (hour: number) => void;
-  onMinuteChange: (minute: number) => void;
-  onSecondChange: (second: number) => void;
-  onSubmit: () => void;
-  format: '12h' | '24h';
-  minuteStep: number;
-  secondStep: number;
-  /** Visible text labels. */
-  labels: DatePickerLabels;
-  /** Aria labels for accessibility. */
-  ariaLabels: DatePickerAriaLabels;
-}
-
-/**
- * Internal time picker component for DatePicker.
- * Uses NumberInput components for hour, minute, and second selection.
- */
-const TimePicker = (props: TimePickerProps) => {
-  const is12h = () => props.format === '12h';
-  const [period, setPeriod] = createSignal<'AM' | 'PM'>('AM');
-
-  // Update period when hour changes
-  createEffect(() => {
-    setPeriod(props.hour() >= 12 ? 'PM' : 'AM');
-  });
-
-  const periodOptions = [
-    { value: 'AM', label: 'AM' },
-    { value: 'PM', label: 'PM' },
-  ];
-
-  // Get display hour for 12h format
-  const displayHour = () => {
-    if (is12h()) {
-      const h = props.hour() % 12;
-      return h.toString();
-    }
-    return props.hour().toString() ?? undefined;
-  };
-
-  const handleHourChange = (value: string) => {
-    const num = parseInt(value, 10);
-    if (is12h()) {
-      // Convert 12h to 24h
-      const isPM = period() === 'PM';
-      let hour24 = num;
-      if (isPM && num < 12) hour24 = num + 12;
-      else if (!isPM && num === 0) hour24 = 0;
-      else if (!isPM && num >= 12) hour24 = num - 12;
-      props.onHourChange(hour24);
-    } else {
-      props.onHourChange(num);
-    }
-  };
-
-  const handlePeriodChange = (value: string) => {
-    const newPeriod = value as 'AM' | 'PM';
-    setPeriod(newPeriod);
-    const currentHour = props.hour();
-    if (newPeriod === 'PM' && currentHour < 12) {
-      props.onHourChange(currentHour + 12);
-    } else if (newPeriod === 'AM' && currentHour >= 12) {
-      props.onHourChange(currentHour - 12);
-    }
-  };
-
-  return (
-    <div class="flex items-center gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800">
-      <div class="flex w-fit items-center justify-center gap-0.5 rounded-lg border border-gray-200 dark:border-neutral-800">
-        <NumberInput
-          value={displayHour()}
-          sizing="sm"
-          onChange={(e) => handleHourChange(e.target.value)}
-          placeholder="00"
-          style={{
-            border: 'none',
-            'background-color': 'transparent',
-            'text-align': 'center',
-          }}
-          min={is12h() ? 1 : 0}
-          max={is12h() ? 12 : 23}
-          class="w-10"
-          aria-label={props.ariaLabels.hour}
-        />
-        <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
-        <NumberInput
-          value={props.minute()}
-          sizing="sm"
-          onChange={(e) => props.onMinuteChange(parseInt(e.target.value))}
-          placeholder="00"
-          style={{
-            border: 'none',
-            'background-color': 'transparent',
-            'text-align': 'center',
-          }}
-          min={0}
-          max={59}
-          step={props.minuteStep}
-          class="w-10"
-          aria-label={props.ariaLabels.minute}
-        />
-        <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
-        <NumberInput
-          value={props.second()}
-          sizing="sm"
-          onChange={(e) => props.onSecondChange(parseInt(e.target.value))}
-          placeholder="00"
-          style={{
-            border: 'none',
-            'background-color': 'transparent',
-            'text-align': 'center',
-          }}
-          min={0}
-          max={59}
-          step={props.secondStep}
-          class="w-10"
-          aria-label={props.ariaLabels.second}
-        />
-        <Show when={is12h()}>
-          <span class="h-5 w-1 bg-gray-200 dark:bg-neutral-700" />
-          <Select
-            options={periodOptions}
-            value={period()}
-            onSelect={(opt) => opt && handlePeriodChange(opt.value)}
-            aria-label="AM/PM"
-            sizing="sm"
-            fitContent={true}
-            style={{ border: 'none', 'background-color': 'transparent' }}
-          />
-        </Show>
-      </div>
-      <div>
-        <Button onClick={props.onSubmit} size="sm">
-          {props.labels.done}
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-/**
- * Props for the internal Shortcuts component.
- */
-interface ShortcutsProps {
-  shortcuts: DatePickerShortcut[];
-  onSelect: (value: { date?: string; startDate?: string; endDate?: string }) => void;
-  type: () => DatePickerType;
-}
-
-/**
- * Internal shortcuts panel component for DatePicker.
- * Displays quick selection buttons on the left side of the calendar.
- */
-const Shortcuts = (props: ShortcutsProps) => {
-  // Filter shortcuts based on selection type
-  const filteredShortcuts = createMemo(() => {
-    return props.shortcuts.filter((shortcut) => {
-      const value = shortcut.getValue();
-      const isSingleShortcut = value.date && !value.startDate && !value.endDate;
-      const isRangeShortcut = value.startDate && value.endDate;
-
-      // For single/multiple type, show only single-date shortcuts
-      if (props.type() === 'single' || props.type() === 'multiple') {
-        return isSingleShortcut;
-      }
-      // For range type, show only range shortcuts
-      if (props.type() === 'range') {
-        return isRangeShortcut;
-      }
-      return true;
-    });
-  });
-
-  return (
-    <div class="flex min-w-[120px] flex-col gap-1 border-r border-gray-300 pr-3 dark:border-neutral-800">
-      <For each={filteredShortcuts()}>
-        {(shortcut) => (
-          <button
-            type="button"
-            onClick={() => props.onSelect(shortcut.getValue())}
-            class="rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-          >
-            {shortcut.label}
-          </button>
-        )}
-      </For>
-    </div>
-  );
-};
+// CalendarProps re-exported from Calendar.tsx
+export type { CalendarProps } from './Calendar';
 
 /**
  * DatePicker component for selecting dates with calendar popup.
@@ -823,12 +235,15 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const [second, setSecond] = createSignal(0);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
-  const [calendarRef, setCalendarRef] = createSignal<HTMLDivElement | undefined>();
+  const [announcement, setAnnouncement] = createSignal('');
 
   const { locale, shortcuts: contextShortcuts } = useDatePicker();
 
   const l = createMemo(() => ({ ...DEFAULT_DATE_PICKER_LABELS, ...props.labels }));
-  const a = createMemo(() => ({ ...DEFAULT_DATE_PICKER_ARIA_LABELS, ...props.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_DATE_PICKER_ARIA_LABELS,
+    ...props.ariaLabels,
+  }));
 
   const helperId = createUniqueId();
 
@@ -842,6 +257,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const minuteStep = () => props.minuteStep ?? 1;
   const secondStep = () => props.secondStep ?? 1;
   const maxDate = () => (props.maxDate ? parseDate(props.maxDate) : undefined);
+
+  // Footer
+  const showFooter = () => props.showFooter ?? false;
+  const hasFooter = () => showFooter() || showTime();
 
   // Shortcuts
   const showShortcuts = () => props.showShortcuts ?? false;
@@ -898,6 +317,16 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   });
 
   /**
+   * Closes the calendar, clears focused date, returns focus to input, and fires onBlur.
+   */
+  const closeCalendar = () => {
+    setIsOpen(false);
+    setFocusedDate(null);
+    inputRef()?.focus();
+    props.onBlur?.();
+  };
+
+  /**
    * Notifies parent of value changes.
    */
   const notifyChange = (value: DateValue) => {
@@ -926,41 +355,95 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   };
 
   /**
-   * Handles time picker submit - fires onChange with complete date/time value.
+   * Builds the current value from the store state.
    */
-  const handleTimeSubmit = () => {
-    if (datesObjectValue.date) {
-      const newValue: DateValue = {
-        date: datesObjectValue.date,
-        hour: hour(),
-        minute: minute(),
-        second: second(),
-      };
-      setDatesObjectValue(newValue);
-      notifyChange(newValue);
-      setIsOpen(false);
+  const buildCurrentValue = (): DateValue => {
+    switch (type()) {
+      case 'single': {
+        const value: DateValue = { date: datesObjectValue.date };
+        if (showTime()) {
+          value.hour = hour();
+          value.minute = minute();
+          value.second = second();
+        }
+        return value;
+      }
+      case 'multiple':
+        return { multipleDates: datesObjectValue.multipleDates };
+      case 'range':
+        return {
+          startDate: datesObjectValue.startDate,
+          endDate: datesObjectValue.endDate,
+        };
+      default:
+        return {};
     }
+  };
+
+  /**
+   * Handles Cancel button click - resets to last committed value and closes.
+   */
+  const handleCancel = () => {
+    // Reset store to the value from props (last committed value)
+    if (props.value) {
+      setDatesObjectValue(reconcile(props.value));
+      if (props.value.hour !== undefined) setHour(props.value.hour);
+      if (props.value.minute !== undefined) setMinute(props.value.minute);
+      if (props.value.second !== undefined) setSecond(props.value.second);
+    } else {
+      setDatesObjectValue(reconcile({}));
+      setHour(0);
+      setMinute(0);
+      setSecond(0);
+    }
+    closeCalendar();
+  };
+
+  /**
+   * Handles Apply button click - fires onChange and closes.
+   */
+  const handleApply = () => {
+    const value = buildCurrentValue();
+    setDatesObjectValue(value);
+    notifyChange(value);
+    closeCalendar();
   };
 
   const selectDate = (date: Date) => {
     const dateISO = toISO(date);
+    const dateLabel = date.toLocaleDateString(props.locale || locale, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
 
     switch (type()) {
       case 'single': {
         if (showTime()) {
           // When time picker is shown, just update date selection
-          // User will confirm with submit button
+          // User will confirm with footer Apply button
           setDatesObjectValue({
             date: dateISO,
             hour: hour(),
             minute: minute(),
             second: second(),
           });
+          announce(`Selected ${dateLabel}`);
+          focusCurrentDateButton();
+        } else if (hasFooter()) {
+          // When footer is shown, don't fire onChange or close — wait for Apply
+          const newValue: DateValue = { date: dateISO };
+          setDatesObjectValue(newValue);
+          announce(`Selected ${dateLabel}`);
+          focusCurrentDateButton();
         } else {
           const newValue: DateValue = { date: dateISO };
           setDatesObjectValue(newValue);
           notifyChange(newValue);
+          announce(`Selected ${dateLabel}`);
           setIsOpen(false);
+          props.onBlur?.();
         }
         break;
       }
@@ -968,11 +451,16 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         let newDates: string[];
         if (datesObjectValue.multipleDates?.includes(dateISO)) {
           newDates = datesObjectValue.multipleDates.filter((d) => d !== dateISO);
+          announce(`Deselected ${dateLabel}`);
         } else {
           newDates = [...(datesObjectValue.multipleDates || []), dateISO];
+          announce(`Selected ${dateLabel}`);
         }
         setDatesObjectValue('multipleDates', newDates);
-        notifyChange({ multipleDates: newDates });
+        if (!hasFooter()) {
+          notifyChange({ multipleDates: newDates });
+        }
+        focusCurrentDateButton();
         break;
       }
       case 'range': {
@@ -982,7 +470,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         ) {
           const newValue = { startDate: dateISO, endDate: undefined };
           setDatesObjectValue(newValue);
-          notifyChange(newValue);
+          if (!hasFooter()) {
+            notifyChange(newValue);
+          }
+          announce(`Range start: ${dateLabel}. ${a().rangeStartSelected}`);
+          focusCurrentDateButton();
         } else if (datesObjectValue.startDate && !datesObjectValue.endDate) {
           const startDateParsed = parseDate(datesObjectValue.startDate);
           let newValue: DateValue;
@@ -998,8 +490,15 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             };
           }
           setDatesObjectValue(newValue);
-          notifyChange(newValue);
-          setIsOpen(false);
+          if (hasFooter()) {
+            announce(`Range end: ${dateLabel}. Range selected.`);
+            focusCurrentDateButton();
+          } else {
+            notifyChange(newValue);
+            announce(`Range end: ${dateLabel}. Range selected.`);
+            setIsOpen(false);
+            props.onBlur?.();
+          }
         }
         break;
       }
@@ -1023,9 +522,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         : { date: value.date };
       setDatesObjectValue(newValue);
       setCurrentDate(parseDate(value.date));
-      if (showTime()) {
-        // When time picker is shown, don't fire onChange - wait for submit
-      } else {
+      if (!hasFooter()) {
         notifyChange(newValue);
         setIsOpen(false);
       }
@@ -1036,9 +533,13 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         endDate: value.endDate,
       };
       setDatesObjectValue(newValue);
-      notifyChange(newValue);
       setCurrentDate(parseDate(value.startDate));
-      setIsOpen(false);
+      if (hasFooter()) {
+        // Wait for Apply
+      } else {
+        notifyChange(newValue);
+        setIsOpen(false);
+      }
     }
   };
 
@@ -1083,7 +584,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   };
 
   /**
-   * Checks if a date is disabled based on min/max constraints.
+   * Checks if a date is disabled based on min/max constraints and custom disabledDates function.
    * Compares at day level to ignore time components.
    */
   const isDateDisabled = (date: Date): boolean => {
@@ -1093,24 +594,27 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
     if (min && dayStart < startOfDay(min)) return true;
     if (max && dayStart > startOfDay(max)) return true;
+    if (props.disabledDates?.(date)) return true;
     return false;
   };
 
   /**
    * Formats time for display based on format setting.
    */
+  const showSeconds = createMemo(() => props.showSeconds ?? false);
+
   const formatTime = (h: number, m: number, s: number): string => {
     const minStr = m.toString().padStart(2, '0');
-    const secStr = s.toString().padStart(2, '0');
+    const secPart = showSeconds() ? `:${s.toString().padStart(2, '0')}` : '';
     if (timeFormat() === '12h') {
       const period = h >= 12 ? 'PM' : 'AM';
       const hour12 = h % 12 || 12;
-      return `${hour12}:${minStr}:${secStr} ${period}`;
+      return `${hour12}:${minStr}${secPart} ${period}`;
     }
-    return `${h.toString().padStart(2, '0')}:${minStr}:${secStr}`;
+    return `${h.toString().padStart(2, '0')}:${minStr}${secPart}`;
   };
 
-  const getDisplayValue = (): string => {
+  const getDisplayValue = createMemo<string>(() => {
     switch (type()) {
       case 'single': {
         if (!datesObjectValue.date) return '';
@@ -1141,19 +645,38 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         }
         return '';
     }
+  });
+
+  /**
+   * Gets the initial date to focus when opening the calendar.
+   * Prioritizes: selected date > range start > first multiple date > today.
+   */
+  const getInitialFocusDate = (): Date => {
+    return (
+      (datesObjectValue.date && parseDate(datesObjectValue.date)) ||
+      (datesObjectValue.startDate && parseDate(datesObjectValue.startDate)) ||
+      (datesObjectValue.multipleDates?.[0] &&
+        parseDate(datesObjectValue.multipleDates[0])) ||
+      new Date()
+    );
+  };
+
+  /**
+   * Announces a message to screen readers via aria-live region.
+   */
+  const announce = (message: string) => {
+    setAnnouncement(message);
+    // Clear after announcement is read
+    setTimeout(() => setAnnouncement(''), 1000);
   };
 
   const handleInputClick = () => {
     if (!props.disabled && !props.isLoading) {
+      // Set focused date BEFORE opening so Calendar renders with the correct focus
+      setFocusedDate(getInitialFocusDate());
       setIsOpen(true);
-      const initialFocusDate =
-        (datesObjectValue.date && parseDate(datesObjectValue.date)) ||
-        (datesObjectValue.startDate && parseDate(datesObjectValue.startDate)) ||
-        (datesObjectValue.multipleDates?.[0] &&
-          parseDate(datesObjectValue.multipleDates[0])) ||
-        new Date();
-      if (!focusedDate()) setFocusedDate(initialFocusDate);
-      setTimeout(() => calendarRef()?.focus(), 10);
+      props.onFocus?.();
+      // Focus is handled by the createEffect that watches isMounted()
     }
   };
 
@@ -1176,36 +699,126 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   };
 
   /**
+   * Gets the reason why a date is disabled for screen reader announcement.
+   */
+  const getDisabledReason = (date: Date): string => {
+    const min = minDate();
+    const max = maxDate();
+    const dayStart = startOfDay(date);
+
+    if (min && dayStart < startOfDay(min)) return a().dateBeforeMin;
+    if (max && dayStart > startOfDay(max)) return a().dateAfterMax;
+    if (props.disabledDates?.(date)) return a().dateNotAvailable;
+    return a().dateNotAvailable;
+  };
+
+  /**
+   * Moves focused date to first day of the current month.
+   */
+  const moveToFirstDayOfMonth = () => {
+    const current = currentDate();
+    const firstDay = new Date(current.getFullYear(), current.getMonth(), 1);
+    setFocusedDate(firstDay);
+  };
+
+  /**
+   * Moves focused date to last day of the current month.
+   */
+  const moveToLastDayOfMonth = () => {
+    const current = currentDate();
+    const lastDay = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+    setFocusedDate(lastDay);
+  };
+
+  /**
    * Handles keyboard navigation within the calendar.
+   * Arrow keys only navigate dates when a date button (gridcell) is focused.
    */
   const handleCalendarKeyDown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    const isDateButton = target.getAttribute('role') === 'gridcell';
+
     switch (e.key) {
-      case 'Escape':
-        setIsOpen(false);
-        setFocusedDate(null);
-        inputRef()?.focus();
+      case 'Escape': {
+        // Don't close if a child Select dropdown was just open
+        // (Select's handler runs first in SolidJS delegation and closes it,
+        // but we can detect it consumed the event via defaultPrevented)
+        if (e.defaultPrevented) return;
+
+        closeCalendar();
         break;
+      }
       case 'ArrowLeft':
+        // Only navigate dates when a date button is focused
+        if (!isDateButton) break;
         e.preventDefault();
         moveFocusedDate(-1);
+        focusCurrentDateButton();
         break;
       case 'ArrowRight':
+        if (!isDateButton) break;
         e.preventDefault();
         moveFocusedDate(1);
+        focusCurrentDateButton();
         break;
       case 'ArrowUp':
+        if (!isDateButton) break;
         e.preventDefault();
         moveFocusedDate(-7);
+        focusCurrentDateButton();
         break;
       case 'ArrowDown':
+        if (!isDateButton) break;
         e.preventDefault();
         moveFocusedDate(7);
+        focusCurrentDateButton();
+        break;
+      case 'Home':
+        if (!isDateButton) break;
+        e.preventDefault();
+        moveToFirstDayOfMonth();
+        focusCurrentDateButton();
+        break;
+      case 'End':
+        if (!isDateButton) break;
+        e.preventDefault();
+        moveToLastDayOfMonth();
+        focusCurrentDateButton();
+        break;
+      case 'PageUp':
+        if (!isDateButton) break;
+        e.preventDefault();
+        // Move to previous month, same day
+        setCurrentDate(addMonths(currentDate(), -1));
+        {
+          const current = focusedDate() || currentDate();
+          const newDate = addMonths(current, -1);
+          setFocusedDate(newDate);
+        }
+        focusCurrentDateButton();
+        break;
+      case 'PageDown':
+        if (!isDateButton) break;
+        e.preventDefault();
+        // Move to next month, same day
+        setCurrentDate(addMonths(currentDate(), 1));
+        {
+          const current = focusedDate() || currentDate();
+          const newDate = addMonths(current, 1);
+          setFocusedDate(newDate);
+        }
+        focusCurrentDateButton();
         break;
       case 'Enter':
       case ' ': {
+        // Only select a date when a date button is focused
+        if (!isDateButton) break;
         e.preventDefault();
         const dateToSelect = focusedDate() || currentDate();
-        if (!isDateDisabled(dateToSelect)) {
+        if (isDateDisabled(dateToSelect)) {
+          // Announce why the date is not available
+          announce(getDisabledReason(dateToSelect));
+        } else {
           selectDate(dateToSelect);
         }
         break;
@@ -1220,10 +833,13 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
       e.preventDefault();
       if (!props.disabled && !props.isLoading) {
+        setFocusedDate(getInitialFocusDate());
         setIsOpen(true);
+        props.onFocus?.();
       }
     } else if (e.key === 'Escape') {
       setIsOpen(false);
+      props.onBlur?.();
     }
   };
 
@@ -1238,10 +854,62 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     isOpen: isMounted,
     offset: 4,
     get backgroundScrollBehavior() {
-      return props.backgroundScrollBehavior;
+      return props.backgroundScrollBehavior ?? 'prevent';
     },
     onClose: () => setIsOpen(false),
   });
+
+  /**
+   * Focuses the date button for the currently focused date.
+   */
+  const focusCurrentDateButton = () => {
+    const dateToFocus = focusedDate();
+    if (!dateToFocus) return;
+
+    const dateISO = toISO(dateToFocus);
+    // Use queueMicrotask to ensure we run after SolidJS batch updates
+    queueMicrotask(() => {
+      const floating = refs.floating();
+      if (floating) {
+        const dateBtn = floating.querySelector<HTMLButtonElement>(
+          `[data-date="${dateISO}"]`,
+        );
+        dateBtn?.focus({ preventScroll: true });
+      }
+    });
+  };
+
+  // Focus the date button and announce month/year when the calendar first becomes visible
+  createEffect(
+    on(isMounted, (mounted) => {
+      if (mounted && focusedDate()) {
+        focusCurrentDateButton();
+        // Announce which month/year is being viewed on initial open
+        const monthYear = currentDate().toLocaleDateString(props.locale || locale, {
+          month: 'long',
+          year: 'numeric',
+        });
+        announce(`${a().calendar}. Viewing ${monthYear}`);
+      }
+    }),
+  );
+
+  // Announce month/year changes for screen readers (after initial open)
+  createEffect(
+    on(
+      currentDate,
+      (date) => {
+        if (isOpen()) {
+          const monthYear = date.toLocaleDateString(props.locale || locale, {
+            month: 'long',
+            year: 'numeric',
+          });
+          announce(`Viewing ${monthYear}`);
+        }
+      },
+      { defer: true },
+    ),
+  );
 
   createEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1261,6 +929,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         !isInsideSelectDropdown
       ) {
         setIsOpen(false);
+        props.onBlur?.();
       }
     };
 
@@ -1278,6 +947,19 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
   return (
     <div class={twMerge('relative w-full text-gray-700 dark:text-neutral-200')}>
+      {/* Hidden input for form integration */}
+      <Show when={props.name}>
+        <input type="hidden" name={props.name} value={getDisplayValue()} />
+      </Show>
+      {/* Screen reader announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        class="sr-only"
+      >
+        {announcement()}
+      </div>
       <Show when={props.label}>
         <div class="mb-1 block">
           <Label value={props.label} color="gray" />
@@ -1332,6 +1014,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           <ClearContentButton
             onClick={() => {
               setDatesObjectValue(reconcile({}));
+              if (!hasFooter()) {
+                notifyChange({});
+              }
               focusInput();
             }}
           />
@@ -1344,7 +1029,106 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             ref={refs.setFloating}
             role="dialog"
             aria-label={a().chooseDate}
-            aria-modal="true"
+            onKeyDown={(e) => {
+              if (e.key !== 'Tab') return;
+
+              const floating = refs.floating();
+              if (!floating) return;
+
+              const active = document.activeElement as HTMLElement;
+              const isDateButton = active.getAttribute('role') === 'gridcell';
+
+              // Build ordered Tab stops. Each section is a single Tab stop:
+              // 1. Shortcuts listbox (single stop - arrow keys navigate within)
+              // 2. Calendar header buttons (prev month, month, year, next month)
+              // 3. Focused date button (the single gridcell with tabindex=0)
+              // 4. Time picker controls (inputs and buttons below calendar)
+
+              const allShortcutButtons = Array.from(
+                floating.querySelectorAll<HTMLElement>('[role="listbox"][aria-label] [role="option"]'),
+              ).filter((el) => el.closest('[role="grid"]') === null && el.offsetParent !== null);
+
+              // Shortcuts are a single Tab stop: use currently focused shortcut or first one
+              const isInShortcuts = allShortcutButtons.includes(active);
+              const shortcutTabStop = isInShortcuts
+                ? active
+                : allShortcutButtons[0] ?? null;
+
+              const calendarGrid = floating.querySelector('[role="grid"]');
+              const headerButtons = calendarGrid
+                ? Array.from(
+                    calendarGrid.querySelectorAll<HTMLElement>(
+                      '[data-calendar-header] button:not([disabled])',
+                    ),
+                  ).filter((el) => el.offsetParent !== null)
+                : [];
+
+              const focusedDateBtn = calendarGrid?.querySelector<HTMLElement>(
+                '[role="gridcell"][tabindex="0"]',
+              );
+
+              // Time picker controls (inputs, buttons outside header and grid)
+              const timePickerControls = Array.from(
+                floating.querySelectorAll<HTMLElement>(
+                  '[role="group"] input:not([disabled]), [role="group"] button:not([disabled])',
+                ),
+              ).filter(
+                (el) =>
+                  el.offsetParent !== null &&
+                  !headerButtons.includes(el) &&
+                  el !== focusedDateBtn &&
+                  el.closest('[role="grid"]') === null &&
+                  el.tabIndex !== -1,
+              );
+
+              // Footer buttons (Cancel, Apply)
+              const footerButtons = Array.from(
+                floating.querySelectorAll<HTMLElement>('[data-footer] button:not([disabled])'),
+              ).filter((el) => el.offsetParent !== null);
+
+              // Build the full ordered Tab stop list
+              const focusOrder: HTMLElement[] = [
+                ...(shortcutTabStop ? [shortcutTabStop] : []),
+                ...headerButtons,
+                ...(focusedDateBtn ? [focusedDateBtn] : []),
+                ...timePickerControls,
+                ...footerButtons,
+              ];
+
+              if (focusOrder.length === 0) return;
+
+              // Find current position in the focus order
+              let currentIndex = focusOrder.indexOf(active);
+
+              // If active element is a shortcut not the tab stop representative, map to shortcuts position
+              if (currentIndex === -1 && isInShortcuts && shortcutTabStop) {
+                currentIndex = focusOrder.indexOf(shortcutTabStop);
+              }
+
+              // If active element is a date button not in list (tabindex=-1), treat it as the focused date position
+              if (currentIndex === -1 && isDateButton && focusedDateBtn) {
+                currentIndex = focusOrder.indexOf(focusedDateBtn);
+              }
+
+              if (currentIndex === -1) return;
+
+              e.preventDefault();
+
+              let nextIndex: number;
+              if (e.shiftKey) {
+                nextIndex = currentIndex === 0 ? focusOrder.length - 1 : currentIndex - 1;
+              } else {
+                nextIndex = currentIndex === focusOrder.length - 1 ? 0 : currentIndex + 1;
+              }
+
+              const nextElement = focusOrder[nextIndex];
+              // If the next element is the focused date button, use focusCurrentDateButton for reactivity
+              if (nextElement === focusedDateBtn) {
+                focusCurrentDateButton();
+              } else {
+                nextElement.focus({ preventScroll: true });
+              }
+            }}
             style={
               {
                 ...floatingStyles(),
@@ -1365,11 +1149,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   shortcuts={shortcuts()}
                   onSelect={handleShortcutSelect}
                   type={type}
+                  ariaLabel={a().shortcuts}
+                  onEscape={closeCalendar}
                 />
               </Show>
               <div>
                 <Calendar
-                  ref={setCalendarRef}
                   currentDate={currentDate}
                   setCurrentDate={setCurrentDate}
                   selectDate={selectDate}
@@ -1384,8 +1169,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   calendarClass={props.calendarClass}
                   onKeyDown={handleCalendarKeyDown}
                   focusedDate={focusedDate}
+                  setFocusedDate={setFocusedDate}
                   weekStartsOn={props.weekStartsOn ?? 1}
                   ariaLabels={a()}
+                  announce={announce}
                 />
                 <Show when={showTime()}>
                   <TimePicker
@@ -1395,13 +1182,23 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                     onHourChange={handleHourChange}
                     onMinuteChange={handleMinuteChange}
                     onSecondChange={handleSecondChange}
-                    onSubmit={handleTimeSubmit}
+                    onEscape={closeCalendar}
                     format={timeFormat()}
                     minuteStep={minuteStep()}
                     secondStep={secondStep()}
-                    labels={l()}
+                    showSeconds={showSeconds()}
                     ariaLabels={a()}
                   />
+                </Show>
+                <Show when={hasFooter()}>
+                  <div class="flex justify-end gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800" data-footer>
+                    <Button color="light" size="sm" onClick={handleCancel}>
+                      {l().cancel}
+                    </Button>
+                    <Button size="sm" onClick={handleApply}>
+                      {l().apply}
+                    </Button>
+                  </div>
                 </Show>
               </div>
             </div>

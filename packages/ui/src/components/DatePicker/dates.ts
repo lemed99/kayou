@@ -31,8 +31,8 @@ export const formatDate = (date: Date | string, format: string): string => {
 };
 
 export const parseDate = (dateString: string): Date => {
-  const date = new Date(dateString);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
 };
 
 export const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -60,4 +60,12 @@ export const addMonths = (date: Date, months: number): Date => {
   return newDate;
 };
 
-export const toISO = (date: Date): string => date.toLocaleDateString('fr-CA');
+export const toISO = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+export const startOfDay = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());

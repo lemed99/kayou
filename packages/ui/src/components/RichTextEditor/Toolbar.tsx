@@ -288,14 +288,14 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled || !canUndo()}
               label={l().undo}
             >
-              <ReverseLeftIcon class="size-4" />
+              <ReverseLeftIcon />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().redo().run()}
               disabled={props.disabled || !canRedo()}
               label={l().redo}
             >
-              <ReverseRightIcon class="size-4" />
+              <ReverseRightIcon />
             </ToolbarButton>
           </ToolbarGroup>
         </Show>
@@ -323,12 +323,12 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                           onClick={() => setHeading(option.level)}
                           class={`flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-left text-sm transition-colors ${'text-gray-700 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-700'}`}
                         >
-                          <Show when={option.icon} fallback={<span class="size-4" />}>
-                            {option.icon && <option.icon class="size-4" />}
+                          <Show when={option.icon} fallback={<span />}>
+                            {option.icon && <option.icon />}
                           </Show>
                           <span class="flex-1">{option.label}</span>
                           <Show when={getCurrentHeadingLevel() === option.level}>
-                            <CheckIcon class="size-4" aria-hidden="true" />
+                            <CheckIcon aria-hidden="true" />
                           </Show>
                         </button>
                       )}
@@ -364,10 +364,10 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                           onClick={() => setList(option.type)}
                           class={`flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-left text-sm transition-colors ${'text-gray-700 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-700'}`}
                         >
-                          <option.icon class="size-4" />
+                          <option.icon />
                           <span class="flex-1">{option.label}</span>
                           <Show when={getCurrentListType() === option.type}>
-                            <CheckIcon class="size-4" aria-hidden="true" />
+                            <CheckIcon aria-hidden="true" />
                           </Show>
                         </button>
                       )}
@@ -381,17 +381,10 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                     disabled={props.disabled}
                     class="flex h-8 items-center gap-1 rounded px-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
                   >
-                    <Show
-                      when={getCurrentListType()}
-                      fallback={<ListIcon class="size-4" />}
-                    >
+                    <Show when={getCurrentListType()} fallback={<ListIcon />}>
                       {(listType) => {
                         const opt = listOptions().find((o) => o.type === listType());
-                        return opt ? (
-                          <opt.icon class="size-4" />
-                        ) : (
-                          <ListIcon class="size-4" />
-                        );
+                        return opt ? <opt.icon /> : <ListIcon />;
                       }}
                     </Show>
                     <ChevronDownIcon class="size-3" />
@@ -516,7 +509,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
                     } disabled:cursor-not-allowed disabled:opacity-50`}
                   >
-                    <HighlighterIcon class="size-4" />
+                    <HighlighterIcon />
                     <ChevronDownIcon class="size-3" />
                   </button>
                 </Tooltip>
@@ -555,7 +548,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
                         aria-label={l().applyLink}
                       >
-                        <CheckIcon class="size-4" />
+                        <CheckIcon />
                       </button>
                     </Tooltip>
                     <div class="mx-0.5 h-6 w-px bg-gray-200 dark:bg-neutral-700" />
@@ -567,7 +560,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
                         aria-label={l().openInNewWindow}
                       >
-                        <LinkExternal01Icon class="size-4" />
+                        <LinkExternal01Icon />
                       </button>
                     </Tooltip>
                     <Tooltip content={l().removeLink} placement="bottom">
@@ -578,7 +571,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-red-400"
                         aria-label={l().removeLink}
                       >
-                        <Trash01Icon class="size-4" />
+                        <Trash01Icon />
                       </button>
                     </Tooltip>
                   </div>
@@ -595,7 +588,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
                     } ${props.disabled ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
-                    <Link01Icon class="size-4" />
+                    <Link01Icon />
                   </button>
                 </Tooltip>
               </Popover>
@@ -612,7 +605,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().superscript}
             >
-              <SuperscriptIcon class="size-4" />
+              <SuperscriptIcon />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().toggleSubscript().run()}
@@ -620,7 +613,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().subscript}
             >
-              <SubscriptIcon class="size-4" />
+              <SubscriptIcon />
             </ToolbarButton>
           </ToolbarGroup>
         </Show>
@@ -637,7 +630,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().alignLeft}
             >
-              <AlignLeftIcon class="size-4" />
+              <AlignLeftIcon />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().setTextAlign('center').run()}
@@ -648,7 +641,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().alignCenter}
             >
-              <AlignCenterIcon class="size-4" />
+              <AlignCenterIcon />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().setTextAlign('right').run()}
@@ -659,7 +652,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().alignRight}
             >
-              <AlignRightIcon class="size-4" />
+              <AlignRightIcon />
             </ToolbarButton>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().setTextAlign('justify').run()}
@@ -670,7 +663,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().alignJustify}
             >
-              <AlignJustifyIcon class="size-4" />
+              <AlignJustifyIcon />
             </ToolbarButton>
           </ToolbarGroup>
         </Show>
@@ -683,7 +676,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().imageUpload}
             >
-              <Image01Icon class="size-4" />
+              <Image01Icon />
             </ToolbarButton>
           </ToolbarGroup>
         </Show>
@@ -698,7 +691,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
               disabled={props.disabled}
               label={l().clearFormatting}
             >
-              <EraserIcon class="size-4" />
+              <EraserIcon />
             </ToolbarButton>
           </ToolbarGroup>
         </Show>
