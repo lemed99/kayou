@@ -231,22 +231,20 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
     const examples = exampleTitles();
     const sections = visibleSectionsConfig();
 
-    queueMicrotask(() => {
-      const cache = new Map<string, HTMLElement>();
+    const cache = new Map<string, HTMLElement>();
 
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (el) cache.set(section.id, el);
-      }
+    for (const section of sections) {
+      const el = document.getElementById(section.id);
+      if (el) cache.set(section.id, el);
+    }
 
-      for (const title of examples) {
-        const id = getExampleId(title);
-        const el = document.getElementById(id);
-        if (el) cache.set(id, el);
-      }
+    for (const title of examples) {
+      const id = getExampleId(title);
+      const el = document.getElementById(id);
+      if (el) cache.set(id, el);
+    }
 
-      setElementCache(cache);
-    });
+    setElementCache(cache);
   });
 
   // Optimized scroll handler with throttling

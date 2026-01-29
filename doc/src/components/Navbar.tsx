@@ -168,7 +168,7 @@ const Navbar: Component = () => {
           </div>
 
           <div class="flex items-center">
-            {/* Center: Navigation Links */}
+            {/* Navigation Links */}
             <div class="hidden items-center gap-4 lg:flex">
               <For each={navLinks}>
                 {(link) => (
@@ -185,7 +185,7 @@ const Navbar: Component = () => {
                 )}
               </For>
             </div>
-            <div class="mx-4 h-8 w-1 border-r border-gray-200" />
+            <div class="mx-4 h-8 w-1 border-r border-gray-200 dark:border-neutral-700" />
             {/* Right: Search + GitHub + Dark Mode */}
             <div class="flex items-center gap-2">
               {/* Search Button */}
@@ -283,7 +283,7 @@ const Navbar: Component = () => {
                 <SearchRefractionIcon class="size-4" />
               </div>
               <input
-                ref={(el) => setTimeout(() => el.focus(), 0)}
+                ref={(el) => el.focus()}
                 type="text"
                 placeholder="Search documentation..."
                 value={searchQuery()}

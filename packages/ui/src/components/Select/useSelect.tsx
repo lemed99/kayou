@@ -15,6 +15,18 @@ import { type BackgroundScrollBehavior, useFloating } from '@kayou/hooks';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+import { type Option } from '../../shared';
+import HelperText from '../HelperText';
+import Label from '../Label';
+import { TextInputProps } from '../TextInput';
+import { VirtualList } from '../VirtualList';
+import {
+  CTA,
+  LazyLoading,
+  getScrollProgress,
+  optionsContainerClass,
+} from './selectUtils';
+
 export interface SelectLabels {
   noResults: string;
 }
@@ -33,19 +45,8 @@ export const DEFAULT_SELECT_ARIA_LABELS: SelectAriaLabels = {
   searchOptions: 'Search options',
 };
 
-import { getScrollProgress } from '../../helpers';
-import {
-  CTA,
-  LazyLoading,
-  type Option,
-  optionsContainerClass,
-} from '../../helpers/selectUtils';
-import HelperText from '../HelperText';
-import Label from '../Label';
-import { TextInputProps } from '../TextInput';
-import { VirtualList } from '../VirtualList';
-
-interface MergedSelectProps extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
+interface MergedSelectProps
+  extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
   options: Option[];
   value?: string;
   onSelect?: (option?: Option) => void;
@@ -73,7 +74,10 @@ const useSelect = <T extends MergedSelectProps>(
   type: 'select' | 'selectWithSearch' | 'multiSelect',
 ) => {
   const selectLabels = createMemo(() => ({ ...DEFAULT_SELECT_LABELS, ...props.labels }));
-  const selectAriaLabels = createMemo(() => ({ ...DEFAULT_SELECT_ARIA_LABELS, ...props.ariaLabels }));
+  const selectAriaLabels = createMemo(() => ({
+    ...DEFAULT_SELECT_ARIA_LABELS,
+    ...props.ariaLabels,
+  }));
 
   const [searchKey, setSearchKey] = createSignal('');
   const [selectedOption, setSelectedOption] = createSignal<Option | null>(null);
@@ -282,6 +286,23 @@ const useSelect = <T extends MergedSelectProps>(
     copy = false,
   ) => {
     const { key } = e;
+
+    // Open dropdown on Enter, Space, or ArrowDown when closed
+    if (!isOpen()) {
+      if (key === 'Enter' || key === ' ' || key === 'ArrowDown') {
+        e.preventDefault();
+        setIsOpen(true);
+        if (type === 'multiSelect' && props.withSearch === true) {
+          (searchRef() as HTMLElement)?.focus();
+          if (!searchKey()) setFilteredOptions(props.options);
+        }
+        if (type === 'selectWithSearch' && !searchKey()) {
+          setFilteredOptions(props.options);
+        }
+        return;
+      }
+    }
+
     if ((type === 'select' || type === 'multiSelect') && !copy) e.preventDefault();
 
     if (key === 'ArrowUp') {
@@ -346,7 +367,13 @@ const useSelect = <T extends MergedSelectProps>(
 
     if (key === 'Escape') {
       e.preventDefault();
+      e.stopPropagation();
       setIsOpen(false);
+      // Return focus to the combobox trigger
+      const ref = refs.reference();
+      const el = ref instanceof HTMLElement ? ref : null;
+      const combobox = el?.querySelector<HTMLElement>('[role="combobox"]') ?? el;
+      combobox?.focus();
       return;
     }
 

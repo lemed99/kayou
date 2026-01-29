@@ -81,7 +81,10 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        setContentWidth(entry.target.scrollWidth);
+        const newWidth = entry.target.scrollWidth;
+        if (newWidth !== contentWidth()) {
+          requestAnimationFrame(() => setContentWidth(newWidth));
+        }
       }
     });
     resizeObserver.observe(el);
