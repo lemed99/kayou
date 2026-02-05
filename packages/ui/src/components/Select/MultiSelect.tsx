@@ -51,11 +51,11 @@ export interface MultiSelectProps
   /** Custom element to render at the bottom of the dropdown */
   cta?: JSX.Element;
 
-  /** Whether lazy loading is currently in progress */
-  isLazyLoading?: boolean;
+  /** Whether more items are currently being loaded (infinite scroll) */
+  isLoadingMore?: boolean;
 
-  /** Callback fired when user scrolls near the bottom of the list */
-  onLazyLoad?: (scrollProgress: number) => void;
+  /** Callback fired when user scrolls near the bottom of the list (infinite scroll) */
+  onLoadMore?: (scrollProgress: number) => void;
 
   /** i18n labels for visible texts */
   labels?: Partial<SelectLabels>;
@@ -77,8 +77,8 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     'noSearchResultPlaceholder',
     'searchPlaceholder',
     'cta',
-    'isLazyLoading',
-    'onLazyLoad',
+    'isLoadingMore',
+    'onLoadMore',
     'helperText',
     'label',
     'required',
@@ -135,6 +135,8 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
             aria-haspopup="listbox"
             aria-expanded={isOpen()}
             aria-controls={listboxId}
+            inputMode="none"
+            autocomplete="off"
             style={{
               'caret-color': 'transparent',
               'padding-right': '36px',

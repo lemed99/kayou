@@ -90,7 +90,7 @@ const theme = {
         md: 'p-2.5 text-sm',
       },
       colors: {
-        gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400',
+        gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500',
         info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-400 dark:bg-blue-100 dark:focus:outline-blue-500',
         failure:
           'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:outline-red-500',

@@ -1,10 +1,21 @@
-import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { preventBackgroundScroll } from '@kayou/hooks';
 import { XCloseIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
+
+/**
+ * Get all focusable elements within a container.
+ */
+const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
+  const selector =
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+    (el) => el.offsetParent !== null,
+  );
+};
 
 export interface DrawerAriaLabels {
   close: string;
@@ -81,7 +92,7 @@ const theme = {
     },
     base: 'fixed z-[91]',
     inner: {
-      base: 'relative bg-white w-full h-full dark:bg-neutral-700 overflow-auto',
+      base: 'relative bg-white w-full h-full dark:bg-neutral-800 overflow-auto',
       positions: {
         top: 'rounded-b-lg',
         bottom: 'rounded-t-lg',
@@ -98,7 +109,7 @@ const theme = {
     base: 'flex items-start justify-between rounded-t dark:border-neutral-700 border-b p-5',
     popup: '!p-2 !border-b-0',
     close: {
-      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-600 dark:hover:text-white',
+      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
     },
   },
@@ -123,6 +134,48 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     if (props.show && drawerEl()) {
       preventBackgroundScroll(drawerEl()!);
     }
+  });
+
+  // Focus trap and Escape key handler
+  createEffect(() => {
+    if (!props.show || !drawerEl()) return;
+
+    const drawer = drawerEl()!;
+
+    // Focus the first focusable element when drawer opens
+    queueMicrotask(() => {
+      const focusable = getFocusableElements(drawer);
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        props.onClose(e as unknown as MouseEvent);
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        const focusable = getFocusableElements(drawer);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    onCleanup(() => document.removeEventListener('keydown', handleKeyDown));
   });
 
   const position = createMemo(() => props.position || 'right');

@@ -1,17 +1,17 @@
 import { createSignal } from 'solid-js';
 
 import {
-    BarChart01Icon,
-    BookOpen01Icon,
-    Headphones01Icon,
-    HelpCircleIcon,
-    Home01Icon,
-    Mail01Icon,
-    SearchSmIcon,
-    Settings01Icon,
-    Star01Icon,
-    Users01Icon,
-    XCloseIcon,
+  BarChart01Icon,
+  BookOpen01Icon,
+  Headphones01Icon,
+  HelpCircleIcon,
+  Home01Icon,
+  Mail01Icon,
+  SearchSmIcon,
+  Settings01Icon,
+  Star01Icon,
+  Users01Icon,
+  XCloseIcon,
 } from '@kayou/icons';
 
 import { Sidebar, type SidebarItem } from '@kayou/ui';
@@ -114,7 +114,7 @@ const fullLayoutItems: SidebarItem[] = [
     label: 'Home',
     icon: Home01Icon,
     path: '#home',
-    isActive: true,
+    isActive: false,
     pinnable: true,
   },
   {
@@ -239,7 +239,7 @@ export default function SidebarPage() {
         {
           term: 'Header Section',
           explanation:
-            'Fixed area at top with logo, custom content, header menu items, and pinned items. Optionally separated from body by a border (showHeaderBorder).',
+            'Fixed area at top with logo, custom content, header menu items, and pinned items. Automatically shows border when header items or pinned items exist.',
         },
         {
           term: 'Pinned Items',
@@ -249,7 +249,7 @@ export default function SidebarPage() {
         {
           term: 'Footer Section',
           explanation:
-            'Add menu items and custom content (e.g., promo cards) at the bottom. Optionally separated from body by a border (showFooterBorder).',
+            'Add menu items and custom content (e.g., promo cards) at the bottom.',
         },
       ]}
       props={[
@@ -347,18 +347,6 @@ export default function SidebarPage() {
           default: '-',
           description:
             'LocalStorage key for persisting pinned items. When provided, pinned items are automatically saved and restored.',
-        },
-        {
-          name: 'showHeaderBorder',
-          type: 'boolean',
-          default: 'true',
-          description: 'Whether to show the border between header and body sections.',
-        },
-        {
-          name: 'showFooterBorder',
-          type: 'boolean',
-          default: 'true',
-          description: 'Whether to show the border between body and footer sections.',
         },
         {
           name: 'labels',
@@ -468,7 +456,7 @@ export default function SidebarPage() {
           title: 'Basic Sidebar',
           description: 'Simple sidebar with navigation items and icons.',
           component: () => (
-            <div class="h-64 overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-64 overflow-hidden ">
               <Sidebar items={basicItems} isMobile={false} />
             </div>
           ),
@@ -477,7 +465,7 @@ export default function SidebarPage() {
           title: 'With Header and Toggle',
           description: 'Sidebar with header content and collapsible toggle button.',
           component: () => (
-            <div class="h-64 overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-200 dark:bg-neutral-900">
+            <div class="h-64 overflow-hidden  transition-all duration-200 ">
               <Sidebar
                 items={basicItems}
                 isMobile={false}
@@ -493,7 +481,7 @@ export default function SidebarPage() {
           title: 'Collapsible Sections',
           description: 'Sidebar with nested items that expand/collapse.',
           component: () => (
-            <div class="h-80 overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-200 dark:bg-neutral-900">
+            <div class="h-80 overflow-hidden  transition-all duration-200 ">
               <Sidebar
                 items={itemsWithCollapse}
                 isMobile={false}
@@ -509,7 +497,7 @@ export default function SidebarPage() {
           title: 'Collapsed Mode with Popovers',
           description: 'When collapsed, nested items appear in popovers on hover.',
           component: () => (
-            <div class="h-80 overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-200 dark:bg-neutral-900">
+            <div class="h-80 overflow-hidden  transition-all duration-200 ">
               <Sidebar
                 items={itemsWithCollapse}
                 isMobile={false}
@@ -525,7 +513,7 @@ export default function SidebarPage() {
           title: 'Click Actions',
           description: 'Items can use onClick instead of path for custom actions.',
           component: () => (
-            <div class="h-48 overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-48 overflow-hidden ">
               <Sidebar
                 items={[
                   {
@@ -550,7 +538,7 @@ export default function SidebarPage() {
           title: 'Notification Badges',
           description: 'Display notification counts or labels on menu items.',
           component: () => (
-            <div class="h-64 overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-64 overflow-hidden ">
               <Sidebar items={itemsWithBadges} isMobile={false} />
             </div>
           ),
@@ -559,7 +547,7 @@ export default function SidebarPage() {
           title: 'Footer with Menu Items',
           description: 'Add footer menu items and custom content like promo cards.',
           component: () => (
-            <div class="h-96 overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-96 overflow-hidden ">
               <Sidebar
                 items={basicItems}
                 isMobile={false}
@@ -578,7 +566,7 @@ export default function SidebarPage() {
           description:
             'Pin frequently used menu items (without children) or submenu items to the top for quick access. Hover over items to see the pin button. Uses localStorage to persist pinned items across sessions.',
           component: () => (
-            <div class="h-96 overflow-hidden rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-96 overflow-hidden ">
               <Sidebar
                 items={itemsWithPinnable}
                 isMobile={false}
@@ -594,9 +582,9 @@ export default function SidebarPage() {
         {
           title: 'Complete Layout',
           description:
-            'Full sidebar layout with header section (logo, header items, pinned), scrollable body (main menu), and footer section (promo card, footer items). Use showHeaderBorder and showFooterBorder props to control section separators.',
+            'Full sidebar layout with header section (logo, header items, pinned), scrollable body (main menu), and footer section (promo card, footer items). Header border appears automatically when header items or pinned items exist.',
           component: () => (
-            <div class="rounded-lg border border-gray-200 bg-white dark:bg-neutral-900">
+            <div class="h-[700px]">
               <Sidebar
                 items={fullLayoutItems}
                 isMobile={false}
@@ -607,7 +595,6 @@ export default function SidebarPage() {
                 pinnedLabel="Pinned"
                 footerContent={<PromoCard />}
                 footerItems={fullLayoutFooterItems}
-                showHeaderBorder
               >
                 <span class="text-lg font-bold">My App</span>
               </Sidebar>

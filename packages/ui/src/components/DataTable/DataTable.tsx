@@ -7,14 +7,16 @@ import {
   createMemo,
   createSignal,
   onCleanup,
+  untrack,
 } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 
-import { getScrollableAncestor } from '@kayou/hooks';
 import {
   Columns03Icon,
+  Expand01Icon,
   FilterFunnel01Icon,
   InfoCircleIcon,
-  Maximize01Icon,
+  Minimize01Icon,
   SearchRefractionIcon,
   XCloseIcon,
 } from '@kayou/icons';
@@ -23,13 +25,13 @@ import { twMerge } from 'tailwind-merge';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import { DynamicVirtualList } from '../DynamicVirtualList';
-import Modal from '../Modal';
 import Pagination from '../Pagination';
 import Select, { MultiSelect } from '../Select';
 import Skeleton from '../Skeleton';
 import Spinner from '../Spinner';
 import Tooltip from '../Tooltip';
 import { VirtualList } from '../VirtualList';
+import { useDataTableState } from './DataTableContext';
 import { DataTableFilters } from './DataTableFilters';
 import { FilterConfig, FilterState } from './types';
 import { useDataTableFilters } from './useDataTableFilters';
@@ -72,6 +74,8 @@ export interface DataTableColumnProps<T> {
   render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
   /** Column width as percentage of table width. */
   width: number;
+  /** Minimum column width in pixels. Defaults to 120. */
+  minWidth?: number;
   /** Tooltip text for the column header. */
   tooltip?: string;
 }
@@ -104,7 +108,7 @@ export interface DataTableProps<T> {
   searchBar?: boolean;
   /** Whether to allow column configuration. */
   configureColumns?: boolean;
-  /** Whether the table can be expanded to full view. */
+  /** Whether the table can be expanded to show all rows inline. */
   expandable?: boolean;
   /** Custom filter components. */
   filters?: JSX.Element;
@@ -116,12 +120,18 @@ export interface DataTableProps<T> {
   rowHeight?: number;
   /** Estimated row height for dynamic virtualization. */
   estimatedRowHeight?: number;
+  /** Whether more data is being loaded (infinite scroll). */
+  isLoadingMore?: boolean;
+  /** Callback fired when scrolling past 80% of the list (infinite scroll). Requires virtualization. */
+  onLoadMore?: (scrollProgress: number) => void;
   /** Message to display on error. */
   errorMessage: string;
   /** Message to display when no data. */
   noDataMessage: string;
   /** Text for the "see more" expand button. */
   seeMoreText: string;
+  /** Text for the collapse button when expanded. Defaults to seeMoreText. */
+  collapseText?: string;
   /** Text for the filter button. */
   filterButtonText?: string;
   /** Text label for elements per page control. */
@@ -152,6 +162,8 @@ export interface DataTableProps<T> {
   applyText?: string;
   /** Text when no filters are applied. */
   noFiltersText?: string;
+  /** Unique key for persisting table state to session storage. Requires DataTableProvider. */
+  storageKey?: string;
 }
 
 /**
@@ -162,7 +174,15 @@ export function DataTable<T extends Record<string, unknown>>(
   props: DataTableProps<T>,
 ): JSX.Element {
   const l = createMemo(() => ({ ...DEFAULT_DATA_TABLE_LABELS, ...props.labels }));
-  const a = createMemo(() => ({ ...DEFAULT_DATA_TABLE_ARIA_LABELS, ...props.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_DATA_TABLE_ARIA_LABELS,
+    ...props.ariaLabels,
+  }));
+
+  // State persistence (storageKey is a static identifier, won't change)
+  const storageKey = untrack(() => props.storageKey);
+  const { restoredState, isRestored, saveState } = useDataTableState(storageKey);
+
   const [searchKey, setSearchKey] = createSignal('');
   const [selectedRows, setSelectedRows] = createSignal<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = createSignal(1);
@@ -171,19 +191,24 @@ export function DataTable<T extends Record<string, unknown>>(
   const [tableRef, setTableRef] = createSignal<HTMLDivElement | undefined>();
   const [tableWidth, setTableWidth] = createSignal(0);
   const [searchRef, setSearchRef] = createSignal<HTMLInputElement | undefined>();
-  const [tableBodyContainerRef, setTableBodyContainerRef] = createSignal<
-    HTMLDivElement | undefined
+  const [virtualContainerRef, setVirtualContainerRef] = createSignal<
+    HTMLElement | undefined
   >();
-  const [tableRowsContainerRef, setTableRowsContainerRef] = createSignal<
-    HTMLDivElement | undefined
-  >();
-  const [fullView, setFullView] = createSignal(false);
-  const [hasScrolled, setHasScrolled] = createSignal(false);
+  const [expanded, setExpanded] = createSignal(false);
   const [rowGridStyle, setRowGridStyle] = createSignal('');
-  const [pageScroll, setPageScroll] = createSignal(0);
-  const [tableBodyHeight, setTableBodyHeight] = createSignal(0);
-  const [scrollTop, setScrollTop] = createSignal(0);
-  const [averageRowHeight, setAverageRowHeight] = createSignal(0);
+  const [headerRef, setHeaderRef] = createSignal<HTMLDivElement | undefined>();
+  const [rowWidth, setRowWidth] = createSignal(0);
+  // Compute a fixed rootHeight for virtualization when expanded
+  const expandedHeight = createMemo(() => {
+    const rh = props.rowHeight ?? props.estimatedRowHeight ?? 0;
+    if (rh === 0) return 400; // fallback
+    // Show ~10 rows worth of height, capped at 70vh equivalent (~600px)
+    return Math.min(rh * 10, 600);
+  });
+
+  const useVirtualization = createMemo(
+    () => expanded() && (!!props.rowHeight || !!props.estimatedRowHeight),
+  );
 
   // Filter system integration
   const filterHook = createMemo(() => {
@@ -197,6 +222,33 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
+  // Restore state from session storage
+  createEffect(() => {
+    if (!isRestored()) return;
+    const state = restoredState();
+    if (!state) return;
+
+    if (state.searchKey !== undefined) setSearchKey(state.searchKey);
+    if (state.expanded !== undefined) setExpanded(state.expanded);
+    if (state.currentPage !== undefined) setCurrentPage(state.currentPage);
+    if (state.perPage !== undefined) setPerPage(state.perPage);
+    if (state.selectedColumns !== undefined) {
+      setColumns(props.columns.filter((c) => state.selectedColumns!.includes(c.key)));
+    }
+  });
+
+  // Save state changes to session storage (debounced for scroll)
+  createEffect(() => {
+    if (!isRestored()) return;
+    saveState({
+      searchKey: searchKey(),
+      expanded: expanded(),
+      currentPage: currentPage(),
+      perPage: perPage(),
+      selectedColumns: columns().map((c) => c.key),
+    });
+  });
+
   // Base data after filter system is applied
   const baseData = createMemo(() => {
     const hook = filterHook();
@@ -205,18 +257,27 @@ export function DataTable<T extends Record<string, unknown>>(
   });
 
   const allSelected = createMemo(() => {
-    if (baseData().length === 0) return false;
-    return baseData().every((_, idx) => selectedRows().has(idx));
+    const len = baseData().length;
+    if (len === 0) return false;
+    return selectedRows().size === len;
   });
 
-  const ancestor = () => getScrollableAncestor(tableRef() || null) || window;
-
   createEffect(() => {
-    setColumns(
-      props.defaultColumns
-        ? props.columns.filter((c) => props.defaultColumns?.includes(c.key))
-        : props.columns,
-    );
+    // Track props.columns and props.defaultColumns as dependencies
+    const propsColumns = props.columns;
+    const defaultCols = props.defaultColumns;
+    // Read current columns without creating a dependency to avoid infinite loop
+    const currentKeys = untrack(() => columns().map((c) => c.key));
+    if (currentKeys.length === 0) {
+      setColumns(
+        defaultCols
+          ? propsColumns.filter((c) => defaultCols.includes(c.key))
+          : propsColumns,
+      );
+    } else {
+      const updated = propsColumns.filter((c) => currentKeys.includes(c.key));
+      setColumns(updated.length > 0 ? updated : propsColumns);
+    }
   });
 
   const toggleSelectAll = () => {
@@ -246,30 +307,34 @@ export function DataTable<T extends Record<string, unknown>>(
 
   const filteredData = createMemo(() => {
     const filtered = baseData();
-    if (fullView()) return filtered;
+    if (expanded()) return filtered;
     if (props.expandable && baseData().length > defaultRowsCount())
       return filtered.slice(0, defaultRowsCount());
     return filtered;
   });
 
   const sharedPercentage = () => {
+    if (columns().length === 0) return 0;
     const allColumnsPercentage = props.columns.reduce((acc, v) => acc + v.width, 0);
     const displayedColumnsPercentage = columns().reduce((acc, v) => acc + v.width, 0);
     return (allColumnsPercentage - displayedColumnsPercentage) / columns().length;
   };
 
   createEffect(() => {
-    const table = tableRef();
+    if (tableWidth() === 0) return;
+
     setRowGridStyle(
       `${props.rowSelection ? '40px ' : ''}${columns()
         .map((col, i) => {
-          const minWidth = Math.max(
-            0,
-            ...Array.from(
-              table?.querySelectorAll(`[data-column="${col.key}"]`) || [],
-            ).map((e) => (e as HTMLElement).offsetWidth),
-          );
-          return `minmax(${Math.max(0, minWidth + 48)}px, ${Math.max(0, (tableWidth() * (col.width + sharedPercentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`; // +48 because of px-6
+          const scope = tableRef();
+          const minWidth = scope
+            ? Math.max(
+                ...Array.from(scope.querySelectorAll(`[data-column="${col.key}"]`)).map(
+                  (e) => (e as HTMLElement).offsetWidth,
+                ),
+              )
+            : 0;
+          return `minmax(${Math.max(0, minWidth + 48)}px, ${Math.max(0, (tableWidth() * (col.width + sharedPercentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`;
         })
         .join(' ')}`,
     );
@@ -277,48 +342,129 @@ export function DataTable<T extends Record<string, unknown>>(
 
   createEffect(() => {
     let resizeObserver: ResizeObserver | undefined;
+    let rafId: number | undefined;
     if (tableRef()) {
       resizeObserver = new ResizeObserver(() => {
-        setTableWidth(tableRef()!.offsetWidth);
-        if (tableBodyContainerRef())
-          setTableBodyHeight(tableBodyContainerRef()!.offsetHeight);
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setTableWidth(tableRef()!.offsetWidth);
+        });
       });
       resizeObserver.observe(tableRef()!);
     }
-    onCleanup(() => resizeObserver?.disconnect());
+    onCleanup(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+    });
   });
 
+  // Track header row width for body container
   createEffect(() => {
-    const container = tableRowsContainerRef();
-    if (!container || !fullView() || hasScrolled()) return;
-    if (props.rowHeight) {
-      container.scrollTop = scrollTop();
-    } else if (props.estimatedRowHeight) {
-      container.scrollTo({
-        top: scrollTop(),
-        left: 0,
-        behavior: 'smooth',
+    let resizeObserver: ResizeObserver | undefined;
+    let rafId: number | undefined;
+    if (headerRef()) {
+      resizeObserver = new ResizeObserver(() => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setRowWidth(headerRef()!.offsetWidth);
+        });
       });
-      const st = setTimeout(() => setHasScrolled(true), 10);
-      onCleanup(() => clearTimeout(st));
+      resizeObserver.observe(headerRef()!);
     }
+    onCleanup(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+    });
   });
+
+  // Save and restore scroll position for virtualized lists
+  createEffect(() => {
+    const el = virtualContainerRef();
+    if (!el || !isRestored()) return;
+
+    // Restore scroll position
+    const state = restoredState();
+    if (state?.scrollTop !== undefined) {
+      el.scrollTop = state.scrollTop;
+    }
+
+    // Save scroll position on scroll (debounced)
+    let scrollSaveTimeout: ReturnType<typeof setTimeout> | undefined;
+    const handleScrollSave = () => {
+      if (scrollSaveTimeout) clearTimeout(scrollSaveTimeout);
+      scrollSaveTimeout = setTimeout(() => {
+        saveState({ scrollTop: el.scrollTop });
+      }, 200);
+    };
+
+    el.addEventListener('scroll', handleScrollSave, { passive: true });
+    onCleanup(() => {
+      if (scrollSaveTimeout) clearTimeout(scrollSaveTimeout);
+      el.removeEventListener('scroll', handleScrollSave);
+    });
+  });
+
+  // Infinite scroll for virtualized lists
+  createEffect(() => {
+    if (!useVirtualization() || !props.onLoadMore) return;
+
+    const el = virtualContainerRef();
+    if (!el) return;
+
+    let lastScrollTop = el.scrollTop;
+    let ticking = false;
+
+    const getScrollProgress = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const scrollable = scrollHeight - clientHeight;
+      if (scrollable <= 0) return 100;
+      return Math.min(100, Math.max(0, (scrollTop / scrollable) * 100));
+    };
+
+    const handleInfiniteScroll = () => {
+      const current = el.scrollTop;
+      const isScrollingDown = current > lastScrollTop;
+      lastScrollTop = current <= 0 ? 0 : current;
+
+      if (!isScrollingDown || ticking) return;
+
+      const progress = getScrollProgress();
+      if (progress < 80) return;
+
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (!props.isLoadingMore) {
+          props.onLoadMore?.(progress);
+        }
+        ticking = false;
+      });
+    };
+
+    el.addEventListener('scroll', handleInfiniteScroll, { passive: true });
+    onCleanup(() => el.removeEventListener('scroll', handleInfiniteScroll));
+  });
+
+  const baseRowClass = createMemo(() =>
+    twMerge(
+      'grid w-fit bg-white hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/50',
+      'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
+    ),
+  );
 
   const List = (row: T, index: Accessor<number>) => (
     <div
-      class={twMerge(
-        'grid w-fit bg-white hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-700',
-        fullView()
-          ? ''
-          : 'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
-        selectedRows().has(index()) ? 'bg-neutral-100 dark:bg-neutral-800' : '',
-      )}
+      role="row"
+      class={
+        selectedRows().has(index())
+          ? `${baseRowClass()} bg-neutral-100 dark:bg-neutral-800`
+          : baseRowClass()
+      }
       style={{
         'grid-template-columns': rowGridStyle(),
       }}
     >
       <Show when={props.rowSelection}>
-        <div class="flex items-center py-3 pl-6">
+        <div role="cell" class="flex items-center py-3 pl-6">
           <Checkbox
             checked={selectedRows().has(index())}
             onChange={() => toggleSelectRow(index())}
@@ -329,7 +475,10 @@ export function DataTable<T extends Record<string, unknown>>(
 
       <For each={columns()}>
         {(column) => (
-          <div class="flex items-center truncate px-6 py-4 text-gray-900 dark:text-white">
+          <div
+            role="cell"
+            class="flex shrink-0 items-center px-6 py-4 text-gray-900 dark:text-white"
+          >
             <Show
               when={column.render}
               fallback={<span data-column={column.key}>{String(row[column.key])}</span>}
@@ -350,26 +499,45 @@ export function DataTable<T extends Record<string, unknown>>(
     </div>
   );
 
-  const VProps = () => ({
-    items: filteredData,
-    rootHeight: tableBodyHeight(),
-    overscanCount: 3,
-    containerPadding: 0,
-    containerWidth: '100%',
-    setContainerRef: setTableRowsContainerRef,
-    setScrollPosition: setScrollTop,
-    fallback: <NoItemsComponent />,
-    rowClass: 'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
-  });
+  const LoadingMoreSpinner = () => (
+    <Show when={props.isLoadingMore}>
+      <div class="flex items-center justify-center py-3">
+        <Spinner color="gray" size="sm" />
+      </div>
+    </Show>
+  );
 
-  const Table = () => {
-    return (
+  const VirtualizedList = () => (
+    <Dynamic
+      component={props.rowHeight ? VirtualList : DynamicVirtualList}
+      items={() => filteredData() as unknown as readonly unknown[]}
+      rootHeight={expandedHeight()}
+      rowHeight={props.rowHeight ? props.rowHeight + 1 : undefined!} // +1 because of rowClass border-b
+      estimatedRowHeight={
+        props.estimatedRowHeight ? props.estimatedRowHeight + 1 : undefined!
+      }
+      containerWidth="100%"
+      containerPadding={0}
+      fallback={<NoItemsComponent />}
+      setContainerRef={setVirtualContainerRef}
+      loading={<LoadingMoreSpinner />}
+      rowClass="border-b border-gray-200 last:border-b-0 dark:border-neutral-800"
+    >
+      {(item: unknown, index: Accessor<number>) => List(item as T, index)}
+    </Dynamic>
+  );
+
+  const hasToolbar = createMemo(
+    () =>
+      !!filterHook() || !!(props.filters && !filterHook()) || !!props.configureColumns,
+  );
+
+  return (
+    <div class="w-full min-w-0">
       <div
         ref={setTableRef}
-        class={twMerge(
-          'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900',
-          fullView() ? 'mt-2 h-[calc(100%-8px)]' : 'h-auto',
-        )}
+        role="table"
+        class="flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
       >
         {/* Search Section */}
         <Show when={props.searchBar}>
@@ -402,68 +570,72 @@ export function DataTable<T extends Record<string, unknown>>(
           </div>
         </Show>
 
-        {/* Filter System Section (when filterConfigs is provided) */}
-        <Show when={filterHook()}>
-          {(hook) => (
-            <DataTableFilters
-              filterConfigs={props.filterConfigs!}
-              activeFilters={hook().activeFilters}
-              setFilter={hook().setFilter}
-              removeFilter={hook().removeFilter}
-              clearFilters={hook().clearFilters}
-              getOperators={hook().getOperators}
-              filterButtonText={props.filterButtonText}
-              addFilterText={props.addFilterText}
-              resetText={props.resetText}
-              applyText={props.applyText}
-              noFiltersText={props.noFiltersText}
-              class={!props.searchBar ? 'rounded-t-lg' : ''}
-            />
-          )}
-        </Show>
-
-        {/* Custom Filters Section (legacy, when filters JSX is provided) */}
-        <Show when={props.filters && !filterHook()}>
+        {/* Toolbar: Filters + Chips + Columns + Expand */}
+        <Show when={hasToolbar()}>
           <div
             class={twMerge(
-              'flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-2 dark:border-neutral-800',
+              'flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-6 py-2 dark:border-neutral-800',
               !props.searchBar ? 'rounded-t-lg' : '',
             )}
           >
-            <div class="flex items-center">
-              <div class="flex items-center border-r border-gray-200 py-3 pr-6 dark:border-neutral-800">
-                <FilterFunnel01Icon class="mr-2 size-5" />
-                <p>{props.filterButtonText || l().filter}</p>
-                <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-white dark:text-neutral-600">
-                  {props.activeFilterCount ?? 0}
-                </span>
-              </div>
-              <div />
-            </div>
-            <Show when={props.configureColumns || props.expandable}>
-              <div class="flex items-center gap-2">
-                <Show when={props.configureColumns}>
-                  <MultiSelect
-                    sizing="sm"
-                    options={props.columns.map((c) => ({
-                      label: c.label,
-                      value: c.key,
-                    }))}
-                    onMultiSelect={(options) => {
-                      setColumns(
-                        props.columns.filter((c) =>
-                          options?.map((o) => o.value).includes(c.key),
-                        ),
-                      );
-                    }}
-                    values={columns().map((c) => c.key)}
-                    displayValue={l().columns}
-                    icon={() => <Columns03Icon class="size-5" />}
-                    fitContent={true}
+            {/* Left: Filters */}
+            <div class="flex min-w-0 flex-1 items-center gap-2">
+              {/* Filter System (when filterConfigs is provided) */}
+              <Show when={filterHook()}>
+                {(hook) => (
+                  <DataTableFilters
+                    filterConfigs={props.filterConfigs!}
+                    activeFilters={hook().activeFilters}
+                    setFilter={hook().setFilter}
+                    removeFilter={hook().removeFilter}
+                    clearFilters={hook().clearFilters}
+                    getOperators={hook().getOperators}
+                    filterButtonText={props.filterButtonText}
+                    addFilterText={props.addFilterText}
+                    resetText={props.resetText}
+                    applyText={props.applyText}
+                    noFiltersText={props.noFiltersText}
+                    showChips
                   />
-                </Show>
-              </div>
-            </Show>
+                )}
+              </Show>
+
+              {/* Custom Filters (legacy, when filters JSX is provided) */}
+              <Show when={props.filters && !filterHook()}>
+                <div class="flex items-center py-1">
+                  <FilterFunnel01Icon class="mr-2 size-5" />
+                  <p>{props.filterButtonText || l().filter}</p>
+                  <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-neutral-200 dark:text-neutral-900">
+                    {props.activeFilterCount ?? 0}
+                  </span>
+                </div>
+              </Show>
+            </div>
+
+            {/* Right: Columns + Expand */}
+            <div class="flex shrink-0 items-center gap-2">
+              {/* Column Configuration */}
+              <Show when={props.configureColumns}>
+                <MultiSelect
+                  sizing="sm"
+                  options={props.columns.map((c) => ({
+                    label: c.label,
+                    value: c.key,
+                  }))}
+                  onMultiSelect={(options) => {
+                    setColumns(
+                      props.columns.filter((c) =>
+                        options?.map((o) => o.value).includes(c.key),
+                      ),
+                    );
+                  }}
+                  values={columns().map((c) => c.key)}
+                  displayValue={l().columns}
+                  icon={() => <Columns03Icon class="size-5" />}
+                  fitContent={true}
+                />
+              </Show>
+            </div>
           </div>
         </Show>
 
@@ -476,7 +648,7 @@ export function DataTable<T extends Record<string, unknown>>(
             )}
           >
             <div class="flex items-center gap-3">
-              <Button size="xs" color="light">
+              <Button size="xs" color="light" aria-label="Bulk actions">
                 ···
               </Button>
               <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
@@ -486,156 +658,161 @@ export function DataTable<T extends Record<string, unknown>>(
           </div>
         </Show>
 
-        {/* Table Header */}
-        <div
-          class={twMerge(
-            'grid w-fit border-b border-gray-200 bg-gray-100 text-xs font-bold uppercase text-gray-700 dark:border-neutral-800 dark:bg-neutral-700 dark:text-neutral-400',
-            !props.searchBar &&
-              !props.filters &&
-              !(props.rowSelection && selectedRows().size > 0)
-              ? 'rounded-t-lg'
-              : '',
-          )}
-          style={{
-            'grid-template-columns': rowGridStyle(),
-          }}
-        >
-          <Show when={props.rowSelection}>
-            <div class="flex items-center py-3 pl-6">
-              <Checkbox
-                checked={allSelected()}
-                onChange={toggleSelectAll}
-                aria-label="Select all rows"
-              />
-            </div>
-          </Show>
-
-          <For each={columns()}>
-            {(column) => (
-              <div
-                class="flex items-center gap-1 whitespace-nowrap px-6 py-3"
-                title={column.tooltip || column.label}
-              >
-                <span>{column.label}</span>
-                <Show when={column.tooltip}>
-                  <Tooltip
-                    content={column.tooltip}
-                    theme="auto"
-                    placement="top"
-                    class="capitalize"
-                  >
-                    <InfoCircleIcon />
-                  </Tooltip>
-                </Show>
-              </div>
+        {/* Scrollable data area (header + body) */}
+        <div class="flex min-w-0 flex-col overflow-x-auto">
+          {/* Table Header */}
+          <div
+            ref={setHeaderRef}
+            role="row"
+            class={twMerge(
+              'grid w-fit border-b border-gray-200 bg-gray-100 text-xs font-bold uppercase text-gray-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
+              !props.searchBar &&
+                !props.filters &&
+                !hasToolbar() &&
+                !(props.rowSelection && selectedRows().size > 0)
+                ? 'rounded-t-lg'
+                : '',
             )}
-          </For>
-        </div>
-
-        {/* Table Body */}
-        <div
-          ref={(el) => (fullView() ? setTableBodyContainerRef(el) : void 0)}
-          class={twMerge('relative flex flex-col', fullView() ? 'grow' : '')}
-        >
-          <Show
-            when={!props.loading && !props.error}
-            fallback={
-              <div>
-                <Show when={props.loading}>
-                  <div
-                    role="status"
-                    aria-live="polite"
-                    aria-label={a().loadingData}
-                    class={twMerge('grid bg-white dark:bg-neutral-900')}
-                    style={{
-                      'grid-template-columns': rowGridStyle(),
-                    }}
-                  >
-                    <Show when={props.rowSelection}>
-                      <div class="flex items-center pl-6">
-                        <Skeleton width={16} height={16} />
-                      </div>
-                    </Show>
-                    <For each={columns()}>
-                      {() => (
-                        <div class="px-6 py-5">
-                          <Skeleton width={100} height={10} />
-                        </div>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-                <Show when={props.error}>
-                  <div
-                    role="alert"
-                    class="whitespace-nowrap px-6 py-4 text-center font-medium text-red-600 dark:text-red-400"
-                  >
-                    {props.errorMessage}
-                  </div>
-                </Show>
-              </div>
-            }
+            style={{
+              'grid-template-columns': rowGridStyle(),
+            }}
           >
-            <Show when={props.validating}>
-              <div
-                role="status"
-                aria-live="polite"
-                aria-label={a().refreshingData}
-                class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60 dark:bg-neutral-900/60"
-              >
-                <Spinner />
+            <Show when={props.rowSelection}>
+              <div role="columnheader" class="flex items-center py-3 pl-6">
+                <Checkbox
+                  checked={allSelected()}
+                  onChange={toggleSelectAll}
+                  aria-label="Select all rows"
+                />
               </div>
             </Show>
-            <Show when={props.rowHeight && fullView() && tableBodyHeight()}>
-              <VirtualList rowHeight={props.rowHeight!} {...VProps()}>
-                {List}
-              </VirtualList>
-            </Show>
-            <Show when={props.estimatedRowHeight && fullView() && tableBodyHeight()}>
-              <DynamicVirtualList
-                estimatedRowHeight={averageRowHeight() ?? props.estimatedRowHeight!}
-                setAverageRowHeight={setAverageRowHeight}
-                {...VProps()}
-              >
-                {List}
-              </DynamicVirtualList>
-            </Show>
-            <Show when={fullView() === false}>
-              <div>
+
+            <For each={columns()}>
+              {(column) => (
+                <div
+                  role="columnheader"
+                  class="flex items-center gap-1 whitespace-nowrap px-6 py-3"
+                  title={column.tooltip || column.label}
+                >
+                  <span>{column.label}</span>
+                  <Show when={column.tooltip}>
+                    <Tooltip
+                      content={column.tooltip}
+                      theme="auto"
+                      placement="top"
+                      class="capitalize"
+                    >
+                      <InfoCircleIcon aria-hidden="true" />
+                    </Tooltip>
+                  </Show>
+                </div>
+              )}
+            </For>
+          </div>
+
+          {/* Table Body */}
+          <div
+            role="rowgroup"
+            aria-busy={props.loading || props.validating}
+            class="relative flex flex-col"
+            style={{ width: `${rowWidth()}px` }}
+          >
+            <Show
+              when={!props.loading && !props.error}
+              fallback={
+                <div>
+                  <Show when={props.loading}>
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      aria-label={a().loadingData}
+                      class={twMerge('grid bg-white dark:bg-neutral-900')}
+                      style={{
+                        'grid-template-columns': rowGridStyle(),
+                      }}
+                    >
+                      <Show when={props.rowSelection}>
+                        <div class="flex items-center pl-6">
+                          <Skeleton width={16} height={16} />
+                        </div>
+                      </Show>
+                      <For each={columns()}>
+                        {() => (
+                          <div class="px-6 py-5">
+                            <Skeleton width={100} height={10} />
+                          </div>
+                        )}
+                      </For>
+                    </div>
+                  </Show>
+                  <Show when={props.error}>
+                    <div
+                      role="alert"
+                      class="whitespace-nowrap px-6 py-4 text-center font-medium text-red-600 dark:text-red-400"
+                    >
+                      {props.errorMessage}
+                    </div>
+                  </Show>
+                </div>
+              }
+            >
+              <Show when={props.validating}>
+                <div
+                  role="status"
+                  aria-live="polite"
+                  aria-label={a().refreshingData}
+                  class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60 dark:bg-neutral-900/60"
+                >
+                  <Spinner />
+                </div>
+              </Show>
+              {/* Virtualized rendering when expanded */}
+              <Show when={useVirtualization()}>
+                <VirtualizedList />
+              </Show>
+              {/* Plain rendering when not virtualized */}
+              <Show when={!useVirtualization()}>
+                {/* <div> */}
                 <For each={filteredData()} fallback={<NoItemsComponent />}>
                   {List}
                 </For>
-              </div>
+                {/* </div> */}
+              </Show>
             </Show>
-          </Show>
+          </div>
         </div>
 
-        {/* FullView trigger */}
-        <Show when={!props.validating && !props.loading}>
-          <Show
-            when={
-              props.expandable && baseData().length > defaultRowsCount() && !fullView()
-            }
+        {/* See more / Collapse trigger */}
+        <Show when={props.expandable && baseData().length > defaultRowsCount()}>
+          <button
+            type="button"
+            aria-expanded={expanded()}
+            onClick={() => setExpanded((v) => !v)}
+            class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
           >
-            <button
-              type="button"
-              onClick={() => {
-                setPageScroll((ancestor() as Element).scrollTop);
-                setFullView(true);
-              }}
-              class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
+            <Show
+              when={expanded()}
+              fallback={
+                <>
+                  <span>{props.seeMoreText}</span>
+                  <Expand01Icon
+                    class="size-3 transition-all group-hover:size-4"
+                    aria-hidden="true"
+                  />
+                </>
+              }
             >
-              <span>{props.seeMoreText}</span>
-              <Maximize01Icon
+              <span>{props.collapseText ?? props.seeMoreText}</span>
+              <Minimize01Icon
                 class="size-3 transition-all group-hover:size-4"
                 aria-hidden="true"
               />
-            </button>
-          </Show>
+            </Show>
+          </button>
         </Show>
 
         {/* Table Footer */}
-        <Show when={props.expandable && !fullView() ? false : (props.footer ?? true)}>
+        <Show when={props.footer ?? true}>
           <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row dark:border-neutral-800">
             <div class="flex items-center gap-4">
               <Show when={props.perPageControl}>
@@ -651,6 +828,7 @@ export function DataTable<T extends Record<string, unknown>>(
                     value={String(perPage())}
                     onSelect={(option) => setPerPage(Number(option?.value || 10))}
                     fitContent={true}
+                    aria-label={props.elementsPerPageText}
                   />
                   <span class="whitespace-nowrap text-sm text-gray-700 dark:text-neutral-300">
                     {props.elementsPerPageText}
@@ -669,28 +847,6 @@ export function DataTable<T extends Record<string, unknown>>(
           </div>
         </Show>
       </div>
-    );
-  };
-
-  const FullView = () => {
-    return (
-      <Modal
-        show={fullView()}
-        size="screen"
-        onClose={() => {
-          setFullView(false);
-          setHasScrolled(false);
-          ancestor().scroll(0, pageScroll());
-        }}
-      >
-        <Table />
-      </Modal>
-    );
-  };
-
-  return (
-    <Show when={fullView()} fallback={<Table />}>
-      <FullView />
-    </Show>
+    </div>
   );
 }

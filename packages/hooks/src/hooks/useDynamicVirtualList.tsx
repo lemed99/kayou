@@ -9,7 +9,7 @@ import {
 
 type DynamicVirtualListConfig<T extends readonly unknown[]> = {
   items: Accessor<T>;
-  rootHeight: number;
+  rootHeight: Accessor<number> | number;
   estimatedRowHeight: number;
   overscanCount: number;
   setScrollPosition?: (scrollTop: number) => void;
@@ -25,14 +25,18 @@ type DynamicVirtualListResult<T extends readonly unknown[]> = {
   totalItems: number;
 };
 
-export function useDynamicVirtualList<T extends readonly unknown[]>({
-  items,
-  rootHeight,
-  estimatedRowHeight,
-  overscanCount,
-  setScrollPosition,
-  setAverageRowHeight,
-}: DynamicVirtualListConfig<T>) {
+export function useDynamicVirtualList<T extends readonly unknown[]>(
+  config: DynamicVirtualListConfig<T>,
+) {
+  const {
+    items,
+    estimatedRowHeight,
+    overscanCount,
+    setScrollPosition,
+    setAverageRowHeight,
+  } = config;
+  const getRootHeight = () =>
+    typeof config.rootHeight === 'function' ? config.rootHeight() : config.rootHeight;
   const [scrollTop, setScrollTop] = createSignal(0);
   const [sizeMapVersion, setSizeMapVersion] = createSignal(0);
   const sizeMap = new Map<number, number>();
@@ -73,21 +77,24 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     // Clean up any existing observer for this index to prevent memory leaks
     cleanupObserver(capturedIndex);
 
+    let rafId: number | undefined;
     const observer = new ResizeObserver(() => {
-      // Only update if element is still connected to DOM
-      if (!el.isConnected) return;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        // Only update if element is still connected to DOM
+        if (!el.isConnected) return;
 
-      const currentLength = items().length;
-      if (capturedIndex >= currentLength) return;
+        const currentLength = items().length;
+        if (capturedIndex >= currentLength) return;
 
-      const newHeight = el.offsetHeight;
-      const currentHeight = sizeMap.get(capturedIndex);
+        const newHeight = el.offsetHeight;
+        const currentHeight = sizeMap.get(capturedIndex);
 
-      // Only update if height actually changed to prevent infinite loops
-      if (currentHeight !== newHeight) {
-        sizeMap.set(capturedIndex, newHeight);
-        setSizeMapVersion((v) => v + 1);
-      }
+        if (currentHeight !== newHeight) {
+          sizeMap.set(capturedIndex, newHeight);
+          setSizeMapVersion((v) => v + 1);
+        }
+      });
     });
     observer.observe(el);
     observerMap.set(capturedIndex, { observer, index: capturedIndex });
@@ -140,7 +147,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     }
 
     const st = scrollTop();
-    const rh = rootHeight;
+    const rh = getRootHeight();
     const ov = overscanCount;
 
     // Binary search to find the first visible item
@@ -169,22 +176,30 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
     };
   });
 
-  // Clean up observers outside visible range (side effect in effect, not memo)
+  // Clean up observers outside visible range (debounced to avoid running on every scroll)
+  let cleanupTimeoutId: ReturnType<typeof setTimeout> | undefined;
   createEffect(() => {
     const { startIndex, endIndex } = virtual();
-    observerMap.forEach((_, index) => {
-      if (index < startIndex || index >= endIndex) {
-        cleanupObserver(index);
-      }
-    });
+    if (cleanupTimeoutId) clearTimeout(cleanupTimeoutId);
+    cleanupTimeoutId = setTimeout(() => {
+      observerMap.forEach((_, index) => {
+        if (index < startIndex || index >= endIndex) {
+          cleanupObserver(index);
+        }
+      });
+    }, 150);
   });
 
+  let scrollRafId: number | undefined;
   const handleScroll = (e: Event) => {
     const el = e.target as HTMLElement;
-    if (el?.scrollTop !== undefined) {
+    if (el?.scrollTop === undefined) return;
+
+    if (scrollRafId) cancelAnimationFrame(scrollRafId);
+    scrollRafId = requestAnimationFrame(() => {
       setScrollTop(el.scrollTop);
       setScrollPosition?.(el.scrollTop);
-    }
+    });
   };
 
   const scrollToIndex = (index: number, behavior: ScrollBehavior = 'auto') => {
@@ -199,6 +214,8 @@ export function useDynamicVirtualList<T extends readonly unknown[]>({
   };
 
   onCleanup(() => {
+    if (cleanupTimeoutId) clearTimeout(cleanupTimeoutId);
+    if (scrollRafId) cancelAnimationFrame(scrollRafId);
     observerMap.forEach((entry) => entry.observer.disconnect());
     observerMap.clear();
     sizeMap.clear();

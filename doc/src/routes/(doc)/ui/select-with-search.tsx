@@ -51,8 +51,8 @@ export default function SelectWithSearchPage() {
           explanation: 'optionRowHeight enables rendering only visible options.',
         },
         {
-          term: 'Lazy Loading',
-          explanation: 'onLazyLoad callback enables infinite scroll patterns.',
+          term: 'Infinite Scroll',
+          explanation: 'onLoadMore callback enables loading more options on scroll.',
         },
       ]}
       relatedHooks={[
@@ -157,16 +157,17 @@ export default function SelectWithSearchPage() {
           description: 'Custom call-to-action element at bottom of dropdown',
         },
         {
-          name: 'isLazyLoading',
+          name: 'isLoadingMore',
           type: 'boolean',
           default: 'false',
-          description: 'Show loading spinner for lazy loading more options',
+          description: 'Show loading spinner when loading more options',
         },
         {
-          name: 'onLazyLoad',
+          name: 'onLoadMore',
           type: '(scrollProgress: number) => void',
           default: '-',
-          description: 'Callback when scrolling for infinite scroll/lazy loading',
+          description:
+            'Callback fired when scrolling down past 80% of the list. Use with isLoadingMore to load more options.',
         },
         {
           name: 'backgroundScrollBehavior',

@@ -24,10 +24,10 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> 
   noSearchResultPlaceholder?: string;
   /** Custom call-to-action element at bottom of dropdown. */
   cta?: JSX.Element;
-  /** Show loading spinner for lazy loading. */
-  isLazyLoading?: boolean;
-  /** Callback when scrolling for lazy loading. */
-  onLazyLoad?: (scrollProgress: number) => void;
+  /** Show loading spinner when loading more items (infinite scroll). */
+  isLoadingMore?: boolean;
+  /** Callback when user scrolls near bottom of list (infinite scroll). */
+  onLoadMore?: (scrollProgress: number) => void;
 }
 
 export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Element {
@@ -41,8 +41,8 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
     'optionRowHeight',
     'noSearchResultPlaceholder',
     'cta',
-    'isLazyLoading',
-    'onLazyLoad',
+    'isLoadingMore',
+    'onLoadMore',
     'helperText',
     'label',
     'required',
@@ -98,6 +98,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
             aria-activedescendant={getOptionId(highlightedOption())}
             aria-autocomplete="list"
             aria-haspopup="listbox"
+            autocomplete="off"
             {...otherProps}
           />
 

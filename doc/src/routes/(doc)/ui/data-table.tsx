@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-import { DataTable, type FilterConfig } from '@kayou/ui';
+import { DataTable, type FilterConfig, Select } from '@kayou/ui';
 import DocPage from '../../../components/DocPage';
 
 interface User extends Record<string, unknown> {
@@ -11,6 +11,7 @@ interface User extends Record<string, unknown> {
   status: string;
   age: number;
   department: string;
+  notes: string;
 }
 
 const sampleUsers: User[] = [
@@ -22,6 +23,7 @@ const sampleUsers: User[] = [
     status: 'active',
     age: 32,
     department: 'Engineering',
+    notes: 'Manages social media campaigns and brand partnerships. Also coordinates with the design team on quarterly launches.',
   },
   {
     id: 2,
@@ -31,6 +33,7 @@ const sampleUsers: User[] = [
     status: 'active',
     age: 28,
     department: 'Marketing',
+    notes: 'Team lead for the frontend platform.',
   },
   {
     id: 3,
@@ -40,6 +43,7 @@ const sampleUsers: User[] = [
     status: 'inactive',
     age: 45,
     department: 'Sales',
+    notes: 'On leave.',
   },
   {
     id: 4,
@@ -49,6 +53,7 @@ const sampleUsers: User[] = [
     status: 'active',
     age: 35,
     department: 'Engineering',
+    notes: 'Responsible for the component library documentation, code reviews, and onboarding new engineers. Previously worked on the design system at her last company.',
   },
   {
     id: 5,
@@ -58,6 +63,7 @@ const sampleUsers: User[] = [
     status: 'pending',
     age: 29,
     department: 'Support',
+    notes: 'Awaiting access approval.',
   },
   {
     id: 6,
@@ -67,6 +73,147 @@ const sampleUsers: User[] = [
     status: 'active',
     age: 41,
     department: 'HR',
+    notes: 'Handles recruitment pipeline and employee relations. Runs the monthly all-hands meeting and coordinates with department heads on headcount planning.',
+  },
+  {
+    id: 7,
+    name: 'Edward Kim',
+    email: 'edward@example.com',
+    role: 'User',
+    status: 'active',
+    age: 26,
+    department: 'Engineering',
+    notes: 'Junior developer.',
+  },
+  {
+    id: 8,
+    name: 'Fiona Garcia',
+    email: 'fiona@example.com',
+    role: 'Editor',
+    status: 'active',
+    age: 38,
+    department: 'Marketing',
+    notes: 'Content strategist overseeing blog posts, whitepapers, and case studies. Works closely with product marketing to align messaging across all channels and customer segments.',
+  },
+  {
+    id: 9,
+    name: 'George Chen',
+    email: 'george@example.com',
+    role: 'Admin',
+    status: 'active',
+    age: 50,
+    department: 'Engineering',
+    notes: 'VP of Engineering. Oversees infrastructure, platform, and product engineering teams.',
+  },
+  {
+    id: 10,
+    name: 'Hannah Lee',
+    email: 'hannah@example.com',
+    role: 'User',
+    status: 'inactive',
+    age: 31,
+    department: 'Sales',
+    notes: 'Transferred to the London office.',
+  },
+  {
+    id: 11,
+    name: 'Ivan Petrov',
+    email: 'ivan@example.com',
+    role: 'User',
+    status: 'active',
+    age: 27,
+    department: 'Support',
+    notes: 'Tier 2 support specialist handling escalations for enterprise customers. Also maintains the internal knowledge base and trains new support staff on tooling and processes.',
+  },
+  {
+    id: 12,
+    name: 'Julia Martinez',
+    email: 'julia@example.com',
+    role: 'Editor',
+    status: 'pending',
+    age: 33,
+    department: 'HR',
+    notes: 'New hire.',
+  },
+  {
+    id: 13,
+    name: 'Kevin O\'Brien',
+    email: 'kevin@example.com',
+    role: 'User',
+    status: 'active',
+    age: 44,
+    department: 'Sales',
+    notes: 'Enterprise account executive covering the APAC region. Consistently exceeds quarterly targets and mentors junior sales reps.',
+  },
+  {
+    id: 14,
+    name: 'Laura Nguyen',
+    email: 'laura@example.com',
+    role: 'Admin',
+    status: 'active',
+    age: 36,
+    department: 'Engineering',
+    notes: 'Security lead.',
+  },
+  {
+    id: 15,
+    name: 'Michael Taylor',
+    email: 'michael@example.com',
+    role: 'User',
+    status: 'active',
+    age: 30,
+    department: 'Marketing',
+    notes: 'Runs paid acquisition channels including Google Ads, LinkedIn, and programmatic display. Reports directly to the CMO on budget allocation and campaign ROI.',
+  },
+  {
+    id: 16,
+    name: 'Nina Patel',
+    email: 'nina@example.com',
+    role: 'User',
+    status: 'active',
+    age: 25,
+    department: 'Support',
+    notes: 'Recently promoted.',
+  },
+  {
+    id: 17,
+    name: 'Oscar Rivera',
+    email: 'oscar@example.com',
+    role: 'Editor',
+    status: 'inactive',
+    age: 39,
+    department: 'Engineering',
+    notes: 'Former tech writer. Left the company in Q3 but account is retained for documentation ownership and historical reference purposes.',
+  },
+  {
+    id: 18,
+    name: 'Patricia Wong',
+    email: 'patricia@example.com',
+    role: 'User',
+    status: 'active',
+    age: 42,
+    department: 'HR',
+    notes: 'Benefits coordinator.',
+  },
+  {
+    id: 19,
+    name: 'Quincy Adams',
+    email: 'quincy@example.com',
+    role: 'Admin',
+    status: 'active',
+    age: 48,
+    department: 'Sales',
+    notes: 'Regional VP. Manages a team of 12 across three offices and is responsible for the full North American sales pipeline, partner relationships, and annual planning.',
+  },
+  {
+    id: 20,
+    name: 'Rachel Green',
+    email: 'rachel@example.com',
+    role: 'User',
+    status: 'pending',
+    age: 24,
+    department: 'Marketing',
+    notes: 'Intern.',
   },
 ];
 
@@ -158,7 +305,12 @@ export default function DataTablePage() {
         {
           term: 'Expandable View',
           explanation:
-            '"See more" button opens full-screen modal when data exceeds defaultRowsCount.',
+            'Expand button in the toolbar shows all rows inline with virtualization when data exceeds defaultRowsCount.',
+        },
+        {
+          term: 'Infinite Scroll',
+          explanation:
+            'onLoadMore fires at 80% scroll when virtualization is enabled, allowing progressive data loading.',
         },
       ]}
       props={[
@@ -261,7 +413,7 @@ export default function DataTablePage() {
           type: 'boolean',
           default: 'false',
           description:
-            'Whether the table can expand to full-view mode when data exceeds defaultRowsCount',
+            'Whether the table can expand inline to show all rows when data exceeds defaultRowsCount',
         },
         {
           name: 'defaultRowsCount',
@@ -306,6 +458,20 @@ export default function DataTablePage() {
           default: '-',
           description:
             'Estimated row height for dynamic virtualization when row heights vary',
+        },
+        {
+          name: 'isLoadingMore',
+          type: 'boolean',
+          default: 'false',
+          description:
+            'Shows loading spinner at the bottom of the list when loading more data (infinite scroll)',
+        },
+        {
+          name: 'onLoadMore',
+          type: '(scrollProgress: number) => void',
+          default: '-',
+          description:
+            'Callback fired when scrolling past 80% of the list. Requires virtualization (rowHeight or estimatedRowHeight) and expandable mode.',
         },
         {
           name: 'filterConfigs',
@@ -459,6 +625,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -477,6 +644,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -495,6 +663,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -514,6 +683,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
               filterButtonText="Filter"
@@ -539,6 +709,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -556,6 +727,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -573,6 +745,7 @@ export default function DataTablePage() {
               errorMessage="Failed to load users. Please try again."
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -581,19 +754,20 @@ export default function DataTablePage() {
         {
           title: 'Expandable Table',
           description:
-            'Table that shows limited rows with a "see more" button to expand to full view.',
+            'Table that shows limited rows with an expand button in the toolbar to show all rows inline.',
           component: () => (
             <DataTable
               data={sampleUsers}
               columns={columns}
               expandable
               defaultRowsCount={3}
-              rowHeight={56}
+              rowHeight={52}
               loading={false}
               error={null}
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
@@ -634,17 +808,118 @@ export default function DataTablePage() {
               errorMessage="Failed to load data"
               noDataMessage="No users found"
               seeMoreText="See more"
+              collapseText="See less"
               elementsPerPageText="per page"
               selectedElementsText={(count, total) => `${count} of ${total} selected`}
             />
           ),
         },
+        {
+          title: 'Complete Example',
+          description:
+            'Full-featured table with search, filters, row selection, pagination, column configuration, expandable view, and custom cell rendering.',
+          component: () => {
+            const departmentOptions = [
+              { value: 'Engineering', label: 'Engineering' },
+              { value: 'Marketing', label: 'Marketing' },
+              { value: 'Sales', label: 'Sales' },
+              { value: 'HR', label: 'HR' },
+              { value: 'Support', label: 'Support' },
+            ];
+
+            return (
+              <DataTable
+                data={sampleUsers}
+                columns={[
+                  { key: 'name', label: 'Name', width: 10, render: (value) => <span class='whitespace-nowrap'>{String(value)}</span> },
+                  { key: 'email', label: 'Email', width: 15 },
+                  {
+                    key: 'status',
+                    label: 'Status',
+                    width: 10,
+                    tooltip: 'Current account status',
+                    render: (value) => (
+                      <span
+                        class={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          value === 'active'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            : value === 'inactive'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                        }`}
+                      >
+                        {String(value)}
+                      </span>
+                    ),
+                  },
+                  { key: 'role', label: 'Role', width: 10 },
+                  { key: 'age', label: 'Age', width: 5 },
+                  {
+                    key: 'department',
+                    label: 'Department',
+                    width: 15,
+                    render: (value) => (
+                      <Select
+                        options={departmentOptions}
+                        value={String(value)}
+                        onSelect={() => {}}
+                        sizing="sm"
+                        fitContent
+                      />
+                    ),
+                  },
+                  {
+                    key: 'notes',
+                    label: 'Notes',
+                    width: 35,
+                    render: (value) => (
+                      <span class="w-64 block text-sm text-gray-600 dark:text-neutral-400">
+                        {String(value)}
+                      </span>
+                    ),
+                  },
+                ]}
+                searchBar
+                rowSelection
+                configureColumns
+                defaultColumns={['name', 'email', 'status', 'role', 'department', 'notes']}
+                expandable
+                defaultRowsCount={4}
+                estimatedRowHeight={56}
+                filterConfigs={filterConfigs}
+                filterButtonText="Filter"
+                addFilterText="Add filter"
+                resetText="Reset"
+                applyText="Apply"
+                pageTotal={3}
+                onPageChange={setPage}
+                perPageControl
+                footer
+                loading={false}
+                error={null}
+                errorMessage="Failed to load data"
+                noDataMessage="No users found"
+                seeMoreText="See more"
+              collapseText="See less"
+                elementsPerPageText="per page"
+                selectedElementsText={(count, total) => `${count} of ${total} selected`}
+              />
+            );
+          },
+        },
       ]}
       usage={`
         import { DataTable, type FilterConfig } from '@kayou/ui';
 
-        <DataTable data={users} columns={columns} loading={isLoading()} error={error()} errorMessage="Error" noDataMessage="No data" seeMoreText="See more" elementsPerPageText="per page" selectedElementsText={(c, t) => \`\${c}/\${t}\`} />
+        // Basic usage
+        <DataTable data={users} columns={columns} loading={isLoading()} error={error()} errorMessage="Error" noDataMessage="No data" seeMoreText="See more"
+              collapseText="See less" elementsPerPageText="per page" selectedElementsText={(c, t) => \`\${c}/\${t}\`} />
+
+        // With filters and pagination
         <DataTable data={users} columns={columns} rowSelection searchBar filterConfigs={filterConfigs} pageTotal={10} onPageChange={setPage} ... />
+
+        // With infinite scroll (requires expandable + virtualization)
+        <DataTable data={users} columns={columns} expandable rowHeight={56} isLoadingMore={isLoadingMore()} onLoadMore={() => fetchNextPage()} ... />
       `}
       relatedHooks={[
         {

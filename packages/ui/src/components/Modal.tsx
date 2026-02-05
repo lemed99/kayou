@@ -1,4 +1,4 @@
-import { JSX, Show, createEffect, createMemo, createSignal } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { XCloseIcon } from '@kayou/icons';
@@ -6,6 +6,17 @@ import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
 import { preventBackgroundScroll } from '@kayou/hooks';
+
+/**
+ * Get all focusable elements within a container.
+ */
+const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
+  const selector =
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+    (el) => el.offsetParent !== null,
+  );
+};
 
 export interface ModalAriaLabels {
   close: string;
@@ -58,19 +69,19 @@ export interface ModalProps
 
 const theme = {
   backdrop: {
-    base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
+    base: 'fixed z-[90] overflow-hidden inset-0 w-full h-dvh',
     show: 'bg-gray-900/50 dark:bg-neutral-900/80',
   },
   content: {
-    base: 'fixed inset-0 flex w-full h-full z-[91] p-4',
+    base: 'fixed inset-0 flex w-full h-dvh z-[91] p-4',
     inner:
-      'relative rounded-lg bg-white shadow dark:bg-neutral-700 w-full max-h-full flex flex-col overflow-hidden',
+      'relative rounded-lg bg-white shadow dark:bg-neutral-800 w-full max-h-full flex flex-col overflow-hidden',
     sizes: {
       sm: 'max-w-sm',
       md: 'max-w-md',
       lg: 'max-w-lg',
       xl: 'max-w-xl',
-      screen: 'h-full',
+      screen: 'h-dvh',
     },
     positions: {
       'top-center': 'items-start justify-center',
@@ -81,7 +92,7 @@ const theme = {
   header: {
     base: 'flex items-start justify-between rounded-t p-2 pb-0 shrink-0',
     close: {
-      base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-600 dark:hover:text-white',
+      base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
     },
   },
@@ -105,6 +116,48 @@ const Modal = (props: ModalProps): JSX.Element => {
     if (props.show && modalEl()) {
       preventBackgroundScroll(modalEl()!);
     }
+  });
+
+  // Focus trap and Escape key handler
+  createEffect(() => {
+    if (!props.show || !modalEl()) return;
+
+    const modal = modalEl()!;
+
+    // Focus the first focusable element when modal opens
+    queueMicrotask(() => {
+      const focusable = getFocusableElements(modal);
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        props.onClose(e as unknown as MouseEvent);
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        const focusable = getFocusableElements(modal);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    onCleanup(() => document.removeEventListener('keydown', handleKeyDown));
   });
 
   const transitionStyle = () => ({

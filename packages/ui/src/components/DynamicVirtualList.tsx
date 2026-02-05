@@ -42,9 +42,7 @@ export function DynamicVirtualList<
     get items() {
       return props.items;
     },
-    get rootHeight() {
-      return props.rootHeight;
-    },
+    rootHeight: () => props.rootHeight,
     get estimatedRowHeight() {
       return props.estimatedRowHeight;
     },
@@ -76,19 +74,22 @@ export function DynamicVirtualList<
       setContentWidth(el.clientWidth);
       setContentHeight(el.clientHeight);
 
+      let rafId: number | undefined;
       resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (entry) {
-          const newWidth = entry.target.clientWidth;
-          const newHeight = entry.target.clientHeight;
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            const newWidth = entry.target.clientWidth;
+            const newHeight = entry.target.clientHeight;
 
-          // Only update if dimensions actually changed to prevent infinite loops
-          if (newWidth !== contentWidth()) {
-            setContentWidth(newWidth);
-          }
-          if (newHeight !== contentHeight()) {
-            setContentHeight(newHeight);
-          }
+            if (newWidth !== contentWidth()) {
+              setContentWidth(newWidth);
+            }
+            if (newHeight !== contentHeight()) {
+              setContentHeight(newHeight);
+            }
+          });
         }
       });
       resizeObserver.observe(el);

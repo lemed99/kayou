@@ -18,8 +18,8 @@ export const optionClass = (option: Option, highlightedOption: Option | null) =>
   );
 };
 
-export const LazyLoading = (props: { isLazyLoading?: boolean }) => (
-  <Show when={props.isLazyLoading}>
+export const InfiniteScrollLoader = (props: { isLoadingMore?: boolean }) => (
+  <Show when={props.isLoadingMore}>
     <div class="p-1 text-center">
       <Spinner color="gray" size="xs" />
     </div>

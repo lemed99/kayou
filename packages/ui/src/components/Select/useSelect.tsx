@@ -22,7 +22,7 @@ import { TextInputProps } from '../TextInput';
 import { VirtualList } from '../VirtualList';
 import {
   CTA,
-  LazyLoading,
+  InfiniteScrollLoader,
   getScrollProgress,
   optionsContainerClass,
 } from './selectUtils';
@@ -61,8 +61,8 @@ interface MergedSelectProps
   optionRowHeight?: number;
   noSearchResultPlaceholder?: string;
   cta?: JSX.Element;
-  isLazyLoading?: boolean;
-  onLazyLoad?: (scrollProgress: number) => void;
+  isLoadingMore?: boolean;
+  onLoadMore?: (scrollProgress: number) => void;
   /** How to handle background scroll when dropdown is open. @default 'close' */
   backgroundScrollBehavior?: BackgroundScrollBehavior;
   labels?: Partial<SelectLabels>;
@@ -238,7 +238,7 @@ const useSelect = <T extends MergedSelectProps>(
   });
 
   createEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: PointerEvent) => {
       if (
         refs.floating() &&
         !refs.floating()?.contains(event.target as Node) &&
@@ -249,9 +249,9 @@ const useSelect = <T extends MergedSelectProps>(
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
 
-    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
+    onCleanup(() => document.removeEventListener('pointerdown', handleClickOutside));
   });
 
   createEffect(() => {
@@ -260,21 +260,32 @@ const useSelect = <T extends MergedSelectProps>(
       if (!el) return;
 
       let lastScrollTop = el.scrollTop;
-      let dir: 'up' | 'down' | 'none' = 'none';
+      let ticking = false;
 
-      const handleLazyLoading = () => {
+      const handleInfiniteScroll = () => {
         const current = el.scrollTop;
-        dir = current > lastScrollTop ? 'down' : current < lastScrollTop ? 'up' : 'none';
+        const isScrollingDown = current > lastScrollTop;
         lastScrollTop = current <= 0 ? 0 : current;
+
+        if (!isScrollingDown || ticking) return;
+
         const progress = getScrollProgress(el);
-        if (props.isLazyLoading) return;
-        if (dir !== 'down') return;
-        props.onLazyLoad?.(progress);
+
+        // Only trigger when near bottom (80%)
+        if (progress < 80) return;
+
+        ticking = true;
+        requestAnimationFrame(() => {
+          if (!props.isLoadingMore) {
+            props.onLoadMore?.(progress);
+          }
+          ticking = false;
+        });
       };
 
-      el.addEventListener('scroll', handleLazyLoading);
+      el.addEventListener('scroll', handleInfiniteScroll, { passive: true });
 
-      onCleanup(() => el.removeEventListener('scroll', handleLazyLoading));
+      onCleanup(() => el.removeEventListener('scroll', handleInfiniteScroll));
     }
   });
 
@@ -428,8 +439,8 @@ const useSelect = <T extends MergedSelectProps>(
                   {
                     ...floatingStyles(),
                     opacity: isVisible() ? '1' : '0',
-                    scale: isVisible() ? 1 : 0.8,
-                    'transition-property': 'opacity, scale',
+                    transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+                    'transition-property': 'opacity, transform',
                     'transition-duration': '.2s',
                     'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
                   } as JSX.CSSProperties
@@ -464,7 +475,7 @@ const useSelect = <T extends MergedSelectProps>(
                       >
                         {layoutProps.optionsComponent}
                       </For>
-                      <LazyLoading isLazyLoading={props.isLazyLoading} />
+                      <InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />
                     </div>
                   }
                 >
@@ -479,7 +490,7 @@ const useSelect = <T extends MergedSelectProps>(
                     role="listbox"
                     aria-multiselectable={type === 'multiSelect' ? true : undefined}
                     aria-label={props.label || selectAriaLabels().selectOptions}
-                    loading={<LazyLoading isLazyLoading={props.isLazyLoading} />}
+                    loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
                     setScrollPosition={setScrollTop}
                     fallback={
                       <div class="whitespace-nowrap px-2 py-1.5 text-sm">

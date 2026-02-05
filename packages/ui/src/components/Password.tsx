@@ -9,13 +9,7 @@ import {
   splitProps,
 } from 'solid-js';
 
-
-import {
-  CheckCircleBrokenIcon,
-  CircleIcon,
-  EyeIcon,
-  EyeOffIcon,
-} from '@kayou/icons';
+import { CheckCircleBrokenIcon, CircleIcon, EyeIcon, EyeOffIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import HelperText from './HelperText';
@@ -98,7 +92,8 @@ export const DEFAULT_PASSWORD_ARIA_LABELS: PasswordAriaLabels = {
   hidePassword: 'Hide password',
 };
 
-export interface PasswordProps extends Omit<TextInputProps, 'type' | 'labels' | 'ariaLabels'> {
+export interface PasswordProps
+  extends Omit<TextInputProps, 'type' | 'labels' | 'ariaLabels'> {
   /**
    * Show the password strength indicator.
    * @default false
@@ -300,8 +295,15 @@ export default function Password(props: PasswordProps): JSX.Element {
     }
   };
 
+  let inputRef: HTMLInputElement | undefined;
+
   const toggleVisibility = () => {
+    const cursorPos = inputRef?.selectionStart ?? passwordValue().length;
     setShowPassword((prev) => !prev);
+    // Restore cursor position after the type change
+    requestAnimationFrame(() => {
+      inputRef?.setSelectionRange(cursorPos, cursorPos);
+    });
   };
 
   // Determine color based on strength when password has value
@@ -316,17 +318,29 @@ export default function Password(props: PasswordProps): JSX.Element {
     return 'gray';
   });
 
+  const toggleIconColors: Record<string, string> = {
+    gray: 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-200',
+    info: 'text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300',
+    failure: 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300',
+    warning: 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300',
+    success: 'text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300',
+  };
+
   const ToggleButton = () => (
     <button
       type="button"
       onClick={toggleVisibility}
-      class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+      onMouseDown={(e) => e.preventDefault()}
+      class={twMerge(
+        'absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 transition-all',
+        toggleIconColors[computedColor()],
+      )}
       aria-label={
         showPassword()
           ? (local.hidePasswordLabel ?? a().hidePassword)
           : (local.showPasswordLabel ?? a().showPassword)
       }
-      tabIndex={-1}
+      tabIndex={0}
     >
       <Show when={showPassword()} fallback={<EyeIcon class="size-5" />}>
         <EyeOffIcon class="size-5" />
@@ -348,6 +362,7 @@ export default function Password(props: PasswordProps): JSX.Element {
       <div class="relative">
         <TextInput
           {...inputProps}
+          ref={(el) => (inputRef = el)}
           id={inputId()}
           type={showPassword() ? 'text' : 'password'}
           value={passwordValue()}
@@ -365,6 +380,10 @@ export default function Password(props: PasswordProps): JSX.Element {
         />
         <ToggleButton />
       </div>
+
+      <Show when={local.helperText}>
+        <HelperText content={local.helperText!} color={computedColor()} />
+      </Show>
 
       <Show when={local.showStrength && passwordValue()}>
         <div id={strengthId()} class={twMerge('mt-2', local.strengthClass)}>
@@ -437,10 +456,6 @@ export default function Password(props: PasswordProps): JSX.Element {
             </For>
           </ul>
         </div>
-      </Show>
-
-      <Show when={local.helperText}>
-        <HelperText content={local.helperText!} color={computedColor()} />
       </Show>
     </div>
   );

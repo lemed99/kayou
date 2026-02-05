@@ -94,6 +94,8 @@ export default function Select(props: SelectProps): JSX.Element {
             aria-controls={listboxId}
             aria-activedescendant={getOptionId(highlightedOption())}
             aria-haspopup="listbox"
+            inputMode="none"
+            autocomplete="off"
             style={{
               'caret-color': 'transparent',
               'padding-right': '36px',

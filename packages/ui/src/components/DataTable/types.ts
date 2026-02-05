@@ -1,6 +1,6 @@
 import { JSX } from 'solid-js';
 
-import { type Option } from '../../helpers';
+import { type Option } from '../../shared';
 
 /**
  * Filter operators supported by the DataTable filter system.
@@ -132,6 +132,8 @@ export interface DataTableColumnProps<T> {
   render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
   /** Column width as percentage of table width. */
   width: number;
+  /** Minimum column width in pixels. Defaults to 120. */
+  minWidth?: number;
   /** Tooltip text for the column header. */
   tooltip?: string;
   /** Optional inline filter configuration for this column. */

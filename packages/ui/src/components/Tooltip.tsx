@@ -81,15 +81,16 @@ const theme = {
   arrow: {
     base: 'absolute z-100',
     theme: {
-      dark: 'text-gray-700 dark:text-neutral-700',
-      light: 'text-white',
+      dark: 'text-neutral-700 dark:text-neutral-700',
+      light: 'text-white dark:text-neutral-900',
     },
   },
   base: 'inline-block z-100 rounded-lg py-2 px-3 text-sm w-max outline shadow-sm',
   hidden: 'invisible opacity-0',
   theme: {
-    dark: 'outline-gray-200 dark:outline-neutral-600 bg-gray-700 text-white dark:bg-neutral-700',
-    light: 'outline-gray-200 dark:outline-neutral-600 bg-white text-gray-900',
+    dark: 'outline-neutral-200 dark:outline-neutral-600 bg-neutral-700 text-white dark:bg-neutral-700',
+    light:
+      'outline-neutral-200 dark:outline-neutral-600 bg-white text-neutral-900 dark:bg-neutral-100 dark:text-neutral-900',
   },
 };
 
@@ -117,12 +118,13 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
 
   // Standalone theme detection (works without ThemeProvider)
   const detectThemeFromDOM = (): 'light' | 'dark' => {
+    if (typeof document === 'undefined') return 'dark';
     // Check for dark class on document (Tailwind convention)
     if (document.documentElement.classList.contains('dark')) {
       return 'dark';
     }
     // Check system preference
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
     return 'light';
@@ -131,6 +133,7 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
   // Theme detection: try ThemeProvider first, fall back to DOM/system detection
   createEffect(() => {
     if (merged.theme !== 'auto' && merged.theme !== 'invert') return;
+    if (typeof document === 'undefined') return; // Skip on server
 
     let themeContextAvailable = false;
     try {
@@ -224,8 +227,11 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
       <div
         class={twMerge('w-fit', merged.wrapperClass)}
         ref={refs.setReference}
+        tabIndex={0}
         onMouseEnter={handleShow}
         onMouseLeave={handleHide}
+        onTouchStart={handleShow}
+        onTouchEnd={handleHide}
         onFocusIn={handleShow}
         onFocusOut={handleHide}
         aria-describedby={showTooltip() && !props.hidden ? tooltipId : undefined}
@@ -243,8 +249,8 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
               {
                 ...floatingStyles(),
                 opacity: isVisible() ? '1' : '0',
-                scale: isVisible() ? 1 : 0.8,
-                'transition-property': 'opacity, scale',
+                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+                'transition-property': 'opacity, transform',
                 'transition-duration': '.2s',
                 'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
               } as JSX.CSSProperties

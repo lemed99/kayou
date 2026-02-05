@@ -58,9 +58,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     get items() {
       return props.items;
     },
-    get rootHeight() {
-      return props.rootHeight;
-    },
+    rootHeight: () => props.rootHeight,
     get rowHeight() {
       return props.rowHeight;
     },

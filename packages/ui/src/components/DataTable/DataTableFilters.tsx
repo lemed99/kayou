@@ -1,5 +1,6 @@
 import {
   Accessor,
+  For,
   Index,
   JSX,
   Match,
@@ -11,7 +12,13 @@ import {
   onCleanup,
 } from 'solid-js';
 
-import { FilterFunnel01Icon, InfoCircleIcon, PlusIcon, XCloseIcon } from '@kayou/icons';
+import {
+  ChevronDownIcon,
+  FilterFunnel01Icon,
+  InfoCircleIcon,
+  PlusIcon,
+  XCloseIcon,
+} from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import { type Option } from '../../shared';
@@ -339,6 +346,12 @@ export interface DataTableFiltersProps<T> {
   noFiltersText?: string;
   /** Custom class for the container. */
   class?: string;
+  /** Whether to show active filter chips inline next to the button. */
+  showChips?: boolean;
+  /** Maximum number of chips to show before overflow. @default 4 */
+  maxVisibleChips?: number;
+  /** Text for the "See more" overflow toggle. @default "See more" */
+  seeMoreChipsText?: string;
   /** i18n labels for visible text in the DataTableFilters UI. */
   labels?: Partial<DataTableFiltersLabels>;
   /** i18n aria-labels for the DataTableFilters UI. */
@@ -470,7 +483,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   createEffect(() => {
     if (!isOpen()) return;
 
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: PointerEvent) => {
       const target = event.target as HTMLElement;
 
       // Don't close if clicking inside a dropdown/listbox (Select options)
@@ -499,21 +512,21 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
     // Use setTimeout to avoid closing immediately on the same click that opened it
     const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('pointerdown', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
     }, 0);
 
     onCleanup(() => {
       clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     });
   });
 
-  const popoverContentWithAttr = (
+  const popoverContentWithAttr = () => (
     <div
       data-filter-popover
-      class="w-[520px] max-w-[calc(100vw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-neutral-900 dark:ring-neutral-700"
+      class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-neutral-900 dark:ring-neutral-700"
     >
       {/* Filter rows */}
       <div class="mb-4 space-y-3">
@@ -581,21 +594,113 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     </div>
   );
 
+  const maxChips = () => props.maxVisibleChips ?? 4;
+  const [showAllChips, setShowAllChips] = createSignal(false);
+
+  const activeFiltersList = createMemo(() => {
+    const filters: ActiveFilter[] = [];
+    props.activeFilters().forEach((f) => filters.push(f));
+    return filters;
+  });
+
+  const visibleChips = createMemo(() => {
+    const all = activeFiltersList();
+    if (showAllChips() || all.length <= maxChips()) return all;
+    return all.slice(0, maxChips());
+  });
+
+  const overflowCount = createMemo(() => {
+    const all = activeFiltersList();
+    if (all.length <= maxChips()) return 0;
+    return all.length - maxChips();
+  });
+
+  const getChipLabel = (filter: ActiveFilter): string => {
+    const config = props.filterConfigs.find((fc) => fc.key === filter.key);
+    const label = config?.label || filter.key;
+    const value = filter.value;
+    if (value === null || value === undefined) return label;
+    if (Array.isArray(value)) return `${label}: ${value.join(', ')}`;
+    return `${label} ${String(value)}`;
+  };
+
   return (
-    <div class={twMerge('inline-flex', props.class)}>
+    <div class={twMerge('flex min-w-0 flex-wrap items-center gap-2', props.class)}>
       <Popover position="bottom-start" content={popoverContentWithAttr} isOpen={isOpen()}>
-        <div data-filter-trigger onClick={handleToggle}>
-          <Button size="sm" color="gray">
+        <div data-filter-trigger>
+          <Button
+            size="sm"
+            color="gray"
+            onClick={handleToggle}
+            aria-expanded={isOpen()}
+            aria-label={
+              activeFilterCount() > 0
+                ? `${props.filterButtonText || l().filter} (${activeFilterCount()})`
+                : undefined
+            }
+          >
             <FilterFunnel01Icon class="mr-1.5 size-4" aria-hidden="true" />
             {props.filterButtonText || l().filter}
             <Show when={activeFilterCount() > 0}>
-              <span class="ml-1.5 rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              <span
+                aria-hidden="true"
+                class="ml-1.5 rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+              >
                 {activeFilterCount()}
               </span>
             </Show>
           </Button>
         </div>
       </Popover>
+
+      {/* Inline filter chips */}
+      <Show when={props.showChips && activeFilterCount() > 0}>
+        <For each={visibleChips()}>
+          {(filter) => (
+            <span class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+              {getChipLabel(filter)}
+              <button
+                type="button"
+                onClick={() => props.removeFilter(filter.key)}
+                class="ml-0.5 rounded-sm text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:text-neutral-300"
+                aria-label={`Remove ${filter.key} filter`}
+              >
+                <XCloseIcon class="size-3" aria-hidden="true" />
+              </button>
+            </span>
+          )}
+        </For>
+
+        {/* Overflow toggle */}
+        <Show when={overflowCount() > 0}>
+          <button
+            type="button"
+            onClick={() => setShowAllChips((v) => !v)}
+            class="inline-flex items-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+          >
+            {showAllChips()
+              ? (props.seeMoreChipsText ?? 'See less')
+              : `${props.seeMoreChipsText ?? 'See more'}`}
+            <ChevronDownIcon
+              class={twMerge('size-3 transition-transform', showAllChips() ? 'rotate-180' : '')}
+              aria-hidden="true"
+            />
+          </button>
+        </Show>
+
+        {/* Add shortcut */}
+        <button
+          type="button"
+          onClick={() => {
+            handlePopoverOpen();
+            handleAddFilter();
+          }}
+          class="inline-flex items-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+        >
+          {props.addFilterText || l().addFilter}
+          <PlusIcon class="size-3" aria-hidden="true" />
+        </button>
+      </Show>
     </div>
   );
 }

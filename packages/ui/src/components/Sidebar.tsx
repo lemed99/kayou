@@ -7,6 +7,7 @@ import {
   createMemo,
   createSignal,
   onCleanup,
+  onMount,
   splitProps,
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -19,6 +20,9 @@ import {
 } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
+
+import Popover from './Popover';
+import Tooltip from './Tooltip';
 
 export interface SidebarLabels {
   pinned: string;
@@ -43,9 +47,6 @@ export const DEFAULT_SIDEBAR_ARIA_LABELS: SidebarAriaLabels = {
   expand: 'Expand sidebar',
   sidebar: 'Sidebar',
 };
-
-import Popover from './Popover';
-import Tooltip from './Tooltip';
 
 /**
  * Configuration for a sidebar navigation item.
@@ -117,10 +118,6 @@ export interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
   pinnedIcon?: (props: IconProps) => JSX.Element;
   /** LocalStorage key for persisting pinned items. When provided, pinned items are saved to and loaded from localStorage. */
   pinnedStorageKey?: string;
-  /** Whether to show the border between header and body sections. @default false */
-  showHeaderBorder?: boolean;
-  /** Whether to show the border between body and footer sections. @default false */
-  showFooterBorder?: boolean;
   /**
    * Labels for i18n support (visible text).
    */
@@ -197,8 +194,8 @@ const sidebarTheme = {
 
 const sidebarItemTheme = {
   item: {
-    active: 'bg-blue-800/10 text-blue-800 dark:bg-neutral-700 dark:text-blue-300',
-    inactive: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-700',
+    active: 'bg-blue-800/10 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    inactive: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800',
     base: 'cursor-pointer text-sm flex items-center justify-center rounded-md px-2.5 py-2 font-normal relative',
     collapsed: {
       noIcon: 'font-bold',
@@ -215,7 +212,7 @@ const sidebarItemTheme = {
 const sidebarCollapseTheme = {
   collapse: {
     button:
-      'mb-1 flex w-full text-sm items-center rounded-md px-2.5 py-2 font-normal transition duration-75 cursor-pointer',
+      'flex w-full text-sm items-center rounded-md px-2.5 py-2 font-normal transition duration-75 cursor-pointer',
     icon: {
       base: 'size-5 transition duration-75 flex shrink-0',
       open: {
@@ -227,10 +224,10 @@ const sidebarCollapseTheme = {
       base: 'flex-1 whitespace-nowrap overflow-hidden text-left',
       icon: 'transition duration-200 size-3',
     },
-    list: 'list-none',
+    list: 'list-none mt-1',
   },
   item: {
-    active: 'bg-blue-800/10 text-blue-800 dark:bg-neutral-700 dark:text-blue-300',
+    active: 'bg-blue-800/10 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     inactive: 'text-gray-900 dark:text-white',
     collapsed: {
       insideCollapse: 'w-full pl-5',
@@ -259,35 +256,30 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
     'pinnedLabel',
     'pinnedIcon',
     'pinnedStorageKey',
-    'showHeaderBorder',
-    'showFooterBorder',
     'labels',
     'ariaLabels',
   ]);
   const l = createMemo(() => ({ ...DEFAULT_SIDEBAR_LABELS, ...local.labels }));
   const a = createMemo(() => ({ ...DEFAULT_SIDEBAR_ARIA_LABELS, ...local.ariaLabels }));
 
-  // Load initial pinned items from localStorage if storage key is provided
-  const getInitialPinnedItems = (): string[] => {
-    if (local.pinnedStorageKey && typeof window !== 'undefined') {
+  const [internalPinnedItems, setInternalPinnedItems] = createSignal<string[]>([]);
+
+  // Load pinned items from localStorage after mount to avoid hydration mismatch
+  onMount(() => {
+    if (local.pinnedStorageKey) {
       try {
         const stored = localStorage.getItem(local.pinnedStorageKey);
         if (stored) {
           const parsed = JSON.parse(stored) as string[];
           if (Array.isArray(parsed)) {
-            return parsed;
+            setInternalPinnedItems(parsed);
           }
         }
       } catch {
         // Ignore localStorage errors
       }
     }
-    return [];
-  };
-
-  const [internalPinnedItems, setInternalPinnedItems] = createSignal<string[]>(
-    getInitialPinnedItems(),
-  );
+  });
 
   const items = createMemo(() => local.items ?? []);
   const headerItems = createMemo(() => local.headerItems ?? []);
@@ -416,7 +408,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
                       class={
                         sb.isActive
                           ? ''
-                          : 'hover:bg-gray-100/75 dark:hover:bg-neutral-700'
+                          : 'hover:bg-gray-100/75 dark:hover:bg-neutral-800'
                       }
                       isActive={sb.isActive}
                       id={sb.id}
@@ -475,9 +467,10 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
   );
 
   // Check if header section should be shown
+  // Note: We use 'prop' in props to avoid evaluating JSX props during SSR which causes hydration issues
   const hasHeaderSection = () =>
-    local.children ||
-    local.headerContent ||
+    'children' in props ||
+    'headerContent' in props ||
     headerItems().length > 0 ||
     pinnedItemsData().length > 0;
 
@@ -492,9 +485,9 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         <Show when={hasHeaderSection()}>
           <div class="shrink-0">
             {/* Logo and toggle button */}
-            <Show when={local.children}>
+            <Show when={'children' in props}>
               <div class="mb-2 flex h-12 items-center justify-between px-2.5">
-                <Show when={isSidebarOpen()}>{local.children}</Show>
+                <div class={isSidebarOpen() ? '' : 'hidden'}>{local.children}</div>
                 <Show when={props.setIsSidebarOpen}>
                   <button
                     type="button"
@@ -514,7 +507,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Custom header content */}
-            <Show when={local.headerContent && isSidebarOpen()}>
+            <Show when={'headerContent' in props && isSidebarOpen()}>
               <div class="px-2 pb-2">{local.headerContent}</div>
             </Show>
 
@@ -541,8 +534,8 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Border separator between header and body */}
-            <Show when={local.showHeaderBorder}>
-              <div class="border-b border-gray-200 dark:border-neutral-800" />
+            <Show when={headerItems().length > 0 || pinnedItemsData().length > 0}>
+              <div class="mt-2 border-b border-gray-200 dark:border-neutral-800" />
             </Show>
           </div>
         </Show>
@@ -557,22 +550,16 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         </div>
 
         {/* Footer section */}
-        <Show when={local.footerContent || footerItems().length > 0}>
+        <Show when={'footerContent' in props || footerItems().length > 0}>
           <div class="mt-auto shrink-0">
             {/* Custom footer content (e.g., promo cards) */}
-            <Show when={local.footerContent && isSidebarOpen()}>
+            <Show when={'footerContent' in props && isSidebarOpen()}>
               <div class="p-2">{local.footerContent}</div>
             </Show>
 
             {/* Footer menu items */}
             <Show when={footerItems().length > 0}>
-              <div
-                class={twMerge(
-                  'pt-2',
-                  local.showFooterBorder &&
-                    'border-t border-gray-200 dark:border-neutral-800',
-                )}
-              >
+              <div class="pt-2">
                 <ul class={sidebarTheme.itemGroup} role="menu">
                   <For each={footerItems()}>{(mn) => renderMenuItem(mn)}</For>
                 </ul>
@@ -587,13 +574,16 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
 
 const SidebarItemComponent = (props: SidebarItemProps) => {
   const [showPinIcon, setShowPinIcon] = createSignal(false);
+  const [mounted, setMounted] = createSignal(false);
   let hoverTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  onMount(() => setMounted(true));
 
   const handleMouseEnter = () => {
     // Show pin icon after 1 second delay
     hoverTimeoutId = setTimeout(() => {
       setShowPinIcon(true);
-    }, 1000);
+    }, 600);
   };
 
   const handleMouseLeave = () => {
@@ -642,26 +632,41 @@ const SidebarItemComponent = (props: SidebarItemProps) => {
       >
         <span class="truncate">{props.children}</span>
         <span class="flex shrink-0 items-center gap-1">
-          <Show when={props.badge !== undefined && !props.showItemIconOnly}>
+          <Show
+            when={props.badge !== undefined && !props.showItemIconOnly && !showPinIcon()}
+          >
             <span class="inline-flex items-center justify-center rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
               {props.badge}
             </span>
           </Show>
-          {/* Pin button - shown after 1s hover delay */}
-          <Show when={props.pinnable && !props.showItemIconOnly && showPinIcon()}>
-            <button
-              type="button"
-              onClick={handlePinClick}
-              class={twMerge(
-                'rounded p-0.5 transition-colors hover:bg-gray-200 dark:hover:bg-neutral-600',
-                props.isPinned
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-400 dark:text-neutral-500',
-              )}
-              aria-label={props.isPinned ? (props.unpinLabel ?? 'Unpin') : (props.pinLabel ?? 'Pin')}
+          {/* Pin button - shown after 1s hover delay, only client-side to avoid hydration mismatch */}
+          <Show
+            when={mounted() && props.pinnable && !props.showItemIconOnly && showPinIcon()}
+          >
+            <Tooltip
+              content={
+                props.isPinned ? (props.unpinLabel ?? 'Unpin') : (props.pinLabel ?? 'Pin')
+              }
+              placement="right"
             >
-              <Pin02Icon class={twMerge('size-3.5', props.isPinned && 'rotate-45')} />
-            </button>
+              <div
+                tabIndex={0}
+                onClick={handlePinClick}
+                class={twMerge(
+                  'cursor-pointer',
+                  props.isPinned
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-400 dark:text-neutral-500',
+                )}
+                aria-label={
+                  props.isPinned
+                    ? (props.unpinLabel ?? 'Unpin')
+                    : (props.pinLabel ?? 'Pin')
+                }
+              >
+                <Pin02Icon class={twMerge('size-4')} />
+              </div>
+            </Tooltip>
           </Show>
         </span>
       </span>
@@ -753,7 +758,7 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
           props.isActive && !props.isItemCollapsed
             ? sidebarCollapseTheme.item.active
             : sidebarCollapseTheme.item.inactive,
-          props.hoveredItem === props.id ? 'bg-gray-100 dark:bg-neutral-700' : '',
+          props.hoveredItem === props.id ? 'bg-gray-100 dark:bg-neutral-800' : '',
           props.class,
         )}
       >
