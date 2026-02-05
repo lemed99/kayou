@@ -77,7 +77,7 @@ export const ImageUploadNode = Node.create<ImageUploadOptions>({
             accept="image/*"
             multiple={false}
             maxLength={1}
-            dragDropText="Click to upload or drag and drop"
+            dragDropText="Tap to select an image"
             helperText="Supported formats: PNG, JPG, GIF, SVG, WebP"
             autoUpload={false}
           />

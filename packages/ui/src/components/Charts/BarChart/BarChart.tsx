@@ -125,7 +125,7 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
 
   const [activePoint, setActivePoint] = createSignal<ActivePoint | null>(null);
 
-  function onMouseMove(e: MouseEvent) {
+  function handlePointerMove(e: MouseEvent | TouchEvent) {
     const data = props.data;
     const s = xScale();
     const ys = yScale();
@@ -219,8 +219,10 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
             width: props.rwidth === undefined ? `${width()}px` : '100%',
             height: props.rheight === undefined ? `${height()}px` : '100%',
           }}
-          onMouseMove={onMouseMove}
+          onMouseMove={handlePointerMove}
+          onTouchMove={handlePointerMove}
           onMouseLeave={() => { setActiveIndex(null); setActivePoint(null); }}
+          onTouchEnd={() => { setActiveIndex(null); setActivePoint(null); }}
           viewBox={`0 0 ${width()} ${height()}`}
         >
           <Show when={props.title}>

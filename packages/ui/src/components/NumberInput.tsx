@@ -297,9 +297,9 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
   const setButtonActive = (btn: HTMLButtonElement | undefined, active: boolean) => {
     if (!btn) return;
     if (active) {
-      btn.classList.add('bg-gray-200', 'dark:bg-neutral-600');
+      btn.classList.add('bg-gray-200', 'dark:bg-neutral-700');
     } else {
-      btn.classList.remove('bg-gray-200', 'dark:bg-neutral-600');
+      btn.classList.remove('bg-gray-200', 'dark:bg-neutral-700');
     }
   };
 

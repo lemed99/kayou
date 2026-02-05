@@ -153,6 +153,8 @@ export function Bar(props: BarProps): JSX.Element {
             <g
               onMouseEnter={() => handleMouseEnter(bar)}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={() => handleMouseEnter(bar)}
+              onTouchEnd={handleMouseLeave}
               style={{ cursor: 'pointer' }}
             >
               <Shape

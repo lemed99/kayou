@@ -109,7 +109,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
 
   const [activePoint, setActivePoint] = createSignal<ActivePoint | null>(null);
 
-  function onMouseMove(e: MouseEvent) {
+  function handlePointerMove(e: MouseEvent | TouchEvent) {
     const data = props.data;
     const key = xKey();
     const xScaleVal = xScale();
@@ -201,8 +201,13 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
             width: props.rwidth === undefined ? `${width()}px` : '100%',
             height: props.rheight === undefined ? `${height()}px` : '100%',
           }}
-          onMouseMove={onMouseMove}
+          onMouseMove={handlePointerMove}
+          onTouchMove={handlePointerMove}
           onMouseLeave={() => {
+            setActiveIndex(null);
+            setActivePoint(null);
+          }}
+          onTouchEnd={() => {
             setActiveIndex(null);
             setActivePoint(null);
           }}

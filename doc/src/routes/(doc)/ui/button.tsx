@@ -148,6 +148,7 @@ export default function ButtonPage() {
       usage={`
         import { Button } from '@kayou/ui';
 
+        // Basic usage
         <Button>Click me</Button>
         <Button color="success" size="md">Save</Button>
         <Button isLoading={true}>Saving...</Button>

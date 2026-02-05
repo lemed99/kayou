@@ -174,7 +174,7 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
         next = Math.max(0, current - cols);
         break;
       case 'Home':
-        if (e.ctrlKey) {
+        if (e.ctrlKey || e.metaKey) {
           next = 0;
         } else {
           // Go to start of current row
@@ -182,7 +182,7 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
         }
         break;
       case 'End':
-        if (e.ctrlKey) {
+        if (e.ctrlKey || e.metaKey) {
           next = total - 1;
         } else {
           // Go to end of current row

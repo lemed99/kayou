@@ -3,6 +3,31 @@ import { JSX } from 'solid-js/jsx-runtime';
 
 import { twMerge } from 'tailwind-merge';
 
+// Static class maps to ensure Tailwind JIT compiles these classes
+const GRAY_CLASSES: Record<number, string> = {
+  100: 'bg-gray-100',
+  200: 'bg-gray-200',
+  300: 'bg-gray-300',
+  400: 'bg-gray-400',
+  500: 'bg-gray-500',
+  600: 'bg-gray-600',
+  700: 'bg-gray-700',
+  800: 'bg-gray-800',
+  900: 'bg-gray-900',
+};
+
+const DARK_GRAY_CLASSES: Record<number, string> = {
+  100: 'dark:bg-neutral-100',
+  200: 'dark:bg-neutral-200',
+  300: 'dark:bg-neutral-300',
+  400: 'dark:bg-neutral-400',
+  500: 'dark:bg-neutral-500',
+  600: 'dark:bg-neutral-600',
+  700: 'dark:bg-neutral-700',
+  800: 'dark:bg-neutral-800',
+  900: 'dark:bg-neutral-900',
+};
+
 export interface SkeletonAriaLabels {
   loading: string;
 }
@@ -74,7 +99,11 @@ const Skeleton = (props: SkeletonProps): JSX.Element => {
           width: typeof width() === 'number' ? `${width()}px` : (width() as string),
           height: typeof height() === 'number' ? `${height()}px` : (height() as string),
         }}
-        class={`rounded-lg bg-gray-${gray()} dark:bg-neutral-${darkGray()}`}
+        class={twMerge(
+          'rounded-lg',
+          GRAY_CLASSES[gray()] || 'bg-gray-100',
+          DARK_GRAY_CLASSES[darkGray()] || 'dark:bg-neutral-700',
+        )}
       />
     </div>
   );

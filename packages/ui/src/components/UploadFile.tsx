@@ -649,7 +649,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
                     : trackedFile.state === 'success'
                       ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
-                      : 'border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-800'
+                      : 'border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-800/50'
                 }`}
               >
                 <div class="flex items-center gap-4 p-4">
@@ -717,7 +717,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                           type="button"
                           onClick={() => removeFile(trackedFile.id)}
                           aria-label={al().removeFile(trackedFile.file.name)}
-                          class="rounded-md p-1.5 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                          class="rounded-md p-1.5 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                         >
                           <XIcon class="size-4" />
                         </button>

@@ -22,7 +22,7 @@ export interface PopoverProps {
   /**
    * Content to display inside the popover.
    */
-  content: JSX.Element;
+  content: JSX.Element | (() => JSX.Element);
   /**
    * Trigger element that opens the popover.
    */
@@ -183,7 +183,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
   createEffect(() => {
     if (!isMounted()) return;
 
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: PointerEvent) => {
       const target = event.target as Node;
       const floatingEl = refs.floating();
       const referenceEl = refs.reference();
@@ -197,8 +197,8 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
       setOpen(false);
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
+    document.addEventListener('pointerdown', handleClickOutside);
+    onCleanup(() => document.removeEventListener('pointerdown', handleClickOutside));
   });
 
   // Escape key handler
@@ -251,6 +251,20 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
     }
   };
 
+  const handleTouchStart = () => {
+    if (!merged.hidden && merged.onHover) {
+      setOpen(true);
+      props.onMouseEnter?.();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!merged.hidden && merged.onHover) {
+      setOpen(false);
+      props.onMouseLeave?.();
+    }
+  };
+
   const handleFocusIn = () => {
     if (!merged.hidden && merged.onHover) {
       setOpen(true);
@@ -280,6 +294,8 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
         onKeyDown={handleTriggerKeyDown}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         onFocusIn={handleFocusIn}
         onFocusOut={handleFocusOut}
       >
@@ -298,14 +314,16 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
               {
                 ...floatingStyles(),
                 opacity: isVisible() ? '1' : '0',
-                scale: isVisible() ? 1 : 0.8,
-                'transition-property': 'opacity, scale',
+                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+                'transition-property': 'opacity, transform',
                 'transition-duration': '.2s',
                 'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
               } as JSX.CSSProperties
             }
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <div
               class={twMerge(
@@ -313,7 +331,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
                 props.class,
               )}
             >
-              {merged.content}
+              {typeof merged.content === 'function' ? merged.content() : merged.content}
             </div>
           </div>
         </Portal>

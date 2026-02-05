@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('DataTable', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/data-table');
+    await page.goto('/ui/data-table', { waitUntil: 'networkidle' });
   });
 
   // ==================== Basic Rendering ====================
@@ -260,31 +260,56 @@ test.describe('DataTable', () => {
 
   // ==================== Expandable Table ====================
 
-  test('should render see more button when expandable', async ({ page }) => {
-    const seeMore = page
-      .locator('button')
-      .filter({ hasText: /See more/i })
-      .first();
-    if (await seeMore.isVisible()) {
-      await expect(seeMore).toBeVisible();
+  test('should render expand button when expandable', async ({ page }) => {
+    const expandBtn = page.locator('button[aria-label="See more"]').first();
+    if (await expandBtn.isVisible()) {
+      await expect(expandBtn).toBeVisible();
     }
   });
 
-  test('should expand to full view on see more click', async ({ page }) => {
-    const seeMore = page
-      .locator('button')
-      .filter({ hasText: /See more/i })
-      .first();
+  test('should expand inline on expand button click', async ({ page }) => {
+    const expandBtn = page.locator('button[aria-label="See more"]').first();
 
-    if (await seeMore.isVisible()) {
-      await seeMore.click();
-      await page.waitForTimeout(500);
+    if (await expandBtn.isVisible()) {
+      await expandBtn.scrollIntoViewIfNeeded();
+      await expandBtn.click();
 
-      // Modal or expanded view should appear
-      const modal = page.locator('[role="dialog"]').first();
-      if (await modal.isVisible()) {
-        await expect(modal).toBeVisible();
-      }
+      await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
+
+      // Should show more rows than the default count
+      const table = page.locator('[role="table"]').first();
+      const dataRows = table.locator('[role="row"]');
+      const rowCount = await dataRows.count();
+      // Header row + more than defaultRowsCount data rows
+      expect(rowCount).toBeGreaterThan(4);
+    }
+  });
+
+  test('should display data rows in expanded view', async ({ page }) => {
+    const expandBtn = page.locator('button[aria-label="See more"]').first();
+
+    if (await expandBtn.isVisible()) {
+      await expandBtn.scrollIntoViewIfNeeded();
+      await expandBtn.click();
+
+      const table = page.locator('[role="table"]').first();
+      const content = await table.textContent();
+      expect(content).toContain('John Doe');
+    }
+  });
+
+  test('should collapse on expand button click again', async ({ page }) => {
+    const expandBtn = page.locator('button[aria-label="See more"]').first();
+
+    if (await expandBtn.isVisible()) {
+      await expandBtn.scrollIntoViewIfNeeded();
+      await expandBtn.click();
+      await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
+
+      // Click again to collapse
+      const collapseBtn = page.locator('button[aria-label="Collapse table"]').first();
+      await collapseBtn.click();
+      await expect(collapseBtn).toHaveAttribute('aria-expanded', 'false');
     }
   });
 

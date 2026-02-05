@@ -912,7 +912,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   );
 
   createEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: PointerEvent) => {
       const floating = refs.floating();
       const reference = refs.reference();
       const target = event.target as HTMLElement;
@@ -933,9 +933,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
 
-    onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
+    onCleanup(() => document.removeEventListener('pointerdown', handleClickOutside));
   });
 
   const focusInput = () => {
@@ -988,6 +988,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           required={props.required}
           onKeyDown={handleInputKeyDown}
           aria-describedby={props.helperText ? helperId : undefined}
+          inputMode="none"
+          autocomplete="off"
           style={{
             'caret-color': 'transparent',
             'padding-right': '36px',
@@ -1133,8 +1135,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               {
                 ...floatingStyles(),
                 opacity: isVisible() ? '1' : '0',
-                scale: isVisible() ? 1 : 0.8,
-                'transition-property': 'opacity, scale',
+                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+                'transition-property': 'opacity, transform',
                 'transition-duration': '.2s',
                 'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
               } as JSX.CSSProperties
