@@ -1,5 +1,6 @@
 import { createSignal } from 'solid-js';
 
+import { ArrowRightIcon, Download01Icon, PlusIcon, Send01Icon } from '@kayou/icons';
 import { Button } from '@kayou/ui';
 import DocPage from '../../../components/DocPage';
 
@@ -67,6 +68,18 @@ export default function ButtonPage() {
           description: 'HTML button type attribute',
         },
         {
+          name: 'icon',
+          type: '(props: IconProps) => JSX.Element',
+          default: '-',
+          description: 'Icon component to display alongside the button content',
+        },
+        {
+          name: 'iconPlacement',
+          type: '"left" | "right"',
+          default: '"left"',
+          description: 'Placement of the icon relative to the button content',
+        },
+        {
           name: 'class',
           type: 'string',
           default: '-',
@@ -129,6 +142,19 @@ export default function ButtonPage() {
           ),
         },
         {
+          title: 'With Icon',
+          description:
+            'Icons can be placed on the left (default) or right side of the button content.',
+          component: () => (
+            <>
+              <Button icon={PlusIcon}>Create</Button>
+              <Button icon={Download01Icon} color="success">Download</Button>
+              <Button icon={ArrowRightIcon} iconPlacement="right">Next</Button>
+              <Button icon={Send01Icon} iconPlacement="right" color="dark">Send</Button>
+            </>
+          ),
+        },
+        {
           title: 'Interactive Loading',
           description: 'Click the button to see loading state in action.',
           component: () => {
@@ -147,12 +173,17 @@ export default function ButtonPage() {
       ]}
       usage={`
         import { Button } from '@kayou/ui';
+        import { PlusIcon, ArrowRightIcon } from '@kayou/icons';
 
         // Basic usage
         <Button>Click me</Button>
         <Button color="success" size="md">Save</Button>
         <Button isLoading={true}>Saving...</Button>
         <Button type="submit">Submit</Button>
+
+        // With icon
+        <Button icon={PlusIcon}>Create</Button>
+        <Button icon={ArrowRightIcon} iconPlacement="right">Next</Button>
       `}
     />
   );

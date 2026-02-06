@@ -1,5 +1,6 @@
 import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
+import { type IconProps } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import Spinner from './Spinner';
@@ -38,6 +39,15 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Icon component to display alongside the button content.
+   */
+  icon?: (props: IconProps) => JSX.Element;
+  /**
+   * Placement of the icon relative to the button content.
+   * @default 'left'
+   */
+  iconPlacement?: 'left' | 'right';
 }
 
 const theme = {
@@ -71,6 +81,8 @@ const Button = (props: ButtonProps): JSX.Element => {
     'class',
     'disabled',
     'isLoading',
+    'icon',
+    'iconPlacement',
   ]);
 
   const type = createMemo(() => local.type || 'button');
@@ -93,8 +105,16 @@ const Button = (props: ButtonProps): JSX.Element => {
       {...buttonProps}
     >
       <div class="relative flex items-center">
-        <div class={twMerge('flex items-center', local.isLoading ? 'opacity-5' : '')}>
+        <div
+          class={twMerge('flex items-center gap-2', local.isLoading ? 'opacity-5' : '')}
+        >
+          <Show when={local.icon && local.iconPlacement !== 'right'}>
+            {local.icon!({})}
+          </Show>
           {local.children}
+          <Show when={local.icon && local.iconPlacement === 'right'}>
+            {local.icon!({})}
+          </Show>
         </div>
         <Show when={local.isLoading}>
           <div class="z-5 absolute inset-0 flex h-full w-full items-center justify-center">

@@ -7,16 +7,16 @@ export default function NumberInputPage() {
   return (
     <DocPage
       title="NumberInput"
-      description="Numeric input with integer/float support, min/max constraints, step increments, and optional arrow buttons. Features debounced validation and typed callbacks."
+      description="Numeric input with integer/float support, min/max constraints, step increments, and optional arrow buttons."
       keyConcepts={[
-        {
-          term: 'Debounced Processing',
-          explanation:
-            'Values processed after inactivity (2s default); set 0 for blur-only.',
-        },
         {
           term: 'Typed Callbacks',
           explanation: 'onValueChange returns number | null for type safety.',
+        },
+        {
+          term: 'Blur Validation',
+          explanation:
+            'Values are validated, formatted, and clamped on blur. No reformatting during typing.',
         },
         {
           term: 'Constraint Enforcement',
@@ -61,10 +61,10 @@ export default function NumberInputPage() {
           description: 'Shows up/down arrow buttons',
         },
         {
-          name: 'nullable',
+          name: 'allowZero',
           type: 'boolean',
           default: 'true',
-          description: 'Allows empty/null values',
+          description: 'Allows zero as a valid value',
         },
         {
           name: 'allowNegativeValues',
@@ -77,13 +77,6 @@ export default function NumberInputPage() {
           type: '(value: number | null) => void',
           default: '-',
           description: 'Callback with typed numeric value',
-        },
-        {
-          name: 'debounceDelay',
-          type: 'number',
-          default: '2000',
-          description:
-            'Delay in ms before processing value after typing. Set to 0 to disable.',
         },
         {
           name: 'label',
@@ -190,43 +183,21 @@ export default function NumberInputPage() {
           ),
         },
         {
-          title: 'Debounced Value Processing',
+          title: 'Blur Validation',
           description:
-            'Value is automatically processed after 2 seconds of inactivity. Type and wait to see the value format and emit.',
+            'Values are validated, formatted, and clamped when the input loses focus. Type a value and click away to see it processed.',
           component: () => {
             const [value, setValue] = createSignal<number | null>(null);
-            const [lastUpdate, setLastUpdate] = createSignal('');
             return (
               <NumberInput
                 type="float"
                 precision={2}
-                label="Debounced Input"
-                onValueChange={(v) => {
-                  setValue(v);
-                  setLastUpdate(new Date().toLocaleTimeString());
-                }}
-                helperText={`Value: ${value()} | Last update: ${lastUpdate()}`}
+                label="Price"
+                onValueChange={setValue}
+                helperText={`Processed value: ${value()}`}
               />
             );
           },
-        },
-        {
-          title: 'Custom Debounce Delay',
-          description: 'Set a custom delay (1 second) or disable debounce entirely.',
-          component: () => (
-            <div class="flex flex-col gap-4">
-              <NumberInput
-                debounceDelay={1000}
-                label="1 Second Delay"
-                helperText="Processes after 1s of inactivity"
-              />
-              <NumberInput
-                debounceDelay={0}
-                label="No Debounce"
-                helperText="Only processes on blur"
-              />
-            </div>
-          ),
         },
       ]}
       usage={`

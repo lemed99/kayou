@@ -6,6 +6,7 @@ export const isDateValid = (dateString: string): boolean => {
 export const getDaysShort = (locale: string): string[] => {
   const days: string[] = [];
   for (let i = 0; i < 7; i++) {
+    // Jan 1, 2024 is a Monday — array starts from Monday: [Mon, Tue, ..., Sun]
     const date = new Date(2024, 0, i + 1);
     days.push(date.toLocaleDateString(locale, { weekday: 'short' }).replace('.', ''));
   }
@@ -56,7 +57,15 @@ export const isInRange = (
 
 export const addMonths = (date: Date, months: number): Date => {
   const newDate = new Date(date);
-  newDate.setMonth(newDate.getMonth() + months);
+  const targetMonth = newDate.getMonth() + months;
+  newDate.setDate(1);
+  newDate.setMonth(targetMonth);
+  const daysInMonth = new Date(
+    newDate.getFullYear(),
+    newDate.getMonth() + 1,
+    0,
+  ).getDate();
+  newDate.setDate(Math.min(date.getDate(), daysInMonth));
   return newDate;
 };
 

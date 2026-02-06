@@ -1,12 +1,19 @@
 import { For, Match, Show, Switch, createMemo, createSignal } from 'solid-js';
-import { twMerge } from 'tailwind-merge';
 
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
+import { twMerge } from 'tailwind-merge';
 
 import Button from '../Button';
 import NumberInput from '../NumberInput';
-import { addMonths, getDaysShort, getMonthsShort, isSameDay, parseDate, toISO } from './dates';
 import type { DatePickerAriaLabels } from './DatePicker';
+import {
+  addMonths,
+  getDaysShort,
+  getMonthsShort,
+  isSameDay,
+  parseDate,
+  toISO,
+} from './dates';
 import { useDatePicker } from './useDatePicker';
 
 /** Number of cells in a 6-week calendar grid (7 days * 6 weeks) */
@@ -68,9 +75,15 @@ export interface CalendarProps {
  * starting from the first day of the week before the first day of the month.
  * @param date - The date representing the month to generate
  * @param weekStartsOn - 0 for Sunday, 1 for Monday
+ * @param monthCache - Cached month data from context
+ * @param setMonthCache - Function to update cache
  */
-const getSixWeeksMergedDaysInMonth = (date: Date, weekStartsOn: 0 | 1): Date[] => {
-  const { monthCache, setMonthCache } = useDatePicker();
+const getSixWeeksMergedDaysInMonth = (
+  date: Date,
+  weekStartsOn: 0 | 1,
+  monthCache: import('./DatePickerContext').DaysMap,
+  setMonthCache: (key: string, days: string[]) => void,
+): Date[] => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const key = `${year}-${month}-${weekStartsOn}`;
@@ -115,6 +128,7 @@ const getSixWeeksMergedDaysInMonth = (date: Date, weekStartsOn: 0 | 1): Date[] =
  * Renders month/year navigation and day selection grid.
  */
 const Calendar = (props: CalendarProps) => {
+  const { monthCache, setMonthCache } = useDatePicker();
   const [showMonthSelector, setShowMonthSelector] = createSignal(false);
   const [showYearSelector, setShowYearSelector] = createSignal(false);
   const [customYear, setCustomYear] = createSignal('');
@@ -129,8 +143,23 @@ const Calendar = (props: CalendarProps) => {
   let nextMonthBtnRef: HTMLButtonElement | undefined;
 
   const days = createMemo(() =>
-    getSixWeeksMergedDaysInMonth(props.currentDate(), props.weekStartsOn),
+    getSixWeeksMergedDaysInMonth(
+      props.currentDate(),
+      props.weekStartsOn,
+      monthCache,
+      setMonthCache,
+    ),
   );
+
+  /** Days grouped into rows of 7 for ARIA grid row structure */
+  const dayRows = createMemo(() => {
+    const allDays = days();
+    const rows: Date[][] = [];
+    for (let i = 0; i < allDays.length; i += 7) {
+      rows.push(allDays.slice(i, i + 7));
+    }
+    return rows;
+  });
 
   // Get day headers in correct order based on weekStartsOn
   const dayHeaders = createMemo(() => {
@@ -216,7 +245,9 @@ const Calendar = (props: CalendarProps) => {
     if (isOpening) {
       setFocusedMonthIndex(props.currentDate().getMonth());
       props.announce?.(props.ariaLabels.monthSelectorOpened);
-      containerRef?.querySelector<HTMLButtonElement>('[data-month][tabindex="0"]')?.focus();
+      containerRef
+        ?.querySelector<HTMLButtonElement>('[data-month][tabindex="0"]')
+        ?.focus();
     } else {
       setFocusedMonthIndex(null);
     }
@@ -235,7 +266,9 @@ const Calendar = (props: CalendarProps) => {
       const currentYearIndex = years.indexOf(props.currentDate().getFullYear());
       setFocusedYearIndex(currentYearIndex >= 0 ? currentYearIndex : 0);
       props.announce?.(props.ariaLabels.yearSelectorOpened);
-      containerRef?.querySelector<HTMLButtonElement>('[data-year][tabindex="0"]')?.focus();
+      containerRef
+        ?.querySelector<HTMLButtonElement>('[data-year][tabindex="0"]')
+        ?.focus();
     } else {
       setFocusedYearIndex(null);
     }
@@ -283,7 +316,9 @@ const Calendar = (props: CalendarProps) => {
 
     if (newIndex !== currentIndex) {
       setFocusedMonthIndex(newIndex);
-      containerRef?.querySelector<HTMLButtonElement>(`[data-month="${newIndex}"]`)?.focus();
+      containerRef
+        ?.querySelector<HTMLButtonElement>(`[data-month="${newIndex}"]`)
+        ?.focus();
     }
   };
 
@@ -330,7 +365,9 @@ const Calendar = (props: CalendarProps) => {
 
     if (newIndex !== currentIndex) {
       setFocusedYearIndex(newIndex);
-      containerRef?.querySelector<HTMLButtonElement>(`[data-year="${newIndex}"]`)?.focus();
+      containerRef
+        ?.querySelector<HTMLButtonElement>(`[data-year="${newIndex}"]`)
+        ?.focus();
     }
   };
 
@@ -407,7 +444,10 @@ const Calendar = (props: CalendarProps) => {
       aria-label={props.ariaLabels.calendar}
       onKeyDown={(e) => props.onKeyDown?.(e)}
     >
-      <div data-calendar-header class="flex items-center space-x-1.5 rounded-md border border-gray-300 px-2 py-1.5 dark:border-neutral-800">
+      <div
+        data-calendar-header
+        class="flex items-center space-x-1.5 rounded-md border border-gray-300 px-2 py-1.5 dark:border-neutral-800"
+      >
         <Show when={!showMonthSelector() && !showYearSelector()}>
           <div class="flex-none">
             <button
@@ -481,47 +521,66 @@ const Calendar = (props: CalendarProps) => {
                 )}
               </For>
             </div>
-            <div class="mt-1 grid grid-cols-7 gap-x-0.5 gap-y-0.5" role="rowgroup">
-              <For each={days()}>
-                {(date) => {
-                  const dateISO = toISO(date);
+            <div class="mt-1 flex flex-col gap-y-0.5" role="rowgroup">
+              <For each={dayRows()}>
+                {(row) => (
+                  <div class="grid grid-cols-7 gap-x-0.5" role="row">
+                    <For each={row}>
+                      {(date) => {
+                        const dateISO = toISO(date);
 
-                  return (
-                    <button
-                      type="button"
-                      data-date={dateISO}
-                      onClick={() => handleDateClick(date)}
-                      disabled={isDisabled(date)}
-                      role="gridcell"
-                      aria-label={getDateAriaLabel(date)}
-                      aria-selected={isSelected(date) || rangeSelection(date).start || rangeSelection(date).end}
-                      aria-disabled={isDisabled(date)}
-                      tabIndex={focusedDateISO() === dateISO ? 0 : -1}
-                      class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                      classList={{
-                        'text-gray-400': !isInCurrentMonth(date),
-                        'text-blue-500': isToday(date) && !isSelected(date) && isInCurrentMonth(date),
-                        'bg-blue-500 text-white font-medium rounded-lg':
-                          isSelected(date) && isInCurrentMonth(date),
-                        'bg-blue-500 text-white font-medium rounded-l-lg rounded-r-none':
-                          rangeSelection(date).start && isInCurrentMonth(date) && !isSelected(date),
-                        'bg-blue-500 text-white font-medium rounded-r-lg rounded-l-none':
-                          rangeSelection(date).end && isInCurrentMonth(date) && !isSelected(date),
-                        'bg-blue-100 dark:bg-blue-900/40':
-                          isInDateRange(date) && !isSelected(date) && isInCurrentMonth(date),
-                        'cursor-not-allowed! opacity-50': isDisabled(date),
-                        'transition-[scale] hover:scale-[1.5]':
-                          !isSelected(date) &&
-                          !isInDateRange(date) &&
-                          !rangeSelection(date).start &&
-                          !rangeSelection(date).end &&
-                          !isDisabled(date),
+                        return (
+                          <button
+                            type="button"
+                            data-date={dateISO}
+                            onClick={() => handleDateClick(date)}
+                            disabled={isDisabled(date)}
+                            role="gridcell"
+                            aria-label={getDateAriaLabel(date)}
+                            aria-selected={
+                              isSelected(date) ||
+                              rangeSelection(date).start ||
+                              rangeSelection(date).end
+                            }
+                            aria-disabled={isDisabled(date)}
+                            tabIndex={focusedDateISO() === dateISO ? 0 : -1}
+                            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                            classList={{
+                              'text-gray-400': !isInCurrentMonth(date),
+                              'text-blue-500':
+                                isToday(date) &&
+                                !isSelected(date) &&
+                                isInCurrentMonth(date),
+                              'bg-blue-500 text-white font-medium rounded-lg':
+                                isSelected(date) && isInCurrentMonth(date),
+                              'bg-blue-500 text-white font-medium rounded-l-lg rounded-r-none':
+                                rangeSelection(date).start &&
+                                isInCurrentMonth(date) &&
+                                !isSelected(date),
+                              'bg-blue-500 text-white font-medium rounded-r-lg rounded-l-none':
+                                rangeSelection(date).end &&
+                                isInCurrentMonth(date) &&
+                                !isSelected(date),
+                              'bg-blue-100 dark:bg-blue-900/40':
+                                isInDateRange(date) &&
+                                !isSelected(date) &&
+                                isInCurrentMonth(date),
+                              'cursor-not-allowed! opacity-50': isDisabled(date),
+                              'transition-[scale] hover:scale-[1.5]':
+                                !isSelected(date) &&
+                                !isInDateRange(date) &&
+                                !rangeSelection(date).start &&
+                                !rangeSelection(date).end &&
+                                !isDisabled(date),
+                            }}
+                          >
+                            {date.getDate()}
+                          </button>
+                        );
                       }}
-                    >
-                      {date.getDate()}
-                    </button>
-                  );
-                }}
+                    </For>
+                  </div>
+                )}
               </For>
             </div>
           </div>
@@ -545,7 +604,7 @@ const Calendar = (props: CalendarProps) => {
                     aria-selected={index() === props.currentDate().getMonth()}
                     tabIndex={focusedMonthIndex() === index() ? 0 : -1}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
                       index() === props.currentDate().getMonth()
                         ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
                         : '',
@@ -576,7 +635,7 @@ const Calendar = (props: CalendarProps) => {
                     aria-selected={year === props.currentDate().getFullYear()}
                     tabIndex={focusedYearIndex() === index() ? 0 : -1}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
                       year === props.currentDate().getFullYear()
                         ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
                         : '',
@@ -589,13 +648,13 @@ const Calendar = (props: CalendarProps) => {
             </div>
           </div>
           <fieldset
-            class="mt-[9px] flex w-full gap-1 border-0 p-0 m-0"
+            class="m-0 mt-[9px] flex w-full gap-1 border-0 p-0"
             role="group"
             aria-label={props.ariaLabels.customYearGroup}
           >
             <NumberInput
               value={customYear()}
-              onChange={(e) => setCustomYear(e.currentTarget.value)}
+              onValueChange={(v) => setCustomYear(v !== null ? String(v) : '')}
               onKeyDown={(e: KeyboardEvent) => {
                 if (e.key === 'Escape') {
                   e.preventDefault();
@@ -615,6 +674,7 @@ const Calendar = (props: CalendarProps) => {
             <Button
               type="button"
               size="md"
+              icon={CheckIcon}
               aria-label={props.ariaLabels.confirmYear}
               onClick={handleCustomYearSubmit}
               onKeyDown={(e: KeyboardEvent) => {
@@ -626,9 +686,7 @@ const Calendar = (props: CalendarProps) => {
                   yearBtnRef?.focus();
                 }
               }}
-            >
-              <CheckIcon class="size-5" />
-            </Button>
+            />
           </fieldset>
         </Match>
       </Switch>

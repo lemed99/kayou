@@ -66,9 +66,16 @@ export default function DrawerPage() {
         },
         {
           name: 'onClose',
-          type: '(event: MouseEvent) => void',
+          type: '() => void',
           default: '-',
           description: 'Callback fired when the drawer is closed (required)',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          default: '-',
+          description:
+            'Title displayed in the drawer header. Also sets the dialog accessible name via aria-labelledby. Implies showHeader.',
         },
         {
           name: 'roundedEdges',
@@ -126,6 +133,7 @@ export default function DrawerPage() {
               <Drawer
                 show={showRight()}
                 onClose={() => setShowRight(false)}
+                // title="Right Drawer"
                 showHeader
                 width="w-80"
               >
@@ -144,7 +152,7 @@ export default function DrawerPage() {
                 show={showLeft()}
                 position="left"
                 onClose={() => setShowLeft(false)}
-                showHeader
+                title="Left Drawer"
                 width="w-80"
               >
                 <p>This drawer slides in from the left.</p>
@@ -162,7 +170,7 @@ export default function DrawerPage() {
                 show={showTop()}
                 position="top"
                 onClose={() => setShowTop(false)}
-                showHeader
+                title="Top Drawer"
                 height="h-48"
               >
                 <p>This drawer slides in from the top.</p>
@@ -181,7 +189,7 @@ export default function DrawerPage() {
                 position="bottom"
                 roundedEdges
                 onClose={() => setShowBottom(false)}
-                showHeader
+                title="Bottom Drawer"
                 height="h-48"
               >
                 <p>This drawer has rounded edges and slides from the bottom.</p>
@@ -193,9 +201,9 @@ export default function DrawerPage() {
       usage={`
         import { Drawer } from '@kayou/ui';
 
-        <Drawer show={show()} onClose={() => setShow(false)}>Content</Drawer>
-        <Drawer show={show()} position="left" showHeader onClose={handleClose}>Content</Drawer>
-        <Drawer show={show()} position="bottom" roundedEdges onClose={handleClose}>Content</Drawer>
+        <Drawer show={show()} title="My Drawer" onClose={() => setShow(false)}>Content</Drawer>
+        <Drawer show={show()} position="left" title="Left" onClose={handleClose}>Content</Drawer>
+        <Drawer show={show()} position="bottom" roundedEdges title="Bottom" onClose={handleClose}>Content</Drawer>
       `}
     />
   );

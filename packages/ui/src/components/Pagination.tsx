@@ -70,7 +70,10 @@ export interface PaginationProps {
  */
 const Pagination: Component<PaginationProps> = (props): JSX.Element => {
   const l = createMemo(() => ({ ...DEFAULT_PAGINATION_LABELS, ...props.labels }));
-  const a = createMemo(() => ({ ...DEFAULT_PAGINATION_ARIA_LABELS, ...props.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_PAGINATION_ARIA_LABELS,
+    ...props.ariaLabels,
+  }));
   const [pageValue, setPageValue] = createSignal(1);
 
   createEffect(() => setPageValue(props.page));
@@ -116,11 +119,15 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
             'font-style': 'normal',
             'min-width': '25px',
           }}
-          onChange={(e) => setPage(parseInt(e.target.value))}
+          onValueChange={(v) => {
+            if (v !== null) setPage(v);
+          }}
           min={1}
           max={props.total}
         />
-        <p class="text-nowrap">{l().of} {props.total}</p>
+        <p class="text-nowrap">
+          {l().of} {props.total}
+        </p>
       </div>
       <nav aria-label={a().page} class="flex items-center gap-1">
         <NavigationButton

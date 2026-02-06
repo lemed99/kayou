@@ -1,10 +1,11 @@
-import { JSX, createMemo, onCleanup, onMount, splitProps } from 'solid-js';
+import { JSX, createMemo, createSignal, splitProps } from 'solid-js';
 
 import TextInput, { TextInputProps } from './TextInput';
 
 type ExtendedTextInputProps = Omit<
   TextInputProps,
   | 'type'
+  | 'onChange'
   | 'onBlur'
   | 'showArrows'
   | 'onArrowUp'
@@ -14,8 +15,8 @@ type ExtendedTextInputProps = Omit<
 >;
 
 export interface NumberInputProps extends ExtendedTextInputProps {
-  /** Allow empty/null values. Defaults to true. */
-  nullable?: boolean;
+  /** Allow zero as a valid value. Defaults to true. */
+  allowZero?: boolean;
   /** Decimal places for float type. Defaults to 3. */
   precision?: number;
   /** Increment/decrement step amount. Defaults to 1. */
@@ -32,8 +33,8 @@ export interface NumberInputProps extends ExtendedTextInputProps {
   arrowUpLabel?: string;
   /** Accessible label for decrement button. Defaults to 'Decrease value'. */
   arrowDownLabel?: string;
-  /** Delay in ms before processing value after user stops typing. Defaults to 1000. Set to 0 to disable. */
-  debounceDelay?: number;
+  /** Wrap around when stepping past min/max. Requires both min and max to be set. Defaults to false. */
+  wrap?: boolean;
 }
 
 const NON_ALPHANUM_KEYS = [
@@ -47,12 +48,16 @@ const NON_ALPHANUM_KEYS = [
 ];
 const DECIMAL_SEPARATORS = [',', '.'];
 
-const isValidNumber = (val: number | string, nullable = false, allowNegative = false) => {
+const isValidNumber = (
+  val: number | string,
+  allowZero = false,
+  allowNegative = false,
+) => {
   val = val.toString();
   if (!val) return false;
   const toFloat = parseFloat(val);
   if (isNaN(toFloat)) return false;
-  if (toFloat === 0 && nullable) return true;
+  if (toFloat === 0 && allowZero) return true;
   if (allowNegative) return true;
   return toFloat > 0;
 };
@@ -62,9 +67,8 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     'onPaste',
     'onKeyDown',
     'onInput',
-    'onChange',
     'onValueChange',
-    'nullable',
+    'allowZero',
     'type',
     'precision',
     'step',
@@ -73,7 +77,8 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     'allowNegativeValues',
     'arrowUpLabel',
     'arrowDownLabel',
-    'debounceDelay',
+    'wrap',
+    'value',
   ]);
 
   // Safe accessors for min/max with proper type handling
@@ -91,7 +96,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     return isNaN(parsed) ? undefined : parsed;
   });
 
-  const nullable = createMemo(() => local.nullable ?? true);
+  const allowZero = createMemo(() => local.allowZero ?? true);
   const precision = createMemo(() => local.precision ?? 3);
   const showArrows = createMemo(() => local.showArrows ?? false);
   const allowNegative = createMemo(() => local.allowNegativeValues ?? false);
@@ -105,19 +110,11 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     }
     return local.step;
   });
-  const debounceDelay = createMemo(() => local.debounceDelay ?? 1000);
+  const [currentValue, setCurrentValue] = createSignal<number | undefined>(undefined);
 
   let inputRef: HTMLInputElement | undefined;
   let upBtnRef: HTMLButtonElement | undefined;
   let downBtnRef: HTMLButtonElement | undefined;
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-  // Cleanup debounce timer on unmount
-  onCleanup(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-  });
 
   /** Clamp a value within min/max bounds */
   const clampValue = (value: number): number => {
@@ -131,17 +128,27 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
 
   /** Emit typed numeric value via onValueChange callback */
   const emitValue = (value: number | null): void => {
+    setCurrentValue(value ?? undefined);
     if (typeof local.onValueChange === 'function') {
       local.onValueChange(value);
     }
   };
 
-  /** Clear debounce timer */
-  const clearDebounce = (): void => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = undefined;
-    }
+  /**
+   * Re-sync the input's DOM value with the parent's `value` prop.
+   * Needed because the parent may format the display value (e.g. zero-padding)
+   * and if the numeric value didn't change, SolidJS won't re-apply the prop.
+   */
+  const syncFromProp = () => {
+    const propValue = local.value;
+    queueMicrotask(() => {
+      if (inputRef && propValue !== undefined) {
+        const propStr = String(propValue);
+        if (inputRef.value !== propStr) {
+          inputRef.value = propStr;
+        }
+      }
+    });
   };
 
   /** Process and format the current input value, emit via callbacks */
@@ -152,29 +159,21 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
 
     if (!value.trim()) {
       emitValue(null);
+      syncFromProp();
       return;
     }
 
-    if (isValidNumber(value, nullable(), allowNegative())) {
+    if (isValidNumber(value, allowZero(), allowNegative())) {
       const num = parseFloat(value);
       let formatted: number =
         inputType() === 'integer'
           ? Math.round(num)
           : parseFloat(num.toFixed(precision()));
       formatted = clampValue(formatted);
-      const formattedStr = formatted.toString();
-      inputRef.value = formattedStr;
+      inputRef.value = formatted.toString();
 
-      // Emit typed numeric value
       emitValue(formatted);
-
-      if (typeof local.onChange === 'function') {
-        const syntheticEvent = {
-          currentTarget: inputRef,
-          target: { ...inputRef, value: formattedStr },
-        };
-        local.onChange(syntheticEvent as Parameters<typeof local.onChange>[0]);
-      }
+      syncFromProp();
     } else {
       // Invalid input - reset to min or default
       const min = minValue();
@@ -186,46 +185,23 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       } else {
         fallbackValue = step();
       }
-      const fallbackStr = fallbackValue.toString();
-      inputRef.value = fallbackStr;
+      inputRef.value = fallbackValue.toString();
 
-      // Emit typed numeric value
       emitValue(fallbackValue);
-
-      if (typeof local.onChange === 'function') {
-        const syntheticEvent = {
-          currentTarget: inputRef,
-          target: { ...inputRef, value: fallbackStr },
-        };
-        local.onChange(syntheticEvent as Parameters<typeof local.onChange>[0]);
-      }
+      syncFromProp();
     }
   };
 
-  /** Schedule debounced value processing */
-  const scheduleDebouncedProcess = (): void => {
-    clearDebounce();
-    const delay = debounceDelay();
-    if (delay > 0) {
-      debounceTimer = setTimeout(() => {
-        processValue();
-      }, delay);
+  const setInputRef = (el: HTMLInputElement) => {
+    inputRef = el;
+    if (typeof local.ref === 'function') {
+      local.ref(el);
+    } else if (typeof local.ref === 'object' && local.ref && 'current' in local.ref) {
+      (local.ref as { current: HTMLInputElement | undefined }).current = el;
     }
   };
-
-  onMount(() => {
-    if (local.ref) {
-      if (typeof local.ref === 'function') {
-        local.ref(inputRef as HTMLInputElement);
-      } else if (typeof local.ref === 'object' && 'current' in local.ref) {
-        (local.ref as { current: HTMLInputElement | undefined }).current = inputRef;
-      }
-    }
-  });
 
   const onBlur = () => {
-    // Clear any pending debounce - we'll process immediately on blur
-    clearDebounce();
     processValue();
   };
 
@@ -234,19 +210,25 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     setButtonActive(upBtnRef, true);
 
     const min = minValue();
+    const max = maxValue();
     const currentVal = parseFloat(
       inputRef.value || (min !== undefined ? String(min) : '0'),
     );
     let newVal: number;
 
-    if (!isValidNumber(currentVal, nullable(), allowNegative())) {
+    if (!isValidNumber(currentVal, allowZero(), allowNegative())) {
       newVal = step();
     } else {
       newVal = currentVal + step();
     }
 
     if (!allowNegative() && newVal < 0) newVal = 0;
-    newVal = clampValue(newVal);
+
+    if (local.wrap && min !== undefined && max !== undefined && newVal > max) {
+      newVal = min;
+    } else {
+      newVal = clampValue(newVal);
+    }
 
     // Format based on type
     if (inputType() === 'integer') {
@@ -255,9 +237,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
 
     inputRef.value = newVal.toString();
     emitValue(newVal);
-
-    const event = new Event('change', { bubbles: true });
-    inputRef.dispatchEvent(event);
+    syncFromProp();
   };
 
   const decrementValue = () => {
@@ -265,22 +245,27 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     setButtonActive(downBtnRef, true);
 
     const min = minValue();
+    const max = maxValue();
     const currentVal = parseFloat(
       inputRef.value || (min !== undefined ? String(min) : '0'),
     );
 
-    if (!isValidNumber(currentVal, nullable(), allowNegative())) {
+    if (!isValidNumber(currentVal, allowZero(), allowNegative())) {
       const fallback = allowNegative() ? -step() : null;
       inputRef.value = fallback !== null ? fallback.toString() : '';
       emitValue(fallback);
-      const event = new Event('change', { bubbles: true });
-      inputRef.dispatchEvent(event);
       return;
     }
 
     let newVal = currentVal - step();
-    if (!allowNegative() && newVal < 0) newVal = 0;
-    newVal = clampValue(newVal);
+
+    if (local.wrap && min !== undefined && max !== undefined && newVal < min) {
+      // Wrap to the highest step-aligned value within range
+      newVal = min + Math.floor((max - min) / step()) * step();
+    } else {
+      if (!allowNegative() && newVal < 0) newVal = 0;
+      newVal = clampValue(newVal);
+    }
 
     // Format based on type
     if (inputType() === 'integer') {
@@ -289,17 +274,15 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
 
     inputRef.value = newVal.toString();
     emitValue(newVal);
-
-    const event = new Event('change', { bubbles: true });
-    inputRef.dispatchEvent(event);
+    syncFromProp();
   };
 
   const setButtonActive = (btn: HTMLButtonElement | undefined, active: boolean) => {
     if (!btn) return;
     if (active) {
-      btn.classList.add('bg-gray-200', 'dark:bg-neutral-700');
+      btn.dataset.active = '';
     } else {
-      btn.classList.remove('bg-gray-200', 'dark:bg-neutral-700');
+      delete btn.dataset.active;
     }
   };
 
@@ -309,15 +292,18 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       target: Element;
     },
   ) => {
+    // Always forward to consumer first (Escape, Enter, etc.)
+    if (typeof local.onKeyDown === 'function') {
+      local.onKeyDown(e);
+    }
+
+    // If consumer already handled it, stop
+    if (e.defaultPrevented) return;
+
     const { key, ctrlKey, metaKey } = e;
 
-    // Allow copy/paste/cut/select-all shortcuts (Ctrl on Windows/Linux, Cmd on Mac)
-    if (ctrlKey || metaKey) {
-      if (typeof local.onKeyDown === 'function') {
-        local.onKeyDown(e);
-      }
-      return;
-    }
+    // Allow copy/paste/cut/select-all shortcuts
+    if (ctrlKey || metaKey) return;
 
     if (key === 'ArrowUp') {
       e.preventDefault();
@@ -357,14 +343,10 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       return;
     }
 
-    if (!isNaN(parseInt(key, 10)) || NON_ALPHANUM_KEYS.includes(key)) {
-      if (typeof local.onKeyDown === 'function') {
-        local.onKeyDown(e);
-      }
-      return;
+    // Allow digits and navigation keys, block everything else
+    if (isNaN(parseInt(key, 10)) && !NON_ALPHANUM_KEYS.includes(key)) {
+      e.preventDefault();
     }
-
-    e.preventDefault();
   };
 
   const handleKeyUp = (
@@ -410,9 +392,6 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     if (typeof local.onInput === 'function') {
       local.onInput(e);
     }
-
-    // Schedule debounced processing after user stops typing
-    scheduleDebouncedProcess();
   };
 
   const handlePaste = (
@@ -422,28 +401,38 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     },
   ) => {
     const clipboardValue = e.clipboardData?.getData('Text');
-    if (clipboardValue) {
-      let val = clipboardValue;
+    if (!clipboardValue) return;
 
-      if (inputType() === 'float') {
-        val = val.replace(/,/g, '.');
-      } else {
-        val = val.replace(/[.,].*/g, '');
-      }
+    let val = clipboardValue;
 
-      if (allowNegative()) {
-        val = val.replace(/(?!^)-/g, '');
-      } else {
-        val = val.replace(/-/g, '');
-      }
-
-      if (isNaN(parseFloat(val))) {
-        e.preventDefault();
-        return;
-      }
+    if (inputType() === 'float') {
+      val = val.replace(/,/g, '.');
+    } else {
+      val = val.replace(/[.,].*/g, '');
     }
 
-    // Allow paste event to continue processing
+    if (allowNegative()) {
+      val = val.replace(/(?!^)-/g, '');
+    } else {
+      val = val.replace(/-/g, '');
+    }
+
+    if (isNaN(parseFloat(val))) {
+      e.preventDefault();
+      return;
+    }
+
+    // Prevent native paste and insert sanitized value instead
+    e.preventDefault();
+    if (inputRef) {
+      const start = inputRef.selectionStart ?? 0;
+      const end = inputRef.selectionEnd ?? 0;
+      const before = inputRef.value.slice(0, start);
+      const after = inputRef.value.slice(end);
+      inputRef.value = before + val + after;
+      const newPos = start + val.length;
+      inputRef.setSelectionRange(newPos, newPos);
+    }
 
     if (typeof local.onPaste === 'function') {
       local.onPaste(e);
@@ -467,7 +456,12 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
   return (
     <TextInput
       {...inputProps}
-      ref={inputRef}
+      value={local.value}
+      ref={setInputRef}
+      role="spinbutton"
+      aria-valuemin={minValue()}
+      aria-valuemax={maxValue()}
+      aria-valuenow={currentValue()}
       onPaste={handlePaste}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}

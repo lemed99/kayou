@@ -27,7 +27,6 @@ export const ChevronDownButton = (props: {
 }) => (
   <button
     type="button"
-    aria-label="Open dropdown"
     tabIndex={-1}
     aria-hidden="true"
     disabled={props.disabled}

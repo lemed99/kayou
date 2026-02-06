@@ -1,7 +1,7 @@
 import { For, createMemo, createSignal } from 'solid-js';
 
-import type { DatePickerShortcut } from './DatePickerContext';
 import type { DatePickerType } from './DatePicker';
+import type { DatePickerShortcut } from './DatePickerContext';
 
 /**
  * Props for the internal Shortcuts component.
@@ -20,6 +20,7 @@ export interface ShortcutsProps {
  */
 const Shortcuts = (props: ShortcutsProps) => {
   const [focusedIndex, setFocusedIndex] = createSignal(0);
+  const [selectedId, setSelectedId] = createSignal<string | null>(null);
 
   // Filter shortcuts based on selection type
   const filteredShortcuts = createMemo(() => {
@@ -48,7 +49,9 @@ const Shortcuts = (props: ShortcutsProps) => {
         if (index > 0) {
           setFocusedIndex(index - 1);
           const container = (e.target as HTMLElement).parentElement;
-          container?.querySelector<HTMLButtonElement>(`[data-shortcut="${index - 1}"]`)?.focus();
+          container
+            ?.querySelector<HTMLButtonElement>(`[data-shortcut="${index - 1}"]`)
+            ?.focus();
         }
         break;
       case 'ArrowDown':
@@ -56,7 +59,9 @@ const Shortcuts = (props: ShortcutsProps) => {
         if (index < shortcuts.length - 1) {
           setFocusedIndex(index + 1);
           const container = (e.target as HTMLElement).parentElement;
-          container?.querySelector<HTMLButtonElement>(`[data-shortcut="${index + 1}"]`)?.focus();
+          container
+            ?.querySelector<HTMLButtonElement>(`[data-shortcut="${index + 1}"]`)
+            ?.focus();
         }
         break;
       case 'Escape':
@@ -78,9 +83,13 @@ const Shortcuts = (props: ShortcutsProps) => {
           <button
             type="button"
             data-shortcut={index()}
-            onClick={() => props.onSelect(shortcut.getValue())}
+            onClick={() => {
+              setSelectedId(shortcut.id);
+              props.onSelect(shortcut.getValue());
+            }}
             onKeyDown={(e) => handleKeyDown(e, index())}
             role="option"
+            aria-selected={selectedId() === shortcut.id}
             tabIndex={focusedIndex() === index() ? 0 : -1}
             class="rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
           >

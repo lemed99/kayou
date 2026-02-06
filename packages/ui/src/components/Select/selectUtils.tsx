@@ -12,7 +12,7 @@ export const optionsContainerClass =
 export const optionClass = (option: Option, highlightedOption: Option | null) => {
   return twMerge(
     'flex cursor-pointer items-center justify-between px-2 py-1.5 text-sm whitespace-nowrap',
-    highlightedOption?.value == option.value
+    highlightedOption?.value === option.value
       ? 'rounded bg-blue-50 dark:bg-neutral-800'
       : '',
   );

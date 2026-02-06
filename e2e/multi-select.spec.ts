@@ -2,30 +2,47 @@ import { expect, test } from '@playwright/test';
 
 test.describe('MultiSelect', () => {
   test.beforeEach(async ({ page }) => {
+    // Suppress ResizeObserver loop errors that trigger SolidStart's dev overlay
+    await page.addInitScript(() => {
+      window.addEventListener(
+        'error',
+        (e) => {
+          if (e.message?.includes('ResizeObserver')) e.stopImmediatePropagation();
+        },
+        true,
+      );
+    });
     await page.goto('/ui/multi-select');
   });
 
+  const getTrigger = (page: import('@playwright/test').Page) =>
+    page.getByRole('combobox').first();
+
+  const openDropdown = async (page: import('@playwright/test').Page) => {
+    const trigger = getTrigger(page);
+    await trigger.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await trigger.click();
+    await page.waitForTimeout(300);
+    return trigger;
+  };
+
   test('should render multi-select input', async ({ page }) => {
-    const multiSelect = page.locator('input').first();
+    const multiSelect = getTrigger(page);
     await expect(multiSelect).toBeVisible();
   });
 
   test('should open dropdown on click', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    await openDropdown(page);
 
     const dropdown = page.locator('[role="listbox"]');
     await expect(dropdown.first()).toBeVisible();
   });
 
   test('should select multiple options', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    await openDropdown(page);
 
-    // Options are divs inside the listbox
-    const options = page.locator('[role="listbox"] > div');
+    const options = page.locator('[role="option"]');
     const count = await options.count();
 
     if (count > 1) {
@@ -33,21 +50,15 @@ test.describe('MultiSelect', () => {
       await options.first().click();
       await page.waitForTimeout(200);
 
-      // Re-click to reopen dropdown
-      await trigger.click();
-      await page.waitForTimeout(300);
-
-      // Select second option
+      // MultiSelect stays open after selection — select second option
       await options.nth(1).click();
     }
   });
 
   test('should display selected items as tags/chips', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    await openDropdown(page);
 
-    const firstOption = page.locator('[role="listbox"] > div').first();
+    const firstOption = page.locator('[role="option"]').first();
     if (await firstOption.isVisible()) {
       await firstOption.click();
       await page.waitForTimeout(200);
@@ -59,40 +70,38 @@ test.describe('MultiSelect', () => {
   });
 
   test('should remove selected item on tag close click', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    const trigger = await openDropdown(page);
 
-    const firstOption = page.locator('[role="listbox"] > div').first();
+    const firstOption = page.locator('[role="option"]').first();
     if (await firstOption.isVisible()) {
       await firstOption.click();
       await page.waitForTimeout(200);
 
-      // Find remove button
-      const removeButton = page.locator('button svg').first();
+      // Close the dropdown first
+      await trigger.press('Escape');
+      await page.waitForTimeout(300);
+
+      // Find the clear/remove button (force: true to bypass any dev overlay)
+      const removeButton = page.locator('button[aria-label="Clear selection"]').first();
       if (await removeButton.isVisible()) {
-        await removeButton.click();
+        await removeButton.click({ force: true });
       }
     }
   });
 
   test('should close dropdown on Escape', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    const trigger = await openDropdown(page);
 
     const dropdown = page.locator('[role="listbox"]').first();
     await expect(dropdown).toBeVisible();
 
-    await page.keyboard.press('Escape');
+    await trigger.press('Escape');
     await page.waitForTimeout(300);
     await expect(dropdown).not.toBeVisible();
   });
 
   test('should support keyboard navigation', async ({ page }) => {
-    const trigger = page.locator('input').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
+    await openDropdown(page);
 
     // Navigate with arrow keys
     await page.keyboard.press('ArrowDown');
@@ -103,12 +112,14 @@ test.describe('MultiSelect', () => {
   });
 
   test('should filter options when typing', async ({ page }) => {
-    const input = page.locator('input').first();
-    await input.click();
-    await input.fill('test');
+    const trigger = await openDropdown(page);
 
-    // Options should be filtered
-    await page.waitForTimeout(200);
+    // Check if there's a search input inside the dropdown
+    const searchInput = page.locator('input[aria-label="Search options"]').first();
+    if (await searchInput.isVisible()) {
+      await searchInput.fill('test');
+      await page.waitForTimeout(200);
+    }
   });
 
   test('should clear all selections', async ({ page }) => {
@@ -122,8 +133,8 @@ test.describe('MultiSelect', () => {
   });
 
   test('should show placeholder when empty', async ({ page }) => {
-    const input = page.locator('input').first();
-    const placeholder = await input.getAttribute('placeholder');
-    expect(placeholder !== null || (await input.inputValue()) !== null).toBeTruthy();
+    const trigger = getTrigger(page);
+    const placeholder = await trigger.getAttribute('placeholder');
+    expect(placeholder !== null || (await trigger.inputValue()) !== null).toBeTruthy();
   });
 });

@@ -1,4 +1,12 @@
-import { For, JSX, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import {
+  For,
+  JSX,
+  createEffect,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  onCleanup,
+} from 'solid-js';
 
 /**
  * Props for the VirtualGrid component.
@@ -48,12 +56,14 @@ export interface VirtualGridProps<T> {
  * ```
  */
 export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
+  const gridId = createUniqueId();
   const [scrollTop, setScrollTop] = createSignal(0);
   const [columns, setColumns] = createSignal(1);
+  const [scrollContainerEl, setScrollContainerEl] = createSignal<HTMLDivElement | null>(
+    null,
+  );
   const [gridEl, setGridEl] = createSignal<HTMLElement | null>(null);
   const [focusedIndex, setFocusedIndex] = createSignal(-1);
-
-  let scrollContainerRef: HTMLDivElement | undefined;
 
   const gap = createMemo(() => props.gap ?? 0);
 
@@ -66,21 +76,39 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
     setColumns(Math.max(cols, 1));
   };
 
-  // Effect with proper cleanup inside the effect
+  // Column detection via ResizeObserver — no extra RAF, observer fires after layout
   createEffect(() => {
     const el = gridEl();
     if (!el) return;
 
-    // Initial column calculation
-    requestAnimationFrame(() => updateColumns(el));
+    updateColumns(el);
 
-    // Watch for resize changes
-    const observer = new ResizeObserver(() => {
-      requestAnimationFrame(() => updateColumns(el));
-    });
+    const observer = new ResizeObserver(() => updateColumns(el));
     observer.observe(el);
 
     onCleanup(() => observer.disconnect());
+  });
+
+  // Passive, RAF-throttled scroll listener
+  createEffect(() => {
+    const el = scrollContainerEl();
+    if (!el) return;
+
+    let rafId: number | undefined;
+    const handler = () => {
+      if (rafId !== undefined) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setScrollTop(el.scrollTop);
+        rafId = undefined;
+      });
+    };
+
+    el.addEventListener('scroll', handler, { passive: true });
+
+    onCleanup(() => {
+      el.removeEventListener('scroll', handler);
+      if (rafId !== undefined) cancelAnimationFrame(rafId);
+    });
   });
 
   const rowHeight = createMemo(() => props.itemHeight + gap());
@@ -95,8 +123,9 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
     }
 
     const overscan = props.overscanRows ?? 2;
-    const startRow = Math.floor(scrollTop() / rowHeight());
-    const visibleRows = Math.ceil(props.rootHeight / rowHeight()) + 1;
+    const rh = rowHeight();
+    const startRow = Math.floor(scrollTop() / rh);
+    const visibleRows = Math.ceil(props.rootHeight / rh) + 1;
     const endRow = Math.min(rowCount(), startRow + visibleRows + overscan);
 
     return {
@@ -107,9 +136,9 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
 
   const visibleItems = createMemo(() => {
     if (props.data.length === 0) return [];
-    const start = visibleRange().start * columns();
-    const end = Math.min(props.data.length, visibleRange().end * columns());
-    return props.data.slice(start, end);
+    const { start, end } = visibleRange();
+    const cols = columns();
+    return props.data.slice(start * cols, Math.min(props.data.length, end * cols));
   });
 
   const totalHeight = createMemo(() => {
@@ -118,9 +147,10 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
     return rows * props.itemHeight + (rows - 1) * gap();
   });
 
-  const offsetTop = createMemo(
-    () => visibleRange().start * props.itemHeight + visibleRange().start * gap(),
-  );
+  const offsetTop = createMemo(() => {
+    const start = visibleRange().start;
+    return start * props.itemHeight + start * gap();
+  });
 
   /**
    * Get the actual data index from visible item index.
@@ -130,22 +160,31 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
   };
 
   /**
+   * ID of the currently focused cell for aria-activedescendant.
+   */
+  const focusedCellId = createMemo(() => {
+    const idx = focusedIndex();
+    return idx >= 0 ? `${gridId}-cell-${idx}` : undefined;
+  });
+
+  /**
    * Scroll to ensure a specific data index is visible.
    */
   const scrollToIndex = (index: number): void => {
-    if (!scrollContainerRef || index < 0 || index >= props.data.length) return;
+    const el = scrollContainerEl();
+    if (!el || index < 0 || index >= props.data.length) return;
 
     const row = Math.floor(index / columns());
     const rowTop = row * rowHeight();
     const rowBottom = rowTop + props.itemHeight;
 
-    const viewTop = scrollContainerRef.scrollTop;
+    const viewTop = el.scrollTop;
     const viewBottom = viewTop + props.rootHeight;
 
     if (rowTop < viewTop) {
-      scrollContainerRef.scrollTop = rowTop;
+      el.scrollTop = rowTop;
     } else if (rowBottom > viewBottom) {
-      scrollContainerRef.scrollTop = rowBottom - props.rootHeight;
+      el.scrollTop = rowBottom - props.rootHeight;
     }
   };
 
@@ -221,12 +260,13 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
 
   return (
     <div
-      ref={scrollContainerRef}
+      ref={setScrollContainerEl}
       role="grid"
       aria-label={props['aria-label']}
       aria-labelledby={props['aria-labelledby']}
       aria-rowcount={rowCount()}
       aria-colcount={columns()}
+      aria-activedescendant={focusedCellId()}
       tabindex={0}
       style={{
         height: `${props.rootHeight}px`,
@@ -234,7 +274,6 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
         position: 'relative',
         'will-change': 'scroll-position',
       }}
-      onScroll={(e) => setScrollTop((e.target as HTMLElement).scrollTop)}
       onKeyDown={handleKeyDown}
       onFocus={handleFocus}
     >
@@ -249,6 +288,7 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
             left: 0,
             right: 0,
             width: '100%',
+            contain: 'content',
           }}
         >
           <For each={visibleItems()}>
@@ -256,15 +296,14 @@ export function VirtualGrid<T>(props: VirtualGridProps<T>): JSX.Element {
               const dataIndex = createMemo(() => getDataIndex(i()));
               const rowIndex = createMemo(() => Math.floor(dataIndex() / columns()) + 1);
               const colIndex = createMemo(() => (dataIndex() % columns()) + 1);
-              const isFocused = createMemo(() => focusedIndex() === dataIndex());
 
               return (
                 <div
+                  id={`${gridId}-cell-${dataIndex()}`}
                   role="gridcell"
                   aria-rowindex={rowIndex()}
                   aria-colindex={colIndex()}
-                  tabindex={isFocused() ? 0 : -1}
-                  data-focused={isFocused() ? '' : undefined}
+                  data-focused={focusedIndex() === dataIndex() ? '' : undefined}
                   style={{ height: `${props.itemHeight}px` }}
                   onClick={() => setFocusedIndex(dataIndex())}
                 >

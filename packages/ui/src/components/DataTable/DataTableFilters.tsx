@@ -631,6 +631,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           <Button
             size="sm"
             color="gray"
+            icon={FilterFunnel01Icon}
             onClick={handleToggle}
             aria-expanded={isOpen()}
             aria-label={
@@ -639,7 +640,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
                 : undefined
             }
           >
-            <FilterFunnel01Icon class="mr-1.5 size-4" aria-hidden="true" />
             {props.filterButtonText || l().filter}
             <Show when={activeFilterCount() > 0}>
               <span
@@ -682,7 +682,10 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
               ? (props.seeMoreChipsText ?? 'See less')
               : `${props.seeMoreChipsText ?? 'See more'}`}
             <ChevronDownIcon
-              class={twMerge('size-3 transition-transform', showAllChips() ? 'rotate-180' : '')}
+              class={twMerge(
+                'size-3 transition-transform',
+                showAllChips() ? 'rotate-180' : '',
+              )}
               aria-hidden="true"
             />
           </button>

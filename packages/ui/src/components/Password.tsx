@@ -6,6 +6,7 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  on,
   splitProps,
 } from 'solid-js';
 
@@ -132,18 +133,6 @@ export interface PasswordProps
   onRequirementsChange?: (met: string[], unmet: string[]) => void;
 
   /**
-   * Label for the show password button.
-   * @default 'Show password'
-   */
-  showPasswordLabel?: string;
-
-  /**
-   * Label for the hide password button.
-   * @default 'Hide password'
-   */
-  hidePasswordLabel?: string;
-
-  /**
    * Additional CSS class for the strength indicator container.
    */
   strengthClass?: string;
@@ -162,30 +151,11 @@ export interface PasswordProps
   ariaLabels?: Partial<PasswordAriaLabels>;
 }
 
-const strengthConfig: Record<
-  PasswordStrength,
-  { color: string; label: string; width: string }
-> = {
-  weak: {
-    color: 'bg-red-500',
-    label: 'Weak',
-    width: 'w-1/4',
-  },
-  fair: {
-    color: 'bg-yellow-500',
-    label: 'Fair',
-    width: 'w-2/4',
-  },
-  good: {
-    color: 'bg-blue-500',
-    label: 'Good',
-    width: 'w-3/4',
-  },
-  strong: {
-    color: 'bg-green-500',
-    label: 'Strong',
-    width: 'w-full',
-  },
+const strengthConfig: Record<PasswordStrength, { color: string; width: string }> = {
+  weak: { color: 'bg-red-500', width: 'w-1/4' },
+  fair: { color: 'bg-yellow-500', width: 'w-2/4' },
+  good: { color: 'bg-blue-500', width: 'w-3/4' },
+  strong: { color: 'bg-green-500', width: 'w-full' },
 };
 
 /**
@@ -214,8 +184,6 @@ export default function Password(props: PasswordProps): JSX.Element {
     'calculateStrength',
     'onStrengthChange',
     'onRequirementsChange',
-    'showPasswordLabel',
-    'hidePasswordLabel',
     'strengthClass',
     'requirementsClass',
     'value',
@@ -274,17 +242,27 @@ export default function Password(props: PasswordProps): JSX.Element {
     }
   });
 
-  // Fire callbacks when strength changes
-  createEffect(() => {
-    const s = strength();
-    local.onStrengthChange?.(s);
-  });
+  // Fire callbacks when strength changes (deferred to skip initial mount)
+  createEffect(
+    on(
+      strength,
+      (s) => {
+        local.onStrengthChange?.(s);
+      },
+      { defer: true },
+    ),
+  );
 
-  // Fire callbacks when requirements change
-  createEffect(() => {
-    const { met, unmet } = requirementStatus();
-    local.onRequirementsChange?.(met, unmet);
-  });
+  // Fire callbacks when requirements change (deferred to skip initial mount)
+  createEffect(
+    on(
+      requirementStatus,
+      ({ met, unmet }) => {
+        local.onRequirementsChange?.(met, unmet);
+      },
+      { defer: true },
+    ),
+  );
 
   const handleInput: JSX.EventHandler<HTMLInputElement, InputEvent> = (e) => {
     const value = e.currentTarget.value;
@@ -306,10 +284,10 @@ export default function Password(props: PasswordProps): JSX.Element {
     });
   };
 
-  // Determine color based on strength when password has value
+  // Determine color based on strength when password has value and showStrength is enabled
   const computedColor = createMemo(() => {
     if (local.color) return local.color;
-    if (!passwordValue()) return 'gray';
+    if (!local.showStrength || !passwordValue()) return 'gray';
 
     const s = strength();
     if (s === 'weak') return 'failure';
@@ -319,34 +297,15 @@ export default function Password(props: PasswordProps): JSX.Element {
   });
 
   const toggleIconColors: Record<string, string> = {
-    gray: 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-200',
-    info: 'text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300',
-    failure: 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300',
-    warning: 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300',
-    success: 'text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300',
+    gray: 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-500 tansition-all',
+    info: 'text-blue-500 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-600 tansition-all',
+    failure:
+      'text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600 tansition-all',
+    warning:
+      'text-yellow-600 hover:text-yellow-700 dark:text-yellow-500 dark:hover:text-yellow-600 tansition-all',
+    success:
+      'text-green-500 hover:text-green-700 dark:text-green-500 dark:hover:text-green-600 tansition-all',
   };
-
-  const ToggleButton = () => (
-    <button
-      type="button"
-      onClick={toggleVisibility}
-      onMouseDown={(e) => e.preventDefault()}
-      class={twMerge(
-        'absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 transition-all',
-        toggleIconColors[computedColor()],
-      )}
-      aria-label={
-        showPassword()
-          ? (local.hidePasswordLabel ?? a().hidePassword)
-          : (local.showPasswordLabel ?? a().showPassword)
-      }
-      tabIndex={0}
-    >
-      <Show when={showPassword()} fallback={<EyeIcon class="size-5" />}>
-        <EyeOffIcon class="size-5" />
-      </Show>
-    </button>
-  );
 
   return (
     <div class="w-full">
@@ -378,7 +337,20 @@ export default function Password(props: PasswordProps): JSX.Element {
               .join(' ') || undefined
           }
         />
-        <ToggleButton />
+        <button
+          type="button"
+          onClick={toggleVisibility}
+          onMouseDown={(e) => e.preventDefault()}
+          class={twMerge(
+            'absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 transition-all',
+            toggleIconColors[computedColor()],
+          )}
+          aria-label={showPassword() ? a().hidePassword : a().showPassword}
+        >
+          <Show when={showPassword()} fallback={<EyeIcon class="size-5" />}>
+            <EyeOffIcon class="size-5" />
+          </Show>
+        </button>
       </div>
 
       <Show when={local.helperText}>

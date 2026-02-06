@@ -1,5 +1,20 @@
 import { expect, test } from '@playwright/test';
 
+type Page = import('@playwright/test').Page;
+
+const getFirstCombobox = (page: Page) =>
+  page.locator('[role="combobox"]').first();
+
+/** Scroll into view + wait for scroll to settle before clicking */
+const openCalendar = async (page: Page) => {
+  const combobox = getFirstCombobox(page);
+  await combobox.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  await combobox.click();
+  await page.waitForTimeout(300);
+  return combobox;
+};
+
 test.describe('DatePicker', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/ui/date-picker');
@@ -29,27 +44,25 @@ test.describe('DatePicker', () => {
   // ==================== Calendar Opening/Closing ====================
 
   test('should open calendar on input click', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]');
     await expect(calendar).toBeVisible();
   });
 
   test('should close calendar on Escape key', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    const combobox = await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]');
     await expect(calendar).toBeVisible();
 
-    await page.keyboard.press('Escape');
+    await combobox.press('Escape');
+    await page.waitForTimeout(300);
     await expect(calendar).not.toBeVisible();
   });
 
   test('should select a date', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    const combobox = await openCalendar(page);
 
     // Click on a day in the current month (day 15)
     const dayButton = page
@@ -59,19 +72,19 @@ test.describe('DatePicker', () => {
       .filter({ hasText: /^15$/ })
       .first();
     await dayButton.click();
+    await page.waitForTimeout(300);
 
     // Calendar should close after selection
     const calendar = page.locator('[role="dialog"]');
     await expect(calendar).not.toBeVisible();
 
     // Input should contain the selected date
-    const input = firstDatePicker.locator('input');
+    const input = combobox.locator('input');
     await expect(input).toHaveValue(/15/);
   });
 
   test('should navigate months with arrow buttons', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
 
@@ -89,8 +102,7 @@ test.describe('DatePicker', () => {
   });
 
   test('should navigate months with keyboard', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     const grid = calendar.locator('[role="grid"]');
@@ -110,8 +122,7 @@ test.describe('DatePicker', () => {
   });
 
   test('should show month selector', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     const monthButton = calendar.locator('button[aria-label="Select month"]');
@@ -130,8 +141,7 @@ test.describe('DatePicker', () => {
   });
 
   test('should show year selector', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     const yearButton = calendar.locator('button[aria-label="Select year"]');
@@ -143,8 +153,7 @@ test.describe('DatePicker', () => {
   });
 
   test('should clear selected date', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    const combobox = await openCalendar(page);
 
     // Select a date
     const dayButton = page
@@ -156,11 +165,11 @@ test.describe('DatePicker', () => {
     await dayButton.click();
 
     // Verify date is selected
-    const input = firstDatePicker.locator('input');
+    const input = combobox.locator('input');
     await expect(input).toHaveValue(/15/);
 
     // Click clear button
-    const clearButton = firstDatePicker.locator('button[aria-label="Clear"]');
+    const clearButton = combobox.locator('button[aria-label="Clear"]');
     if (await clearButton.isVisible()) {
       await clearButton.click();
       await expect(input).toHaveValue('');
@@ -221,7 +230,10 @@ test.describe('DatePicker - Week Start', () => {
       .locator('[role="combobox"]')
       .first();
 
+    await datePicker.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
     await datePicker.click();
+    await page.waitForTimeout(300);
 
     const calendar = page.locator('[role="dialog"]').first();
     const dayHeaders = calendar.locator('[role="columnheader"]');
@@ -241,7 +253,10 @@ test.describe('DatePicker - Week Start', () => {
       .locator('[role="combobox"]')
       .first();
 
+    await datePicker.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
     await datePicker.click();
+    await page.waitForTimeout(300);
 
     const calendar = page.locator('[role="dialog"]').first();
     const dayHeaders = calendar.locator('[role="columnheader"]');
@@ -267,7 +282,10 @@ test.describe('DatePicker - Time Selection', () => {
       .locator('[role="combobox"]')
       .first();
 
+    await datePicker.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
     await datePicker.click();
+    await page.waitForTimeout(300);
 
     const calendar = page.locator('[role="dialog"]').first();
 
@@ -293,7 +311,10 @@ test.describe('DatePicker - Time Selection', () => {
       .locator('[role="combobox"]')
       .first();
 
+    await datePicker.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
     await datePicker.click();
+    await page.waitForTimeout(300);
 
     const calendar = page.locator('[role="dialog"]').first();
 
@@ -337,16 +358,14 @@ test.describe('DatePicker - Accessibility', () => {
   });
 
   test('calendar should have dialog role', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]');
     await expect(calendar).toHaveAttribute('role', 'dialog');
   });
 
   test('calendar grid should have proper role', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const grid = page.locator('[role="dialog"] [role="grid"]');
     if (await grid.isVisible()) {
@@ -355,8 +374,7 @@ test.describe('DatePicker - Accessibility', () => {
   });
 
   test('day cells should have gridcell role', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const gridCells = page.locator('[role="dialog"] [role="gridcell"]');
     const count = await gridCells.count();
@@ -376,8 +394,7 @@ test.describe('DatePicker - Visual States', () => {
   });
 
   test("should highlight today's date", async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     // Today's date typically has special styling
     const calendar = page.locator('[role="dialog"]').first();
@@ -385,8 +402,7 @@ test.describe('DatePicker - Visual States', () => {
   });
 
   test('should show selected date with different styling', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    const combobox = await openCalendar(page);
 
     // Select a date
     const dayButton = page
@@ -396,16 +412,19 @@ test.describe('DatePicker - Visual States', () => {
       .filter({ hasText: /^15$/ })
       .first();
     await dayButton.click();
+    await page.waitForTimeout(300);
 
-    // Reopen and verify selection styling
-    await firstDatePicker.click();
+    // Reopen — scroll again since closing may restore scroll position
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await combobox.click();
+    await page.waitForTimeout(300);
     const calendar = page.locator('[role="dialog"]');
     await expect(calendar).toBeVisible();
   });
 
   test('should show hover state on days', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    await openCalendar(page);
 
     const dialog = page.locator('[role="dialog"]').first();
     await expect(dialog).toBeVisible();
@@ -427,8 +446,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
 
   test('should focus date button when calendar opens', async ({ page }) => {
     // Click on the input specifically to ensure calendar opens
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     // Wait for calendar to be visible with a longer timeout
     const calendar = page.locator('[role="dialog"]').first();
@@ -440,8 +458,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should navigate dates with arrow keys', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -473,8 +490,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should select date with Enter key', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    const combobox = await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -490,14 +506,13 @@ test.describe('DatePicker - Keyboard Navigation', () => {
     await expect(calendar).not.toBeVisible();
 
     // Input should have a value
-    const input = datePicker.locator('input');
+    const input = combobox.locator('input');
     const value = await input.inputValue();
     expect(value.length).toBeGreaterThan(0);
   });
 
   test('should select date with Space key', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -513,8 +528,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should cycle focus with Tab key: date -> header buttons -> date', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -552,8 +566,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   test('should not navigate dates with arrow keys when header button is focused', async ({
     page,
   }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -583,8 +596,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should activate header button with Enter when focused', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -604,8 +616,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should navigate month selector with arrow keys', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -642,8 +653,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should navigate year selector with arrow keys', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -682,8 +692,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   test('should close month selector with Escape and return focus to month button', async ({
     page,
   }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -706,8 +715,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should update focused date when changing month', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -740,8 +748,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should clamp day when changing to month with fewer days', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -776,8 +783,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should maintain focus cycle after changing month', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -824,8 +830,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should maintain focus cycle after changing year', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    await datePicker.click();
+    await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
@@ -872,8 +877,10 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should open calendar with Enter key on input', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    const input = firstDatePicker.locator('input');
+    const combobox = getFirstCombobox(page);
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    const input = combobox.locator('input');
     await input.focus();
 
     // Press Enter to open calendar
@@ -888,8 +895,10 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should open calendar with Space key on input', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    const input = firstDatePicker.locator('input');
+    const combobox = getFirstCombobox(page);
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    const input = combobox.locator('input');
     await input.focus();
 
     // Press Space to open calendar
@@ -900,8 +909,10 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should open calendar with ArrowDown key on input', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    const input = firstDatePicker.locator('input');
+    const combobox = getFirstCombobox(page);
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    const input = combobox.locator('input');
     await input.focus();
 
     // Press ArrowDown to open calendar
@@ -912,15 +923,15 @@ test.describe('DatePicker - Keyboard Navigation', () => {
   });
 
   test('should close calendar and return focus to input on Escape', async ({ page }) => {
-    const datePicker = page.locator('[role="combobox"]').first();
-    const input = datePicker.locator('input');
-    await datePicker.click();
+    const combobox = await openCalendar(page);
+    const input = combobox.locator('input');
 
     const calendar = page.locator('[role="dialog"]').first();
     await expect(calendar).toBeVisible({ timeout: 5000 });
 
     // Press Escape
-    await page.keyboard.press('Escape');
+    await combobox.press('Escape');
+    await page.waitForTimeout(300);
 
     // Calendar should close
     await expect(calendar).not.toBeVisible();
@@ -936,20 +947,21 @@ test.describe('DatePicker - Edge Cases', () => {
   });
 
   test('should handle rapid calendar open/close', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
+    const combobox = getFirstCombobox(page);
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
 
-    await firstDatePicker.click();
+    await combobox.click();
     await page.keyboard.press('Escape');
-    await firstDatePicker.click();
+    await combobox.click();
     await page.keyboard.press('Escape');
 
     // Should be in a valid state
-    await expect(firstDatePicker).toBeVisible();
+    await expect(combobox).toBeVisible();
   });
 
   test('should maintain selection after closing and reopening', async ({ page }) => {
-    const firstDatePicker = page.locator('[role="combobox"]').first();
-    await firstDatePicker.click();
+    const combobox = await openCalendar(page);
 
     // Select a date
     const dayButton = page
@@ -959,14 +971,19 @@ test.describe('DatePicker - Edge Cases', () => {
       .filter({ hasText: /^15$/ })
       .first();
     await dayButton.click();
+    await page.waitForTimeout(300);
 
     // Get the selected value
-    const input = firstDatePicker.locator('input');
+    const input = combobox.locator('input');
     const value = await input.inputValue();
 
     // Reopen and verify value persists
-    await firstDatePicker.click();
-    await page.keyboard.press('Escape');
+    await combobox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await combobox.click();
+    await page.waitForTimeout(300);
+    await combobox.press('Escape');
+    await page.waitForTimeout(300);
 
     const newValue = await input.inputValue();
     expect(newValue).toBe(value);

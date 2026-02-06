@@ -3,203 +3,107 @@ import { expect, test } from '@playwright/test';
 test.describe('RichTextEditor', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/ui/rich-text-editor');
-  });
-
-  // ==================== Basic Rendering ====================
-
-  test('should render rich text editor container', async ({ page }) => {
-    const content = await page.textContent('body');
-    expect(content).toContain('RichTextEditor');
+    await page.waitForLoadState('networkidle');
   });
 
   test('should render editable content area', async ({ page }) => {
     const editor = page.locator('[contenteditable="true"]').first();
     await expect(editor).toBeVisible();
+    await expect(editor).toHaveAttribute('role', 'textbox');
+    await expect(editor).toHaveAttribute('aria-multiline', 'true');
   });
 
-  test('should render toolbar', async ({ page }) => {
-    const toolbar = page.locator('[role="toolbar"], [class*="toolbar"]').first();
-    if (await toolbar.isVisible()) {
-      await expect(toolbar).toBeVisible();
-    }
+  test('should render toolbar with formatting buttons', async ({ page }) => {
+    const boldButton = page.locator('button[aria-label*="Bold"]').first();
+    const italicButton = page.locator('button[aria-label*="Italic"]').first();
+    const underlineButton = page.locator('button[aria-label*="Underline"]').first();
+    await expect(boldButton).toBeVisible();
+    await expect(italicButton).toBeVisible();
+    await expect(underlineButton).toBeVisible();
   });
-
-  // ==================== Toolbar Buttons ====================
-
-  test('should render bold button', async ({ page }) => {
-    const boldButton = page
-      .locator('button[aria-label*="Bold"], button[title*="Bold"]')
-      .first();
-    if (await boldButton.isVisible()) {
-      await expect(boldButton).toBeVisible();
-    }
-  });
-
-  test('should render italic button', async ({ page }) => {
-    const italicButton = page
-      .locator('button[aria-label*="Italic"], button[title*="Italic"]')
-      .first();
-    if (await italicButton.isVisible()) {
-      await expect(italicButton).toBeVisible();
-    }
-  });
-
-  test('should render underline button', async ({ page }) => {
-    const underlineButton = page
-      .locator('button[aria-label*="Underline"], button[title*="Underline"]')
-      .first();
-    if (await underlineButton.isVisible()) {
-      await expect(underlineButton).toBeVisible();
-    }
-  });
-
-  // ==================== Text Editing ====================
 
   test('should accept text input', async ({ page }) => {
     const editor = page.locator('[contenteditable="true"]').first();
     await editor.click();
     await page.keyboard.type('Hello, World!');
-
-    const content = await editor.textContent();
-    expect(content).toContain('Hello, World!');
+    await expect(editor).toContainText('Hello, World!');
   });
 
-  test('should apply bold formatting', async ({ page }) => {
+  test('should apply bold formatting with Ctrl+B', async ({ page }) => {
     const editor = page.locator('[contenteditable="true"]').first();
     await editor.click();
-    await page.keyboard.type('Test text');
-
-    // Select all text
-    await page.keyboard.press('Control+a');
-
-    // Click bold button
-    const boldButton = page.locator('button').filter({ has: page.locator('svg') }).first();
-    if (await boldButton.isVisible()) {
-      await boldButton.click();
-    }
-  });
-
-  // ==================== Keyboard Shortcuts ====================
-
-  test('should support Ctrl+B for bold', async ({ page }) => {
-    const editor = page.locator('[contenteditable="true"]').first();
-    await editor.click();
-    await page.keyboard.type('Test');
-
+    await page.keyboard.type('bold text');
     await page.keyboard.press('Control+a');
     await page.keyboard.press('Control+b');
 
-    // Text should have bold formatting
-    await expect(editor).toBeVisible();
+    const strong = editor.locator('strong');
+    await expect(strong).toContainText('bold text');
   });
 
-  test('should support Ctrl+I for italic', async ({ page }) => {
+  test('should apply italic formatting with Ctrl+I', async ({ page }) => {
     const editor = page.locator('[contenteditable="true"]').first();
     await editor.click();
-    await page.keyboard.type('Test');
-
+    await page.keyboard.type('italic text');
     await page.keyboard.press('Control+a');
     await page.keyboard.press('Control+i');
 
-    await expect(editor).toBeVisible();
+    const em = editor.locator('em');
+    await expect(em).toContainText('italic text');
   });
 
-  // ==================== Focus Behavior ====================
+  test('should apply underline formatting with Ctrl+U', async ({ page }) => {
+    const editor = page.locator('[contenteditable="true"]').first();
+    await editor.click();
+    await page.keyboard.type('underlined');
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Control+u');
+
+    const u = editor.locator('u');
+    await expect(u).toContainText('underlined');
+  });
+
+  test('should toggle bold button active state', async ({ page }) => {
+    const editor = page.locator('[contenteditable="true"]').first();
+    const boldButton = page.locator('button[aria-label*="Bold"]').first();
+
+    await editor.click();
+    await page.keyboard.type('text');
+    await page.keyboard.press('Control+a');
+
+    await expect(boldButton).toHaveAttribute('aria-pressed', 'false');
+    await page.keyboard.press('Control+b');
+    await expect(boldButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('should display pre-populated content', async ({ page }) => {
+    // The "With Initial Content" example has sample content
+    const editors = page.locator('[contenteditable="true"]');
+    const secondEditor = editors.nth(1);
+    await expect(secondEditor).toContainText('Welcome to RichTextEditor');
+  });
+
+  test('should show character count when enabled', async ({ page }) => {
+    // The "Product Review Editor" example has showCharacterCount and maxLength=1000
+    const charCount = page.locator('text=/\\d+\\s*\\/\\s*1000/');
+    await expect(charCount).toBeVisible();
+  });
+
+  test('should show error message', async ({ page }) => {
+    // The "With Label and Validation" example has error="Description is required"
+    await expect(page.locator('text=Description is required')).toBeVisible();
+  });
+
+  test('should show label with required indicator', async ({ page }) => {
+    // The "With Label and Validation" example has label="Product Description" and required
+    await expect(page.locator('text=Product Description')).toBeVisible();
+    const requiredStar = page.locator('label:has-text("Product Description") span.text-red-500');
+    await expect(requiredStar).toBeVisible();
+  });
 
   test('should be focusable', async ({ page }) => {
     const editor = page.locator('[contenteditable="true"]').first();
     await editor.focus();
     await expect(editor).toBeFocused();
-  });
-
-  test('should show focus indicator', async ({ page }) => {
-    const editor = page.locator('[contenteditable="true"]').first();
-    await editor.click();
-    await expect(editor).toBeVisible();
-  });
-
-  // ==================== Lists ====================
-
-  test('should support bullet list', async ({ page }) => {
-    const listButton = page
-      .locator('button[aria-label*="list"], button[title*="list"]')
-      .first();
-    if (await listButton.isVisible()) {
-      await expect(listButton).toBeVisible();
-    }
-  });
-
-  test('should support numbered list', async ({ page }) => {
-    const orderedListButton = page
-      .locator('button[aria-label*="ordered"], button[title*="ordered"]')
-      .first();
-    if (await orderedListButton.isVisible()) {
-      await expect(orderedListButton).toBeVisible();
-    }
-  });
-
-  // ==================== Headings ====================
-
-  test('should support heading selection', async ({ page }) => {
-    const headingDropdown = page.locator('select, [role="combobox"]').first();
-    if (await headingDropdown.isVisible()) {
-      await expect(headingDropdown).toBeVisible();
-    }
-  });
-
-  // ==================== Placeholder ====================
-
-  test('should show placeholder when empty', async ({ page }) => {
-    const editor = page.locator('[contenteditable="true"]').first();
-    const placeholder = await editor.getAttribute('data-placeholder');
-    expect(placeholder !== null || (await editor.textContent()) !== null).toBeTruthy();
-  });
-
-  // ==================== Disabled State ====================
-
-  test('should render disabled state', async ({ page }) => {
-    const disabledEditor = page.locator('[contenteditable="false"]');
-    const count = await disabledEditor.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
-
-  // ==================== Accessibility ====================
-
-  test('should have proper ARIA attributes', async ({ page }) => {
-    const editor = page.locator('[contenteditable="true"]').first();
-    const role = await editor.getAttribute('role');
-    // May have role="textbox" or no specific role
-    expect(role === 'textbox' || role === null).toBeTruthy();
-  });
-
-  test('toolbar buttons should be keyboard accessible', async ({ page }) => {
-    const toolbar = page.locator('[role="toolbar"], [class*="toolbar"]').first();
-    if (await toolbar.isVisible()) {
-      const buttons = toolbar.locator('button');
-      const count = await buttons.count();
-      expect(count).toBeGreaterThanOrEqual(0);
-    }
-  });
-
-  // ==================== Edge Cases ====================
-
-  test('should render without crashing', async ({ page }) => {
-    await page.waitForTimeout(500);
-    const body = page.locator('body');
-    await expect(body).toBeVisible();
-  });
-
-  test('should handle rapid formatting changes', async ({ page }) => {
-    const editor = page.locator('[contenteditable="true"]').first();
-    await editor.click();
-    await page.keyboard.type('Test');
-
-    await page.keyboard.press('Control+a');
-    await page.keyboard.press('Control+b');
-    await page.keyboard.press('Control+i');
-    await page.keyboard.press('Control+u');
-
-    await expect(editor).toBeVisible();
   });
 
   test('should preserve content on blur and refocus', async ({ page }) => {
@@ -208,13 +112,53 @@ test.describe('RichTextEditor', () => {
     await page.keyboard.type('Persistent text');
 
     // Click outside to blur
-    await page.click('body');
+    await page.locator('body').click({ position: { x: 10, y: 10 } });
     await page.waitForTimeout(100);
 
     // Click back in editor
     await editor.click();
+    await expect(editor).toContainText('Persistent text');
+  });
 
-    const content = await editor.textContent();
-    expect(content).toContain('Persistent text');
+  test('should handle rapid formatting changes', async ({ page }) => {
+    const editor = page.locator('[contenteditable="true"]').first();
+    await editor.click();
+    await page.keyboard.type('styled text');
+
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Control+b');
+    await page.keyboard.press('Control+i');
+    await page.keyboard.press('Control+u');
+
+    // Text should have all three formats applied
+    const u = editor.locator('u');
+    const em = u.locator('em');
+    const strong = em.locator('strong');
+    await expect(strong).toContainText('styled text');
+  });
+
+  test('should render disabled state without toolbar', async ({ page }) => {
+    // The "Disabled State" example has disabled editor
+    const disabledEditor = page.locator('[contenteditable="false"]').first();
+    await expect(disabledEditor).toBeVisible();
+    await expect(disabledEditor).toContainText('This content cannot be edited');
+  });
+
+  test('should render read-only mode without toolbar', async ({ page }) => {
+    // The "Read-Only Mode" example
+    const readOnlySection = page.locator('text=Read-Only Mode').locator('..');
+    const readOnlyEditor = readOnlySection.locator('[contenteditable="false"]');
+    await expect(readOnlyEditor).toBeVisible();
+  });
+
+  test('should undo with Ctrl+Z', async ({ page }) => {
+    const editor = page.locator('[contenteditable="true"]').first();
+    await editor.click();
+    await page.keyboard.type('first ');
+    await page.keyboard.type('second');
+    await expect(editor).toContainText('first second');
+
+    await page.keyboard.press('Control+z');
+    await expect(editor).not.toContainText('second');
   });
 });

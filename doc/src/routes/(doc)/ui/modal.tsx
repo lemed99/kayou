@@ -63,9 +63,16 @@ export default function ModalPage() {
         },
         {
           name: 'onClose',
-          type: '(event: MouseEvent) => void',
+          type: '() => void',
           default: '-',
           description: 'Callback fired when the modal is closed (required)',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          default: '-',
+          description:
+            'Title displayed in the modal header. Also sets the dialog accessible name via aria-labelledby.',
         },
         {
           name: 'children',
@@ -108,8 +115,7 @@ export default function ModalPage() {
           component: () => (
             <>
               <Button onClick={() => setShowDefault(true)}>Open Modal</Button>
-              <Modal show={showDefault()} onClose={() => setShowDefault(false)}>
-                <h3 class="mb-4 text-lg font-semibold dark:text-white">Modal Title</h3>
+              <Modal show={showDefault()} title="Modal Title" onClose={() => setShowDefault(false)}>
                 <p class="text-gray-600 dark:text-neutral-300">
                   This is the modal content. Click outside or the close button to dismiss.
                 </p>
@@ -142,8 +148,7 @@ export default function ModalPage() {
           component: () => (
             <>
               <Button onClick={() => setShowLarge(true)}>Open Large Modal</Button>
-              <Modal show={showLarge()} size="xl" onClose={() => setShowLarge(false)}>
-                <h3 class="mb-4 text-lg font-semibold dark:text-white">Large Modal</h3>
+              <Modal show={showLarge()} size="xl" title="Large Modal" onClose={() => setShowLarge(false)}>
                 <p class="text-gray-600 dark:text-neutral-300">
                   This modal uses the large size variant for more content space.
                 </p>
@@ -161,9 +166,9 @@ export default function ModalPage() {
       usage={`
         import { Modal } from '@kayou/ui';
 
-        <Modal show={show()} onClose={() => setShow(false)}>Content</Modal>
-        <Modal show={show()} position="center" onClose={handleClose}>Content</Modal>
-        <Modal show={show()} size="xl" onClose={handleClose}>Content</Modal>
+        <Modal show={show()} title="My Modal" onClose={() => setShow(false)}>Content</Modal>
+        <Modal show={show()} title="Centered" position="center" onClose={handleClose}>Content</Modal>
+        <Modal show={show()} title="Large" size="xl" onClose={handleClose}>Content</Modal>
       `}
     />
   );

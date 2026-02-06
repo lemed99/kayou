@@ -57,6 +57,15 @@ export function DynamicVirtualList<
     },
   });
 
+  // Passive scroll listener
+  createEffect(() => {
+    const el = containerRef();
+    if (!el) return;
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    onCleanup(() => el.removeEventListener('scroll', onScroll));
+  });
+
   let resizeObserver: ResizeObserver | undefined;
 
   // Set up ResizeObserver when contentRef changes
@@ -74,22 +83,18 @@ export function DynamicVirtualList<
       setContentWidth(el.clientWidth);
       setContentHeight(el.clientHeight);
 
-      let rafId: number | undefined;
       resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (entry) {
-          if (rafId) cancelAnimationFrame(rafId);
-          rafId = requestAnimationFrame(() => {
-            const newWidth = entry.target.clientWidth;
-            const newHeight = entry.target.clientHeight;
+          const newWidth = entry.target.clientWidth;
+          const newHeight = entry.target.clientHeight;
 
-            if (newWidth !== contentWidth()) {
-              setContentWidth(newWidth);
-            }
-            if (newHeight !== contentHeight()) {
-              setContentHeight(newHeight);
-            }
-          });
+          if (newWidth !== contentWidth()) {
+            setContentWidth(newWidth);
+          }
+          if (newHeight !== contentHeight()) {
+            setContentHeight(newHeight);
+          }
         }
       });
       resizeObserver.observe(el);
@@ -200,8 +205,8 @@ export function DynamicVirtualList<
         padding: `${containerPadding()}px`,
         width: containerWidth(),
         'box-sizing': 'border-box',
+        'will-change': 'scroll-position',
       }}
-      onScroll={onScroll}
       onKeyDown={handleKeyDown}
     >
       <div
@@ -217,6 +222,7 @@ export function DynamicVirtualList<
             position: 'absolute',
             top: `${virtual().viewerTop}px`,
             width: props.containerWidth ? containerWidth() : 'auto',
+            contain: 'content',
           }}
         >
           <For each={virtual().visibleItems} fallback={props.fallback}>

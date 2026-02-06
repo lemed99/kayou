@@ -84,19 +84,12 @@ test.describe('Select - Accessibility', () => {
     test('selected option should have aria-selected="true"', async ({
       page,
     }) => {
-      // "Favorite Fruit" has default value "banana" — find combobox with value "Banana"
+      // "Favorite Fruit" has default value "banana" — wait for the value to appear
       const allComboboxes = page.locator('[role="combobox"]');
-      const count = await allComboboxes.count();
-      let trigger: Locator | null = null;
-      for (let i = 0; i < count; i++) {
-        const val = await allComboboxes.nth(i).inputValue();
-        if (val === 'Banana') {
-          trigger = allComboboxes.nth(i);
-          break;
-        }
-      }
-      expect(trigger).not.toBeNull();
-      await openWithClick(trigger!);
+      // The third combobox (index 2) is the "With Default Value" example
+      const trigger = allComboboxes.nth(2);
+      await expect(trigger).toHaveValue('Banana', { timeout: 5000 });
+      await openWithClick(trigger);
 
       const selected = page.locator('[role="option"][aria-selected="true"]');
       await expect(selected.first()).toBeVisible();
@@ -464,6 +457,16 @@ test.describe('SelectWithSearch - Accessibility', () => {
 
 test.describe('MultiSelect - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
+    // Suppress ResizeObserver loop errors that trigger SolidStart's dev overlay
+    await page.addInitScript(() => {
+      window.addEventListener(
+        'error',
+        (e) => {
+          if (e.message?.includes('ResizeObserver')) e.stopImmediatePropagation();
+        },
+        true,
+      );
+    });
     await page.goto('/ui/multi-select');
   });
 
@@ -653,6 +656,16 @@ test.describe('MultiSelect - Accessibility', () => {
 
 test.describe('MultiSelect with Search - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
+    // Suppress ResizeObserver loop errors that trigger SolidStart's dev overlay
+    await page.addInitScript(() => {
+      window.addEventListener(
+        'error',
+        (e) => {
+          if (e.message?.includes('ResizeObserver')) e.stopImmediatePropagation();
+        },
+        true,
+      );
+    });
     await page.goto('/ui/multi-select');
   });
 

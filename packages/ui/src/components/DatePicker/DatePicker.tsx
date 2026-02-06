@@ -246,6 +246,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   }));
 
   const helperId = createUniqueId();
+  const dialogId = createUniqueId();
 
   const type = () => props.type || 'single';
   const displayFormat = () => props.displayFormat || 'DD/MM/YYYY';
@@ -442,8 +443,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           setDatesObjectValue(newValue);
           notifyChange(newValue);
           announce(`Selected ${dateLabel}`);
-          setIsOpen(false);
-          props.onBlur?.();
+          closeCalendar();
         }
         break;
       }
@@ -496,8 +496,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           } else {
             notifyChange(newValue);
             announce(`Range end: ${dateLabel}. Range selected.`);
-            setIsOpen(false);
-            props.onBlur?.();
+            closeCalendar();
           }
         }
         break;
@@ -524,7 +523,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       setCurrentDate(parseDate(value.date));
       if (!hasFooter()) {
         notifyChange(newValue);
-        setIsOpen(false);
+        closeCalendar();
       }
     } else if (value.startDate && value.endDate) {
       // Range shortcut
@@ -538,7 +537,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         // Wait for Apply
       } else {
         notifyChange(newValue);
-        setIsOpen(false);
+        closeCalendar();
       }
     }
   };
@@ -664,20 +663,27 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   /**
    * Announces a message to screen readers via aria-live region.
    */
+  let announceTimer: ReturnType<typeof setTimeout>;
   const announce = (message: string) => {
+    clearTimeout(announceTimer);
     setAnnouncement(message);
-    // Clear after announcement is read
-    setTimeout(() => setAnnouncement(''), 1000);
+    announceTimer = setTimeout(() => setAnnouncement(''), 1000);
   };
+  onCleanup(() => clearTimeout(announceTimer));
 
   const handleInputClick = () => {
-    if (!props.disabled && !props.isLoading) {
-      // Set focused date BEFORE opening so Calendar renders with the correct focus
-      setFocusedDate(getInitialFocusDate());
-      setIsOpen(true);
-      props.onFocus?.();
-      // Focus is handled by the createEffect that watches isMounted()
+    if (props.disabled || props.isLoading) return;
+
+    if (isOpen()) {
+      closeCalendar();
+      return;
     }
+
+    // Set focused date BEFORE opening so Calendar renders with the correct focus
+    setFocusedDate(getInitialFocusDate());
+    setIsOpen(true);
+    props.onFocus?.();
+    // Focus is handled by the createEffect that watches isMounted()
   };
 
   /**
@@ -947,17 +953,22 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
   return (
     <div class={twMerge('relative w-full text-gray-700 dark:text-neutral-200')}>
-      {/* Hidden input for form integration */}
+      {/* Hidden input for form integration (ISO format for server-side parsing) */}
       <Show when={props.name}>
-        <input type="hidden" name={props.name} value={getDisplayValue()} />
+        <input
+          type="hidden"
+          name={props.name}
+          value={
+            type() === 'single'
+              ? (datesObjectValue.date ?? '')
+              : type() === 'range'
+                ? `${datesObjectValue.startDate ?? ''}/${datesObjectValue.endDate ?? ''}`
+                : (datesObjectValue.multipleDates ?? []).join(',')
+          }
+        />
       </Show>
       {/* Screen reader announcements */}
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        class="sr-only"
-      >
+      <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
         {announcement()}
       </div>
       <Show when={props.label}>
@@ -975,6 +986,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         role="combobox"
         aria-expanded={isOpen()}
         aria-haspopup="dialog"
+        aria-controls={isOpen() ? dialogId : undefined}
         aria-label={props.label || a().selectDate}
       >
         <TextInput
@@ -1029,6 +1041,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         <Portal mount={container() ?? undefined}>
           <div
             ref={refs.setFloating}
+            id={dialogId}
             role="dialog"
             aria-label={a().chooseDate}
             onKeyDown={(e) => {
@@ -1047,14 +1060,18 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               // 4. Time picker controls (inputs and buttons below calendar)
 
               const allShortcutButtons = Array.from(
-                floating.querySelectorAll<HTMLElement>('[role="listbox"][aria-label] [role="option"]'),
-              ).filter((el) => el.closest('[role="grid"]') === null && el.offsetParent !== null);
+                floating.querySelectorAll<HTMLElement>(
+                  '[role="listbox"][aria-label] [role="option"]',
+                ),
+              ).filter(
+                (el) => el.closest('[role="grid"]') === null && el.offsetParent !== null,
+              );
 
               // Shortcuts are a single Tab stop: use currently focused shortcut or first one
               const isInShortcuts = allShortcutButtons.includes(active);
               const shortcutTabStop = isInShortcuts
                 ? active
-                : allShortcutButtons[0] ?? null;
+                : (allShortcutButtons[0] ?? null);
 
               const calendarGrid = floating.querySelector('[role="grid"]');
               const headerButtons = calendarGrid
@@ -1085,7 +1102,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
               // Footer buttons (Cancel, Apply)
               const footerButtons = Array.from(
-                floating.querySelectorAll<HTMLElement>('[data-footer] button:not([disabled])'),
+                floating.querySelectorAll<HTMLElement>(
+                  '[data-footer] button:not([disabled])',
+                ),
               ).filter((el) => el.offsetParent !== null);
 
               // Build the full ordered Tab stop list
@@ -1193,7 +1212,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   />
                 </Show>
                 <Show when={hasFooter()}>
-                  <div class="flex justify-end gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800" data-footer>
+                  <div
+                    class="flex justify-end gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800"
+                    data-footer
+                  >
                     <Button color="light" size="sm" onClick={handleCancel}>
                       {l().cancel}
                     </Button>

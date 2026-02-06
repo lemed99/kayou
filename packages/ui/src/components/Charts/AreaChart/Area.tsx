@@ -1,6 +1,6 @@
 import { For, JSX, Show, createMemo, onMount } from 'solid-js';
 
-import { area, curveLinear, curveMonotoneX, curveStep } from 'd3-shape';
+import { area, curveLinear, curveMonotoneX, curveStep, line } from 'd3-shape';
 
 import { AreaProps } from '../types';
 import { useAreaChart } from './ChartContext';
@@ -57,30 +57,12 @@ export function Area(props: AreaProps): JSX.Element {
     const y = chart.yScale();
     const dataKey = props.dataKey;
 
-    // Create a line path from the area's top edge
-    const points = chart.data.map((d) => ({
-      x: s(String(d[key])) ?? 0,
-      y: y(Number(d[dataKey])),
-    }));
-
-    if (points.length === 0) return '';
-
-    const curveType = props.type ?? 'monotone';
-    if (curveType === 'linear') {
-      return `M ${points.map((p) => `${p.x},${p.y}`).join(' L ')}`;
-    }
-
-    // For monotone and step, we'll use d3 area with y0=y1 to get the top line
-    const gen = area<Record<string, unknown>>()
+    const gen = line<Record<string, unknown>>()
       .x((d) => s(String(d[key])) ?? 0)
-      .y0((d) => y(Number(d[dataKey])))
-      .y1((d) => y(Number(d[dataKey])))
+      .y((d) => y(Number(d[dataKey])))
       .curve(getCurve());
 
-    const fullPath = gen(chart.data as Record<string, unknown>[]) ?? '';
-    // Extract just the top line (first half of the path before the close)
-    const parts = fullPath.split(/[LZ]/);
-    return parts[0] || '';
+    return gen(chart.data as Record<string, unknown>[]) ?? '';
   });
 
   const points = createMemo(() => {
@@ -93,6 +75,12 @@ export function Area(props: AreaProps): JSX.Element {
       y: y(Number(d[props.dataKey])),
       item: d,
     }));
+  });
+
+  const activePoints = createMemo(() => {
+    const ai = chart.activeIndex();
+    if (!ai) return [];
+    return points().filter((p) => p.x === ai.x);
   });
 
   const fill = () => props.fill ?? '#8884d8';
@@ -123,7 +111,7 @@ export function Area(props: AreaProps): JSX.Element {
       {/* Active point indicator */}
       <Show when={chart.activeIndex()}>
         {(activeIndex) => (
-          <For each={points().filter((p) => p.x === activeIndex().x)}>
+          <For each={activePoints()}>
             {(p) => (
               <circle
                 cx={activeIndex().x}

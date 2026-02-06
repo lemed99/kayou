@@ -42,18 +42,20 @@ const TimePicker = (props: TimePickerProps) => {
     { value: 'PM', label: 'PM' },
   ];
 
-  // Get display hour for 12h format (12 instead of 0)
+  // Get display hour for 12h format (12 instead of 0), zero-padded
   const displayHour = (): string => {
     if (is12h()) {
       const h = props.hour() % 12 || 12;
-      return h.toString();
+      return h.toString().padStart(2, '0');
     }
-    return props.hour().toString();
+    return props.hour().toString().padStart(2, '0');
   };
 
-  const handleHourChange = (value: string) => {
-    const num = parseInt(value, 10);
-    if (isNaN(num)) return;
+  const displayMinute = (): string => props.minute().toString().padStart(2, '0');
+  const displaySecond = (): string => props.second().toString().padStart(2, '0');
+
+  const handleHourChange = (num: number | null) => {
+    if (num === null) return;
     if (is12h()) {
       // Clamp to valid 12h range (1-12)
       const clamped = Math.max(1, Math.min(12, num));
@@ -98,9 +100,9 @@ const TimePicker = (props: TimePickerProps) => {
 
     const handleEscapeNative = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // Don't close the calendar if a child Select dropdown is open
-        const active = document.activeElement as HTMLElement;
-        if (active?.getAttribute('aria-expanded') === 'true') return;
+        // If a child Select already consumed this Escape (closed its dropdown),
+        // don't also close the calendar
+        if (e.defaultPrevented) return;
 
         e.preventDefault();
         e.stopPropagation();
@@ -115,7 +117,7 @@ const TimePicker = (props: TimePickerProps) => {
   return (
     <div
       ref={setTimePickerRef}
-      class="flex items-center gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800"
+      class="flex items-center justify-center gap-2 border-t border-gray-300 py-3 dark:border-neutral-800"
       role="group"
       aria-label={props.ariaLabels.timePicker}
     >
@@ -123,7 +125,7 @@ const TimePicker = (props: TimePickerProps) => {
         <NumberInput
           value={displayHour()}
           sizing="sm"
-          onChange={(e) => handleHourChange(e.target.value)}
+          onValueChange={handleHourChange}
           onKeyDown={handleEscape}
           placeholder="00"
           style={{
@@ -133,16 +135,16 @@ const TimePicker = (props: TimePickerProps) => {
           }}
           min={is12h() ? 1 : 0}
           max={is12h() ? 12 : 23}
+          wrap
           class="w-10"
           aria-label={props.ariaLabels.hour}
         />
         <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
         <NumberInput
-          value={props.minute()}
+          value={displayMinute()}
           sizing="sm"
-          onChange={(e) => {
-            const num = parseInt(e.target.value, 10);
-            if (!isNaN(num)) props.onMinuteChange(num);
+          onValueChange={(v) => {
+            if (v !== null) props.onMinuteChange(v);
           }}
           onKeyDown={handleEscape}
           placeholder="00"
@@ -154,17 +156,17 @@ const TimePicker = (props: TimePickerProps) => {
           min={0}
           max={59}
           step={props.minuteStep}
+          wrap
           class="w-10"
           aria-label={props.ariaLabels.minute}
         />
         <Show when={props.showSeconds}>
           <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
           <NumberInput
-            value={props.second()}
+            value={displaySecond()}
             sizing="sm"
-            onChange={(e) => {
-              const num = parseInt(e.target.value, 10);
-              if (!isNaN(num)) props.onSecondChange(num);
+            onValueChange={(v) => {
+              if (v !== null) props.onSecondChange(v);
             }}
             onKeyDown={handleEscape}
             placeholder="00"
@@ -176,6 +178,7 @@ const TimePicker = (props: TimePickerProps) => {
             min={0}
             max={59}
             step={props.secondStep}
+            wrap
             class="w-10"
             aria-label={props.ariaLabels.second}
           />

@@ -7,8 +7,12 @@ import {
   splitProps,
 } from 'solid-js';
 
-import { ChevronDownIcon, ChevronUpIcon } from '@kayou/icons';
+import { ChevronDownIcon, ChevronUpIcon, type IconProps } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
+
+import HelperText from './HelperText';
+import Label from './Label';
+import Spinner from './Spinner';
 
 export interface TextInputAriaLabels {
   increase: string;
@@ -20,10 +24,6 @@ export const DEFAULT_TEXT_INPUT_ARIA_LABELS: TextInputAriaLabels = {
   decrease: 'Decrease value',
 };
 
-import HelperText from './HelperText';
-import Label from './Label';
-import Spinner from './Spinner';
-
 export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   /** Input size variant. Defaults to 'md'. */
   sizing?: 'xs' | 'sm' | 'md';
@@ -34,7 +34,7 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   /** Addon element displayed before the input. */
   addon?: JSX.Element;
   /** Icon component rendered inside the input. */
-  icon?: (props: { class: string }) => JSX.Element;
+  icon?: (props: IconProps) => JSX.Element;
   /** Color variant for styling and validation states. Defaults to 'gray'. */
   color?: 'gray' | 'info' | 'failure' | 'warning' | 'success';
   /** Show increment/decrement arrow buttons. Defaults to false. */
@@ -80,7 +80,7 @@ const theme = {
     arrows: {
       base: 'absolute inset-y-0 right-0 flex items-center flex-col gap-0.5 justify-center pr-3',
       button:
-        'border border-gray-300 px-1 text-gray-500 dark:text-neutral-400 cursor-pointer dark:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-50',
+        'border border-gray-300 px-1 text-gray-500 dark:text-neutral-400 cursor-pointer dark:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 active:bg-gray-200 dark:active:bg-neutral-700 data-[active]:bg-gray-200 dark:data-[active]:bg-neutral-700',
     },
     input: {
       base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
@@ -91,13 +91,13 @@ const theme = {
       },
       colors: {
         gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500',
-        info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-400 dark:bg-blue-100 dark:focus:outline-blue-500',
+        info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-500 dark:bg-blue-100 dark:focus:outline-blue-500',
         failure:
-          'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:outline-red-500',
+          'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-500 dark:bg-red-100 dark:focus:outline-red-500',
         warning:
-          'border-yellow-500 bg-yellow-50 text-yellow-900 placeholder-yellow-700 focus:outline-yellow-500 dark:border-yellow-400 dark:bg-yellow-100 dark:focus:outline-yellow-500',
+          'border-yellow-500 bg-yellow-50 text-yellow-900 placeholder-yellow-700 focus:outline-yellow-500 dark:border-yellow-500 dark:bg-yellow-100 dark:focus:outline-yellow-500',
         success:
-          'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:outline-green-500 dark:border-green-400 dark:bg-green-100 dark:focus:outline-green-500',
+          'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:outline-green-500 dark:border-green-500 dark:bg-green-100 dark:focus:outline-green-500',
       },
       withIcon: {
         on: 'pl-9',
@@ -147,7 +147,10 @@ const TextInput = (props: TextInputProps): JSX.Element => {
     'id',
     'ariaLabels',
   ]);
-  const a = createMemo(() => ({ ...DEFAULT_TEXT_INPUT_ARIA_LABELS, ...local.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_TEXT_INPUT_ARIA_LABELS,
+    ...local.ariaLabels,
+  }));
 
   // Generate unique IDs for accessibility associations
   const uniqueId = createUniqueId();

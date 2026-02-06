@@ -76,7 +76,8 @@ const theme = {
         failure: 'bg-red-700 border-red-900 dark:bg-red-600 dark:border-red-700',
         gray: 'bg-gray-500 border-gray-600 dark:bg-gray-400 dark:border-gray-500',
         success: 'bg-green-500 border-green-500 dark:bg-green-400 dark:border-green-400',
-        warning: 'bg-yellow-600 border-yellow-600 dark:bg-yellow-500 dark:border-yellow-500',
+        warning:
+          'bg-yellow-600 border-yellow-600 dark:bg-yellow-500 dark:border-yellow-500',
       },
     },
   },

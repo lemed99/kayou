@@ -70,6 +70,15 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     },
   });
 
+  // Passive scroll listener
+  createEffect(() => {
+    const el = containerRef();
+    if (!el) return;
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    onCleanup(() => el.removeEventListener('scroll', onScroll));
+  });
+
   let resizeObserver: ResizeObserver | undefined;
 
   onMount(() => {
@@ -81,7 +90,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
       if (entry) {
         const newWidth = entry.target.scrollWidth;
         if (newWidth !== contentWidth()) {
-          requestAnimationFrame(() => setContentWidth(newWidth));
+          setContentWidth(newWidth);
         }
       }
     });
@@ -119,8 +128,8 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
         width: containerWidth(),
         'box-sizing': 'border-box',
         'min-width': props.minWidth ? `${props.minWidth}px` : undefined,
+        'will-change': 'scroll-position',
       }}
-      onScroll={onScroll}
     >
       <div
         style={{
@@ -138,6 +147,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
             'min-width': props.minWidth
               ? `${props.minWidth - containerPadding() * 2}px`
               : undefined,
+            contain: 'content',
           }}
         >
           <For each={virtual().visibleItems} fallback={props.fallback}>

@@ -20,31 +20,43 @@ test.describe('Password', () => {
   // ==================== Password Visibility Toggle ====================
 
   test('should toggle password visibility on button click', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    const toggleButton = page
-      .locator('button')
-      .filter({ has: page.locator('svg') })
-      .first();
-
-    await expect(input).toHaveAttribute('type', 'password');
-
-    await toggleButton.click();
+    const showBtn = page.locator('button[aria-label="Show password"]').first();
+    await showBtn.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await showBtn.click();
     await page.waitForTimeout(100);
 
-    // Input type should change to text
-    await expect(input).toHaveAttribute('type', 'text');
+    // After toggling, a "Hide password" button should appear
+    const hideBtn = page.locator('button[aria-label="Hide password"]').first();
+    await expect(hideBtn).toBeVisible();
 
-    // Toggle again to hide password
-    await toggleButton.click();
+    // The first input in the same container should now be type="text"
+    const inputType = await page.evaluate(() => {
+      const btn = document.querySelector('button[aria-label="Hide password"]');
+      const container = btn?.closest('.relative');
+      return container?.querySelector('input')?.type;
+    });
+    expect(inputType).toBe('text');
+
+    // Toggle back to hide password
+    await hideBtn.click();
     await page.waitForTimeout(100);
 
-    await expect(input).toHaveAttribute('type', 'password');
+    await expect(showBtn).toBeVisible();
+    const inputTypeAfter = await page.evaluate(() => {
+      const btn = document.querySelector('button[aria-label="Show password"]');
+      const container = btn?.closest('.relative');
+      return container?.querySelector('input')?.type;
+    });
+    expect(inputTypeAfter).toBe('password');
   });
 
   // ==================== Input Behavior ====================
 
   test('should accept text input', async ({ page }) => {
     const input = page.locator('input[type="password"]').first();
+    await input.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
     await input.fill('testpassword123');
     await expect(input).toHaveValue('testpassword123');
   });
@@ -82,6 +94,8 @@ test.describe('Password', () => {
 
   test('should be focusable via keyboard', async ({ page }) => {
     const input = page.locator('input[type="password"]').first();
+    await input.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
     await input.focus();
     await expect(input).toBeFocused();
   });
@@ -128,18 +142,17 @@ test.describe('Password', () => {
   // ==================== Edge Cases ====================
 
   test('should handle rapid toggle clicks', async ({ page }) => {
-    const toggleButton = page
-      .locator('button')
-      .filter({ has: page.locator('svg') })
-      .first();
+    const toggleButton = page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first();
 
     if (await toggleButton.isVisible()) {
       await toggleButton.click();
-      await toggleButton.click();
-      await toggleButton.click();
+      await page.waitForTimeout(50);
+      await page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first().click();
+      await page.waitForTimeout(50);
+      await page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first().click();
 
       // Should be in valid state
-      const input = page.locator('input').first();
+      const input = page.locator('input[type="password"], input[type="text"]').first();
       const type = await input.getAttribute('type');
       expect(['password', 'text']).toContain(type);
     }

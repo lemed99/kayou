@@ -5,15 +5,16 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  onCleanup,
   splitProps,
 } from 'solid-js';
 
 import { ScaleBand, ScaleLinear, scaleBand, scaleLinear } from 'd3-scale';
 import { pointer } from 'd3-selection';
 
-import { ActivePoint, BarChartProps } from '../types';
 import { BaseChartContext } from '../shared/BaseChartContext';
 import { ChartTooltipOverlay } from '../shared/ChartTooltip';
+import { ActivePoint, BarChartProps } from '../types';
 import { BarChartContext } from './ChartContext';
 
 /**
@@ -99,10 +100,13 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
       : Object.keys(props.data[0] ?? {}).filter(
           (k) => typeof props.data[0][k] === 'number',
         );
-    const maxVal = Math.max(
-      1,
-      ...props.data.map((d) => Math.max(...numericKeys.map((k) => Number(d[k] ?? 0)))),
-    );
+    let maxVal = 1;
+    for (const d of props.data) {
+      for (const k of numericKeys) {
+        const v = Number(d[k] ?? 0);
+        if (v > maxVal) maxVal = v;
+      }
+    }
     const scale = scaleLinear<number, number>()
       .domain([0, maxVal])
       .nice()
@@ -125,33 +129,50 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
 
   const [activePoint, setActivePoint] = createSignal<ActivePoint | null>(null);
 
+  // Memoize band centers for binary search
+  const bandCenters = createMemo(() => {
+    const s = xScale();
+    return s.domain().map((d) => (s(d) ?? 0) + s.bandwidth() / 2);
+  });
+
+  let pointerRafId: number | undefined;
+
   function handlePointerMove(e: MouseEvent | TouchEvent) {
+    if (pointerRafId !== undefined) return;
+    pointerRafId = requestAnimationFrame(() => {
+      pointerRafId = undefined;
+      processPointer(e);
+    });
+  }
+
+  function processPointer(e: MouseEvent | TouchEvent) {
     const data = props.data;
     const s = xScale();
     const ys = yScale();
     const keys = barKeys();
+    const centers = bandCenters();
     const [mx] = pointer(e);
 
     const domain = s.domain();
     if (!domain.length) return;
 
-    // Find nearest band center (no dead zones, like line/area charts)
-    const centers = domain.map((d) => (s(d) ?? 0) + s.bandwidth() / 2);
-    let idx = 0;
-    let minDist = Math.abs(mx - centers[0]);
-    for (let i = 1; i < centers.length; i++) {
-      const dist = Math.abs(mx - centers[i]);
-      if (dist < minDist) { minDist = dist; idx = i; }
-    }
+    // Binary search for nearest band center
+    const idx = findNearestIndex(centers, mx);
+    if (idx === -1) return;
 
     const d = data[idx];
-    if (!d) { setActivePoint(null); return; }
+    if (!d) {
+      setActivePoint(null);
+      return;
+    }
 
     const bandX = s(domain[idx])!;
-    // Find the tallest bar's y for tooltip positioning
-    const maxVal = keys.length
-      ? Math.max(...keys.map((k) => Number(d[k] ?? 0)))
-      : 0;
+    // Find the tallest bar's y for tooltip positioning (safe loop)
+    let maxVal = 0;
+    for (const k of keys) {
+      const v = Number(d[k] ?? 0);
+      if (v > maxVal) maxVal = v;
+    }
 
     setActivePoint({
       item: d,
@@ -161,6 +182,19 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
       bandWidth: s.bandwidth(),
     });
   }
+
+  function clearActive() {
+    if (pointerRafId !== undefined) {
+      cancelAnimationFrame(pointerRafId);
+      pointerRafId = undefined;
+    }
+    setActiveIndex(null);
+    setActivePoint(null);
+  }
+
+  onCleanup(() => {
+    if (pointerRafId !== undefined) cancelAnimationFrame(pointerRafId);
+  });
 
   // Wrap bar-specific custom tooltip (2-arg) into base (1-arg) for the overlay
   createEffect(() => {
@@ -221,8 +255,8 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
           }}
           onMouseMove={handlePointerMove}
           onTouchMove={handlePointerMove}
-          onMouseLeave={() => { setActiveIndex(null); setActivePoint(null); }}
-          onTouchEnd={() => { setActiveIndex(null); setActivePoint(null); }}
+          onMouseLeave={clearActive}
+          onTouchEnd={clearActive}
           viewBox={`0 0 ${width()} ${height()}`}
         >
           <Show when={props.title}>
@@ -264,4 +298,24 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
       </BaseChartContext.Provider>
     </div>
   );
+}
+
+function findNearestIndex(sortedPositions: number[], target: number): number {
+  const len = sortedPositions.length;
+  if (len === 0) return -1;
+  if (len === 1) return 0;
+  let lo = 0;
+  let hi = len - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sortedPositions[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  if (
+    lo > 0 &&
+    Math.abs(sortedPositions[lo - 1] - target) <= Math.abs(sortedPositions[lo] - target)
+  ) {
+    return lo - 1;
+  }
+  return lo;
 }

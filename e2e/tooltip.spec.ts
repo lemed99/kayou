@@ -3,74 +3,48 @@ import { expect, test } from '@playwright/test';
 test.describe('Tooltip', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/ui/tooltip');
+    await page.waitForLoadState('networkidle');
   });
 
   test('should render tooltip trigger', async ({ page }) => {
-    const trigger = page.locator('button').first();
+    const trigger = page.locator('button', { hasText: 'Hover me' });
     await expect(trigger).toBeVisible();
   });
 
   test('should show tooltip on hover', async ({ page }) => {
-    // Tooltips show on hover
-    const trigger = page.locator('button').first();
+    const trigger = page.locator('button', { hasText: 'Hover me' });
     await trigger.hover();
 
-    // Wait for tooltip to appear
-    await page.waitForTimeout(500);
-
-    // Tooltip uses role="tooltip" or is just a floating div
-    const tooltip = page.locator('[role="tooltip"], [id^="solid-"]');
-    const count = await tooltip.count();
-    // Tooltip may or may not have role="tooltip" - just verify page responds
-    expect(count).toBeGreaterThanOrEqual(0);
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+    await expect(tooltip).toContainText('This is a tooltip');
   });
 
   test('should hide tooltip on mouse leave', async ({ page }) => {
-    const trigger = page.locator('button').first();
+    const trigger = page.locator('button', { hasText: 'Hover me' });
     await trigger.hover();
-    await page.waitForTimeout(500);
 
-    // Move mouse away
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+
     await page.mouse.move(0, 0);
-    await page.waitForTimeout(500);
-
-    // Test passes if no error occurs
-  });
-
-  test('should position tooltip correctly', async ({ page }) => {
-    const trigger = page.locator('button').first();
-    await trigger.hover();
-    await page.waitForTimeout(500);
-
-    // Check page content exists
-    const content = await page.textContent('body');
-    expect(content).toBeTruthy();
+    await expect(tooltip).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should display tooltip content', async ({ page }) => {
-    // Find a button and hover to show tooltip
-    const buttons = page.locator('button');
-    const count = await buttons.count();
+    const trigger = page.locator('button', { hasText: 'Hover me' });
+    await trigger.hover();
 
-    if (count > 0) {
-      await buttons.first().hover();
-      await page.waitForTimeout(500);
-    }
-
-    // Verify page is responsive
-    const bodyContent = await page.textContent('body');
-    expect(bodyContent).toBeTruthy();
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+    await expect(tooltip).toContainText('This is a tooltip');
   });
 
   test('should show tooltip when anchor is focused via keyboard', async ({ page }) => {
-    // Wait for page to be fully loaded and interactive
-    await page.waitForLoadState('networkidle');
-
     const trigger = page.locator('button', { hasText: 'Hover me' });
     await expect(trigger).toBeVisible();
     await trigger.scrollIntoViewIfNeeded();
 
-    // Click nearby to set focus context, then tab into the button
     await trigger.evaluate((el) => el.focus());
 
     const tooltip = page.locator('[role="tooltip"]');
@@ -78,8 +52,6 @@ test.describe('Tooltip', () => {
   });
 
   test('should hide tooltip when anchor loses focus via keyboard', async ({ page }) => {
-    await page.waitForLoadState('networkidle');
-
     const trigger = page.locator('button', { hasText: 'Hover me' });
     await expect(trigger).toBeVisible();
     await trigger.scrollIntoViewIfNeeded();
@@ -92,20 +64,42 @@ test.describe('Tooltip', () => {
     await expect(tooltip).not.toBeVisible({ timeout: 5000 });
   });
 
+  test('should dismiss tooltip on Escape key', async ({ page }) => {
+    const trigger = page.locator('button', { hasText: 'Hover me' });
+    await trigger.evaluate((el) => el.focus());
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+
+    await page.keyboard.press('Escape');
+    await expect(tooltip).not.toBeVisible({ timeout: 5000 });
+  });
+
   test('should support different placements', async ({ page }) => {
-    // Verify page has tooltip examples
-    const content = await page.textContent('body');
-    expect(content).toContain('Tooltip');
+    for (const placement of ['Top', 'Bottom', 'Left', 'Right']) {
+      await expect(page.locator('button', { hasText: placement })).toBeVisible();
+    }
+
+    const button = page.locator('button', { hasText: 'Bottom' });
+    await button.hover();
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible({ timeout: 5000 });
+    await expect(tooltip).toContainText('Bottom tooltip');
   });
 
   test('should render with delay', async ({ page }) => {
-    // Find delayed tooltip example
     const delayedTrigger = page.locator('button').filter({ hasText: /delay/i }).first();
 
     if (await delayedTrigger.isVisible()) {
       await delayedTrigger.hover();
-      // Wait longer for delayed tooltip
-      await page.waitForTimeout(800);
+
+      // Tooltip should NOT be visible immediately (500ms delay)
+      const tooltip = page.locator('[role="tooltip"]');
+      await expect(tooltip).not.toBeVisible({ timeout: 200 });
+
+      // But should appear after the delay
+      await expect(tooltip).toBeVisible({ timeout: 5000 });
     }
   });
 });

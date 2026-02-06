@@ -1,19 +1,38 @@
-import { JSX, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import {
+  JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  onCleanup,
+  splitProps,
+} from 'solid-js';
 import { Portal } from 'solid-js/web';
 
+import { preventBackgroundScroll } from '@kayou/hooks';
 import { XCloseIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
-import { preventBackgroundScroll } from '@kayou/hooks';
-
 /**
  * Get all focusable elements within a container.
  */
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  '[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+  '[contenteditable]:not([contenteditable="false"])',
+  'details > summary',
+  'audio[controls]',
+  'video[controls]',
+].join(', ');
+
 const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
-  const selector =
-    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     (el) => el.offsetParent !== null,
   );
 };
@@ -39,8 +58,7 @@ export type ModalPosition = 'top-center' | 'center';
 /**
  * Props for the Modal component.
  */
-export interface ModalProps
-  extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
+export interface ModalProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /**
    * Whether the modal is visible.
    * @default false
@@ -57,10 +75,14 @@ export interface ModalProps
    */
   position?: ModalPosition;
   /**
-   * Callback fired when the modal is closed.
+   * Callback fired when the modal is closed (via close button, Escape, or backdrop click).
    */
-  onClose: (event: MouseEvent) => void;
+  onClose: () => void;
   children: JSX.Element;
+  /**
+   * Title displayed in the modal header. Also sets the dialog's accessible name via aria-labelledby.
+   */
+  title?: string;
   /**
    * Labels for i18n support.
    */
@@ -88,9 +110,10 @@ const theme = {
       center: 'items-center justify-center',
     },
   },
-  body: 'p-6 pt-0 grow overflow-y-auto overflow-x-hidden',
+  body: 'p-6 grow overflow-y-auto overflow-x-hidden',
   header: {
     base: 'flex items-start justify-between rounded-t p-2 pb-0 shrink-0',
+    title: 'grow px-4 pt-1 text-lg font-semibold text-gray-900 dark:text-white',
     close: {
       base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
@@ -103,26 +126,39 @@ const theme = {
  * Uses role="dialog" and aria-modal for accessibility.
  */
 const Modal = (props: ModalProps): JSX.Element => {
-  const a = createMemo(() => ({ ...DEFAULT_MODAL_ARIA_LABELS, ...props.ariaLabels }));
-  const size = createMemo(() => props.size || 'md');
-  const position = createMemo(() => props.position || 'top-center');
-  const [modalEl, setModalEl] = createSignal<HTMLDivElement | undefined>();
+  const [local, dialogProps] = splitProps(props, [
+    'show',
+    'size',
+    'position',
+    'onClose',
+    'children',
+    'title',
+    'ariaLabels',
+    'class',
+  ]);
 
-  const { isVisible, isMounted } = createPresence(() => props.show, {
+  const a = createMemo(() => ({ ...DEFAULT_MODAL_ARIA_LABELS, ...local.ariaLabels }));
+  const size = createMemo(() => local.size || 'md');
+  const position = createMemo(() => local.position || 'top-center');
+  const [modalEl, setModalEl] = createSignal<HTMLDivElement | undefined>();
+  const titleId = createUniqueId();
+
+  const { isVisible, isMounted } = createPresence(() => local.show, {
     transitionDuration: 500,
   });
 
   createEffect(() => {
-    if (props.show && modalEl()) {
+    if (local.show && modalEl()) {
       preventBackgroundScroll(modalEl()!);
     }
   });
 
-  // Focus trap and Escape key handler
+  // Focus trap, Escape key handler, and focus restoration
   createEffect(() => {
-    if (!props.show || !modalEl()) return;
+    if (!local.show || !modalEl()) return;
 
     const modal = modalEl()!;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
 
     // Focus the first focusable element when modal opens
     queueMicrotask(() => {
@@ -135,7 +171,7 @@ const Modal = (props: ModalProps): JSX.Element => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        props.onClose(e as unknown as MouseEvent);
+        local.onClose();
         return;
       }
 
@@ -157,7 +193,10 @@ const Modal = (props: ModalProps): JSX.Element => {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    onCleanup(() => document.removeEventListener('keydown', handleKeyDown));
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    });
   });
 
   const transitionStyle = () => ({
@@ -176,29 +215,38 @@ const Modal = (props: ModalProps): JSX.Element => {
           class={twMerge(
             theme.content.base,
             theme.content.positions[position()],
-            props.class,
+            local.class,
           )}
           style={transitionStyle()}
-          onClick={(e) => props?.onClose(e)}
+          onClick={() => local.onClose()}
         >
           <div
+            {...dialogProps}
             ref={setModalEl}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={local.title ? titleId : undefined}
             class={twMerge(theme.content.inner, theme.content.sizes[size()])}
             onClick={(e) => e.stopPropagation()}
           >
             <div class={theme.header.base}>
+              <Show when={local.title}>
+                <h2 id={titleId} class={theme.header.title}>
+                  {local.title}
+                </h2>
+              </Show>
               <button
                 aria-label={a().close}
                 class={theme.header.close.base}
                 type="button"
-                onClick={(e) => props.onClose(e)}
+                onClick={() => local.onClose()}
               >
                 <XCloseIcon class={theme.header.close.icon} />
               </button>
             </div>
-            <div class={theme.body}>{props.children}</div>
+            <div class={twMerge(theme.body, local.title ? 'pt-4' : 'pt-0')}>
+              {local.children}
+            </div>
           </div>
         </div>
       </Portal>

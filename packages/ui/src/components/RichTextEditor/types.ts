@@ -1,5 +1,6 @@
 import { Accessor, JSX } from 'solid-js';
 
+import { type IconProps } from '@kayou/icons';
 import { Editor } from '@tiptap/core';
 
 export interface RichTextEditorProps {
@@ -88,7 +89,7 @@ export interface ToolbarButtonProps {
   /** Button label for accessibility */
   label: string;
   /** Button icon */
-  icon: JSX.Element;
+  icon: (props: IconProps) => JSX.Element;
   /** Whether the button is disabled */
   disabled?: boolean;
 }

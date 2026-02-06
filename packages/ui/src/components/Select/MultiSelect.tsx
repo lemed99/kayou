@@ -109,6 +109,9 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     searchInputId,
   } = useSelect(local, 'multiSelect');
 
+  const getOptionId = (option: Option | null) =>
+    option ? `${listboxId}-option-${option.value}` : undefined;
+
   const displayValue = createMemo(() => {
     const selected = selectedOptions();
     if (selected.length === 0) return '';
@@ -123,6 +126,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
       inputComponent={
         <>
           <TextInput
+            {...otherProps}
             ref={setInputRef}
             title={displayValue()}
             disabled={props.disabled}
@@ -135,6 +139,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
             aria-haspopup="listbox"
             aria-expanded={isOpen()}
             aria-controls={listboxId}
+            aria-activedescendant={getOptionId(highlightedOption())}
             inputMode="none"
             autocomplete="off"
             style={{
@@ -145,7 +150,6 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
                 ? local.style
                 : {}),
             }}
-            {...otherProps}
           />
           <Show
             when={
@@ -193,6 +197,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
               onKeyDown={(e) => handleKeyDown(e, true)}
               aria-label={a().searchOptions}
               aria-controls={listboxId}
+              aria-activedescendant={getOptionId(highlightedOption())}
             />
             <Show when={searchKey() && !props.disabled && !props.isLoading}>
               <ClearContentButton
@@ -210,6 +215,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
       }
       optionsComponent={(option) => (
         <div
+          id={getOptionId(option)}
           role="option"
           aria-selected={selectedOptions().some((o) => o.value === option.value)}
           class={twMerge(optionClass(option, highlightedOption()), 'p-0')}

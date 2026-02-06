@@ -1,4 +1,13 @@
-import { JSX, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import {
+  JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  onCleanup,
+  splitProps,
+} from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 import { preventBackgroundScroll } from '@kayou/hooks';
@@ -9,10 +18,21 @@ import { twMerge } from 'tailwind-merge';
 /**
  * Get all focusable elements within a container.
  */
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  '[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+  '[contenteditable]:not([contenteditable="false"])',
+  'details > summary',
+  'audio[controls]',
+  'video[controls]',
+].join(', ');
+
 const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
-  const selector =
-    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     (el) => el.offsetParent !== null,
   );
 };
@@ -33,8 +53,7 @@ export type DrawerPosition = 'right' | 'left' | 'top' | 'bottom';
 /**
  * Props for the Drawer component.
  */
-export interface DrawerProps
-  extends Omit<JSX.DialogHtmlAttributes<HTMLDialogElement>, 'onClose'> {
+export interface DrawerProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children?: JSX.Element;
   /**
    * Whether the drawer is visible.
@@ -55,9 +74,9 @@ export interface DrawerProps
    */
   height?: string;
   /**
-   * Callback fired when the drawer is closed.
+   * Callback fired when the drawer is closed (via close button, Escape, or backdrop click).
    */
-  onClose: (event: MouseEvent) => void;
+  onClose: () => void;
   /**
    * Whether to show rounded edges on the drawer.
    * @default false
@@ -68,6 +87,11 @@ export interface DrawerProps
    * @default false
    */
   showHeader?: boolean;
+  /**
+   * Title displayed in the drawer header. Also sets the dialog's accessible name via aria-labelledby.
+   * Implies showHeader.
+   */
+  title?: string;
   /**
    * Additional CSS classes for the body content.
    */
@@ -103,13 +127,12 @@ const theme = {
   },
   body: {
     base: 'p-6',
-    popup: 'pt-0',
   },
   header: {
-    base: 'flex items-start justify-between rounded-t dark:border-neutral-700 border-b p-5',
-    popup: '!p-2 !border-b-0',
+    base: 'flex items-center justify-between p-4',
+    title: 'grow text-lg font-semibold text-gray-900 dark:text-white p-2',
     close: {
-      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
+      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-2 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
     },
   },
@@ -120,27 +143,46 @@ const theme = {
  * Uses role="dialog" and aria-modal for accessibility.
  */
 const Drawer = (props: DrawerProps): JSX.Element => {
-  const a = createMemo(() => ({ ...DEFAULT_DRAWER_ARIA_LABELS, ...props.ariaLabels }));
-  const [drawerEl, setDrawerEl] = createSignal<HTMLDivElement | undefined>();
+  const [local, dialogProps] = splitProps(props, [
+    'show',
+    'position',
+    'width',
+    'height',
+    'onClose',
+    'roundedEdges',
+    'showHeader',
+    'title',
+    'bodyClass',
+    'ariaLabels',
+    'children',
+    'class',
+  ]);
 
-  const getSizeClasses = () => {
-    if (props.position === 'top' || props.position === 'bottom') {
-      return props.height ?? 'h-full md:h-fit';
+  const a = createMemo(() => ({ ...DEFAULT_DRAWER_ARIA_LABELS, ...local.ariaLabels }));
+  const [drawerEl, setDrawerEl] = createSignal<HTMLDivElement | undefined>();
+  const titleId = createUniqueId();
+
+  const position = createMemo(() => local.position || 'right');
+
+  const getSizeClasses = createMemo(() => {
+    if (position() === 'top' || position() === 'bottom') {
+      return local.height ?? 'h-full md:h-fit';
     }
-    return props.width ?? 'w-full md:w-fit';
-  };
+    return local.width ?? 'w-full md:w-fit';
+  });
 
   createEffect(() => {
-    if (props.show && drawerEl()) {
+    if (local.show && drawerEl()) {
       preventBackgroundScroll(drawerEl()!);
     }
   });
 
-  // Focus trap and Escape key handler
+  // Focus trap, Escape key handler, and focus restoration
   createEffect(() => {
-    if (!props.show || !drawerEl()) return;
+    if (!local.show || !drawerEl()) return;
 
     const drawer = drawerEl()!;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
 
     // Focus the first focusable element when drawer opens
     queueMicrotask(() => {
@@ -153,7 +195,7 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        props.onClose(e as unknown as MouseEvent);
+        local.onClose();
         return;
       }
 
@@ -175,12 +217,13 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    onCleanup(() => document.removeEventListener('keydown', handleKeyDown));
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    });
   });
 
-  const position = createMemo(() => props.position || 'right');
-
-  const { isVisible, isMounted } = createPresence(() => props.show, {
+  const { isVisible, isMounted } = createPresence(() => local.show, {
     transitionDuration: 500,
   });
 
@@ -199,6 +242,8 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     }
   });
 
+  const hasHeader = createMemo(() => local.showHeader || !!local.title);
+
   return (
     <Show when={isMounted()}>
       <Portal>
@@ -208,14 +253,14 @@ const Drawer = (props: DrawerProps): JSX.Element => {
             transition: 'all .5s cubic-bezier(.32, .72, 0, 1)',
             opacity: isVisible() ? '1' : '0',
           }}
-          onClick={(e) => props?.onClose(e)}
+          onClick={() => local.onClose()}
         />
         <div
           ref={setDrawerEl}
           class={twMerge(
             theme.content.base,
             theme.content.positions[position()],
-            props.class,
+            local.class,
             getSizeClasses(),
           )}
           style={{
@@ -224,27 +269,40 @@ const Drawer = (props: DrawerProps): JSX.Element => {
           }}
         >
           <div
+            {...dialogProps}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={local.title ? titleId : undefined}
             class={twMerge(
               theme.content.inner.base,
-              props.roundedEdges ? theme.content.inner.positions[position()] : '',
+              local.roundedEdges ? theme.content.inner.positions[position()] : '',
             )}
           >
-            <Show when={props.showHeader}>
-              <div class={twMerge(theme.header.base, theme.header.popup)}>
+            <Show when={hasHeader()}>
+              <div class={twMerge(theme.header.base)}>
+                <Show when={local.title}>
+                  <h2 id={titleId} class={theme.header.title}>
+                    {local.title}
+                  </h2>
+                </Show>
                 <button
                   aria-label={a().close}
                   class={theme.header.close.base}
                   type="button"
-                  onClick={(e) => props.onClose(e)}
+                  onClick={() => local.onClose()}
                 >
                   <XCloseIcon class={theme.header.close.icon} />
                 </button>
               </div>
             </Show>
-            <div class={twMerge(theme.body.base, theme.body.popup, props.bodyClass)}>
-              {props.children}
+            <div
+              class={twMerge(
+                theme.body.base,
+                hasHeader() ? (local.title ? 'pt-4' : 'pt-0') : '',
+                local.bodyClass,
+              )}
+            >
+              {local.children}
             </div>
           </div>
         </div>

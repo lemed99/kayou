@@ -368,4 +368,3 @@ export interface AreaProps {
   /** Type of curve interpolation. @default 'monotone' */
   type?: 'monotone' | 'linear' | 'step';
 }
-

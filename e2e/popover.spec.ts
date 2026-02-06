@@ -3,120 +3,116 @@ import { expect, test } from '@playwright/test';
 test.describe('Popover', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/ui/popover');
+    await page.waitForLoadState('networkidle');
   });
 
   test('should render popover trigger', async ({ page }) => {
-    const trigger = page.locator('button').first();
+    const trigger = page.locator('button', { hasText: 'Click me' });
     await expect(trigger).toBeVisible();
   });
 
   test('should show popover on trigger click', async ({ page }) => {
-    // Find trigger with aria-haspopup="dialog"
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
 
-    // Wait for animation
-    await page.waitForTimeout(300);
-
-    const popover = page.locator('[role="dialog"]');
-    await expect(popover.first()).toBeVisible();
+    const popover = page.locator('[role="dialog"]').first();
+    await expect(popover).toBeVisible({ timeout: 5000 });
+    await expect(popover).toContainText('Popover Title');
   });
 
   test('should hide popover on second click', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
 
-    // Open
     await trigger.click();
-    await page.waitForTimeout(300);
-
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
+    await expect(popover).toBeVisible({ timeout: 5000 });
 
-    // Close by clicking trigger again
     await trigger.click();
-    await page.waitForTimeout(300);
-    await expect(popover).not.toBeVisible();
+    await expect(popover).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should close popover on Escape', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
 
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
+    await expect(popover).toBeVisible({ timeout: 5000 });
 
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
-    await expect(popover).not.toBeVisible();
+    await expect(popover).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should close popover on outside click', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
 
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
+    await expect(popover).toBeVisible({ timeout: 5000 });
 
-    // Click outside - on page body area that's not the popover
+    // Click outside the popover and trigger
     await page.locator('body').click({ position: { x: 10, y: 10 } });
-    await page.waitForTimeout(300);
-    // Popover should be closed or still exist - check count
-    const count = await page.locator('[role="dialog"]').count();
-    expect(count).toBeGreaterThanOrEqual(0);
+    await expect(popover).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should render popover content', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
 
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
-    const content = await popover.textContent();
-    expect(content).toBeTruthy();
+    await expect(popover).toBeVisible({ timeout: 5000 });
+    await expect(popover).toContainText('popover content');
   });
 
   test('should position popover correctly', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
 
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
-    const boundingBox = await popover.boundingBox();
+    await expect(popover).toBeVisible({ timeout: 5000 });
 
-    expect(boundingBox).toBeTruthy();
-    expect(boundingBox!.x).toBeGreaterThanOrEqual(0);
-    expect(boundingBox!.y).toBeGreaterThanOrEqual(0);
+    const triggerBox = await trigger.boundingBox();
+    const popoverBox = await popover.boundingBox();
+    expect(triggerBox).toBeTruthy();
+    expect(popoverBox).toBeTruthy();
+    // Popover should be positioned near the trigger (default is bottom)
+    expect(popoverBox!.y).toBeGreaterThanOrEqual(triggerBox!.y);
   });
 
   test('should support different placements', async ({ page }) => {
-    // Popovers can be positioned top, bottom, left, right
-    const content = await page.textContent('body');
-    expect(content).toContain('Popover');
+    for (const placement of ['Top', 'Right', 'Bottom', 'Left']) {
+      await expect(page.locator('button', { hasText: placement })).toBeVisible();
+    }
+
+    // Open a specific placement popover and verify content
+    const rightButton = page.locator('button', { hasText: 'Right' });
+    await rightButton.click();
+
+    const popover = page.locator('[role="dialog"]', { hasText: 'Right position' });
+    await expect(popover).toBeVisible({ timeout: 5000 });
   });
 
-  test('should render arrow indicator', async ({ page }) => {
-    const trigger = page.locator('[aria-haspopup="dialog"]').first();
+  test('should focus first focusable element when opened', async ({ page }) => {
+    // Use the interactive content example which has buttons inside
+    const trigger = page.locator('button', { hasText: 'Delete Item' });
     await trigger.click();
-    await page.waitForTimeout(300);
 
-    const arrow = page.locator('[data-arrow], [class*="arrow"]');
-    const count = await arrow.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+    const popover = page.locator('[role="dialog"]', { hasText: 'Confirm Action' });
+    await expect(popover).toBeVisible({ timeout: 5000 });
+
+    // First focusable element in the popover should have focus
+    const cancelButton = popover.locator('button', { hasText: 'Cancel' });
+    await expect(cancelButton).toBeFocused({ timeout: 5000 });
   });
 
-  test('should trap focus when open', async ({ page }) => {
+  test('should return focus to trigger on close', async ({ page }) => {
     const trigger = page.locator('[aria-haspopup="dialog"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
 
     const popover = page.locator('[role="dialog"]').first();
-    await expect(popover).toBeVisible();
+    await expect(popover).toBeVisible({ timeout: 5000 });
 
-    // Tab should work within popover or move through focusable elements
-    await page.keyboard.press('Tab');
+    await page.keyboard.press('Escape');
+    await expect(popover).not.toBeVisible({ timeout: 5000 });
+    await expect(trigger).toBeFocused({ timeout: 5000 });
   });
 });

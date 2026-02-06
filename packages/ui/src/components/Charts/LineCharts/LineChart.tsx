@@ -4,15 +4,16 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  onCleanup,
   splitProps,
 } from 'solid-js';
 
 import { ScaleLinear, ScalePoint, scaleLinear, scalePoint } from 'd3-scale';
 import { pointer } from 'd3-selection';
 
-import { ActivePoint, LineChartProps } from '../types';
 import { BaseChartContext } from '../shared/BaseChartContext';
 import { ChartTooltipOverlay } from '../shared/ChartTooltip';
+import { ActivePoint, LineChartProps } from '../types';
 import { ChartContext } from './ChartContext';
 
 /**
@@ -85,10 +86,13 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
       : Object.keys(props.data[0] ?? {}).filter(
           (k) => typeof props.data[0][k] === 'number',
         );
-    const maxVal = Math.max(
-      1,
-      ...props.data.map((d) => Math.max(...numericKeys.map((k) => Number(d[k] ?? 0)))),
-    );
+    let maxVal = 1;
+    for (const d of props.data) {
+      for (const k of numericKeys) {
+        const v = Number(d[k] ?? 0);
+        if (v > maxVal) maxVal = v;
+      }
+    }
     const scale = scaleLinear<number, number>()
       .domain([0, maxVal])
       .nice()
@@ -109,33 +113,36 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
 
   const [activePoint, setActivePoint] = createSignal<ActivePoint | null>(null);
 
+  // Memoize x positions for binary search
+  const xPositions = createMemo(() => {
+    const s = xScale();
+    return s.domain().map((d) => s(d) ?? 0);
+  });
+
+  let pointerRafId: number | undefined;
+
   function handlePointerMove(e: MouseEvent | TouchEvent) {
+    if (pointerRafId !== undefined) return;
+    pointerRafId = requestAnimationFrame(() => {
+      pointerRafId = undefined;
+      processPointer(e);
+    });
+  }
+
+  function processPointer(e: MouseEvent | TouchEvent) {
     const data = props.data;
     const key = xKey();
     const xScaleVal = xScale();
     const yScaleVal = yScale();
     const lineKeysVal = lineKeys();
+    const positions = xPositions();
 
     const [x, y] = pointer(e);
 
-    const step = xScaleVal.step();
-    if (!step) return;
+    if (!positions.length) return;
 
-    const points = xScaleVal.domain().map((d) => xScaleVal(d));
-    if (!points.length) return;
-
-    const index = points.findIndex((point, i) => {
-      if (i === 0) {
-        return x <= point! + step / 2;
-      }
-      if (i === points.length - 1) {
-        return x > point! - step / 2;
-      }
-      const zoneStart = point! - step / 2;
-      const zoneEnd = point! + step / 2;
-      return x > zoneStart && x <= zoneEnd;
-    });
-
+    // Binary search for nearest x position
+    const index = findNearestIndex(positions, x);
     if (index === -1) return;
 
     const d = data[index];
@@ -157,6 +164,19 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
       setActivePoint(null);
     }
   }
+
+  function clearActive() {
+    if (pointerRafId !== undefined) {
+      cancelAnimationFrame(pointerRafId);
+      pointerRafId = undefined;
+    }
+    setActiveIndex(null);
+    setActivePoint(null);
+  }
+
+  onCleanup(() => {
+    if (pointerRafId !== undefined) cancelAnimationFrame(pointerRafId);
+  });
 
   const titleId = createUniqueId();
   const descId = createUniqueId();
@@ -203,14 +223,8 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
           }}
           onMouseMove={handlePointerMove}
           onTouchMove={handlePointerMove}
-          onMouseLeave={() => {
-            setActiveIndex(null);
-            setActivePoint(null);
-          }}
-          onTouchEnd={() => {
-            setActiveIndex(null);
-            setActivePoint(null);
-          }}
+          onMouseLeave={clearActive}
+          onTouchEnd={clearActive}
           viewBox={`0 0 ${width()} ${height()}`}
         >
           <Show when={props.title}>
@@ -250,4 +264,24 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
       </BaseChartContext.Provider>
     </div>
   );
+}
+
+function findNearestIndex(sortedPositions: number[], target: number): number {
+  const len = sortedPositions.length;
+  if (len === 0) return -1;
+  if (len === 1) return 0;
+  let lo = 0;
+  let hi = len - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sortedPositions[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+  if (
+    lo > 0 &&
+    Math.abs(sortedPositions[lo - 1] - target) <= Math.abs(sortedPositions[lo] - target)
+  ) {
+    return lo - 1;
+  }
+  return lo;
 }

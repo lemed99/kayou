@@ -8,7 +8,8 @@ export function CartesianGrid(props: CartesianGridProps): JSX.Element {
 
   const xTicks = createMemo<number[]>(() => {
     const s = chart.xScale();
-    const halfBand = 'bandwidth' in s ? (s as { bandwidth(): number }).bandwidth() / 2 : 0;
+    const halfBand =
+      'bandwidth' in s ? (s as { bandwidth(): number }).bandwidth() / 2 : 0;
     return s.domain().map((v) => (s(v) ?? 0) + halfBand);
   });
 

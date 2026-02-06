@@ -6,6 +6,7 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  on,
   onCleanup,
 } from 'solid-js';
 
@@ -80,11 +81,26 @@ export function ChartTooltipOverlay(): JSX.Element {
     height: 0,
   });
 
-  createEffect(() => {
-    if (chart.activePoint() && tooltipRef) {
-      const { width, height } = tooltipRef.getBoundingClientRect();
-      setBoxDimensions({ width, height });
-    }
+  // Only re-measure when the active item changes (not on every pointer move)
+  const activeItem = createMemo(() => chart.activePoint()?.item ?? null);
+  let measureRafId: number | undefined;
+
+  createEffect(
+    on(activeItem, (item) => {
+      if (measureRafId !== undefined) cancelAnimationFrame(measureRafId);
+      if (!item) return;
+      measureRafId = requestAnimationFrame(() => {
+        measureRafId = undefined;
+        if (tooltipRef) {
+          const { width, height } = tooltipRef.getBoundingClientRect();
+          setBoxDimensions({ width, height });
+        }
+      });
+    }),
+  );
+
+  onCleanup(() => {
+    if (measureRafId !== undefined) cancelAnimationFrame(measureRafId);
   });
 
   const boxPos = createMemo<{ x: number; y: number }>(() => {

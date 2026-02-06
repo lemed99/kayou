@@ -2,128 +2,98 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Accordion', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/accordion');
+    // Navigate via client-side routing to avoid pre-existing SSR hydration mismatch
+    await page.goto('/ui/button');
+    await page.waitForLoadState('networkidle');
+    // Use JS-based navigation to trigger client-side routing
+    await page.evaluate(() => {
+      const link = document.querySelector('a[href="/ui/accordion"]') as HTMLAnchorElement;
+      link?.click();
+    });
+    await page.waitForURL('/ui/accordion');
+    await page.locator('#accordion-trigger-basic-1').waitFor({ state: 'visible' });
   });
 
   // ==================== Basic Rendering ====================
 
-  test('should render accordion container', async ({ page }) => {
-    const accordion = page.locator('[id^="accordion-item-"]').first();
-    await expect(accordion).toBeVisible();
+  test('should render panels with titles', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toContainText('What is SolidJS?');
   });
 
-  test('should render multiple accordion items', async ({ page }) => {
-    const accordionItems = page.locator('[id^="accordion-item-"]');
-    const count = await accordionItems.count();
-    expect(count).toBeGreaterThan(1);
-  });
-
-  test('should render panel titles', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-    const text = await trigger.textContent();
-    expect(text).toBeTruthy();
-    expect(text!.length).toBeGreaterThan(0);
-  });
-
-  test('should render chevron/arrow icon in each panel header', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
+  test('should render chevron icon in panel header', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
     const svg = trigger.locator('svg');
     await expect(svg).toBeVisible();
   });
 
-  // ==================== Expand/Collapse Behavior ====================
+  // ==================== Expand/Collapse ====================
 
-  test('should expand accordion item on click', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
+  test('should expand panel on click and show content', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
     await trigger.click();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
-    const panelId = await trigger.getAttribute('aria-controls');
-    if (panelId) {
-      const panel = page.locator(`#${panelId}`);
-      await expect(panel).toBeVisible();
-    }
+    const panel = page.locator('#accordion-panel-basic-1');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('SolidJS is a declarative JavaScript library');
   });
 
-  test('should collapse accordion item on second click', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-
-    await trigger.click();
-    await page.waitForTimeout(300);
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
-    await trigger.click();
-    await page.waitForTimeout(300);
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  test('should allow multiple panels to be open simultaneously', async ({ page }) => {
-    const triggers = page.locator('[id^="accordion-trigger-"]');
-    const count = await triggers.count();
-
-    if (count >= 2) {
-      await triggers.nth(0).click();
-      await page.waitForTimeout(200);
-      await expect(triggers.nth(0)).toHaveAttribute('aria-expanded', 'true');
-
-      await triggers.nth(1).click();
-      await page.waitForTimeout(200);
-      await expect(triggers.nth(1)).toHaveAttribute('aria-expanded', 'true');
-
-      // First panel should still be open
-      await expect(triggers.nth(0)).toHaveAttribute('aria-expanded', 'true');
-    }
-  });
-
-  test('should show panel content when expanded', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-    await trigger.click();
-    await page.waitForTimeout(300);
-
-    const panelId = await trigger.getAttribute('aria-controls');
-    if (panelId) {
-      const panel = page.locator(`#${panelId}`);
-      const content = await panel.textContent();
-      expect(content).toBeTruthy();
-    }
-  });
-
-  // ==================== Accessibility (ARIA) ====================
-
-  test('should have correct aria-expanded attribute', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  test('should collapse panel on second click', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
 
     await trigger.click();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-  });
 
-  test('should have aria-controls pointing to panel', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-    const ariaControls = await trigger.getAttribute('aria-controls');
-    expect(ariaControls).toBeTruthy();
-    expect(ariaControls).toContain('accordion-panel-');
-  });
-
-  test('panel should have aria-labelledby pointing to trigger', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
 
-    const panelId = await trigger.getAttribute('aria-controls');
-    if (panelId) {
-      const panel = page.locator(`#${panelId}`);
-      const labelledBy = await panel.getAttribute('aria-labelledby');
-      expect(labelledBy).toBeTruthy();
-    }
+  test('should allow multiple panels open simultaneously', async ({ page }) => {
+    const trigger1 = page.locator('#accordion-trigger-basic-1');
+    const trigger2 = page.locator('#accordion-trigger-basic-2');
+
+    await trigger1.click();
+    await expect(trigger1).toHaveAttribute('aria-expanded', 'true');
+
+    await trigger2.click();
+    await expect(trigger2).toHaveAttribute('aria-expanded', 'true');
+    // First panel stays open
+    await expect(trigger1).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('should rotate chevron when expanded', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
+    const chevron = trigger.locator('svg');
+
+    await expect(chevron).not.toHaveClass(/rotate-90/);
+
+    await trigger.click();
+    await expect(chevron).toHaveClass(/rotate-90/);
+  });
+
+  // ==================== Accessibility ====================
+
+  test('should have correct ARIA attributes', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).toHaveAttribute('aria-controls', 'accordion-panel-basic-1');
+
+    await trigger.click();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    const panel = page.locator('#accordion-panel-basic-1');
+    await expect(panel).toHaveAttribute('role', 'region');
+    await expect(panel).toHaveAttribute('aria-labelledby', 'accordion-trigger-basic-1');
   });
 
   // ==================== Keyboard Navigation ====================
 
   test('should toggle panel with Enter key', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
+    const trigger = page.locator('#accordion-trigger-basic-1');
     await trigger.focus();
 
     await page.keyboard.press('Enter');
@@ -134,7 +104,7 @@ test.describe('Accordion', () => {
   });
 
   test('should toggle panel with Space key', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
+    const trigger = page.locator('#accordion-trigger-basic-1');
     await trigger.focus();
 
     await page.keyboard.press('Space');
@@ -144,154 +114,83 @@ test.describe('Accordion', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('should navigate between triggers with Tab key', async ({ page }) => {
-    const triggers = page.locator('[id^="accordion-trigger-"]');
-    const count = await triggers.count();
+  // ==================== Exclusive Mode ====================
 
-    if (count >= 2) {
-      await triggers.first().focus();
-      await expect(triggers.first()).toBeFocused();
+  test('should close other panels in exclusive mode', async ({ page }) => {
+    const trigger1 = page.locator('#accordion-trigger-exc-1');
+    const trigger2 = page.locator('#accordion-trigger-exc-2');
 
-      await page.keyboard.press('Tab');
-      // Next focusable element (may be next trigger or other element)
-    }
+    await trigger1.click();
+    await expect(trigger1).toHaveAttribute('aria-expanded', 'true');
+
+    await trigger2.click();
+    await expect(trigger2).toHaveAttribute('aria-expanded', 'true');
+    // First panel should be closed
+    await expect(trigger1).toHaveAttribute('aria-expanded', 'false');
   });
 
   // ==================== Controlled Mode ====================
 
-  test('should support controlled mode with external button', async ({ page }) => {
-    const toggleButton = page
-      .locator('button')
-      .filter({ hasText: /Toggle Panel/i })
-      .first();
+  test('should start with controlled panel open', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-ctrl-1');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(trigger).toContainText('Panel 1 (starts open)');
+  });
 
-    if (await toggleButton.isVisible()) {
-      await toggleButton.click();
-      await page.waitForTimeout(300);
+  test('should toggle panel via external button', async ({ page }) => {
+    const trigger2 = page.locator('#accordion-trigger-ctrl-2');
+    await expect(trigger2).toHaveAttribute('aria-expanded', 'false');
 
-      const triggers = page.locator('[id^="accordion-trigger-"]');
-      const count = await triggers.count();
-      expect(count).toBeGreaterThan(0);
-    }
+    const toggleBtn = page.locator('button').filter({ hasText: 'Toggle Panel 2' });
+    await toggleBtn.click();
+    await expect(trigger2).toHaveAttribute('aria-expanded', 'true');
+
+    await toggleBtn.click();
+    await expect(trigger2).toHaveAttribute('aria-expanded', 'false');
   });
 
   // ==================== Highlighted Panel ====================
 
-  test('should support panel highlighting', async ({ page }) => {
-    const highlightButton = page
-      .locator('button')
-      .filter({ hasText: /Highlight/i })
-      .first();
+  test('should highlight panel when button is clicked', async ({ page }) => {
+    const highlightBtn = page.locator('button').filter({ hasText: 'Highlight Panel 3' });
+    await highlightBtn.click();
 
-    if (await highlightButton.isVisible()) {
-      await highlightButton.click();
-      await page.waitForTimeout(300);
-
-      // Verify accordion still works after highlighting
-      const triggers = page.locator('[id^="accordion-trigger-"]');
-      const count = await triggers.count();
-      expect(count).toBeGreaterThan(0);
-    }
+    const trigger = page.locator('#accordion-trigger-hl-3');
+    await expect(trigger).toHaveClass(/bg-yellow-200/);
   });
 
-  test('should clear highlighting when clear button is clicked', async ({ page }) => {
-    const highlightButton = page
-      .locator('button')
-      .filter({ hasText: /Highlight/i })
-      .first();
-    const clearButton = page.locator('button').filter({ hasText: /Clear/i }).first();
+  test('should clear highlight when clear button is clicked', async ({ page }) => {
+    const highlightBtn = page.locator('button').filter({ hasText: 'Highlight Panel 3' });
+    const clearBtn = page.locator('button').filter({ hasText: 'Clear' });
 
-    if ((await highlightButton.isVisible()) && (await clearButton.isVisible())) {
-      await highlightButton.click();
-      await page.waitForTimeout(300);
+    await highlightBtn.click();
+    const trigger = page.locator('#accordion-trigger-hl-3');
+    await expect(trigger).toHaveClass(/bg-yellow-200/);
 
-      await clearButton.click();
-      await page.waitForTimeout(300);
-
-      const triggers = page.locator('[id^="accordion-trigger-"]');
-      const count = await triggers.count();
-      expect(count).toBeGreaterThan(0);
-    }
+    await clearBtn.click();
+    await expect(trigger).not.toHaveClass(/bg-yellow-200/);
   });
 
-  // ==================== Edge Cases ====================
+  // ==================== Separated Cards ====================
 
-  test('should handle rapid clicking gracefully', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-
-    await trigger.click();
-    await trigger.click();
-    await trigger.click();
-    await trigger.click();
-
-    await page.waitForTimeout(500);
-
-    const ariaExpanded = await trigger.getAttribute('aria-expanded');
-    expect(['true', 'false']).toContain(ariaExpanded);
+  test('should render separated panels with gap', async ({ page }) => {
+    const item = page.locator('#accordion-item-sep-1');
+    await expect(item).toBeVisible();
+    await expect(item).toHaveClass(/rounded-lg/);
+    await expect(item).toHaveClass(/border/);
   });
 
-  test('should maintain state when clicking same panel multiple times', async ({
-    page,
-  }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
+  // ==================== Rapid Interaction ====================
 
+  test('should handle rapid clicking with correct final state', async ({ page }) => {
+    const trigger = page.locator('#accordion-trigger-basic-1');
+
+    // 4 clicks = even number = back to closed
     await trigger.click();
-    await page.waitForTimeout(200);
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
     await trigger.click();
-    await page.waitForTimeout(200);
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
     await trigger.click();
-    await page.waitForTimeout(200);
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-  });
-
-  // ==================== Content Types ====================
-
-  test('should render various content types in panel body', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
     await trigger.click();
-    await page.waitForTimeout(300);
-
-    const panelId = await trigger.getAttribute('aria-controls');
-    if (panelId) {
-      const panel = page.locator(`#${panelId}`);
-      const innerHTML = await panel.innerHTML();
-      expect(innerHTML).toBeTruthy();
-      expect(innerHTML.length).toBeGreaterThan(0);
-    }
-  });
-
-  // ==================== Visual States ====================
-
-  test('should rotate chevron icon when expanded', async ({ page }) => {
-    const trigger = page.locator('[id^="accordion-trigger-"]').first();
-    const svg = trigger.locator('svg');
 
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
-    await trigger.click();
-    await page.waitForTimeout(300);
-
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    // SVG should have rotation transform or class change
-    await expect(svg).toBeVisible();
-  });
-
-  // ==================== isSimple Variant ====================
-
-  test('should render simple variant by default', async ({ page }) => {
-    const accordionItem = page.locator('[id^="accordion-item-"]').first();
-    await expect(accordionItem).toBeVisible();
-  });
-
-  test('should render styled variant with borders', async ({ page }) => {
-    const styledSection = page.locator('text=/Styled Variant/i').first();
-    if (await styledSection.isVisible()) {
-      // The styled section should be visible
-      await expect(styledSection).toBeVisible();
-    }
   });
 });

@@ -130,7 +130,7 @@ export interface SidebarProps extends JSX.HTMLAttributes<HTMLElement> {
 
 export interface SidebarItemProps {
   /** Optional icon component. */
-  icon?: (props: { class: string }) => JSX.Element;
+  icon?: (props: IconProps) => JSX.Element;
   /** Accessible label for the item. */
   label?: string;
   /** Whether this item is currently active. */
@@ -163,7 +163,7 @@ export interface SidebarItemProps {
 
 export interface SidebarCollapseProps {
   /** Optional icon component. */
-  icon?: (props: { class: string }) => JSX.Element;
+  icon?: (props: IconProps) => JSX.Element;
   /** Label content for the collapse button. */
   label?: JSX.Element;
   /** Whether the collapse section is expanded. */

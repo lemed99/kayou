@@ -1,5 +1,7 @@
-import { Node, mergeAttributes } from '@tiptap/core';
+import { createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
+
+import { Node, mergeAttributes } from '@tiptap/core';
 
 import { UploadFile } from '../UploadFile';
 
@@ -46,11 +48,13 @@ export const ImageUploadNode = Node.create<ImageUploadOptions>({
     return ({ editor, getPos }) => {
       const dom = document.createElement('div');
       dom.className = 'my-4';
+      const [error, setError] = createSignal('');
 
       const handleFileChange = async (fileOrList: File | FileList) => {
         const file = fileOrList instanceof FileList ? fileOrList[0] : fileOrList;
         if (!file || !this.options.onImageUpload) return;
 
+        setError('');
         try {
           const url = await this.options.onImageUpload(file);
           const pos = getPos();
@@ -62,25 +66,30 @@ export const ImageUploadNode = Node.create<ImageUploadOptions>({
               .setImage({ src: url })
               .run();
           }
-        } catch (error) {
-          console.error('Image upload failed:', error);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Image upload failed');
         }
       };
 
       // Render the SolidJS UploadFile component
       const dispose = render(
         () => (
-          <UploadFile
-            onChange={(fileOrList) => {
-              void handleFileChange(fileOrList);
-            }}
-            accept="image/*"
-            multiple={false}
-            maxLength={1}
-            dragDropText="Tap to select an image"
-            helperText="Supported formats: PNG, JPG, GIF, SVG, WebP"
-            autoUpload={false}
-          />
+          <div>
+            <UploadFile
+              onChange={(fileOrList) => {
+                void handleFileChange(fileOrList);
+              }}
+              accept="image/*"
+              multiple={false}
+              maxLength={1}
+              dragDropText="Tap to select an image"
+              helperText="Supported formats: PNG, JPG, GIF, SVG, WebP"
+              autoUpload={false}
+            />
+            {error() && (
+              <p class="mt-2 text-sm text-red-600 dark:text-red-400">{error()}</p>
+            )}
+          </div>
         ),
         dom,
       );

@@ -1,5 +1,6 @@
 import { JSX, Show, createMemo, splitProps } from 'solid-js';
 
+import { type IconProps } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 /**
@@ -19,7 +20,7 @@ export interface AlertProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /**
    * Optional icon to display in the alert.
    */
-  icon?: (props: { class: string }) => JSX.Element;
+  icon?: (props: IconProps) => JSX.Element;
   /**
    * Additional content to display below the main alert message.
    */

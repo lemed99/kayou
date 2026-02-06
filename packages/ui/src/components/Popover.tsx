@@ -140,7 +140,9 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
     get placement() {
       return merged.position || undefined;
     },
-    offset: merged.offset ?? 8,
+    get offset() {
+      return merged.offset ?? 8;
+    },
     get backgroundScrollBehavior() {
       return props.backgroundScrollBehavior;
     },
@@ -154,26 +156,28 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
     }
   });
 
-  // Focus management: focus first focusable element when opened
+  // Focus management: focus first focusable element when opened (click mode only)
   createEffect((prev: boolean) => {
     const current = isPopoverVisible();
 
-    if (current && !prev) {
-      // Opening: focus first focusable element in popover
-      queueMicrotask(() => {
-        const floatingEl = refs.floating();
-        if (floatingEl) {
-          const focusable = floatingEl.querySelector<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-          );
-          if (focusable) {
-            focusable.focus();
+    if (!merged.onHover) {
+      if (current && !prev) {
+        // Opening: focus first focusable element in popover
+        queueMicrotask(() => {
+          const floatingEl = refs.floating();
+          if (floatingEl) {
+            const focusable = floatingEl.querySelector<HTMLElement>(
+              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+            );
+            if (focusable) {
+              focusable.focus();
+            }
           }
-        }
-      });
-    } else if (!current && prev) {
-      // Closing: return focus to trigger
-      triggerRef?.focus();
+        });
+      } else if (!current && prev) {
+        // Closing: return focus to trigger
+        triggerRef?.focus();
+      }
     }
 
     return current;
@@ -230,6 +234,9 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
 
   const handleTriggerKeyDown = (event: KeyboardEvent) => {
     if (merged.hidden || merged.onHover) return;
+    // Only handle when the wrapper itself has focus, not a child element,
+    // to prevent double-toggle (keydown + click) when pressing Enter on a child button
+    if (event.target !== event.currentTarget) return;
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -245,20 +252,6 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
   };
 
   const handleMouseLeave = () => {
-    if (!merged.hidden && merged.onHover) {
-      setOpen(false);
-      props.onMouseLeave?.();
-    }
-  };
-
-  const handleTouchStart = () => {
-    if (!merged.hidden && merged.onHover) {
-      setOpen(true);
-      props.onMouseEnter?.();
-    }
-  };
-
-  const handleTouchEnd = () => {
     if (!merged.hidden && merged.onHover) {
       setOpen(false);
       props.onMouseLeave?.();
@@ -294,8 +287,6 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
         onKeyDown={handleTriggerKeyDown}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         onFocusIn={handleFocusIn}
         onFocusOut={handleFocusOut}
       >
@@ -322,8 +313,6 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
             }
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
           >
             <div
               class={twMerge(

@@ -78,6 +78,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
       inputComponent={
         <>
           <TextInput
+            {...otherProps}
             ref={setSearchRef}
             value={searchKey()}
             onInput={handleSearchChange}
@@ -99,7 +100,6 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
             aria-autocomplete="list"
             aria-haspopup="listbox"
             autocomplete="off"
-            {...otherProps}
           />
 
           <Show when={searchKey() && !local.disabled && !local.isLoading}>

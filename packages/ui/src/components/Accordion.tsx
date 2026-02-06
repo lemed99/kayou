@@ -147,20 +147,25 @@ const Accordion = (props: AccordionProps): JSX.Element => {
 
   return (
     <div
-      class={twMerge(
-        'w-full',
-        isSeparated() && `flex flex-col gap-${props.gap}`,
-        props.class,
-      )}
+      class={twMerge('w-full', isSeparated() && 'flex flex-col', props.class)}
+      style={
+        isSeparated()
+          ? {
+              gap: `${props.gap!.match(/^\d+$/) ? `${Number(props.gap) * 0.25}rem` : props.gap}`,
+            }
+          : undefined
+      }
     >
       <For each={panels()}>
-        {(panel) => (
+        {(panel, index) => (
           <Panel
             panel={panel}
             isOpen={getOpenState(panel.itemKey)}
             toggle={() => togglePanel(panel.itemKey)}
             isSimple={getIsSimple()}
             isSeparated={isSeparated()}
+            isFirst={index() === 0}
+            isLast={index() === panels().length - 1}
             highlightedKey={getHighlightedKey()}
             highlightedClass={getHighlightedClass()}
           />
@@ -176,6 +181,8 @@ interface PanelProps {
   toggle: () => void;
   isSimple: boolean;
   isSeparated?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
   highlightedKey?: string;
   highlightedClass?: string;
 }
@@ -193,10 +200,7 @@ const Panel = (props: PanelProps): JSX.Element => {
   createEffect(() => {
     if (isHighlighted()) {
       const element = document.getElementById(triggerId());
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
-      }
+      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   });
 
@@ -224,13 +228,6 @@ const Panel = (props: PanelProps): JSX.Element => {
     }
   });
 
-  const handleKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      props.toggle();
-    }
-  };
-
   return (
     <div
       class={twMerge(
@@ -243,34 +240,10 @@ const Panel = (props: PanelProps): JSX.Element => {
       )}
       id={itemId()}
     >
-      {!props.isSimple && !props.isSeparated && (
-        <style>
-          {`
-            #${itemId()}:first-child > button#${triggerId()} {
-              border-top-right-radius: 7px;
-              border-top-left-radius: 7px;
-            }
-            #${itemId()}:last-child > div#${panelId()} {
-              border-bottom-right-radius: 7px;
-              border-bottom-left-radius: 7px;
-            }
-            ${
-              !props.isOpen
-                ? `#${itemId()}:last-child > button#${triggerId()} {
-              border-bottom-right-radius: 7px;
-              border-bottom-left-radius: 7px;
-            }`
-                : ''
-            }
-          `}
-        </style>
-      )}
-
       <button
         type="button"
         id={triggerId()}
         onClick={() => props.toggle()}
-        onKeyDown={handleKeyDown}
         aria-expanded={props.isOpen}
         aria-controls={panelId()}
         class={twMerge(
@@ -281,6 +254,18 @@ const Panel = (props: PanelProps): JSX.Element => {
           isHighlighted() && (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
           props.panel.titleClass,
         )}
+        style={
+          !props.isSimple && !props.isSeparated
+            ? {
+                'border-top-left-radius': props.isFirst ? '7px' : undefined,
+                'border-top-right-radius': props.isFirst ? '7px' : undefined,
+                'border-bottom-left-radius':
+                  props.isLast && !props.isOpen ? '7px' : undefined,
+                'border-bottom-right-radius':
+                  props.isLast && !props.isOpen ? '7px' : undefined,
+              }
+            : undefined
+        }
       >
         <span class="flex w-full items-center">{props.panel.title}</span>
         <Show when={props.panel.content}>
@@ -309,6 +294,12 @@ const Panel = (props: PanelProps): JSX.Element => {
           style={{
             height: isVisible() ? `${panelElementHeight()}px` : '0px',
             transition: 'height .242s cubic-bezier(0.4, 0, 0.2, 1)',
+            ...(!props.isSimple && !props.isSeparated && props.isLast
+              ? {
+                  'border-bottom-left-radius': '7px',
+                  'border-bottom-right-radius': '7px',
+                }
+              : {}),
           }}
         >
           <div ref={setPanelContentElement} class="p-3">

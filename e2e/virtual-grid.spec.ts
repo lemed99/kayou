@@ -5,109 +5,139 @@ test.describe('VirtualGrid', () => {
     await page.goto('/ui/virtual-grid');
   });
 
-  test('should render virtual grid container', async ({ page }) => {
-    // VirtualGrid renders in a scrollable container
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"], [class*="grid"]')
-      .first();
-    await expect(container).toBeVisible();
+  test('should render grid with correct ARIA attributes', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+    await expect(grid).toBeVisible();
+    await expect(grid).toHaveAttribute('aria-rowcount');
+    await expect(grid).toHaveAttribute('aria-colcount');
   });
 
-  test('should render visible grid items only', async ({ page }) => {
-    // Virtual grid renders only visible items
-    const items = page
-      .locator('[class*="overflow-auto"] > div, [class*="grid"] > div')
-      .first();
-    await expect(items).toBeVisible();
+  test('should only render visible items (virtualization)', async ({ page }) => {
+    // First example: 100 items in 3 columns — far fewer should be in the DOM
+    const grid = page.locator('role=grid').first();
+    await expect(grid).toBeVisible();
+
+    const cells = grid.locator('role=gridcell');
+    const cellCount = await cells.count();
+
+    expect(cellCount).toBeGreaterThan(0);
+    expect(cellCount).toBeLessThan(30);
   });
 
-  test('should render items in grid layout', async ({ page }) => {
-    // Grid items are laid out in a grid or flex pattern
-    const gridContainer = page.locator('[class*="grid"], [class*="flex"]').first();
-    await expect(gridContainer).toBeVisible();
+  test('should render gridcells with correct ARIA roles', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+    const firstCell = grid.locator('role=gridcell').first();
+    await expect(firstCell).toBeVisible();
+    await expect(firstCell).toHaveAttribute('aria-rowindex');
+    await expect(firstCell).toHaveAttribute('aria-colindex');
   });
 
-  test('should scroll vertically', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
+  test('should update visible items on scroll', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
 
-    if (await container.isVisible()) {
-      await container.evaluate((el) => {
-        el.scrollTop = 500;
-      });
+    const initialFirstCell = grid.locator('role=gridcell').first();
+    const initialRowIndex = await initialFirstCell.getAttribute('aria-rowindex');
 
+    // Scroll down significantly
+    await grid.evaluate((el) => {
+      el.scrollTop = 500;
+    });
+    await page.waitForTimeout(200);
+
+    // First visible cell should now have a higher row index
+    const newFirstCell = grid.locator('role=gridcell').first();
+    const newRowIndex = await newFirstCell.getAttribute('aria-rowindex');
+    expect(Number(newRowIndex)).toBeGreaterThan(Number(initialRowIndex));
+  });
+
+  test('should maintain virtualization with large dataset', async ({ page }) => {
+    // Second example: 200 items in 4 columns
+    const grid = page.locator('role=grid').nth(1);
+    await expect(grid).toBeVisible();
+
+    const cells = grid.locator('role=gridcell');
+    const cellCount = await cells.count();
+    expect(cellCount).toBeLessThan(50);
+  });
+
+  test('should navigate with arrow keys', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+    await grid.focus();
+    await page.waitForTimeout(100);
+
+    // After focus, first cell should be marked as focused
+    let focusedCell = grid.locator('[data-focused]');
+    await expect(focusedCell).toHaveCount(1);
+
+    const initialColIndex = await focusedCell.getAttribute('aria-colindex');
+    expect(initialColIndex).toBe('1');
+
+    // Arrow right moves to next column
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(50);
+    focusedCell = grid.locator('[data-focused]');
+    await expect(focusedCell).toHaveAttribute('aria-colindex', '2');
+
+    // Arrow down moves to next row
+    await page.keyboard.press('ArrowDown');
+    await page.waitForTimeout(50);
+    focusedCell = grid.locator('[data-focused]');
+    await expect(focusedCell).toHaveAttribute('aria-rowindex', '2');
+  });
+
+  test('should navigate to start/end with Home/End', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+    await grid.focus();
+    await page.waitForTimeout(100);
+
+    // Move right twice
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(50);
+
+    // Home should go to start of row
+    await page.keyboard.press('Home');
+    await page.waitForTimeout(50);
+    const focusedCell = grid.locator('[data-focused]');
+    await expect(focusedCell).toHaveAttribute('aria-colindex', '1');
+  });
+
+  test('should handle empty data gracefully', async ({ page }) => {
+    // Last example starts with empty data
+    const grids = page.locator('role=grid');
+    const lastGrid = grids.last();
+    await expect(lastGrid).toBeVisible();
+
+    const cells = lastGrid.locator('role=gridcell');
+    await expect(cells).toHaveCount(0);
+  });
+
+  test('should set aria-activedescendant on focus', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+    await grid.focus();
+    await page.waitForTimeout(100);
+
+    const activedescendant = await grid.getAttribute('aria-activedescendant');
+    expect(activedescendant).toBeTruthy();
+
+    // The referenced element should exist in the DOM
+    const activeCell = page.locator(`[id="${activedescendant}"]`);
+    await expect(activeCell).toBeVisible();
+  });
+
+  test('should keep rendered item count bounded during scroll', async ({ page }) => {
+    const grid = page.locator('role=grid').first();
+
+    for (const scrollPos of [0, 300, 600, 900]) {
+      await grid.evaluate((el, pos) => {
+        el.scrollTop = pos;
+      }, scrollPos);
       await page.waitForTimeout(200);
 
-      const scrollTop = await container.evaluate((el) => el.scrollTop);
-      expect(scrollTop).toBeGreaterThanOrEqual(0);
-    }
-  });
-
-  test('should scroll horizontally if enabled', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-x-auto"], [class*="overflow-auto"]')
-      .first();
-
-    if (await container.isVisible()) {
-      await container.evaluate((el) => {
-        el.scrollLeft = 200;
-      });
-
-      await page.waitForTimeout(200);
-      // Test passes if no error
-    }
-  });
-
-  test('should update items on scroll', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-
-    if (await container.isVisible()) {
-      await container.evaluate((el) => {
-        el.scrollTop = 1000;
-      });
-
-      await page.waitForTimeout(300);
-
-      // Content should be updated (new items rendered)
-      const newContent = await container.innerHTML();
-      expect(newContent).toBeTruthy();
-    }
-  });
-
-  test('should handle large datasets', async ({ page }) => {
-    // Virtual grid should handle large amounts of data efficiently
-    const container = page.locator('[class*="overflow-auto"], [class*="grid"]').first();
-    await expect(container).toBeVisible();
-  });
-
-  test('should maintain grid structure', async ({ page }) => {
-    const gridItems = page.locator(
-      '[class*="grid"] > div, [class*="overflow-auto"] > div > div',
-    );
-    const count = await gridItems.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  test('should support variable item sizes', async ({ page }) => {
-    // Grid items may have variable sizes
-    const container = page.locator('[class*="overflow-auto"], [class*="grid"]').first();
-    await expect(container).toBeVisible();
-  });
-
-  test('should be keyboard navigable', async ({ page }) => {
-    const firstItem = page
-      .locator('[class*="grid"] > div, [class*="overflow-auto"] > div')
-      .first();
-
-    if (await firstItem.isVisible()) {
-      await firstItem.click();
-
-      // Arrow keys should navigate
-      await page.keyboard.press('ArrowRight');
-      await page.keyboard.press('ArrowDown');
+      const cells = grid.locator('role=gridcell');
+      const count = await cells.count();
+      expect(count).toBeLessThan(30);
+      expect(count).toBeGreaterThan(0);
     }
   });
 });

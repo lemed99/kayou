@@ -21,6 +21,7 @@ import {
   Link01Icon,
   LinkExternal01Icon,
   ListIcon,
+  MinusIcon,
   OrderedListIcon,
   QuoteIcon,
   ReverseLeftIcon,
@@ -306,7 +307,8 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
             config().headings ||
             config().lists ||
             config().blockquote ||
-            config().codeBlock
+            config().codeBlock ||
+            config().horizontalRule
           }
         >
           <ToolbarGroup>
@@ -414,6 +416,17 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                 label={l().codeBlock}
               >
                 <CodeSquare01Icon />
+              </ToolbarButton>
+            </Show>
+
+            {/* Horizontal Rule */}
+            <Show when={config().horizontalRule}>
+              <ToolbarButton
+                onClick={() => props.editor.chain().focus().setHorizontalRule().run()}
+                disabled={props.disabled}
+                label={l().horizontalRule}
+              >
+                <MinusIcon />
               </ToolbarButton>
             </Show>
           </ToolbarGroup>
@@ -623,10 +636,14 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
           <ToolbarGroup>
             <ToolbarButton
               onClick={() => props.editor.chain().focus().setTextAlign('left').run()}
-              isActive={() =>
-                isActive('paragraph', { textAlign: 'left' })() ||
-                isActive('heading', { textAlign: 'left' })()
-              }
+              isActive={() => {
+                void props.editorState;
+                return (
+                  !props.editor.isActive({ textAlign: 'center' }) &&
+                  !props.editor.isActive({ textAlign: 'right' }) &&
+                  !props.editor.isActive({ textAlign: 'justify' })
+                );
+              }}
               disabled={props.disabled}
               label={l().alignLeft}
             >

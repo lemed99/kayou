@@ -81,16 +81,15 @@ const theme = {
   arrow: {
     base: 'absolute z-100',
     theme: {
-      dark: 'text-neutral-700 dark:text-neutral-700',
-      light: 'text-white dark:text-neutral-900',
+      dark: 'text-neutral-700',
+      light: 'text-white',
     },
   },
   base: 'inline-block z-100 rounded-lg py-2 px-3 text-sm w-max outline shadow-sm',
   hidden: 'invisible opacity-0',
   theme: {
-    dark: 'outline-neutral-200 dark:outline-neutral-600 bg-neutral-700 text-white dark:bg-neutral-700',
-    light:
-      'outline-neutral-200 dark:outline-neutral-600 bg-white text-neutral-900 dark:bg-neutral-100 dark:text-neutral-900',
+    dark: 'outline-neutral-600 bg-neutral-700 text-white',
+    light: 'outline-neutral-200 bg-white text-neutral-900',
   },
 };
 
@@ -124,33 +123,36 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
       return 'dark';
     }
     // Check system preference
-    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)').matches
+    ) {
       return 'dark';
     }
     return 'light';
   };
 
-  // Theme detection: try ThemeProvider first, fall back to DOM/system detection
+  // Theme detection: try ThemeProvider at top level (required for Solid.js context),
+  // fall back to DOM/system detection
+  let themeContext: ReturnType<typeof useTheme> | null = null;
+  try {
+    themeContext = useTheme();
+  } catch {
+    // No ThemeProvider available
+  }
+
   createEffect(() => {
     if (merged.theme !== 'auto' && merged.theme !== 'invert') return;
-    if (typeof document === 'undefined') return; // Skip on server
+    if (typeof document === 'undefined') return;
 
-    let themeContextAvailable = false;
-    try {
-      const { systemTheme, appTheme } = useTheme();
-      themeContextAvailable = true;
+    if (themeContext) {
+      const { systemTheme, appTheme } = themeContext;
       setCurrentTheme(
         appTheme() === 'system' ? systemTheme() : (appTheme() as 'light' | 'dark'),
       );
-    } catch {
-      // No ThemeProvider available
-    }
-
-    if (!themeContextAvailable) {
-      // Use standalone detection
+    } else {
       setCurrentTheme(detectThemeFromDOM());
 
-      // Watch for dark class changes on document
       const observer = new MutationObserver(() => {
         setCurrentTheme(detectThemeFromDOM());
       });
@@ -159,7 +161,6 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
         attributeFilter: ['class'],
       });
 
-      // Watch for system preference changes
       const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
       const handleChange = () => setCurrentTheme(detectThemeFromDOM());
       mediaQuery?.addEventListener('change', handleChange);
@@ -198,6 +199,20 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
     clearTimeout(hideTimeoutId);
   });
 
+  // Dismiss tooltip on Escape key (WAI-ARIA tooltip pattern)
+  createEffect(() => {
+    if (showTooltip() && !props.hidden) {
+      const handleEscapeKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          clearTimeout(showTimeoutId);
+          setShowTooltip(false);
+        }
+      };
+      document.addEventListener('keydown', handleEscapeKey);
+      onCleanup(() => document.removeEventListener('keydown', handleEscapeKey));
+    }
+  });
+
   const { isVisible, isMounted } = createPresence(() => showTooltip(), {
     transitionDuration: 200,
   });
@@ -227,11 +242,8 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
       <div
         class={twMerge('w-fit', merged.wrapperClass)}
         ref={refs.setReference}
-        tabIndex={0}
         onMouseEnter={handleShow}
         onMouseLeave={handleHide}
-        onTouchStart={handleShow}
-        onTouchEnd={handleHide}
         onFocusIn={handleShow}
         onFocusOut={handleHide}
         aria-describedby={showTooltip() && !props.hidden ? tooltipId : undefined}
@@ -270,7 +282,9 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
                 />
                 <path
                   d="M11.0045 8.14139C10.2438 8.8259 9.08927 8.82593 8.32857 8.14137L3.47178 3.77026C2.92098 3.27447 2.20607 3.00014 1.46497 3.00014L4.10987 3.00015L8.99757 7.39808C9.37787 7.74035 9.95517 7.74035 10.3355 7.39808L15.2225 3.00015L17.8682 3.00014C17.127 3.00014 16.4121 3.27447 15.8613 3.77026L11.0045 8.14139Z"
-                  class="fill-gray-200 dark:fill-neutral-600"
+                  class={
+                    resolvedTheme() === 'dark' ? 'fill-neutral-600' : 'fill-neutral-200'
+                  }
                 />
               </svg>
             </div>

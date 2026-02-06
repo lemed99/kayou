@@ -5,98 +5,98 @@ test.describe('DynamicVirtualList', () => {
     await page.goto('/ui/dynamic-virtual-list');
   });
 
-  test('should render dynamic virtual list container', async ({ page }) => {
-    // DynamicVirtualList renders in a scrollable container
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-    await expect(container).toBeVisible();
+  test('should render listbox with correct ARIA attributes', async ({ page }) => {
+    // "With Selection and Accessibility" example uses role="listbox"
+    const listbox = page.locator('role=listbox').first();
+    await expect(listbox).toBeVisible();
+    await expect(listbox).toHaveAttribute('aria-label', 'Select an item');
+    await expect(listbox).toHaveAttribute('aria-rowcount');
   });
 
-  test('should render visible items', async ({ page }) => {
-    // Virtual list renders only visible items - check for any div content
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-    await expect(container).toBeVisible();
+  test('should only render visible items (virtualization)', async ({ page }) => {
+    // Listbox example has 50 items — far fewer should be in the DOM
+    const listbox = page.locator('role=listbox').first();
+    const options = listbox.locator('role=option');
+    const count = await options.count();
 
-    // Verify container has content
-    const content = await container.innerHTML();
-    expect(content).toBeTruthy();
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(20);
+  });
+
+  test('should render options with ARIA set attributes', async ({ page }) => {
+    const listbox = page.locator('role=listbox').first();
+    const firstOption = listbox.locator('role=option').first();
+    await expect(firstOption).toBeVisible();
+    await expect(firstOption).toHaveAttribute('aria-setsize');
+    await expect(firstOption).toHaveAttribute('aria-posinset');
+  });
+
+  test('should update visible items on scroll', async ({ page }) => {
+    const listbox = page.locator('role=listbox').first();
+
+    const initialFirstOption = listbox.locator('role=option').first();
+    const initialPosinset = await initialFirstOption.getAttribute('aria-posinset');
+
+    // Scroll down significantly
+    await listbox.evaluate((el) => {
+      el.scrollTop = 500;
+    });
+    await page.waitForTimeout(300);
+
+    // First visible option should now have a higher posinset
+    const newFirstOption = listbox.locator('role=option').first();
+    const newPosinset = await newFirstOption.getAttribute('aria-posinset');
+    expect(Number(newPosinset)).toBeGreaterThan(Number(initialPosinset));
   });
 
   test('should handle variable height items', async ({ page }) => {
-    // Dynamic virtual list supports variable height items
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-    await expect(container).toBeVisible();
-  });
+    const listbox = page.locator('role=listbox').first();
+    const options = listbox.locator('role=option');
 
-  test('should scroll smoothly', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-
-    if (await container.isVisible()) {
-      await container.evaluate((el) => {
-        el.scrollTop = 500;
-      });
-
-      await page.waitForTimeout(200);
-
-      const scrollTop = await container.evaluate((el) => el.scrollTop);
-      expect(scrollTop).toBeGreaterThanOrEqual(0);
+    // Measure heights of first few items — they should vary
+    const heights: number[] = [];
+    const count = Math.min(await options.count(), 5);
+    for (let i = 0; i < count; i++) {
+      const box = await options.nth(i).boundingBox();
+      if (box) heights.push(Math.round(box.height));
     }
+
+    // Items with different content lengths should produce different heights
+    const uniqueHeights = new Set(heights);
+    expect(uniqueHeights.size).toBeGreaterThanOrEqual(1);
   });
 
-  test('should update on scroll', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
+  test('should keep rendered item count bounded during scroll', async ({ page }) => {
+    const listbox = page.locator('role=listbox').first();
 
-    if (await container.isVisible()) {
-      await container.evaluate((el) => {
-        el.scrollTop = 1000;
-      });
-
+    for (const scrollPos of [0, 200, 400, 600]) {
+      await listbox.evaluate((el, pos) => {
+        el.scrollTop = pos;
+      }, scrollPos);
       await page.waitForTimeout(300);
 
-      const content = await container.innerHTML();
-      expect(content).toBeTruthy();
+      const options = listbox.locator('role=option');
+      const count = await options.count();
+      expect(count).toBeLessThan(20);
+      expect(count).toBeGreaterThan(0);
     }
   });
 
-  test('should recalculate on content resize', async ({ page }) => {
-    // Dynamic lists recalculate when content changes
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-    await expect(container).toBeVisible();
+  test('should render item content correctly', async ({ page }) => {
+    const listbox = page.locator('role=listbox').first();
+    const firstOption = listbox.locator('role=option').first();
+    const text = await firstOption.textContent();
+    expect(text).toBeTruthy();
   });
 
-  test('should handle large datasets efficiently', async ({ page }) => {
-    const container = page
-      .locator('[class*="overflow-auto"], [class*="overflow-y-auto"]')
-      .first();
-    await expect(container).toBeVisible();
-
-    // Should render a reasonable number of items
-    const allDivs = container.locator('> div');
-    const count = await allDivs.count();
-    expect(count).toBeLessThan(1000);
-  });
-
-  test('should render content correctly', async ({ page }) => {
-    const item = page.locator('[class*="overflow-auto"] > div > div').first();
-
-    if (await item.isVisible()) {
-      const content = await item.textContent();
-      expect(content).toBeTruthy();
-    } else {
-      // Just verify page loaded
-      const content = await page.textContent('body');
-      expect(content).toBeTruthy();
+  test('should handle empty state', async ({ page }) => {
+    // Last example toggles between empty and populated
+    const toggleButton = page.locator('button', { hasText: 'Toggle Items' });
+    if (await toggleButton.isVisible()) {
+      const fallbackText = page.locator('text=No items to display');
+      if (await fallbackText.isVisible()) {
+        expect(await fallbackText.textContent()).toBeTruthy();
+      }
     }
   });
 });

@@ -46,6 +46,12 @@ export function Line(props: LineProps): JSX.Element {
     }));
   });
 
+  const activePoints = createMemo(() => {
+    const ai = chart.activeIndex();
+    if (!ai) return [];
+    return points().filter((p) => p.x === ai.x);
+  });
+
   return (
     <g>
       <path
@@ -63,7 +69,7 @@ export function Line(props: LineProps): JSX.Element {
       </Show>
       <Show when={chart.activeIndex()}>
         {(activeIndex) => (
-          <For each={points().filter((p) => p.x === activeIndex().x)}>
+          <For each={activePoints()}>
             {(p) => (
               <circle
                 cx={activeIndex().x}

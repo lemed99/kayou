@@ -1,4 +1,13 @@
-import { JSX, Show, createEffect, createSignal, on, onCleanup, onMount } from 'solid-js';
+import {
+  JSX,
+  Show,
+  createEffect,
+  createSignal,
+  createUniqueId,
+  on,
+  onCleanup,
+  onMount,
+} from 'solid-js';
 
 import { AnyExtension, Editor } from '@tiptap/core';
 import CharacterCount from '@tiptap/extension-character-count';
@@ -22,6 +31,26 @@ import {
   DEFAULT_TOOLBAR_CONFIG,
   RichTextEditorProps,
 } from './types';
+
+let placeholderStyleInjected = false;
+const injectPlaceholderStyle = () => {
+  if (placeholderStyleInjected || typeof document === 'undefined') return;
+  placeholderStyleInjected = true;
+  const style = document.createElement('style');
+  style.textContent = `
+    .ProseMirror p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: #9ca3af;
+      pointer-events: none;
+      height: 0;
+    }
+    .dark .ProseMirror p.is-editor-empty:first-child::before {
+      color: #525252;
+    }
+  `;
+  document.head.appendChild(style);
+};
 
 /**
  * Converts a File to a base64 data URL.
@@ -110,6 +139,8 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
   const [editorState, setEditorState] = createSignal(0);
   // Signal to control link popover from editor content clicks
   const [linkPopoverOpen, setLinkPopoverOpen] = createSignal(false);
+  const labelId = createUniqueId();
+  let isSettingContent = false;
 
   const toolbarConfig = () => ({ ...DEFAULT_TOOLBAR_CONFIG, ...props.toolbar });
   const editorLabels = () => ({ ...DEFAULT_RICH_TEXT_EDITOR_LABELS, ...props.labels });
@@ -120,6 +151,7 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
 
   onMount(() => {
     if (!editorElement) return;
+    injectPlaceholderStyle();
 
     const editorInstance = new Editor({
       element: editorElement,
@@ -134,10 +166,11 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
       editable: !props.disabled && !props.readOnly,
       autofocus: props.autofocus ? 'end' : false,
       onUpdate: ({ editor: ed }) => {
+        setCharacterCount(ed.storage.characterCount.characters());
+        if (isSettingContent) return;
         const html = ed.getHTML();
         props.onChange?.(html);
         props.onChangeJSON?.(ed.getJSON() as Record<string, unknown>);
-        setCharacterCount(ed.storage.characterCount.characters());
       },
       onTransaction: () => {
         // Trigger toolbar state update on any transaction (format changes, selection, etc.)
@@ -149,7 +182,9 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
         attributes: {
           class:
             'prose prose-sm dark:prose-invert max-w-none focus:outline-none flex-1 p-4',
-          'aria-label': props.label ?? editorAriaLabels().ariaLabel,
+          ...(props.label
+            ? { 'aria-labelledby': labelId }
+            : { 'aria-label': editorAriaLabels().ariaLabel }),
           role: 'textbox',
           'aria-multiline': 'true',
         },
@@ -181,7 +216,9 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
       (content) => {
         const ed = editor();
         if (ed && content !== undefined && ed.getHTML() !== content) {
-          ed.commands.setContent(content, { emitUpdate: false });
+          isSettingContent = true;
+          ed.commands.setContent(content);
+          isSettingContent = false;
         }
       },
       { defer: true },
@@ -211,22 +248,12 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
 
   return (
     <div class={`flex min-w-0 flex-col ${props.class ?? ''}`}>
-      {/* Placeholder styles for Tiptap */}
-      <style>{`
-        .ProseMirror p.is-editor-empty:first-child::before {
-          content: attr(data-placeholder);
-          float: left;
-          color: #9ca3af;
-          pointer-events: none;
-          height: 0;
-        }
-        .dark .ProseMirror p.is-editor-empty:first-child::before {
-          color: #525252;
-        }
-      `}</style>
       {/* Label */}
       <Show when={props.label}>
-        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-neutral-300">
+        <label
+          id={labelId}
+          class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-neutral-300"
+        >
           {props.label}
           <Show when={props.required}>
             <span class="ml-0.5 text-red-500">*</span>

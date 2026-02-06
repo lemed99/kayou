@@ -90,6 +90,8 @@ const useSelect = <T extends MergedSelectProps>(
     HTMLDivElement | undefined
   >();
   const [scrollTop, setScrollTop] = createSignal(0);
+  const [typeaheadBuffer, setTypeaheadBuffer] = createSignal('');
+  let typeaheadTimeout: ReturnType<typeof setTimeout>;
 
   const listboxId = createUniqueId();
   const searchInputId = createUniqueId();
@@ -101,7 +103,7 @@ const useSelect = <T extends MergedSelectProps>(
   createEffect(() => {
     if (type === 'selectWithSearch') {
       if (props.idValue) {
-        const opt = props.options.find((o) => o.value == props.idValue);
+        const opt = props.options.find((o) => o.value === props.idValue);
         if (opt) {
           if (props.autoFillSearchKey) setSearchKey(opt.label);
           setSelectedOption(opt);
@@ -117,7 +119,7 @@ const useSelect = <T extends MergedSelectProps>(
     }
     if (type === 'select') {
       if (props.value) {
-        const opt = props.options.find((o) => o.value == props.value);
+        const opt = props.options.find((o) => o.value === props.value);
         if (opt) {
           setSelectedOption(opt);
           setHighlightedOption(opt);
@@ -197,13 +199,12 @@ const useSelect = <T extends MergedSelectProps>(
       setIsOpen(false);
     }
     if (type === 'multiSelect') {
-      setSelectedOptions((prev) => {
-        if (prev.some((o) => o.value === option.value)) {
-          return prev.filter((o) => o.value !== option.value);
-        }
-        return [...prev, option];
-      });
-      props.onMultiSelect?.(selectedOptions());
+      const current = selectedOptions();
+      const newSelected = current.some((o) => o.value === option.value)
+        ? current.filter((o) => o.value !== option.value)
+        : [...current, option];
+      setSelectedOptions(newSelected);
+      props.onMultiSelect?.(newSelected);
       if (props.withSearch === true) {
         (searchRef() as HTMLElement)?.focus();
       }
@@ -213,6 +214,10 @@ const useSelect = <T extends MergedSelectProps>(
 
   const handleInputClick = () => {
     if (!props.disabled) {
+      if (isOpen()) {
+        setIsOpen(false);
+        return;
+      }
       setIsOpen(true);
       const container = optionsContainerRef();
       if (!container) return;
@@ -251,7 +256,10 @@ const useSelect = <T extends MergedSelectProps>(
 
     document.addEventListener('pointerdown', handleClickOutside);
 
-    onCleanup(() => document.removeEventListener('pointerdown', handleClickOutside));
+    onCleanup(() => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+      clearTimeout(typeaheadTimeout);
+    });
   });
 
   createEffect(() => {
@@ -313,8 +321,6 @@ const useSelect = <T extends MergedSelectProps>(
         return;
       }
     }
-
-    if ((type === 'select' || type === 'multiSelect') && !copy) e.preventDefault();
 
     if (key === 'ArrowUp') {
       e.preventDefault();
@@ -403,6 +409,49 @@ const useSelect = <T extends MergedSelectProps>(
       if (lastIndex >= 0) {
         setHighlightedOption(filteredOptions()[lastIndex]);
         scrollToHighlightedOption(lastIndex);
+      }
+      return;
+    }
+
+    if (key === 'Tab') {
+      setIsOpen(false);
+      return;
+    }
+
+    // Space selects the highlighted option in non-searchable selects
+    if (key === ' ' && (type === 'select' || (type === 'multiSelect' && !copy))) {
+      e.preventDefault();
+      const currentIndex = highlightedOption()
+        ? filteredOptions().findIndex((o) => o.value === highlightedOption()?.value)
+        : -1;
+      if (highlightedOption() && currentIndex !== -1) {
+        handleOptionClick(highlightedOption()!);
+      } else if (filteredOptions().length === 1) {
+        handleOptionClick(filteredOptions()[0]);
+      }
+      return;
+    }
+
+    // Typeahead: jump to matching option in non-searchable selects
+    if (
+      (type === 'select' || (type === 'multiSelect' && !props.withSearch)) &&
+      key.length === 1 &&
+      !e.ctrlKey &&
+      !e.metaKey
+    ) {
+      e.preventDefault();
+      clearTimeout(typeaheadTimeout);
+      const buffer = typeaheadBuffer() + key.toLowerCase();
+      setTypeaheadBuffer(buffer);
+      typeaheadTimeout = setTimeout(() => setTypeaheadBuffer(''), 500);
+
+      const match = filteredOptions().find((o) =>
+        o.label.toLowerCase().startsWith(buffer),
+      );
+      if (match) {
+        setHighlightedOption(match);
+        const index = filteredOptions().indexOf(match);
+        scrollToHighlightedOption(index);
       }
       return;
     }

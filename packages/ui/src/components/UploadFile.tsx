@@ -1,11 +1,20 @@
-import { For, JSX, Match, Show, Switch, createSignal, mergeProps, onCleanup } from 'solid-js';
+import {
+  For,
+  Index,
+  JSX,
+  Match,
+  Show,
+  Switch,
+  createSignal,
+  mergeProps,
+  onCleanup,
+} from 'solid-js';
 
 import {
   ArchiveIcon,
   CheckIcon,
   File04Icon,
   FileCode01Icon,
-  HandIcon,
   Image01Icon,
   MusicNote01Icon,
   RefreshCw01Icon,
@@ -13,6 +22,8 @@ import {
   VideoRecorderIcon,
   XIcon,
 } from '@kayou/icons';
+
+import Button from './Button';
 
 /**
  * Upload state for each file
@@ -50,7 +61,6 @@ export interface UploadFileLabels {
   browseFiles: string;
   retry: string;
   queued: string;
-  dropFilesHere: string;
   timeRemaining: (seconds: number) => string;
   uploadFailed: string;
   uploading: string;
@@ -66,7 +76,6 @@ export const DEFAULT_UPLOAD_FILE_LABELS: UploadFileLabels = {
   browseFiles: 'Browse Files',
   retry: 'Retry',
   queued: 'Queued',
-  dropFilesHere: 'Drop files here',
   timeRemaining: (seconds: number) => {
     if (seconds < 60) return `${Math.round(seconds)}s remaining`;
     if (seconds < 3600) return `${Math.round(seconds / 60)}m remaining`;
@@ -203,14 +212,23 @@ const generateId = (): string => {
  * Features: upload progress, image previews, upload states, retry, and smart file icons.
  */
 export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
-  const props = mergeProps({ labels: {} as Partial<UploadFileLabels>, ariaLabels: {} as Partial<UploadFileAriaLabels> }, rawProps);
+  const props = mergeProps(
+    {
+      labels: {} as Partial<UploadFileLabels>,
+      ariaLabels: {} as Partial<UploadFileAriaLabels>,
+    },
+    rawProps,
+  );
   const l = (): UploadFileLabels => ({ ...DEFAULT_UPLOAD_FILE_LABELS, ...props.labels });
-  const al = (): UploadFileAriaLabels => ({ ...DEFAULT_UPLOAD_FILE_ARIA_LABELS, ...props.ariaLabels });
+  const al = (): UploadFileAriaLabels => ({
+    ...DEFAULT_UPLOAD_FILE_ARIA_LABELS,
+    ...props.ariaLabels,
+  });
 
   const [dragActive, setDragActive] = createSignal(false);
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | null>(null);
   const [trackedFiles, setTrackedFiles] = createSignal<TrackedFile[]>([]);
-  const [error, setError] = createSignal<string | null>(null);
+  const [error, setError] = createSignal<string[] | null>(null);
 
   // Cleanup preview URLs on unmount
   onCleanup(() => {
@@ -304,35 +322,35 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     notifyChange(newFiles);
   };
 
-  const uploadFile = async (trackedFile: TrackedFile) => {
+  const uploadFile = async (entry: TrackedFile) => {
     if (!props.onUpload) {
       // If no upload handler, mark as success immediately
-      updateTrackedFile(trackedFile.id, { state: 'success', progress: 100 });
+      updateTrackedFile(entry.id, { state: 'success', progress: 100 });
       return;
     }
 
-    updateTrackedFile(trackedFile.id, { state: 'uploading', progress: 0 });
+    updateTrackedFile(entry.id, { state: 'uploading', progress: 0 });
 
     const startTime = Date.now();
     let lastProgress = 0;
     let lastTime = startTime;
 
     try {
-      await props.onUpload(trackedFile.file, (progress) => {
+      await props.onUpload(entry.file, (progress) => {
         const now = Date.now();
         const timeDelta = (now - lastTime) / 1000; // seconds
         const progressDelta = progress - lastProgress;
 
         // Calculate speed (bytes per second)
-        const bytesUploaded = (progressDelta / 100) * trackedFile.file.size;
+        const bytesUploaded = (progressDelta / 100) * entry.file.size;
         const speed = timeDelta > 0 ? bytesUploaded / timeDelta : 0;
 
         // Estimate time remaining
         const remainingProgress = 100 - progress;
-        const remainingBytes = (remainingProgress / 100) * trackedFile.file.size;
+        const remainingBytes = (remainingProgress / 100) * entry.file.size;
         const timeRemaining = speed > 0 ? remainingBytes / speed : 0;
 
-        updateTrackedFile(trackedFile.id, {
+        updateTrackedFile(entry.id, {
           progress,
           speed,
           timeRemaining,
@@ -342,14 +360,14 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         lastTime = now;
       });
 
-      updateTrackedFile(trackedFile.id, {
+      updateTrackedFile(entry.id, {
         state: 'success',
         progress: 100,
         speed: undefined,
         timeRemaining: undefined,
       });
     } catch (error) {
-      updateTrackedFile(trackedFile.id, {
+      updateTrackedFile(entry.id, {
         state: 'error',
         errorMessage: error instanceof Error ? error.message : l().uploadFailed,
         speed: undefined,
@@ -393,15 +411,16 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     const totalFiles = currentFiles.length + fileArray.length;
 
     if (props.maxLength && totalFiles > props.maxLength) {
-      setError(props.maxLengthError ?? l().maxLengthError(props.maxLength));
+      setError([props.maxLengthError ?? l().maxLengthError(props.maxLength)]);
       return;
     }
 
     const validFiles: File[] = [];
+    const errors: string[] = [];
 
     fileArray.forEach((file) => {
       if (!isFileTypeAllowed(file)) {
-        setError(
+        errors.push(
           props.fileTypeError
             ? props.fileTypeError(file)
             : l().fileTypeError(file.name, file.type),
@@ -409,8 +428,8 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         return;
       }
 
-      if (props.maxSize && file.size > Number(props.maxSize)) {
-        setError(
+      if (props.maxSize && file.size > props.maxSize) {
+        errors.push(
           props.maxSizeError
             ? props.maxSizeError(file)
             : l().fileTooLargeError(file.name, formatFileSize(file.size)),
@@ -421,17 +440,18 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
       validFiles.push(file);
     });
 
+    // Show errors for rejected files
+    setError(errors.length > 0 ? errors : null);
+
     if (validFiles.length === 0) return;
 
-    // Clear error when files are successfully added
-    setError(null);
-
     // Create tracked files
+    const hasUploader = !!props.onUpload;
     const newTrackedFiles: TrackedFile[] = validFiles.map((file) => ({
       file,
       id: generateId(),
-      state: 'queued' as UploadState,
-      progress: 0,
+      state: (hasUploader ? 'queued' : 'success') as UploadState,
+      progress: hasUploader ? 0 : 100,
       previewUrl: createPreviewUrl(file),
     }));
 
@@ -467,44 +487,24 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     const category = () => getFileCategory(iconProps.file);
 
     return (
-      <Switch
-        fallback={<File04Icon strokeWidth={1.5} class={iconProps.class ?? 'size-8'} />}
-      >
+      <Switch fallback={<File04Icon class={iconProps.class ?? 'size-8'} />}>
         <Match when={category() === 'image'}>
-          <Image01Icon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-purple-500`}
-          />
+          <Image01Icon class={`${iconProps.class ?? 'size-8'} text-purple-500`} />
         </Match>
         <Match when={category() === 'video'}>
-          <VideoRecorderIcon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-pink-500`}
-          />
+          <VideoRecorderIcon class={`${iconProps.class ?? 'size-8'} text-pink-500`} />
         </Match>
         <Match when={category() === 'audio'}>
-          <MusicNote01Icon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-orange-500`}
-          />
+          <MusicNote01Icon class={`${iconProps.class ?? 'size-8'} text-orange-500`} />
         </Match>
         <Match when={category() === 'pdf'}>
-          <File04Icon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-red-500`}
-          />
+          <File04Icon class={`${iconProps.class ?? 'size-8'} text-red-500`} />
         </Match>
         <Match when={category() === 'archive'}>
-          <ArchiveIcon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-yellow-600`}
-          />
+          <ArchiveIcon class={`${iconProps.class ?? 'size-8'} text-yellow-600`} />
         </Match>
         <Match when={category() === 'code'}>
-          <FileCode01Icon
-            strokeWidth={1.5}
-            class={`${iconProps.class ?? 'size-8'} text-green-500`}
-          />
+          <FileCode01Icon class={`${iconProps.class ?? 'size-8'} text-green-500`} />
         </Match>
       </Switch>
     );
@@ -524,7 +524,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         </Match>
         <Match when={tf().state === 'success'}>
           <div class="flex size-6 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
-            <CheckIcon class="size-4" />
+            <CheckIcon />
           </div>
         </Match>
         <Match when={tf().state === 'error'}>
@@ -548,23 +548,20 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     <div class="w-full">
       {/* Drop Zone */}
       <div
-        class={`relative w-full overflow-hidden rounded-xl border-2 border-dashed transition-all duration-200 ${
+        class={`relative w-full overflow-hidden rounded-xl border border-dashed transition-all duration-200 ${
           dragActive()
             ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
-            : 'border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-800/50 dark:hover:border-neutral-600 dark:hover:bg-neutral-800'
+            : 'border-gray-200 bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900'
         } ${props.dropZoneClass ?? ''}`}
         onDragEnter={handleDrag}
+        onDragOver={handleDrag}
       >
         <div class="px-8 py-8 text-center">
           {/* Upload Icon */}
           <div
-            class={`mx-auto mb-4 flex size-14 items-center justify-center rounded-full transition-all duration-200 ${
-              dragActive()
-                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
-                : 'bg-gray-100 text-gray-400 dark:bg-neutral-700 dark:text-neutral-500'
-            }`}
+            class={`mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-all duration-200 dark:bg-neutral-800 dark:text-neutral-500`}
           >
-            <Upload01Icon class="size-7" strokeWidth={1.5} />
+            <Upload01Icon class="size-5" />
           </div>
 
           {/* Text */}
@@ -581,14 +578,11 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
           </div>
 
           {/* Browse Button */}
-          <button
-            type="button"
-            onClick={onFileInputClick}
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-          >
-            <HandIcon class="size-4" />
-            {props.chooseFileText ?? l().browseFiles}
-          </button>
+          <div class="flex justify-center">
+            <Button icon={File04Icon} onClick={onFileInputClick}>
+              {props.chooseFileText ?? l().browseFiles}
+            </Button>
+          </div>
 
           <Show when={props.helperText}>
             <p class="mt-4 text-xs text-gray-500 dark:text-neutral-400">
@@ -609,150 +603,141 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         {/* Drag Overlay */}
         <Show when={dragActive()}>
           <div
-            class="absolute inset-0 flex items-center justify-center bg-blue-500/10 backdrop-blur-[1px]"
+            class="absolute inset-0 flex items-center justify-center rounded-xl backdrop-blur-sm"
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
-          >
-            <div class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg">
-              {l().dropFilesHere}
-            </div>
-          </div>
+          />
         </Show>
       </div>
 
       {/* Error Display */}
-      <Show when={error()}>
-        <div class="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-900/20">
-          <XIcon class="size-4 shrink-0 text-red-500 dark:text-red-400" />
-          <p class="text-sm text-red-600 dark:text-red-400">{error()}</p>
-          <button
-            type="button"
-            onClick={() => setError(null)}
-            class="ml-auto rounded p-1 text-red-500 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
-            aria-label={al().dismissError}
-          >
-            <XIcon class="size-4" />
-          </button>
+      <Show when={error() && error()!.length > 0}>
+        <div class="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-900/20">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex flex-col gap-1.5">
+              <For each={error()}>
+                {(errorMsg) => (
+                  <div class="flex items-center gap-2">
+                    <XIcon class="size-4 shrink-0 text-red-500 dark:text-red-400" />
+                    <p class="text-sm text-red-600 dark:text-red-400">{errorMsg}</p>
+                  </div>
+                )}
+              </For>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              class="shrink-0 rounded p-1 text-red-500 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
+              aria-label={al().dismissError}
+            >
+              <XIcon />
+            </button>
+          </div>
         </div>
       </Show>
 
       {/* File List */}
       <Show when={trackedFiles().length > 0}>
         <div class="mt-4 space-y-3">
-          <For each={trackedFiles()}>
+          <Index each={trackedFiles()}>
             {(trackedFile) => (
-              <div
-                class={`group relative overflow-hidden rounded-xl border transition-all duration-200 ${
-                  trackedFile.state === 'error'
-                    ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-                    : trackedFile.state === 'success'
-                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
-                      : 'border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-800/50'
-                }`}
-              >
-                <div class="flex items-center gap-4 p-4">
+              <div class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-800/50">
+                <div class="flex items-center gap-3 p-3">
                   {/* Preview or Icon */}
                   <div class="shrink-0">
                     <Show
                       when={
-                        trackedFile.previewUrl &&
-                        getFileCategory(trackedFile.file) === 'image'
+                        trackedFile().previewUrl &&
+                        getFileCategory(trackedFile().file) === 'image'
                       }
                       fallback={
-                        <div class="flex size-14 items-center justify-center rounded-lg bg-gray-100 dark:bg-neutral-700">
-                          <FileIcon file={trackedFile.file} class="size-7" />
+                        <div class="flex size-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-neutral-700">
+                          <FileIcon file={trackedFile().file} class="size-5" />
                         </div>
                       }
                     >
                       <img
-                        src={trackedFile.previewUrl}
-                        alt={trackedFile.file.name}
-                        class="size-14 rounded-lg object-cover"
+                        src={trackedFile().previewUrl}
+                        alt={trackedFile().file.name}
+                        class="size-10 rounded-lg object-cover"
                       />
                     </Show>
                   </div>
 
                   {/* File Info */}
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center justify-between gap-2">
                       <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
-                          {trackedFile.file.name}
+                          {trackedFile().file.name}
                         </p>
                         <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
-                          <span>{formatFileSize(trackedFile.file.size)}</span>
+                          <span>{formatFileSize(trackedFile().file.size)}</span>
                           <Show
-                            when={trackedFile.state === 'uploading' && trackedFile.speed}
+                            when={
+                              trackedFile().state === 'uploading' && trackedFile().speed
+                            }
                           >
                             <span class="text-gray-300 dark:text-neutral-600">•</span>
                             <span class="text-blue-600 dark:text-blue-400">
-                              {formatSpeed(trackedFile.speed!)}
+                              {formatSpeed(trackedFile().speed!)}
                             </span>
                           </Show>
                           <Show
                             when={
-                              trackedFile.state === 'uploading' &&
-                              trackedFile.timeRemaining
+                              trackedFile().state === 'uploading' &&
+                              trackedFile().timeRemaining
                             }
                           >
                             <span class="text-gray-300 dark:text-neutral-600">•</span>
-                            <span>{formatTimeRemaining(trackedFile.timeRemaining!)}</span>
+                            <span>
+                              {formatTimeRemaining(trackedFile().timeRemaining!)}
+                            </span>
                           </Show>
                         </div>
                         <Show
-                          when={trackedFile.state === 'error' && trackedFile.errorMessage}
+                          when={
+                            trackedFile().state === 'error' && trackedFile().errorMessage
+                          }
                         >
                           <p class="mt-1 text-xs text-red-600 dark:text-red-400">
-                            {trackedFile.errorMessage}
+                            {trackedFile().errorMessage}
                           </p>
                         </Show>
                       </div>
 
                       {/* State & Actions */}
                       <div class="flex items-center gap-2">
-                        <StateIndicator trackedFile={trackedFile} />
+                        <StateIndicator trackedFile={trackedFile()} />
                         <button
                           type="button"
-                          onClick={() => removeFile(trackedFile.id)}
-                          aria-label={al().removeFile(trackedFile.file.name)}
+                          onClick={() => removeFile(trackedFile().id)}
+                          aria-label={al().removeFile(trackedFile().file.name)}
                           class="rounded-md p-1.5 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                         >
-                          <XIcon class="size-4" />
+                          <XIcon />
                         </button>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <Show when={trackedFile.state === 'uploading'}>
+                    <Show when={trackedFile().state === 'uploading'}>
                       <div class="mt-3">
                         <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-700">
                           <div
                             class="h-full rounded-full bg-blue-600 transition-all duration-300 ease-out"
-                            style={{ width: `${trackedFile.progress}%` }}
+                            style={{ width: `${trackedFile().progress}%` }}
                           />
                         </div>
                       </div>
                     </Show>
                   </div>
                 </div>
-
-                {/* Success animation overlay */}
-                <Show when={trackedFile.state === 'success'}>
-                  <div class="pointer-events-none absolute inset-0">
-                    <div
-                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-green-500/5 via-green-500/10 to-green-500/5"
-                      style={{
-                        'animation-duration': '1s',
-                        'animation-iteration-count': '1',
-                      }}
-                    />
-                  </div>
-                </Show>
               </div>
             )}
-          </For>
+          </Index>
         </div>
       </Show>
     </div>

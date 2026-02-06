@@ -62,7 +62,10 @@ const theme = {
  */
 const Breadcrumb = (props: BreadcrumbProps): JSX.Element => {
   const [local, navProps] = splitProps(props, ['children', 'class', 'ariaLabels']);
-  const a = createMemo(() => ({ ...DEFAULT_BREADCRUMB_ARIA_LABELS, ...local.ariaLabels }));
+  const a = createMemo(() => ({
+    ...DEFAULT_BREADCRUMB_ARIA_LABELS,
+    ...local.ariaLabels,
+  }));
 
   return (
     <nav aria-label={a().breadcrumb} class={twMerge(local.class)} {...navProps}>
