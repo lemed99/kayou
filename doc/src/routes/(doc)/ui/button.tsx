@@ -121,10 +121,14 @@ export default function ButtonPage() {
             'Shows a spinner overlay during async operations. The button is automatically disabled.',
           component: () => (
             <>
-              <Button isLoading={true}>Saving...</Button>
-              <Button isLoading={true} color="success">
-                Processing
-              </Button>
+              <Button isLoading color="info">Info</Button>
+              <Button isLoading color="gray">Gray</Button>
+              <Button isLoading color="dark">Dark</Button>
+              <Button isLoading color="light">Light</Button>
+              <Button isLoading color="success">Success</Button>
+              <Button isLoading color="failure">Failure</Button>
+              <Button isLoading color="warning">Warning</Button>
+              <Button isLoading color="blue">Blue</Button>
             </>
           ),
         },

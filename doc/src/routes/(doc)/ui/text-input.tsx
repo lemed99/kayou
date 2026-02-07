@@ -99,7 +99,7 @@ export default function TextInputPage() {
         {
           name: 'ariaLabels',
           type: 'Partial<TextInputAriaLabels>',
-          default: 'DEFAULT_TEXT_INPUT_ARIA_LABELS',
+          default: '{ increase: "Increase value", decrease: "Decrease value" }',
           description: 'Accessibility labels for screen readers',
         },
       ]}

@@ -1,4 +1,4 @@
-import { Component, JSX, createEffect, createMemo, createSignal } from 'solid-js';
+import { Component, JSX, createEffect, createMemo, createSignal, splitProps } from 'solid-js';
 
 import {
   ChevronLeftDoubleIcon,
@@ -42,7 +42,7 @@ export const DEFAULT_PAGINATION_ARIA_LABELS: PaginationAriaLabels = {
 /**
  * Props for the Pagination component.
  */
-export interface PaginationProps {
+export interface PaginationProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /**
    * Total number of pages.
    */
@@ -65,54 +65,74 @@ export interface PaginationProps {
   ariaLabels?: Partial<PaginationAriaLabels>;
 }
 
+const NavigationButton = (props: {
+  onClick: () => void;
+  disabled: boolean;
+  content: JSX.Element;
+  tooltip: string;
+  ariaLabel: string;
+}) => (
+  <Tooltip hidden={props.disabled} content={props.tooltip} theme="auto">
+    <Button
+      color="gray"
+      onClick={props.onClick}
+      disabled={props.disabled}
+      class="size-8"
+      aria-label={props.ariaLabel}
+    >
+      {props.content}
+    </Button>
+  </Tooltip>
+);
+
 /**
  * Pagination component for navigating between pages.
  */
 const Pagination: Component<PaginationProps> = (props): JSX.Element => {
-  const l = createMemo(() => ({ ...DEFAULT_PAGINATION_LABELS, ...props.labels }));
+  const [local, divProps] = splitProps(props, [
+    'total',
+    'page',
+    'onChange',
+    'labels',
+    'ariaLabels',
+    'class',
+  ]);
+
+  const l = createMemo(() => ({ ...DEFAULT_PAGINATION_LABELS, ...local.labels }));
   const a = createMemo(() => ({
     ...DEFAULT_PAGINATION_ARIA_LABELS,
-    ...props.ariaLabels,
+    ...local.ariaLabels,
   }));
   const [pageValue, setPageValue] = createSignal(1);
+  const total = () => Math.max(0, local.total);
+  const allDisabled = () => total() <= 0;
 
-  createEffect(() => setPageValue(props.page));
+  createEffect(() => setPageValue(local.page));
 
   const setPage = (page: number) => {
-    props.onChange(page);
+    local.onChange(page);
     setPageValue(page);
   };
 
-  const NavigationButton = (navProps: {
-    onClick: () => void;
-    disabled: boolean;
-    content: JSX.Element;
-    tooltip: string;
-    ariaLabel: string;
-  }) => (
-    <Tooltip hidden={navProps.disabled} content={navProps.tooltip} theme="auto">
-      <Button
-        color="gray"
-        onClick={navProps.onClick}
-        disabled={navProps.disabled}
-        class="size-8"
-        aria-label={navProps.ariaLabel}
-      >
-        {navProps.content}
-      </Button>
-    </Tooltip>
-  );
-
   return (
-    <div class="flex items-center gap-6">
-      <div class="flex items-center gap-1 italic dark:text-white">
+    <div
+      {...divProps}
+      class={`flex items-center gap-6 ${local.class ?? ''}`}
+    >
+      <div class="flex items-center gap-1 italic dark:text-white" aria-current="page">
         <p>{l().page}</p>
         <NumberInput
           type="integer"
           showArrows={false}
           sizing="xs"
           value={pageValue()}
-          onInput={(e) => setPageValue(parseInt(e.target.value))}
+          onInput={(e) => {
+            const v = parseInt(e.target.value);
+            if (!isNaN(v)) setPageValue(v);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.currentTarget.blur();
+          }}
           fitContent={true}
           style={{
             'text-align': 'center',
@@ -123,39 +143,40 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
             if (v !== null) setPage(v);
           }}
           min={1}
-          max={props.total}
+          max={total()}
+          disabled={allDisabled()}
         />
         <p class="text-nowrap">
-          {l().of} {props.total}
+          {l().of} {total()}
         </p>
       </div>
       <nav aria-label={a().page} class="flex items-center gap-1">
         <NavigationButton
           onClick={() => setPage(1)}
-          disabled={props.page === 1}
+          disabled={allDisabled() || local.page <= 1}
           content={<ChevronLeftDoubleIcon class="size-2.5" strokeWidth={2} />}
           tooltip={l().pageN(1)}
           ariaLabel={a().goToFirst}
         />
         <NavigationButton
-          onClick={() => setPage(Math.max(1, props.page - 1))}
-          disabled={props.page === 1}
+          onClick={() => setPage(Math.max(1, local.page - 1))}
+          disabled={allDisabled() || local.page <= 1}
           content={<ChevronLeftIcon class="size-2.5" strokeWidth={2} />}
-          tooltip={l().pageN(Math.max(1, props.page - 1))}
+          tooltip={l().pageN(Math.max(1, local.page - 1))}
           ariaLabel={a().goToPrevious}
         />
         <NavigationButton
-          onClick={() => setPage(Math.min(props.total, props.page + 1))}
-          disabled={props.page === props.total}
+          onClick={() => setPage(Math.min(total(), local.page + 1))}
+          disabled={allDisabled() || local.page >= total()}
           content={<ChevronRightIcon class="size-2.5" strokeWidth={2} />}
-          tooltip={l().pageN(Math.min(props.total, props.page + 1))}
+          tooltip={l().pageN(Math.min(total(), local.page + 1))}
           ariaLabel={a().goToNext}
         />
         <NavigationButton
-          onClick={() => setPage(props.total)}
-          disabled={props.page === props.total}
+          onClick={() => setPage(total())}
+          disabled={allDisabled() || local.page >= total()}
           content={<ChevronRightDoubleIcon class="size-2.5" strokeWidth={2} />}
-          tooltip={l().pageN(props.total)}
+          tooltip={l().pageN(total())}
           ariaLabel={a().goToLast}
         />
       </nav>

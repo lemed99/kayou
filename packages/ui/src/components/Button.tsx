@@ -51,13 +51,13 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const theme = {
-  base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 rounded-lg cursor-pointer transition-all duration-200',
+  base: 'group flex h-min items-center disabled:cursor-not-allowed disabled:pointer-events-none justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 rounded-lg cursor-pointer transition-all duration-200',
   color: {
     gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:text-blue-700 dark:bg-transparent dark:text-neutral-400 dark:border-neutral-600 dark:hover:text-white dark:hover:bg-neutral-700',
-    dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900  dark:bg-neutral-900 dark:hover:bg-neutral-700 dark:border-neutral-800',
+    dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 dark:bg-neutral-900 dark:hover:bg-neutral-700 dark:border-neutral-800',
     failure:
       'text-white bg-red-700 border border-transparent hover:bg-red-800 dark:bg-red-500 dark:hover:bg-red-600',
-    info: 'text-white dark:text-neutral-800 bg-blue-600 border border-transparent hover:bg-blue-700 disabled:bg-blue-600 dark:bg-neutral-50 dark:hover:bg-neutral-200',
+    info: 'text-white dark:text-neutral-800 bg-blue-600 border border-transparent hover:bg-blue-700 dark:bg-neutral-50 dark:hover:bg-neutral-200',
     light:
       'text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-neutral-600 dark:text-white dark:border-neutral-600 dark:hover:bg-neutral-700 dark:hover:border-neutral-700',
     success:
@@ -92,6 +92,7 @@ const Button = (props: ButtonProps): JSX.Element => {
 
   return (
     <button
+      {...buttonProps}
       type={type()}
       class={twMerge(
         theme.base,
@@ -102,22 +103,21 @@ const Button = (props: ButtonProps): JSX.Element => {
       )}
       disabled={disabled()}
       aria-busy={local.isLoading}
-      {...buttonProps}
     >
       <div class="relative flex items-center">
         <div
           class={twMerge('flex items-center gap-2', local.isLoading ? 'opacity-5' : '')}
         >
           <Show when={local.icon && local.iconPlacement !== 'right'}>
-            {local.icon!({})}
+            {local.icon?.({})}
           </Show>
           {local.children}
           <Show when={local.icon && local.iconPlacement === 'right'}>
-            {local.icon!({})}
+            {local.icon?.({})}
           </Show>
         </div>
         <Show when={local.isLoading}>
-          <div class="z-5 absolute inset-0 flex h-full w-full items-center justify-center">
+          <div class="z-10 absolute inset-0 flex h-full w-full items-center justify-center">
             <Spinner size="sm" color={color()} />
           </div>
         </Show>

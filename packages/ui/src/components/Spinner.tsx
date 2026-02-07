@@ -1,9 +1,7 @@
-import { createMemo } from 'solid-js';
+import { createMemo, splitProps } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
 
 import { twMerge } from 'tailwind-merge';
-
-import { defaultProps } from '../helpers/defaultProps';
 
 export interface SpinnerAriaLabels {
   loading: string;
@@ -52,7 +50,7 @@ export interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 
 }
 
 const theme = {
-  base: 'inline animate-spin text-gray-200',
+  base: 'inline animate-spin text-gray-200 dark:text-neutral-700',
   color: {
     failure: 'fill-red-600',
     gray: 'fill-gray-600',
@@ -75,20 +73,28 @@ const theme = {
  * Includes screen reader text for accessibility.
  */
 const Spinner = (props: SpinnerProps): JSX.Element => {
-  const merged = defaultProps({ color: 'info', size: 'sm' }, props);
-  const a = createMemo(() => ({ ...DEFAULT_SPINNER_ARIA_LABELS, ...props.ariaLabels }));
+  const [local, spanProps] = splitProps(props, [
+    'color',
+    'size',
+    'class',
+    'ariaLabels',
+  ]);
+
+  const color = createMemo(() => local.color || 'info');
+  const size = createMemo(() => local.size || 'sm');
+  const labels = createMemo(() => ({ ...DEFAULT_SPINNER_ARIA_LABELS, ...local.ariaLabels }));
 
   return (
-    <span role="status" class="flex items-center justify-center">
+    <span {...spanProps} role="status" class="flex items-center justify-center">
       <svg
         aria-hidden="true"
         fill="none"
         viewBox="0 0 100 100"
         class={twMerge(
           theme.base,
-          theme.color[merged.color],
-          theme.size[merged.size],
-          merged.class,
+          theme.color[color()],
+          theme.size[size()],
+          local.class,
         )}
       >
         <path
@@ -97,10 +103,9 @@ const Spinner = (props: SpinnerProps): JSX.Element => {
         />
         <path
           d="M100 50C100 77.6142 77.6142 100 50 100V90C72.0914 90 90 72.0914 90 50H100Z"
-          fill="currentFill"
         />
       </svg>
-      <span class="sr-only">{a().loading}</span>
+      <span class="sr-only">{labels().loading}</span>
     </span>
   );
 };

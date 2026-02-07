@@ -26,7 +26,6 @@ export interface LabelProps
 
 const theme = {
   base: 'text-sm font-medium',
-  disabled: 'opacity-50',
   colors: {
     gray: 'text-gray-900 dark:text-neutral-300',
     info: 'text-blue-500 dark:text-blue-600',
@@ -42,12 +41,12 @@ const theme = {
 const Label = (props: LabelProps): JSX.Element => {
   const [local, labelProps] = splitProps(props, ['color', 'class', 'value', 'children']);
 
-  const color = createMemo(() => local.color || 'gray');
+  const color = createMemo(() => local.color ?? 'gray');
 
   return (
     <label
-      class={twMerge(theme.base, theme.colors[color()], local.class)}
       {...labelProps}
+      class={twMerge(theme.base, theme.colors[color()], local.class)}
     >
       {local.value ?? local.children ?? ''}
     </label>

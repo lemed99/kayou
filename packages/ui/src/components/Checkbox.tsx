@@ -37,8 +37,8 @@ export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement>
   color?: CheckboxColor;
 }
 
-const textInputTheme = {
-  base: 'size-4 cursor-pointer disabled:cursor-not-allowed rounded border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-white shrink-0 appearance-none bg-white',
+const theme = {
+  base: 'size-4 cursor-pointer disabled:cursor-not-allowed rounded border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-white shrink-0 appearance-none bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-500',
 };
 
 const checked = (color: CheckboxProps['color']) => `
@@ -49,7 +49,7 @@ const checked = (color: CheckboxProps['color']) => `
   checked:bg-[url('data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0ndHJ1ZScgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyBmaWxsPSdub25lJyB2aWV3Qm94PScwIDAgMTYgMTInPiA8cGF0aCBzdHJva2U9J3doaXRlJyBzdHJva2UtbGluZWNhcD0ncm91bmQnIHN0cm9rZS1saW5lam9pbj0ncm91bmQnIHN0cm9rZS13aWR0aD0nMycgZD0nTTEgNS45MTcgNS43MjQgMTAuNSAxNSAxLjUnLz4gPC9zdmc+')]
   checked:bg-[length:0.55em_0.55em]
   checked:bg-center
-  checked:bg-no-repeat 
+  checked:bg-no-repeat
 `;
 
 /**
@@ -62,11 +62,14 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
     'labelClass',
     'labelSpanClass',
     'color',
+    'id',
+    'class',
   ]);
 
   const labelPosition = createMemo(() => local.labelPosition || 'right');
 
-  const id = createUniqueId();
+  const uniqueId = createUniqueId();
+  const id = createMemo(() => local.id || `checkbox-${uniqueId}`);
 
   return (
     <Label
@@ -75,7 +78,7 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
         local.labelClass,
         inputProps.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
       )}
-      for={id}
+      for={id()}
     >
       <Show when={local.label && labelPosition() === 'left'}>
         <span
@@ -89,11 +92,11 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
       </Show>
       <input
         {...inputProps}
-        id={id}
+        id={id()}
         class={twMerge(
-          textInputTheme.base,
+          theme.base,
           checked(local.color || 'blue'),
-          inputProps.class,
+          local.class,
         )}
         type="checkbox"
       />

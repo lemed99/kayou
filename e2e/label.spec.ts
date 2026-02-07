@@ -5,65 +5,97 @@ test.describe('Label', () => {
     await page.goto('/ui/label');
   });
 
-  test('should render label components', async ({ page }) => {
-    const labels = page.locator('label');
-    const count = await labels.count();
-    expect(count).toBeGreaterThan(0);
+  test.describe('Basic rendering', () => {
+    test('should render labels with value prop', async ({ page }) => {
+      const section = page.locator('#basic-label');
+      const labels = section.locator('label');
+
+      await expect(labels.filter({ hasText: 'Email' })).toBeVisible();
+      await expect(labels.filter({ hasText: 'Password' })).toBeVisible();
+    });
+
+    test('should render as native label element', async ({ page }) => {
+      const section = page.locator('#basic-label');
+      const label = section.locator('label').first();
+
+      await expect(label).toBeVisible();
+      expect(await label.evaluate((el) => el.tagName)).toBe('LABEL');
+    });
   });
 
-  test('should display label text', async ({ page }) => {
-    const label = page.locator('label').first();
-    const text = await label.textContent();
-    expect(text).toBeTruthy();
-  });
+  test.describe('Color variants', () => {
+    test('should render all five color variants', async ({ page }) => {
+      const section = page.locator('#color-variants');
+      const labels = section.locator('label');
 
-  test('should be associated with form input', async ({ page }) => {
-    const labelWithFor = page.locator('label[for]');
-    const count = await labelWithFor.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
+      await expect(labels.filter({ hasText: 'Default label' })).toBeVisible();
+      await expect(labels.filter({ hasText: 'Info label' })).toBeVisible();
+      await expect(labels.filter({ hasText: 'Success label' })).toBeVisible();
+      await expect(labels.filter({ hasText: 'Warning label' })).toBeVisible();
+      await expect(labels.filter({ hasText: 'Error label' })).toBeVisible();
+    });
 
-  test('should click label to focus associated input', async ({ page }) => {
-    const label = page.locator('label[for]').first();
+    test('should apply correct text color classes', async ({ page }) => {
+      const section = page.locator('#color-variants');
+      const labels = section.locator('label');
 
-    if (await label.isVisible()) {
-      const forId = await label.getAttribute('for');
-      if (forId) {
-        await label.click();
-        const input = page.locator(`#${forId}`);
-        if (await input.isVisible()) {
-          await expect(input).toBeFocused();
-        }
+      const expected = [
+        { text: 'Default label', color: 'text-gray-900' },
+        { text: 'Info label', color: 'text-blue-500' },
+        { text: 'Success label', color: 'text-green-700' },
+        { text: 'Warning label', color: 'text-yellow-500' },
+        { text: 'Error label', color: 'text-red-700' },
+      ];
+
+      for (const { text, color } of expected) {
+        const label = labels.filter({ hasText: text });
+        const classes = await label.getAttribute('class');
+        expect(classes, `"${text}" should have ${color}`).toContain(color);
       }
-    }
+    });
   });
 
-  test('should render required indicator', async ({ page }) => {
-    // Required labels typically have an asterisk (*)
-    const requiredIndicator = page.locator('label').filter({ hasText: '*' });
-    const count = await requiredIndicator.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  test.describe('Form association', () => {
+    test('should associate with input via for attribute', async ({ page }) => {
+      const section = page.locator('#with-form-element');
+      const label = section.locator('label');
+
+      await expect(label).toHaveAttribute('for', 'username-input');
+    });
+
+    test('should focus associated input on click', async ({ page }) => {
+      const section = page.locator('#with-form-element');
+      const label = section.locator('label');
+      const input = section.locator('#username-input');
+
+      await label.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await label.click();
+      await expect(input).toBeFocused();
+    });
   });
 
-  test('should render with different colors', async ({ page }) => {
-    // Labels can have different colors
-    const content = await page.textContent('body');
-    expect(content).toContain('Label');
+  test.describe('Children content', () => {
+    test('should render children with custom JSX', async ({ page }) => {
+      const section = page.locator('#using-children');
+      const label = section.locator('label');
+
+      await expect(label).toBeVisible();
+      await expect(label).toContainText('Email Address');
+      // Should contain the red asterisk span
+      const asterisk = label.locator('span.text-red-500');
+      await expect(asterisk).toHaveText('*');
+    });
   });
 
-  test('should render disabled state', async ({ page }) => {
-    // Disabled labels may have different styling
-    const disabledLabel = page.locator(
-      'label[class*="disabled"], label[class*="opacity"]',
-    );
-    const count = await disabledLabel.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
+  test.describe('Base styling', () => {
+    test('should have base text-sm font-medium classes', async ({ page }) => {
+      const section = page.locator('#basic-label');
+      const label = section.locator('label').first();
+      const classes = await label.getAttribute('class');
 
-  test('should support nested input', async ({ page }) => {
-    // Labels can wrap inputs directly
-    const labelWithInput = page.locator('label').filter({ has: page.locator('input') });
-    const count = await labelWithInput.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+      expect(classes).toContain('text-sm');
+      expect(classes).toContain('font-medium');
+    });
   });
 });

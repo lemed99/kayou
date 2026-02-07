@@ -99,6 +99,11 @@ export default function PaginationPage() {
           description: 'Pagination with only one page (buttons disabled).',
           component: () => <Pagination total={1} page={1} onChange={() => {}} />,
         },
+        {
+          title: 'Empty (No Pages)',
+          description: 'Pagination with zero total pages (all controls disabled).',
+          component: () => <Pagination total={0} page={1} onChange={() => {}} />,
+        },
       ]}
       usage={`
         import { Pagination } from '@kayou/ui';

@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo, splitProps } from 'solid-js';
+import { JSX, Show, children, createMemo, splitProps } from 'solid-js';
 
 import { type IconProps } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
@@ -28,7 +28,7 @@ export interface AlertProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 const theme = {
-  base: 'flex flex-col gap-2 p-4 text-sm relative',
+  base: 'flex flex-col gap-2 border p-4 text-sm relative',
   color: {
     info: 'text-blue-700 bg-blue-100 border-blue-500 dark:bg-blue-200 dark:text-blue-800',
     failure: 'text-red-700 bg-red-100 border-red-500 dark:bg-red-200 dark:text-red-800',
@@ -57,6 +57,7 @@ const Alert = (props: AlertProps): JSX.Element => {
   ]);
 
   const color = createMemo(() => local.color || 'info');
+  const resolvedAdditional = children(() => local.additionalContent);
 
   return (
     <div
@@ -72,8 +73,8 @@ const Alert = (props: AlertProps): JSX.Element => {
         </Show>
         <div>{local.children}</div>
       </div>
-      <Show when={local.additionalContent}>
-        <div>{local.additionalContent}</div>
+      <Show when={resolvedAdditional()}>
+        <div>{resolvedAdditional()}</div>
       </Show>
     </div>
   );

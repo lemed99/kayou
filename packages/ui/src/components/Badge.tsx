@@ -43,7 +43,6 @@ const theme = {
         'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-300',
       dark: 'bg-gray-700 text-gray-100 group-hover:bg-gray-500 dark:group-hover:bg-neutral-700',
     },
-    href: 'group',
     size: {
       xs: 'text-xs',
       sm: 'text-sm',
@@ -57,18 +56,18 @@ const theme = {
 const Badge = (props: BadgeProps): JSX.Element => {
   const [local, otherProps] = splitProps(props, ['color', 'size', 'class', 'children']);
 
-  const color = createMemo(() => local.color || 'default');
-  const size = createMemo(() => local.size || 'xs');
+  const color = createMemo(() => local.color ?? 'default');
+  const size = createMemo(() => local.size ?? 'xs');
 
   return (
     <div
+      {...otherProps}
       class={twMerge(
         theme.root.base,
         theme.root.color[color()],
         theme.root.size[size()],
         local.class,
       )}
-      {...otherProps}
     >
       <Show when={local.children}>
         <span>{local.children}</span>

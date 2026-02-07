@@ -39,6 +39,8 @@ export const DEFAULT_SKELETON_ARIA_LABELS: SkeletonAriaLabels = {
 /**
  * Props for the Skeleton component.
  */
+export type GrayShade = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
 export interface SkeletonProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /**
    * Width of the skeleton. Can be a number (px) or string (e.g., '100%').
@@ -54,12 +56,12 @@ export interface SkeletonProps extends JSX.HTMLAttributes<HTMLDivElement> {
    * Gray shade for light mode (100-900).
    * @default 100
    */
-  gray?: number;
+  gray?: GrayShade;
   /**
    * Gray shade for dark mode (100-900).
    * @default 700
    */
-  darkGray?: number;
+  darkGray?: GrayShade;
   /**
    * Labels for i18n support.
    */
@@ -81,18 +83,18 @@ const Skeleton = (props: SkeletonProps): JSX.Element => {
   ]);
   const a = createMemo(() => ({ ...DEFAULT_SKELETON_ARIA_LABELS, ...local.ariaLabels }));
 
-  const width = createMemo(() => local.width || 50);
-  const height = createMemo(() => local.height || 10);
+  const width = createMemo(() => local.width ?? 50);
+  const height = createMemo(() => local.height ?? 10);
   const gray = createMemo(() => local.gray ?? 100);
   const darkGray = createMemo(() => local.darkGray ?? 700);
 
   return (
     <div
+      {...otherProps}
       role="status"
       aria-busy="true"
       aria-label={a().loading}
       class={twMerge('flex animate-pulse', local.class)}
-      {...otherProps}
     >
       <div
         style={{

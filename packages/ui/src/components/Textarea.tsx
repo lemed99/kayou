@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo, splitProps } from 'solid-js';
+import { JSX, Show, createMemo, createUniqueId, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -60,22 +60,28 @@ const Textarea = (props: TextareaProps): JSX.Element => {
     'helperText',
     'label',
     'ref',
-    'required',
     'disabled',
     'isLoading',
-    'value',
-    'placeholder',
+    'id',
   ]);
 
   const color = createMemo(() => local.color || 'gray');
+  const inputId = createMemo(() => local.id || createUniqueId());
+  const helperId = createMemo(() =>
+    local.helperText ? `${inputId()}-helper` : undefined,
+  );
+  const ariaInvalid = createMemo(() =>
+    color() === 'failure' ? true : undefined,
+  );
+  const ariaBusy = createMemo(() => (local.isLoading ? true : undefined));
 
   return (
     <div>
       <Show when={local.label}>
         <div class="mb-1 block">
-          <Label value={local.label} color={color()} />
-          <Show when={local.required}>
-            <span class="ml-0.5 font-medium text-red-500">*</span>
+          <Label value={local.label} color={color()} for={inputId()} />
+          <Show when={props.required}>
+            <span class="ml-0.5 font-medium text-red-500" aria-hidden="true">*</span>
           </Show>
         </div>
       </Show>
@@ -87,17 +93,28 @@ const Textarea = (props: TextareaProps): JSX.Element => {
         </Show>
 
         <textarea
-          class={twMerge(theme.base, theme.colors[color()], local.class)}
+          id={inputId()}
+          class={twMerge(
+            theme.base,
+            theme.colors[color()],
+            local.isLoading ? 'pl-8' : '',
+            local.class,
+          )}
           ref={local.ref}
           disabled={local.disabled || local.isLoading}
-          placeholder={local.isLoading ? '' : local.placeholder}
-          value={local.isLoading ? '' : local.value}
+          aria-describedby={helperId()}
+          aria-invalid={ariaInvalid()}
+          aria-busy={ariaBusy()}
           {...textareaProps}
         />
       </div>
 
       <Show when={local.helperText}>
-        <HelperText content={local.helperText as string} color={color()} />
+        <HelperText
+          id={helperId()}
+          content={local.helperText as string}
+          color={color()}
+        />
       </Show>
     </div>
   );

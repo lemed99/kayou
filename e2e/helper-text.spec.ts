@@ -5,48 +5,104 @@ test.describe('HelperText', () => {
     await page.goto('/ui/helper-text');
   });
 
-  test('should render helper text components', async ({ page }) => {
-    const helperTexts = page.locator('p, span').filter({ hasText: /.+/ });
-    const count = await helperTexts.count();
-    expect(count).toBeGreaterThan(0);
+  // ==================== Basic Rendering ====================
+
+  test('should render helper text with content', async ({ page }) => {
+    const helperText = page.getByText('This is a neutral hint', { exact: true });
+    await expect(helperText).toBeVisible();
   });
 
-  test('should display text content', async ({ page }) => {
-    const content = await page.textContent('body');
-    expect(content).toContain('Helper');
+  test('should render as a span element', async ({ page }) => {
+    const helperText = page.getByText('This is a neutral hint', { exact: true });
+    const tagName = await helperText.evaluate((el) => el.tagName.toLowerCase());
+    expect(tagName).toBe('span');
   });
 
-  test('should render with different colors', async ({ page }) => {
-    // Helper text comes in different colors (gray, red for errors, etc.)
-    const pageContent = await page.content();
-    expect(pageContent).toContain('Helper');
+  test('should have text-xs font size class', async ({ page }) => {
+    const helperText = page.getByText('This is a neutral hint', { exact: true });
+    const classes = await helperText.getAttribute('class');
+    expect(classes).toContain('text-xs');
   });
 
-  test('should be associated with form inputs', async ({ page }) => {
-    // Helper text is typically linked to inputs via aria-describedby
-    const inputs = page.locator('input[aria-describedby]');
-    const count = await inputs.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  // ==================== Color Variants ====================
+
+  test('should render gray variant with gray text color', async ({ page }) => {
+    const gray = page.getByText('This is a neutral hint', { exact: true });
+    const classes = await gray.getAttribute('class');
+    expect(classes).toContain('text-gray-500');
   });
 
-  test('should render error helper text', async ({ page }) => {
-    // Error helper text is typically red
-    const errorText = page.locator('[class*="text-red"], [class*="error"]');
-    const count = await errorText.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  test('should render info variant with blue text color', async ({ page }) => {
+    const info = page.getByText('This is informational', { exact: true });
+    const classes = await info.getAttribute('class');
+    expect(classes).toContain('text-blue-600');
   });
 
-  test('should render success helper text', async ({ page }) => {
-    // Success helper text is typically green
-    const successText = page.locator('[class*="text-green"], [class*="success"]');
-    const count = await successText.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  test('should render success variant with green text color', async ({ page }) => {
+    const success = page.getByText('This is a success message', { exact: true });
+    const classes = await success.getAttribute('class');
+    expect(classes).toContain('text-green-600');
   });
 
-  test('should have proper font size', async ({ page }) => {
-    // Helper text is typically smaller than regular text
-    const helperText = page.locator('[class*="text-sm"], [class*="text-xs"]').first();
-    const count = await helperText.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  test('should render warning variant with yellow text color', async ({ page }) => {
+    const warning = page.getByText('This is a warning', { exact: true });
+    const classes = await warning.getAttribute('class');
+    expect(classes).toContain('text-yellow-600');
+  });
+
+  test('should render failure variant with red text color', async ({ page }) => {
+    const failure = page.getByText('This is an error message', { exact: true });
+    const classes = await failure.getAttribute('class');
+    expect(classes).toContain('text-red-600');
+  });
+
+  // ==================== Form Field Example ====================
+
+  test('should render below a form input', async ({ page }) => {
+    const input = page.locator('input[type="email"]');
+    await expect(input).toBeVisible();
+
+    const helperText = page.getByText("We'll never share your email", { exact: true });
+    await expect(helperText).toBeVisible();
+
+    // Helper text should be positioned below the input
+    const inputBox = await input.boundingBox();
+    const helperBox = await helperText.boundingBox();
+    expect(inputBox).toBeTruthy();
+    expect(helperBox).toBeTruthy();
+    expect(helperBox!.y).toBeGreaterThan(inputBox!.y);
+  });
+
+  // ==================== Validation Messages ====================
+
+  test('should render failure validation message', async ({ page }) => {
+    const failure = page.getByText('Password must be at least 8 characters', { exact: true });
+    await expect(failure).toBeVisible();
+    const classes = await failure.getAttribute('class');
+    expect(classes).toContain('text-red-600');
+  });
+
+  test('should render success validation message', async ({ page }) => {
+    const success = page.getByText('Email is valid', { exact: true });
+    await expect(success).toBeVisible();
+    const classes = await success.getAttribute('class');
+    expect(classes).toContain('text-green-600');
+  });
+
+  // ==================== Multiple Instances ====================
+
+  test('should render all five color variants on the page', async ({ page }) => {
+    const texts = [
+      'This is a neutral hint',
+      'This is informational',
+      'This is a success message',
+      'This is a warning',
+      'This is an error message',
+    ];
+
+    for (const text of texts) {
+      const el = page.getByText(text, { exact: true });
+      await expect(el).toBeVisible();
+    }
   });
 });

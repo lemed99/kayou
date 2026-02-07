@@ -7,297 +7,181 @@ test.describe('Breadcrumb', () => {
 
   // ==================== Basic Rendering ====================
 
-  test('should render breadcrumb navigation', async ({ page }) => {
-    const nav = page.locator(
-      'nav[aria-label*="breadcrumb" i], nav[aria-label*="Breadcrumb" i]',
-    );
-    const count = await nav.count();
-    expect(count).toBeGreaterThan(0);
+  test('should render nav element with aria-label "Breadcrumb"', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    await expect(nav).toBeVisible();
   });
 
-  test('should display breadcrumb items', async ({ page }) => {
-    const breadcrumbItems = page
-      .locator('nav li, nav a, nav span')
-      .filter({ hasText: /.+/ });
-    const count = await breadcrumbItems.count();
-    expect(count).toBeGreaterThan(0);
+  test('should render ordered list with breadcrumb items', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const ol = nav.locator('ol');
+    await expect(ol).toBeVisible();
+
+    const items = ol.locator('li');
+    const count = await items.count();
+    expect(count).toBeGreaterThanOrEqual(2);
   });
 
-  test('should render nav element with proper aria-label', async ({ page }) => {
-    const nav = page.locator('nav[aria-label]').first();
-    if (await nav.isVisible()) {
-      const ariaLabel = await nav.getAttribute('aria-label');
-      expect(ariaLabel).toBeTruthy();
-    }
-  });
+  test('should render items in correct hierarchical order', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const items = nav.locator('li');
 
-  // ==================== Breadcrumb Items ====================
-
-  test('should render Home item', async ({ page }) => {
-    const homeItem = page
-      .locator('nav')
-      .filter({ hasText: /Home|Dashboard/i })
-      .first();
-    if (await homeItem.isVisible()) {
-      await expect(homeItem).toBeVisible();
-    }
-  });
-
-  test('should render multiple items in hierarchical order', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const text = await nav.textContent();
-    expect(text).toBeTruthy();
-  });
-
-  test('should render current page item', async ({ page }) => {
-    const currentItem = page
-      .locator('nav')
-      .filter({ hasText: /Current Page|Profile|John Doe/i })
-      .first();
-    if (await currentItem.isVisible()) {
-      await expect(currentItem).toBeVisible();
-    }
-  });
-
-  // ==================== Separators ====================
-
-  test('should have separator between items', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const content = await nav.textContent();
-    const svgCount = await nav.locator('svg').count();
-
-    // Should have some separator character or SVG icon
-    const hasSeparator =
-      content?.includes('/') ||
-      content?.includes('>') ||
-      content?.includes('›') ||
-      svgCount > 0;
-    expect(hasSeparator).toBeTruthy();
-  });
-
-  test('should render SVG separators', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const svgCount = await nav.locator('svg').count();
-    expect(svgCount).toBeGreaterThanOrEqual(0);
-  });
-
-  test('separator should be visible', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const svg = nav.locator('svg').first();
-    if (await svg.isVisible()) {
-      await expect(svg).toBeVisible();
-    }
+    await expect(items.first()).toContainText('Home');
+    await expect(items.last()).toContainText('Current Page');
   });
 
   // ==================== Links ====================
 
-  test('should have clickable links for non-current items', async ({ page }) => {
-    const links = page.locator('nav a[href]');
+  test('should render items with href as links', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const links = nav.locator('a[href]');
     const count = await links.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+    expect(count).toBeGreaterThanOrEqual(1);
+
+    const firstHref = await links.first().getAttribute('href');
+    expect(firstHref).toBe('/');
   });
 
-  test('links should have href attributes', async ({ page }) => {
-    const links = page.locator('nav a[href]');
-    const count = await links.count();
+  test('should render items without href as spans', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const lastItem = nav.locator('li').last();
+    const span = lastItem.locator('span');
+    await expect(span).toBeVisible();
 
-    for (let i = 0; i < Math.min(count, 3); i++) {
-      const href = await links.nth(i).getAttribute('href');
-      expect(href).toBeTruthy();
+    const link = lastItem.locator('a');
+    await expect(link).toHaveCount(0);
+  });
+
+  // ==================== Current Page (aria-current) ====================
+
+  test('should add aria-current="page" to current item', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').nth(1);
+    const currentElement = nav.locator('[aria-current="page"]');
+    await expect(currentElement).toBeVisible();
+    await expect(currentElement).toContainText('Profile');
+  });
+
+  test('current page item should render as span, not link', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').nth(1);
+    const currentElement = nav.locator('[aria-current="page"]');
+
+    const tagName = await currentElement.evaluate((el) => el.tagName.toLowerCase());
+    expect(tagName).toBe('span');
+  });
+
+  // ==================== Separators ====================
+
+  test('should render chevron separators between items', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const svgs = nav.locator('svg');
+    const itemCount = await nav.locator('li').count();
+
+    // Each item has an SVG but the first is hidden via CSS (group-first:hidden)
+    const svgCount = await svgs.count();
+    expect(svgCount).toBe(itemCount);
+    await expect(svgs.first()).toBeHidden();
+
+    for (let i = 1; i < itemCount; i++) {
+      await expect(svgs.nth(i)).toBeVisible();
     }
   });
 
-  test('link should navigate on click', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      const href = await link.getAttribute('href');
-      expect(href).toBeTruthy();
-    }
-  });
-
-  // ==================== Current Page Indicator ====================
-
-  test('should indicate current page', async ({ page }) => {
-    const currentPage = page.locator(
-      '[aria-current="page"], nav li:last-child, nav span:last-child',
-    );
-    const count = await currentPage.count();
+  test('separators should have aria-hidden', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const svgs = nav.locator('svg');
+    const count = await svgs.count();
     expect(count).toBeGreaterThan(0);
-  });
 
-  test('current page should have aria-current attribute', async ({ page }) => {
-    const currentPage = page.locator('[aria-current="page"]');
-    const count = await currentPage.count();
-    if (count > 0) {
-      await expect(currentPage.first()).toHaveAttribute('aria-current', 'page');
+    for (let i = 0; i < count; i++) {
+      await expect(svgs.nth(i)).toHaveAttribute('aria-hidden', 'true');
     }
-  });
-
-  test('current page should not be a link', async ({ page }) => {
-    // The current page item typically doesn't have href
-    const nav = page.locator('nav').first();
-    const allItems = await nav.locator('li, span').count();
-    expect(allItems).toBeGreaterThan(0);
   });
 
   // ==================== Keyboard Navigation ====================
 
-  test('should be keyboard navigable', async ({ page }) => {
-    const firstLink = page.locator('nav a[href]').first();
+  test('links should be focusable via keyboard', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const firstLink = nav.locator('a[href]').first();
 
-    if (await firstLink.isVisible()) {
-      await firstLink.focus();
-      await expect(firstLink).toBeFocused();
-    }
+    await firstLink.focus();
+    await expect(firstLink).toBeFocused();
   });
 
-  test('should navigate between links with Tab key', async ({ page }) => {
-    const links = page.locator('nav a[href]');
-    const count = await links.count();
+  test('should have visible focus indicator on links', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const firstLink = nav.locator('a[href]').first();
 
-    if (count >= 2) {
-      await links.first().focus();
-      await expect(links.first()).toBeFocused();
+    await firstLink.focus();
+    await expect(firstLink).toBeFocused();
 
-      await page.keyboard.press('Tab');
-      // Next link should be focusable
-    }
+    const classes = await firstLink.getAttribute('class');
+    expect(classes).toContain('focus-visible:ring-2');
   });
 
-  test('links should be focusable', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      await link.focus();
-      await expect(link).toBeFocused();
-    }
-  });
+  test('Tab key should move focus between links', async ({ page }) => {
+    // Use the "All Links" breadcrumb which has 3 consecutive links
+    const nav = page
+      .locator('nav[aria-label="Breadcrumb"]')
+      .filter({ hasText: /Dashboard/ });
+    const links = nav.locator('a[href]');
+    await expect(links).toHaveCount(3);
 
-  test('should activate link on Enter key', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      await link.focus();
-      await expect(link).toBeFocused();
-      // Enter should activate the link
-      const href = await link.getAttribute('href');
-      expect(href).toBeTruthy();
-    }
-  });
+    await links.first().focus();
+    await expect(links.first()).toBeFocused();
 
-  // ==================== Accessibility (ARIA) ====================
-
-  test('should have correct aria-label on nav', async ({ page }) => {
-    const nav = page.locator('nav[aria-label]').first();
-    if (await nav.isVisible()) {
-      const ariaLabel = await nav.getAttribute('aria-label');
-      expect(ariaLabel?.toLowerCase()).toContain('breadcrumb');
-    }
-  });
-
-  test('should be accessible to screen readers', async ({ page }) => {
-    const nav = page.locator('nav[aria-label]').first();
-    if (await nav.isVisible()) {
-      await expect(nav).toBeVisible();
-      const ariaLabel = await nav.getAttribute('aria-label');
-      expect(ariaLabel).toBeTruthy();
-    }
+    await page.keyboard.press('Tab');
+    await expect(links.nth(1)).toBeFocused();
   });
 
   // ==================== Visual States ====================
 
-  test('links should have different styling from current page', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      const classes = await link.getAttribute('class');
-      expect(classes).toBeTruthy();
-    }
+  test('links and non-link items should have different styles', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const link = nav.locator('a[href]').first();
+    const span = nav.locator('li').last().locator('span');
+
+    const linkClasses = await link.getAttribute('class');
+    const spanClasses = await span.getAttribute('class');
+
+    expect(linkClasses).toContain('cursor-pointer');
+    expect(spanClasses).not.toContain('cursor-pointer');
   });
 
-  test('should have hover effect on links', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      await link.hover();
-      await expect(link).toBeVisible();
-    }
-  });
+  // ==================== ariaLabels Override (i18n) ====================
 
-  test('should have focus indicator', async ({ page }) => {
-    const link = page.locator('nav a[href]').first();
-    if (await link.isVisible()) {
-      await link.focus();
-      await expect(link).toBeFocused();
-    }
-  });
-
-  // ==================== Multiple Breadcrumbs ====================
-
-  test('should render multiple breadcrumb examples', async ({ page }) => {
-    const navs = page.locator('nav');
-    const count = await navs.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  test('each breadcrumb should function independently', async ({ page }) => {
-    const navs = page.locator('nav');
-    const count = await navs.count();
-
-    for (let i = 0; i < Math.min(count, 3); i++) {
-      const nav = navs.nth(i);
-      if (await nav.isVisible()) {
-        await expect(nav).toBeVisible();
-      }
-    }
-  });
-
-  // ==================== Hierarchical Navigation ====================
-
-  test('should show hierarchical path', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const text = await nav.textContent();
-
-    // Should contain multiple items indicating hierarchy
-    expect(text).toBeTruthy();
-    expect(text!.length).toBeGreaterThan(5);
-  });
-
-  test('items should be in correct order', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const links = nav.locator('a, span');
-    const count = await links.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  // ==================== Edge Cases ====================
-
-  test('should handle single item breadcrumb', async ({ page }) => {
-    const navs = page.locator('nav');
-    const count = await navs.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  test('should handle long item text gracefully', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const box = await nav.boundingBox();
-    expect(box).toBeTruthy();
-    expect(box!.width).toBeGreaterThan(0);
-  });
-
-  test('should support custom CSS classes', async ({ page }) => {
-    const nav = page.locator('nav').first();
-    const classes = await nav.getAttribute('class');
-    expect(classes).toBeTruthy();
+  test('should support custom aria-label via ariaLabels prop', async ({ page }) => {
+    const customNav = page.locator('nav[aria-label="Fil d\'Ariane"]');
+    await expect(customNav).toBeVisible();
+    await expect(customNav).toContainText('Accueil');
   });
 
   // ==================== All Links Example ====================
 
-  test('should render breadcrumb with all clickable links', async ({ page }) => {
+  test('should render breadcrumb where all items are links', async ({ page }) => {
     const allLinksNav = page
-      .locator('nav')
-      .filter({ hasText: /Dashboard.*Users.*John Doe/i })
-      .first();
-    if (await allLinksNav.isVisible()) {
-      const links = allLinksNav.locator('a[href]');
-      const count = await links.count();
-      expect(count).toBeGreaterThan(0);
-    }
+      .locator('nav[aria-label="Breadcrumb"]')
+      .filter({ hasText: /Dashboard/ });
+
+    await expect(allLinksNav).toBeVisible();
+
+    const links = allLinksNav.locator('a[href]');
+    await expect(links).toHaveCount(3);
+  });
+
+  // ==================== Responsive ====================
+
+  test('should have flex-wrap on the ordered list for responsive layout', async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Breadcrumb"]').first();
+    const ol = nav.locator('ol');
+    const classes = await ol.getAttribute('class');
+    expect(classes).toContain('flex-wrap');
+  });
+
+  // ==================== Multiple Breadcrumbs ====================
+
+  test('should render multiple independent breadcrumb examples', async ({ page }) => {
+    const navs = page.locator('nav[aria-label]');
+    const count = await navs.count();
+    expect(count).toBeGreaterThanOrEqual(3);
   });
 });

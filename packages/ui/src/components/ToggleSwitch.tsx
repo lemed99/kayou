@@ -58,7 +58,7 @@ const toggleClassName = `
 
 const theme = {
   root: {
-    base: 'flex items-center rounded-lg focus:outline-none',
+    base: 'flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900',
     active: {
       on: 'cursor-pointer',
       off: 'cursor-not-allowed opacity-50',
@@ -100,40 +100,30 @@ const ToggleSwitch = (props: ToggleSwitchProps): JSX.Element => {
 
   const id = createUniqueId();
 
-  const handleClick = (event: MouseEvent) => {
-    event.preventDefault();
+  const handleClick = () => {
     local.onChange?.(!local.checked);
   };
 
   return (
     <>
       <Show when={local.name && local.checked}>
-        <input
-          checked={local.checked}
-          hidden
-          name={local.name}
-          readOnly
-          type="checkbox"
-          class="sr-only"
-        />
+        <input hidden name={local.name} type="checkbox" class="sr-only" />
       </Show>
       <button
+        {...otherProps}
         aria-checked={local.checked}
-        aria-labelledby={`${id}-toggleswitch-label`}
         disabled={local.disabled}
         id={`${id}-toggleswitch`}
         onClick={handleClick}
         role="switch"
-        tabIndex={0}
         type="button"
         class={twMerge(
           theme.root.base,
           theme.root.active[local.disabled ? 'off' : 'on'],
           local.class,
         )}
-        {...otherProps}
       >
-        <span id={`${id}-toggleswitch-label`} class={theme.root.label}>
+        <span class={theme.root.label}>
           {local.label}
         </span>
 
@@ -142,9 +132,7 @@ const ToggleSwitch = (props: ToggleSwitchProps): JSX.Element => {
             class={twMerge(
               theme.toggle.base,
               theme.toggle.checked[local.checked ? 'on' : 'off'],
-              !local.disabled &&
-                local.checked &&
-                theme.toggle.checked.color[local.color || 'blue'],
+              local.checked && theme.toggle.checked.color[local.color || 'blue'],
             )}
           />
         </div>

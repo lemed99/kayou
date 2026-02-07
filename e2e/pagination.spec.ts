@@ -5,106 +5,169 @@ test.describe('Pagination', () => {
     await page.goto('/ui/pagination');
   });
 
-  test('should render pagination component', async ({ page }) => {
-    const pagination = page
-      .locator('nav[aria-label*="pagination" i], nav, [class*="pagination"]')
-      .first();
-    await expect(pagination).toBeVisible();
+  test.describe('Basic rendering', () => {
+    test('should render navigation buttons with correct aria labels', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      await expect(nav).toBeVisible();
+
+      await expect(nav.locator('button[aria-label="Go to first page"]')).toBeVisible();
+      await expect(nav.locator('button[aria-label="Go to previous page"]')).toBeVisible();
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeVisible();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeVisible();
+    });
+
+    test('should render page input with "Page" label and total', async ({ page }) => {
+      const container = page.locator('[aria-current="page"]').first();
+      await expect(container).toBeVisible();
+      await expect(container).toContainText('Page');
+      await expect(container).toContainText('of');
+    });
   });
 
-  test('should render page number buttons', async ({ page }) => {
-    // Look for buttons with numbers or aria-label containing page
-    const pageButtons = page.locator('button').filter({ hasText: /^\d+$/ });
-    const count = await pageButtons.count();
-    // Some pagination components may not show numbers
-    expect(count).toBeGreaterThanOrEqual(0);
+  test.describe('Boundary disabling', () => {
+    test('should disable first/previous buttons on page 1', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
 
-    // Just verify page content exists
-    const content = await page.textContent('body');
-    expect(content).toContain('Pagination');
+      await expect(nav.locator('button[aria-label="Go to first page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to previous page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeEnabled();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeEnabled();
+    });
+
+    test('should disable all buttons when total is 1 (single page)', async ({ page }) => {
+      const singlePageSection = page.locator('text=Single Page').locator('..').locator('..');
+      const nav = singlePageSection.locator('nav[aria-label="Page"]');
+
+      await expect(nav.locator('button[aria-label="Go to first page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to previous page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeDisabled();
+    });
+
+    test('should disable all controls when total is 0', async ({ page }) => {
+      const emptySection = page.locator('text=Empty (No Pages)').locator('..').locator('..');
+      const nav = emptySection.locator('nav[aria-label="Page"]');
+
+      await expect(nav.locator('button[aria-label="Go to first page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to previous page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeDisabled();
+
+      const input = emptySection.locator('input');
+      await expect(input).toBeDisabled();
+    });
   });
 
-  test('should render previous button', async ({ page }) => {
-    const prevButton = page.locator('button').first();
-    await expect(prevButton).toBeVisible();
+  test.describe('Navigation', () => {
+    test('should navigate to next page on next click', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      const input = page.getByRole('spinbutton').first();
+
+      await expect(input).toHaveValue('1');
+
+      const nextBtn = nav.locator('button[aria-label="Go to next page"]');
+      await nextBtn.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await nextBtn.click({ force: true });
+      await expect(input).toHaveValue('2');
+    });
+
+    test('should navigate to previous page', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      const input = page.getByRole('spinbutton').first();
+
+      const nextBtn = nav.locator('button[aria-label="Go to next page"]');
+      await nextBtn.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await nextBtn.click({ force: true });
+      await expect(input).toHaveValue('2');
+
+      const prevBtn = nav.locator('button[aria-label="Go to previous page"]');
+      await prevBtn.click({ force: true });
+      await expect(input).toHaveValue('1');
+    });
+
+    test('should navigate to last page', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      const input = page.getByRole('spinbutton').first();
+
+      const lastBtn = nav.locator('button[aria-label="Go to last page"]');
+      await lastBtn.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await lastBtn.click({ force: true });
+      await expect(input).toHaveValue('10');
+
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeDisabled();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeDisabled();
+    });
+
+    test('should navigate to first page', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      const input = page.getByRole('spinbutton').first();
+
+      // Go to last first
+      const lastBtn = nav.locator('button[aria-label="Go to last page"]');
+      await lastBtn.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await lastBtn.click({ force: true });
+      await expect(input).toHaveValue('10');
+
+      // Go back to first
+      const firstBtn = nav.locator('button[aria-label="Go to first page"]');
+      await firstBtn.click({ force: true });
+      await expect(input).toHaveValue('1');
+    });
   });
 
-  test('should render next button', async ({ page }) => {
-    const buttons = page.locator('button');
-    const count = await buttons.count();
-    expect(count).toBeGreaterThan(0);
+  test.describe('Direct page input', () => {
+    test('should navigate via direct page number entry', async ({ page }) => {
+      const input = page.getByRole('spinbutton').first();
+
+      await input.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await input.click();
+      await input.fill('5');
+      await input.press('Enter');
+      await expect(input).toHaveValue('5');
+    });
+
+    test('should clamp value to max when exceeding total', async ({ page }) => {
+      const input = page.getByRole('spinbutton').first();
+
+      await input.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await input.click();
+      await input.fill('999');
+      await input.press('Tab');
+      await expect(input).toHaveValue('10');
+    });
   });
 
-  test('should navigate to next page on next click', async ({ page }) => {
-    // Find a button that looks like next (last button, or one with arrow)
-    const buttons = page.locator('button');
-    const count = await buttons.count();
+  test.describe('Keyboard navigation', () => {
+    test('should activate button with Enter key', async ({ page }) => {
+      const nav = page.locator('nav[aria-label="Page"]').first();
+      const input = page.getByRole('spinbutton').first();
+      const nextButton = nav.locator('button[aria-label="Go to next page"]');
 
-    if (count > 1) {
-      const lastButton = buttons.last();
-      if (await lastButton.isEnabled()) {
-        await lastButton.click();
-        await page.waitForTimeout(100);
-      }
-    }
+      await nextButton.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(200);
+      await nextButton.focus();
+      await nextButton.press('Enter');
+      await expect(input).toHaveValue('2');
+    });
   });
 
-  test('should navigate to previous page on prev click', async ({ page }) => {
-    // Click next first, then prev
-    const buttons = page.locator('button');
-    const count = await buttons.count();
+  test.describe('Middle page example', () => {
+    test('should start at page 5 with all buttons enabled', async ({ page }) => {
+      const navs = page.locator('nav[aria-label="Page"]');
+      const nav = navs.nth(1);
+      const input = page.getByRole('spinbutton').nth(1);
 
-    if (count > 1) {
-      const lastButton = buttons.last();
-      if (await lastButton.isEnabled()) {
-        await lastButton.click();
-        await page.waitForTimeout(100);
-      }
-
-      const firstButton = buttons.first();
-      if (await firstButton.isEnabled()) {
-        await firstButton.click();
-        await page.waitForTimeout(100);
-      }
-    }
-  });
-
-  test('should navigate to specific page on number click', async ({ page }) => {
-    const pageButton = page.locator('button').filter({ hasText: /^2$/ }).first();
-
-    if (await pageButton.isVisible()) {
-      await pageButton.click();
-      await page.waitForTimeout(100);
-    }
-  });
-
-  test('should highlight current page', async ({ page }) => {
-    // Verify pagination exists and has buttons
-    const buttons = page.locator('button');
-    const count = await buttons.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  test('should disable previous on first page', async ({ page }) => {
-    // The first button is usually the previous button
-    const firstButton = page.locator('button').first();
-    // It may or may not be disabled depending on implementation
-    await expect(firstButton).toBeVisible();
-  });
-
-  test('should support keyboard navigation', async ({ page }) => {
-    const button = page.locator('button').first();
-    await button.focus();
-
-    // Tab to navigate between buttons
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
-  });
-
-  test('should render ellipsis for many pages', async ({ page }) => {
-    const ellipsis = page.locator('span').filter({ hasText: '...' });
-    const count = await ellipsis.count();
-    // Ellipsis may or may not be present depending on total pages
-    expect(count).toBeGreaterThanOrEqual(0);
+      await expect(input).toHaveValue('5');
+      await expect(nav.locator('button[aria-label="Go to first page"]')).toBeEnabled();
+      await expect(nav.locator('button[aria-label="Go to previous page"]')).toBeEnabled();
+      await expect(nav.locator('button[aria-label="Go to next page"]')).toBeEnabled();
+      await expect(nav.locator('button[aria-label="Go to last page"]')).toBeEnabled();
+    });
   });
 });

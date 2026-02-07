@@ -19,7 +19,7 @@ export interface TextInputAriaLabels {
   decrease: string;
 }
 
-export const DEFAULT_TEXT_INPUT_ARIA_LABELS: TextInputAriaLabels = {
+const DEFAULT_TEXT_INPUT_ARIA_LABELS: TextInputAriaLabels = {
   increase: 'Increase value',
   decrease: 'Decrease value',
 };
@@ -57,10 +57,6 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   isLoading?: boolean;
   /** Additional CSS class for the input element. */
   inputClass?: string;
-  /** Accessible label for the increment arrow button. Defaults to 'Increase value'. */
-  arrowUpLabel?: string;
-  /** Accessible label for the decrement arrow button. Defaults to 'Decrease value'. */
-  arrowDownLabel?: string;
   /**
    * Labels for i18n support.
    */
@@ -142,8 +138,6 @@ const TextInput = (props: TextInputProps): JSX.Element => {
     'value',
     'placeholder',
     'inputClass',
-    'arrowUpLabel',
-    'arrowDownLabel',
     'id',
     'ariaLabels',
   ]);
@@ -190,14 +184,18 @@ const TextInput = (props: TextInputProps): JSX.Element => {
       if (!inputRef) return;
       const value = String(local.value ?? inputRef.placeholder ?? '');
       const span = document.createElement('span');
-      const computedStyle = window.getComputedStyle(inputRef);
+      const cs = window.getComputedStyle(inputRef);
       span.style.cssText = `
         position: absolute;
         visibility: hidden;
         white-space: pre;
-        font-size: ${computedStyle.fontSize};
-        padding: ${computedStyle.padding};
-        border: ${computedStyle.border};
+        font-family: ${cs.fontFamily};
+        font-size: ${cs.fontSize};
+        font-weight: ${cs.fontWeight};
+        letter-spacing: ${cs.letterSpacing};
+        padding: ${cs.padding};
+        border: ${cs.border};
+        box-sizing: ${cs.boxSizing};
       `;
       span.textContent = value;
       document.body.appendChild(span);
@@ -217,7 +215,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
         <div class="mb-1 block">
           <Label for={inputId()} value={local.label} color={color()} />
           <Show when={props.required}>
-            <span class="ml-0.5 font-medium text-red-500">*</span>
+            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">*</span>
           </Show>
         </div>
       </Show>
@@ -226,36 +224,36 @@ const TextInput = (props: TextInputProps): JSX.Element => {
           <span class={theme.addon}>{local.addon}</span>
         </Show>
         <div class={theme.field.base}>
-          <Show when={local.icon}>
+          <Show when={local.icon && !local.isLoading}>
             <div class={theme.field.icon.base}>
               {local.icon?.({ class: theme.field.icon.svg })}
             </div>
           </Show>
           <Show when={local.isLoading}>
-            <div class={twMerge(theme.field.icon.base, local.icon ? 'pl-9' : 'pl-3')}>
+            <div class={theme.field.icon.base}>
               <Spinner size="sm" color={color()} />
             </div>
           </Show>
 
           <input
+            {...inputProps}
             id={inputId()}
             class={twMerge(
               theme.field.input.base,
               theme.field.input.colors[color()],
               theme.field.input.sizes[sizing()],
               theme.field.input.withAddon[local.addon ? 'on' : 'off'],
-              theme.field.input.withIcon[local.icon ? 'on' : 'off'],
+              theme.field.input.withIcon[local.icon || local.isLoading ? 'on' : 'off'],
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
               local.inputClass,
             )}
             ref={(el) => handleRef(el)}
             disabled={local.disabled || local.isLoading}
-            placeholder={local.isLoading ? '' : local.placeholder}
-            value={local.isLoading ? '' : local.value}
+            placeholder={local.placeholder}
+            value={local.value}
             aria-invalid={ariaInvalid()}
             aria-busy={ariaBusy()}
             aria-describedby={helperId()}
-            {...inputProps}
           />
 
           <Show when={showArrows()}>
@@ -269,7 +267,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
                 class={twMerge(theme.field.arrows.button, 'rounded-t')}
                 tabIndex={-1}
                 disabled={local.disabled || local.isLoading}
-                aria-label={local.arrowUpLabel || a().increase}
+                aria-label={a().increase}
               >
                 <ChevronUpIcon class="size-2.5" aria-hidden="true" />
               </button>
@@ -282,7 +280,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
                 class={twMerge(theme.field.arrows.button, 'rounded-b')}
                 tabIndex={-1}
                 disabled={local.disabled || local.isLoading}
-                aria-label={local.arrowDownLabel || a().decrease}
+                aria-label={a().decrease}
               >
                 <ChevronDownIcon class="size-2.5" aria-hidden="true" />
               </button>

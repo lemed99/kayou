@@ -1,81 +1,82 @@
 // Components - @kayou/ui
 export { default as Accordion, type AccordionProps, type PanelData } from './Accordion';
 export { default as Alert } from './Alert';
-export { default as Badge } from './Badge';
+export { default as Badge, type BadgeColor, type BadgeSize } from './Badge';
 export {
   default as Breadcrumb,
-  type BreadcrumbAriaLabels,
   DEFAULT_BREADCRUMB_ARIA_LABELS,
+  type BreadcrumbAriaLabels,
+  type BreadcrumbItemData,
+  type BreadcrumbProps,
 } from './Breadcrumb';
 export { default as Button } from './Button';
 export { default as Checkbox } from './Checkbox';
 export {
+  DEFAULT_DRAWER_ARIA_LABELS,
   default as Drawer,
   type DrawerAriaLabels,
-  DEFAULT_DRAWER_ARIA_LABELS,
 } from './Drawer';
+export { DynamicVirtualList, type DynamicVirtualListHandle } from './DynamicVirtualList';
 export { default as HelperText } from './HelperText';
-export { IconWrapper } from './IconWrapper';
-export { default as Label } from './Label';
+export { default as Label, type LabelColor, type LabelProps } from './Label';
 export {
+  DEFAULT_MODAL_ARIA_LABELS,
   default as Modal,
   type ModalAriaLabels,
-  DEFAULT_MODAL_ARIA_LABELS,
 } from './Modal';
 export { default as NumberInput } from './NumberInput';
 export {
-  default as Pagination,
-  type PaginationLabels,
-  DEFAULT_PAGINATION_LABELS,
-  type PaginationAriaLabels,
   DEFAULT_PAGINATION_ARIA_LABELS,
+  DEFAULT_PAGINATION_LABELS,
+  default as Pagination,
+  type PaginationAriaLabels,
+  type PaginationLabels,
 } from './Pagination';
 export { default as Popover } from './Popover';
 export {
-  default as Skeleton,
-  type SkeletonAriaLabels,
   DEFAULT_SKELETON_ARIA_LABELS,
+  default as Skeleton,
+  type GrayShade,
+  type SkeletonAriaLabels,
 } from './Skeleton';
 export {
+  DEFAULT_SPINNER_ARIA_LABELS,
   default as Spinner,
   type SpinnerAriaLabels,
-  DEFAULT_SPINNER_ARIA_LABELS,
 } from './Spinner';
 export { default as Textarea } from './Textarea';
 export {
   default as TextInput,
-  type TextInputProps,
   type TextInputAriaLabels,
-  DEFAULT_TEXT_INPUT_ARIA_LABELS,
+  type TextInputProps,
 } from './TextInput';
 export { default as ToggleSwitch } from './ToggleSwitch';
 export { default as Tooltip } from './Tooltip';
 export { VirtualList, type VirtualListHandle } from './VirtualList';
-export { DynamicVirtualList, type DynamicVirtualListHandle } from './DynamicVirtualList';
 
 // Select family
 export {
-  default as Select,
+  DEFAULT_SELECT_LABELS,
   MultiSelect,
+  default as Select,
   SelectWithSearch,
   type SelectLabels,
-  DEFAULT_SELECT_LABELS,
 } from './Select';
 
 // DataTable
 export {
   DataTable,
   DataTableFilters,
-  useDataTableFilters,
+  DEFAULT_DATA_TABLE_FILTERS_LABELS,
+  DEFAULT_DATA_TABLE_LABELS,
   DEFAULT_OPERATORS,
   OPERATOR_LABELS,
-  DEFAULT_DATA_TABLE_LABELS,
-  DEFAULT_DATA_TABLE_FILTERS_LABELS,
+  useDataTableFilters,
   type ActiveFilter,
   type DataTableColumnProps,
+  type DataTableFiltersLabels,
   type DataTableFiltersProps,
   type DataTableLabels,
-  type DataTableFiltersLabels,
   type DateFilterConfig,
   type FilterConfig,
   type FilterDataType,
@@ -91,8 +92,8 @@ export {
   default as DatePicker,
   DatePickerContext,
   DatePickerProvider,
-  DEFAULT_DATE_SHORTCUTS,
   DEFAULT_DATE_PICKER_LABELS,
+  DEFAULT_DATE_SHORTCUTS,
   type DatePickerContextType,
   type DatePickerLabels,
   type DatePickerProviderProps,
@@ -103,30 +104,30 @@ export {
 
 // Other components
 export {
-  default as Password,
-  DEFAULT_REQUIREMENTS,
-  DEFAULT_PASSWORD_LABELS,
   DEFAULT_PASSWORD_ARIA_LABELS,
-  type PasswordLabels,
+  DEFAULT_PASSWORD_LABELS,
+  DEFAULT_REQUIREMENTS,
+  default as Password,
   type PasswordAriaLabels,
+  type PasswordLabels,
   type PasswordProps,
   type PasswordRequirement,
   type PasswordStrength,
 } from './Password';
 export {
+  DEFAULT_SIDEBAR_ARIA_LABELS,
+  DEFAULT_SIDEBAR_LABELS,
   default as Sidebar,
+  type SidebarAriaLabels,
   type SidebarItem,
   type SidebarLabels,
-  DEFAULT_SIDEBAR_LABELS,
-  type SidebarAriaLabels,
-  DEFAULT_SIDEBAR_ARIA_LABELS,
 } from './Sidebar';
 export {
-  UploadFile,
-  type UploadFileLabels,
-  DEFAULT_UPLOAD_FILE_LABELS,
-  type UploadFileAriaLabels,
   DEFAULT_UPLOAD_FILE_ARIA_LABELS,
+  DEFAULT_UPLOAD_FILE_LABELS,
+  UploadFile,
+  type UploadFileAriaLabels,
+  type UploadFileLabels,
 } from './UploadFile';
 export { VirtualGrid } from './VirtualGrid';
 
@@ -135,14 +136,14 @@ export * from './Charts';
 
 // Rich Text Editor
 export {
+  DEFAULT_RICH_TEXT_EDITOR_ARIA_LABELS,
+  DEFAULT_RICH_TEXT_EDITOR_LABELS,
+  DEFAULT_TOOLBAR_LABELS,
   RichTextEditor,
   Toolbar as RichTextEditorToolbar,
-  type RichTextEditorProps,
-  type RichTextEditorLabels,
-  DEFAULT_RICH_TEXT_EDITOR_LABELS,
   type RichTextEditorAriaLabels,
-  DEFAULT_RICH_TEXT_EDITOR_ARIA_LABELS,
+  type RichTextEditorLabels,
+  type RichTextEditorProps,
   type ToolbarConfig,
   type ToolbarLabels,
-  DEFAULT_TOOLBAR_LABELS,
 } from './RichTextEditor';

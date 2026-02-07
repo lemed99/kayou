@@ -1,96 +1,156 @@
 import { expect, test } from '@playwright/test';
 
+/** Helper to scope locators to a specific example section by title. */
+const exampleSection = (page: import('@playwright/test').Page, title: string) =>
+  page.locator(`#${title.toLowerCase().replace(/\s+/g, '-')}`);
+
 test.describe('TextInput', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/ui/text-input');
   });
 
-  test('should render text input', async ({ page }) => {
-    const input = page.locator('input[type="text"], input:not([type])').first();
+  // ── Basic rendering ──────────────────────────────────────────────
+
+  test('renders basic input with placeholder', async ({ page }) => {
+    const section = exampleSection(page, 'Basic Input');
+    const input = section.locator('input');
+    await expect(input).toBeVisible();
+    await expect(input).toHaveAttribute('placeholder', 'Enter your name');
+  });
+
+  test('accepts and clears text', async ({ page }) => {
+    const section = exampleSection(page, 'Basic Input');
+    const input = section.locator('input');
+    await input.fill('Hello World');
+    await expect(input).toHaveValue('Hello World');
+    await input.clear();
+    await expect(input).toHaveValue('');
+  });
+
+  test('keyboard input works', async ({ page }) => {
+    const section = exampleSection(page, 'Basic Input');
+    const input = section.locator('input');
+    await input.focus();
+    await expect(input).toBeFocused();
+    await page.keyboard.type('Test');
+    await expect(input).toHaveValue('Test');
+  });
+
+  // ── Label + helper text ──────────────────────────────────────────
+
+  test('label is associated with input via for/id', async ({ page }) => {
+    const section = exampleSection(page, 'With Label and Helper Text');
+    const label = section.locator('label');
+    await expect(label).toHaveText('Email Address');
+    const forAttr = await label.getAttribute('for');
+    expect(forAttr).toBeTruthy();
+    const input = section.locator(`input#${forAttr}`);
     await expect(input).toBeVisible();
   });
 
-  test('should accept text input', async ({ page }) => {
-    const input = page.locator('input[type="text"], input:not([type])').first();
-    await input.click();
-    await input.fill('Hello World');
-
-    const value = await input.inputValue();
-    expect(value).toBe('Hello World');
+  test('helper text is linked via aria-describedby', async ({ page }) => {
+    const section = exampleSection(page, 'With Label and Helper Text');
+    const input = section.locator('input');
+    const describedBy = await input.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const helper = section.locator(`#${describedBy}`);
+    await expect(helper).toHaveText("We'll never share your email.");
   });
 
-  test('should clear input', async ({ page }) => {
-    const input = page.locator('input[type="text"], input:not([type])').first();
-    await input.fill('Test');
-    await input.clear();
+  // ── Size variants ────────────────────────────────────────────────
 
-    const value = await input.inputValue();
-    expect(value).toBe('');
+  test('renders three size variants', async ({ page }) => {
+    const section = exampleSection(page, 'Size Variants');
+    const inputs = section.locator('input');
+    await expect(inputs).toHaveCount(3);
+    await expect(inputs.nth(0)).toHaveAttribute('placeholder', 'Extra Small');
+    await expect(inputs.nth(1)).toHaveAttribute('placeholder', 'Small');
+    await expect(inputs.nth(2)).toHaveAttribute('placeholder', 'Medium');
   });
 
-  test('should render placeholder', async ({ page }) => {
-    const input = page.locator('input[placeholder]').first();
+  // ── Validation states ────────────────────────────────────────────
 
-    if (await input.isVisible()) {
-      const placeholder = await input.getAttribute('placeholder');
-      expect(placeholder).toBeTruthy();
-    }
+  test('failure state has aria-invalid and red border', async ({ page }) => {
+    const section = exampleSection(page, 'Validation States');
+    const errorInput = section.locator('input[aria-invalid="true"]');
+    await expect(errorInput).toBeVisible();
+    await expect(errorInput).toHaveValue('Invalid input');
+    await expect(errorInput).toHaveClass(/border-red/);
   });
 
-  test('should render disabled state', async ({ page }) => {
-    const disabledInput = page.locator('input[disabled]');
-    const count = await disabledInput.count();
-
-    if (count > 0) {
-      await expect(disabledInput.first()).toBeDisabled();
-    }
+  test('failure state helper text is linked', async ({ page }) => {
+    const section = exampleSection(page, 'Validation States');
+    const errorInput = section.locator('input[aria-invalid="true"]');
+    const describedBy = await errorInput.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const helper = section.locator(`#${describedBy}`);
+    await expect(helper).toHaveText('Please check this field');
   });
 
-  test('should render readonly state', async ({ page }) => {
-    const readonlyInput = page.locator('input[readonly]');
-    const count = await readonlyInput.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+  test('success state has green border', async ({ page }) => {
+    const section = exampleSection(page, 'Validation States');
+    const successInput = section.locator('input').filter({ hasText: '' }).first();
+    // Find the input with "Valid input" value
+    const input = section.locator('input[class*="border-green"]');
+    await expect(input).toBeVisible();
+    await expect(input).toHaveValue('Valid input');
   });
 
-  test('should be keyboard accessible', async ({ page }) => {
-    const input = page.locator('input[type="text"], input:not([type])').first();
+  // ── Addon ────────────────────────────────────────────────────────
+
+  test('renders addon text before input', async ({ page }) => {
+    const section = exampleSection(page, 'With Addon');
+    const addon = section.getByText('https://', { exact: true });
+    await expect(addon).toBeVisible();
+    const input = section.locator('input').first();
+    await expect(input).toHaveAttribute('placeholder', 'example.com');
+    // Addon input should have rounded-r-lg (right-only rounding)
+    await expect(input).toHaveClass(/rounded-r-lg/);
+  });
+
+  // ── Loading state ────────────────────────────────────────────────
+
+  test('loading state disables input and shows spinner', async ({ page }) => {
+    const section = exampleSection(page, 'Loading State');
+    const input = section.locator('input');
+    await expect(input).toBeDisabled();
+    await expect(input).toHaveAttribute('aria-busy', 'true');
+    // Spinner should be visible via its role="status"
+    const spinner = section.getByRole('status');
+    await expect(spinner).toBeVisible();
+  });
+
+  // ── Disabled state ───────────────────────────────────────────────
+
+  test('disabled state prevents interaction', async ({ page }) => {
+    const section = exampleSection(page, 'Disabled State');
+    const input = section.locator('input');
+    await expect(input).toBeDisabled();
+    await expect(input).toHaveValue('Disabled input');
+  });
+
+  // ── Required field ───────────────────────────────────────────────
+
+  test('required field has visual indicator and required attribute', async ({ page }) => {
+    const section = exampleSection(page, 'Required Field');
+    const input = section.locator('input');
+    await expect(input).toHaveAttribute('required', '');
+    // Visual * indicator should be present and aria-hidden
+    const asterisk = section.locator('span[aria-hidden="true"]');
+    await expect(asterisk).toHaveText('*');
+  });
+
+  // ── Controlled input ─────────────────────────────────────────────
+
+  test('controlled input updates helper text on type', async ({ page }) => {
+    await page.waitForLoadState('networkidle');
+    const input = page.getByRole('textbox', { name: 'Controlled Input' });
+    await input.scrollIntoViewIfNeeded();
     await input.focus();
     await expect(input).toBeFocused();
-
-    // Type with keyboard
-    await page.keyboard.type('Test');
-    const value = await input.inputValue();
-    expect(value).toBe('Test');
-  });
-
-  test('should render with label', async ({ page }) => {
-    const label = page.locator('label');
-    const count = await label.count();
-    expect(count).toBeGreaterThan(0);
-  });
-
-  test('should render with helper text', async ({ page }) => {
-    const helperText = page.locator('[class*="helper"], [class*="text-sm"]');
-    const count = await helperText.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should render error state', async ({ page }) => {
-    const errorInput = page.locator('input[class*="error"], input[class*="border-red"]');
-    const count = await errorInput.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should render with icon', async ({ page }) => {
-    const inputWithIcon = page.locator('input').locator('..').locator('svg');
-    const count = await inputWithIcon.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should render different sizes', async ({ page }) => {
-    // Inputs come in different sizes
-    const inputs = page.locator('input');
-    const count = await inputs.count();
-    expect(count).toBeGreaterThan(1);
+    await page.keyboard.type('hello');
+    await expect(input).toHaveValue('hello');
+    const section = exampleSection(page, 'Controlled Input');
+    await expect(section.getByText('You typed: hello')).toBeVisible();
   });
 });

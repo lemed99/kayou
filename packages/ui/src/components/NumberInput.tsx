@@ -10,8 +10,6 @@ type ExtendedTextInputProps = Omit<
   | 'showArrows'
   | 'onArrowUp'
   | 'onArrowDown'
-  | 'arrowUpLabel'
-  | 'arrowDownLabel'
 >;
 
 export interface NumberInputProps extends ExtendedTextInputProps {
@@ -77,6 +75,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     'allowNegativeValues',
     'arrowUpLabel',
     'arrowDownLabel',
+    'ariaLabels',
     'wrap',
     'value',
   ]);
@@ -476,8 +475,11 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       onArrowDownMouseUp={handleArrowDownMouseUp}
       upBtnRef={(el) => (upBtnRef = el)}
       downBtnRef={(el) => (downBtnRef = el)}
-      arrowUpLabel={local.arrowUpLabel}
-      arrowDownLabel={local.arrowDownLabel}
+      ariaLabels={{
+        ...local.ariaLabels,
+        ...(local.arrowUpLabel ? { increase: local.arrowUpLabel } : {}),
+        ...(local.arrowDownLabel ? { decrease: local.arrowDownLabel } : {}),
+      }}
     />
   );
 };

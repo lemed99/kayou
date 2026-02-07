@@ -26,7 +26,7 @@ export default function TextareaPage() {
         },
         {
           term: 'Loading State',
-          explanation: 'Spinner during async operations; textarea remains editable.',
+          explanation: 'Spinner overlay with disabled textarea during async operations.',
         },
       ]}
       props={[
