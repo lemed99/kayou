@@ -79,7 +79,8 @@ export function Pie(props: PieProps): JSX.Element {
   const updateActiveSector = (index: number) => {
     const d = arcs()[index];
     if (!d) return;
-    const percent = d.value / total();
+    const t = total();
+    const percent = t > 0 ? d.value / t : 0;
     const sectorProps = {
       innerRadius: props.innerRadius,
       outerRadius: props.outerRadius,
@@ -134,6 +135,11 @@ export function Pie(props: PieProps): JSX.Element {
         setFocusedIndex(arcsLength - 1);
         updateActiveSector(arcsLength - 1);
         break;
+      case 'Escape':
+        e.preventDefault();
+        setFocusedIndex(null);
+        setActiveSector(null);
+        break;
     }
   };
 
@@ -147,7 +153,8 @@ export function Pie(props: PieProps): JSX.Element {
     <g role="list" aria-label="Pie chart segments">
       <For each={arcs()}>
         {(d, i) => {
-          const percent = d.value / total();
+          const t = total();
+          const percent = t > 0 ? d.value / t : 0;
           const sectorProps = {
             innerRadius: props.innerRadius,
             outerRadius: props.outerRadius,

@@ -4,8 +4,6 @@ import { readdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-import extractExampleCode from './vite-plugin-extract-example-code';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Auto-discover routes for prerendering
@@ -43,12 +41,13 @@ export default defineConfig({
   // Use function form to ensure plugins are applied to all routers
   vite: () => {
     return {
-      plugins: [extractExampleCode(), tailwindcss()],
+      plugins: [tailwindcss()],
       resolve: {
         alias: {
           '@kayou/ui': join(__dirname, '../packages/ui/src'),
           '@kayou/hooks': join(__dirname, '../packages/hooks/src'),
           '@kayou/icons': join(__dirname, '../packages/icons/src'),
+          'assert': 'assert/',
         },
       },
     };

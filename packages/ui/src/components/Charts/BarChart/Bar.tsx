@@ -73,7 +73,7 @@ export function Bar(props: BarProps): JSX.Element {
   const chart = useBarChart();
 
   onMount(() => {
-    chart.registerBar(props.dataKey);
+    chart.registerBar(props.dataKey, props.stackId);
   });
 
   const barIndex = createMemo(() => {
@@ -86,15 +86,44 @@ export function Bar(props: BarProps): JSX.Element {
 
   const fill = () => props.fill ?? '#8884d8';
 
+  // Only the topmost bar in a stack gets rounded corners
+  const effectiveRadius = createMemo(() => {
+    if (!props.radius) return undefined;
+    if (props.stackId && !chart.isTopOfStack(props.dataKey)) return 0;
+    return props.radius;
+  });
+
   const bars = createMemo(() => {
     const data = chart.data;
     const xScale = chart.xScale();
     const yScale = chart.yScale();
     const xKeyVal = chart.xKey();
     const bandwidth = xScale.bandwidth();
-    const barGap = chart.barGap();
 
-    // Calculate individual bar width
+    if (props.stackId) {
+      // Stacked mode: full bandwidth, offset by cumulative stack base
+      return data.map((d, i) => {
+        const xVal = String(d[xKeyVal]);
+        const yVal = Number(d[props.dataKey] ?? 0);
+        const base = chart.getStackBase(props.dataKey, i);
+        const x = xScale(xVal) ?? 0;
+        const y = yScale(base + yVal);
+        const baseY = yScale(base);
+
+        return {
+          x,
+          y,
+          width: bandwidth,
+          height: Math.max(0, baseY - y),
+          value: yVal,
+          data: d,
+          xVal,
+        };
+      });
+    }
+
+    // Grouped mode (existing logic)
+    const barGap = chart.barGap();
     const totalGapWidth = bandwidth * barGap * (totalBars() - 1);
     const availableWidth = bandwidth - totalGapWidth;
     const barWidth = availableWidth / totalBars();
@@ -163,7 +192,7 @@ export function Bar(props: BarProps): JSX.Element {
                 width={bar.width}
                 height={bar.height}
                 fill={fill()}
-                radius={props.radius}
+                radius={effectiveRadius()}
                 value={bar.value}
                 dataKey={props.dataKey}
                 data={bar.data}

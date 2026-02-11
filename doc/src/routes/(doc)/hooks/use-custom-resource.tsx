@@ -4,7 +4,7 @@ export default function UseCustomResourcePage() {
   return (
     <HookDocPage
       title="useCustomResource"
-      description="A powerful data fetching hook for SolidJS that provides advanced features like automatic retries with exponential backoff, request deduplication, SWR (stale-while-revalidate) caching, IndexedDB persistence, and comprehensive loading/error states. It integrates with CustomResourceProvider for global configuration while allowing per-resource overrides."
+      description="A powerful data fetching hook for SolidJS that provides advanced features like automatic retries with exponential backoff, request deduplication, SWR (stale-while-revalidate) caching, IndexedDB persistence, request cancellation via AbortController, customizable cache validation, and comprehensive loading/error states. It integrates with CustomResourceProvider for global configuration while allowing per-resource overrides."
       parameters={[
         {
           name: 'urlString',
@@ -17,7 +17,7 @@ export default function UseCustomResourcePage() {
           name: 'options',
           type: 'ResourceOptions<T>',
           description:
-            'Per-resource configuration that overrides context defaults. See ResourceOptions interface.',
+            'Per-resource configuration that overrides context defaults. Includes fetcher, retryCount, retryDelay, exponentialBackoff, errorsBlackList, dedupeRequests, dedupeInterval, cacheValidator, onSuccess, and onError.',
         },
         {
           name: 'refreshKey',
@@ -73,7 +73,7 @@ export default function UseCustomResourcePage() {
           name: 'loading',
           type: 'Accessor<boolean>',
           description:
-            'True during initial load (false with SWR when cached data exists).',
+            'True during initial load when no cached data is available. With SWR enabled, becomes false once cached data is served.',
         },
         {
           name: 'validating',
@@ -103,7 +103,7 @@ export default function UseCustomResourcePage() {
         {
           name: 'refetch',
           type: '() => void',
-          description: 'Function to manually trigger a refetch.',
+          description: 'Manually trigger a refetch. Aborts any in-flight request before starting a new one.',
         },
         {
           name: 'setErrorStatus',
@@ -112,269 +112,191 @@ export default function UseCustomResourcePage() {
         },
       ]}
       returnType="CustomResource<T>"
+      types={[
+        {
+          name: 'ResourceOptions<T>',
+          description:
+            'Configuration options for resource fetching behavior. Can be set globally via CustomResourceProvider or per-hook.',
+          props: [
+            {
+              name: 'fetcher',
+              type: '(url: string) => Promise<T>',
+              default: 'fetch + JSON.parse',
+              description: 'Custom fetcher function. Defaults to fetch with JSON parsing.',
+            },
+            {
+              name: 'onSuccess',
+              type: '(data: T, fromCache: boolean) => void',
+              description:
+                'Callback invoked on successful fetch. Receives data and a flag indicating if it came from cache.',
+            },
+            {
+              name: 'onError',
+              type: '(err: Error | null) => void',
+              description: 'Callback invoked on fetch error.',
+            },
+            {
+              name: 'retryCount',
+              type: 'number',
+              default: '3',
+              description: 'Maximum number of retry attempts on failure.',
+            },
+            {
+              name: 'retryDelay',
+              type: 'number',
+              default: '2000',
+              description: 'Base delay in milliseconds between retries.',
+            },
+            {
+              name: 'exponentialBackoff',
+              type: 'boolean',
+              default: 'true',
+              description:
+                'Whether to use exponential backoff for retries. Delay doubles on each attempt with random jitter.',
+            },
+            {
+              name: 'errorsBlackList',
+              type: 'number[]',
+              default: '[404, 500, 400, 401, 403]',
+              description:
+                'HTTP status codes that should NOT trigger retries. Network errors (no status code) always retry.',
+            },
+            {
+              name: 'dedupeRequests',
+              type: 'boolean',
+              default: 'true',
+              description: 'Whether to deduplicate concurrent requests to the same URL.',
+            },
+            {
+              name: 'dedupeInterval',
+              type: 'number',
+              default: '2000',
+              description: 'Time in milliseconds to cache responses for deduplication.',
+            },
+            {
+              name: 'cacheValidator',
+              type: '(data: unknown) => boolean',
+              default: 'isValidCacheData',
+              description:
+                'Custom validator for cached data. Return true if the data is valid.',
+            },
+          ],
+        },
+        {
+          name: 'ResourceState',
+          description: 'The current state of the resource.',
+          values: ['unresolved', 'pending', 'ready', 'errored', 'refreshing'],
+        },
+      ]}
       usage={`
         import { useCustomResource, CustomResourceProvider } from '@kayou/hooks';
       `}
-      examples={[
-        {
-          title: 'Provider Setup',
-          description:
-            'Wrap your application with CustomResourceProvider to configure global data fetching behavior.',
-          code: `
-            import { CustomResourceProvider } from '@kayou/hooks';
-            import { createSignal } from 'solid-js';
+      provider={{
+        name: 'CustomResourceProvider',
+        description:
+          'Wraps your application to provide global fetch settings to all useCustomResource hooks. Per-hook options override provider defaults.',
+        example: `
+          import { createSignal } from 'solid-js';
+          import { CustomResourceProvider } from '@kayou/hooks';
 
-            function App() {
-              const [refreshData] = createSignal({});
+          function App() {
+            const [refreshData] = createSignal({});
 
-              return (
-                <CustomResourceProvider
-                  refreshData={refreshData}
-                  baseUrl="https://api.example.com/v1"
-                  retryCount={5}
-                  retryDelay={1000}
-                  exponentialBackoff={true}
-                  dedupeRequests={true}
-                  onError={(err) => console.error('Fetch failed:', err)}
-                >
-                  <Dashboard />
-                </CustomResourceProvider>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Custom Fetcher with Authentication',
-          description:
-            'Provide a custom fetcher function for adding authentication headers globally.',
-          code: `
-            import { CustomResourceProvider } from '@kayou/hooks';
-            import { createSignal } from 'solid-js';
-
-            function App() {
-              const [refreshData] = createSignal({});
-
-              const customFetcher = async (url: string) => {
-                const res = await fetch(url, {
-                  headers: {
-                    'Authorization': \\\`Bearer \\\${getToken()}\\\`,
-                    'Content-Type': 'application/json',
-                  },
-                });
-                if (!res.ok) throw new Error('Request failed');
-                return res.json();
-              };
-
-              return (
-                <CustomResourceProvider
-                  refreshData={refreshData}
-                  fetcher={customFetcher}
-                >
-                  <YourComponents />
-                </CustomResourceProvider>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Basic Usage',
-          description: 'Simple data fetching with loading and error states.',
-          code: `
-            import { useCustomResource } from '@kayou/hooks';
-            import { Show } from 'solid-js';
-
-            function UserProfile() {
-              const { data, loading, error } = useCustomResource<User>({
-                urlString: () => '/api/users/me',
-              });
-
-              return (
-                <Show when={!loading()} fallback={<Spinner />}>
-                  <Show when={!error()} fallback={<ErrorMessage error={error()} />}>
-                    <div>{data()?.name}</div>
-                  </Show>
-                </Show>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Conditional Fetching',
-          description:
-            'Use the condition prop to control when fetching should occur. Useful for dependent queries.',
-          code: `
-            function OrderDetails(props: { orderId: Accessor<string | null> }) {
-              // Only fetch when orderId is available
-              const { data, loading } = useCustomResource<Order>({
-                urlString: () => \`/api/orders/\${props.orderId()}\`,
-                condition: () => !!props.orderId(),
-              });
-
-              return (
-                <Show when={props.orderId()} fallback={<p>Select an order</p>}>
-                  <Show when={!loading()} fallback={<Spinner />}>
-                    <OrderCard order={data()} />
-                  </Show>
-                </Show>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Automatic Retry with Exponential Backoff',
-          description:
-            'Failed requests are automatically retried with increasing delays. 500 errors are NOT retried as they indicate processing errors, not transient issues.',
-          code: `
-            const { data, error, attempts, errorStatus } = useCustomResource<Data>({
-              urlString: () => '/api/unstable-endpoint',
-              options: {
-                retryCount: 5,        // Max 5 retries
-                retryDelay: 1000,     // Base delay: 1 second
-                exponentialBackoff: true, // Delays: 1s, 2s, 4s, 8s, 16s
-                // 400, 401, 403, 404, 500 will NOT be retried (in blacklist)
-                // 502, 503, 504 WILL be retried (transient server issues)
-              },
-            });
-
-            // Track retry progress
-            createEffect(() => {
-              if (attempts() > 0) {
-                console.log(\`Retry attempt \${attempts()}/5\`);
-              }
-            });
-          `,
-        },
-        {
-          title: 'SWR (Stale-While-Revalidate)',
-          description:
-            'Show cached data immediately while fetching fresh data in the background.',
-          code: `
-            function ProductList() {
-              const { data, validating, fromCache } = useCustomResource<Product[]>({
-                urlString: () => '/api/products',
-                swr: true,           // Enable SWR pattern
-                pullFromCache: true, // Use IndexedDB cache
-              });
-
-              return (
-                <div>
-                  {/* Show indicator when revalidating */}
-                  <Show when={validating()}>
-                    <div class="fixed top-4 right-4">
-                      <Spinner size="sm" />
-                      <span>Updating...</span>
-                    </div>
-                  </Show>
-
-                  {/* Show cache indicator */}
-                  <Show when={fromCache()}>
-                    <Badge color="warning">Showing cached data</Badge>
-                  </Show>
-
-                  {/* Data is available immediately from cache */}
-                  <For each={data()}>
-                    {(product) => <ProductCard product={product} />}
-                  </For>
-                </div>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Manual Refresh',
-          description:
-            'Use refetch() for manual refresh or refreshKey for coordinated refresh across components.',
-          code: `
-            function UserDashboard() {
-              const { data, refetch, loading } = useCustomResource<User>({
-                urlString: () => '/api/user',
-                refreshKey: 'user', // Links to context.refreshData
-              });
-
-              return (
-                <div>
-                  <button
-                    onClick={refetch}
-                    disabled={loading()}
-                    class="btn-primary"
-                  >
-                    {loading() ? 'Refreshing...' : 'Refresh Data'}
-                  </button>
-                  <UserInfo user={data()} />
-                </div>
-              );
-            }
-
-            // Refresh from anywhere using context
-            function RefreshAllButton() {
-              const [, setRefreshData] = useRefreshSignal();
-
-              const refreshAll = () => {
-                setRefreshData({ user: true, orders: true });
-              };
-
-              return <button onClick={refreshAll}>Refresh All</button>;
-            }
-          `,
-        },
-        {
-          title: 'Custom Options',
-          description: 'Override context defaults with per-resource configuration.',
-          code: `
-            function CriticalData() {
-              const { data, error, attempts, errorStatus } = useCustomResource<ImportantData>({
-                urlString: () => '/api/critical-data',
-                options: {
-                  retryCount: 10,
-                  retryDelay: 500,
-                  exponentialBackoff: true,
-                  onError: (err) => {
-                    reportToSentry(err);
-                  },
-                },
-              });
-
-              return (
-                <Show when={error()}>
-                  <div>
-                    Failed after {attempts()} attempts.
-                    Status: {errorStatus()}
-                  </div>
-                </Show>
-              );
-            }
-          `,
-        },
-        {
-          title: 'ResourceOptions Interface',
-          description:
-            'Configuration options that can be passed per-resource to override context defaults.',
-          code: `
-            interface ResourceOptions<T> {
-              // Custom fetch function
-              fetcher?: (url: string) => Promise<T>;
-
-              // Success/error callbacks
-              onSuccess?: (data: T, fromCache: boolean) => void;
-              onError?: (err: unknown) => void;
-
-              // Retry configuration
-              retryCount?: number;        // Default: 3
-              retryDelay?: number;        // Default: 2000ms
-              exponentialBackoff?: boolean; // Default: true
-
-              // HTTP errors that should NOT trigger retry
-              // Default: [404, 500, 400, 401, 403]
-              // 500 is included because it indicates processing errors, not transient issues
-              errorsBlackList?: number[];
-
-              // Request deduplication
-              dedupeRequests?: boolean;   // Default: true
-              dedupeInterval?: number;    // Default: 2000ms
-            }
-          `,
-        },
-      ]}
+            return (
+              <CustomResourceProvider
+                refreshData={refreshData}
+                retryCount={3}
+                retryDelay={1000}
+                exponentialBackoff={true}
+              >
+                <MyApp />
+              </CustomResourceProvider>
+            );
+          }
+        `,
+        props: [
+          {
+            name: 'refreshData',
+            type: 'Accessor<Record<string, boolean>> | null',
+            required: true,
+            default: '-',
+            description:
+              'Reactive signal containing refresh keys. When keys change, associated resources refetch.',
+          },
+          {
+            name: 'baseUrl',
+            type: 'string',
+            default: '-',
+            description:
+              'Base URL prepended to all resource URLs. Trailing slashes are automatically removed.',
+          },
+          {
+            name: 'fetcher',
+            type: '(url: string) => Promise<T>',
+            default: 'fetch + JSON.parse',
+            description:
+              'Custom fetcher function used by all resources. Defaults to fetch with JSON parsing.',
+          },
+          {
+            name: 'retryCount',
+            type: 'number',
+            default: '3',
+            description: 'Maximum number of retry attempts on failure.',
+          },
+          {
+            name: 'retryDelay',
+            type: 'number',
+            default: '2000',
+            description: 'Base delay in milliseconds between retries.',
+          },
+          {
+            name: 'exponentialBackoff',
+            type: 'boolean',
+            default: 'true',
+            description:
+              'Whether to use exponential backoff for retries. Delay doubles on each attempt with random jitter.',
+          },
+          {
+            name: 'errorsBlackList',
+            type: 'number[]',
+            default: '[404, 500, 400, 401, 403]',
+            description:
+              'HTTP status codes that should NOT trigger retries. Network errors (no status code) always retry.',
+          },
+          {
+            name: 'dedupeRequests',
+            type: 'boolean',
+            default: 'true',
+            description: 'Whether to deduplicate concurrent requests to the same URL.',
+          },
+          {
+            name: 'dedupeInterval',
+            type: 'number',
+            default: '2000',
+            description: 'Time in milliseconds to cache responses for deduplication.',
+          },
+          {
+            name: 'cacheValidator',
+            type: '(data: unknown) => boolean',
+            default: 'isValidCacheData',
+            description:
+              'Custom validator for cached data. Return true if the data is valid. Defaults to built-in validation that rejects strings, empty objects, and falsy values.',
+          },
+          {
+            name: 'onSuccess',
+            type: '(data: T, fromCache: boolean) => void',
+            default: '-',
+            description:
+              'Callback invoked on successful fetch. Receives data and a flag indicating if it came from cache.',
+          },
+          {
+            name: 'onError',
+            type: '(err: Error | null) => void',
+            default: '-',
+            description: 'Callback invoked on fetch error.',
+          },
+        ],
+      }}
     />
   );
 }

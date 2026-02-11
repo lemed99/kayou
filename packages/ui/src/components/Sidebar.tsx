@@ -186,7 +186,7 @@ export interface SidebarCollapseProps {
 
 const sidebarTheme = {
   root: {
-    base: 'h-full max-w-[248px]',
+    base: 'h-full max-w-[248px] w-fit',
     inner: 'h-full overflow-hidden p-2 dark:bg-neutral-900',
   },
   itemGroup: 'space-y-1 list-none',
@@ -363,7 +363,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
     mn: SidebarItem,
     options?: { showPinButton?: boolean; hideIcon?: boolean },
   ) => (
-    <div>
+    <>
       <Show when={!mn.children}>
         <Tooltip hidden={isSidebarOpen()} content={mn.label} placement="right">
           <SidebarItemComponent
@@ -463,14 +463,13 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
           </SidebarCollapse>
         </Popover>
       </Show>
-    </div>
+    </>
   );
 
   // Check if header section should be shown
-  // Note: We use 'prop' in props to avoid evaluating JSX props during SSR which causes hydration issues
   const hasHeaderSection = () =>
-    'children' in props ||
-    'headerContent' in props ||
+    local.children !== undefined ||
+    local.headerContent !== undefined ||
     headerItems().length > 0 ||
     pinnedItemsData().length > 0;
 
@@ -485,7 +484,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         <Show when={hasHeaderSection()}>
           <div class="shrink-0">
             {/* Logo and toggle button */}
-            <Show when={'children' in props}>
+            <Show when={local.children !== undefined}>
               <div class="mb-2 flex h-12 items-center justify-between px-2.5">
                 <div class={isSidebarOpen() ? '' : 'hidden'}>{local.children}</div>
                 <Show when={props.setIsSidebarOpen}>
@@ -494,6 +493,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
                     aria-label={isSidebarOpen() ? a().collapse : a().expand}
                     aria-expanded={isSidebarOpen()}
                     class={twMerge(
+                      'text-gray-900 dark:text-white',
                       isSidebarOpen() ? 'cursor-w-resize' : 'cursor-e-resize',
                     )}
                     onClick={() => {
@@ -507,29 +507,29 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Custom header content */}
-            <Show when={'headerContent' in props && isSidebarOpen()}>
+            <Show when={local.headerContent !== undefined && isSidebarOpen()}>
               <div class="px-2 pb-2">{local.headerContent}</div>
             </Show>
 
             {/* Header menu items */}
-            <Show when={headerItems().length > 0}>
+            <Show when={headerItems().length > 0 || pinnedItemsData().length > 0}>
               <ul class={sidebarTheme.itemGroup} role="menu">
-                <For each={headerItems()}>{(mn) => renderMenuItem(mn)}</For>
-              </ul>
-            </Show>
+                <Show when={headerItems().length > 0}>
+                  <For each={headerItems()}>{(mn) => renderMenuItem(mn)}</For>
+                </Show>
 
-            {/* Pinned section */}
-            <Show when={pinnedItemsData().length > 0}>
-              <ul class={sidebarTheme.itemGroup} role="menu">
-                {renderMenuItem(
-                  {
-                    id: '__pinned__',
-                    label: local.pinnedLabel ?? l().pinned,
-                    icon: local.pinnedIcon ?? Pin02Icon,
-                    children: pinnedItemsData(),
-                  },
-                  { showPinButton: true },
-                )}
+                {/* Pinned section */}
+                <Show when={pinnedItemsData().length > 0}>
+                  {renderMenuItem(
+                    {
+                      id: '__pinned__',
+                      label: local.pinnedLabel ?? l().pinned,
+                      icon: local.pinnedIcon ?? Pin02Icon,
+                      children: pinnedItemsData(),
+                    },
+                    { showPinButton: true },
+                  )}
+                </Show>
               </ul>
             </Show>
 
@@ -550,10 +550,10 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         </div>
 
         {/* Footer section */}
-        <Show when={'footerContent' in props || footerItems().length > 0}>
+        <Show when={local.footerContent !== undefined || footerItems().length > 0}>
           <div class="mt-auto shrink-0">
             {/* Custom footer content (e.g., promo cards) */}
-            <Show when={'footerContent' in props && isSidebarOpen()}>
+            <Show when={local.footerContent !== undefined && isSidebarOpen()}>
               <div class="p-2">{local.footerContent}</div>
             </Show>
 
@@ -649,8 +649,8 @@ const SidebarItemComponent = (props: SidebarItemProps) => {
               }
               placement="right"
             >
-              <div
-                tabIndex={0}
+              <button
+                type="button"
                 onClick={handlePinClick}
                 class={twMerge(
                   'cursor-pointer',
@@ -665,7 +665,7 @@ const SidebarItemComponent = (props: SidebarItemProps) => {
                 }
               >
                 <Pin02Icon class={twMerge('size-4')} />
-              </div>
+              </button>
             </Tooltip>
           </Show>
         </span>

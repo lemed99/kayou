@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
 
 import { Node, mergeAttributes } from '@tiptap/core';
@@ -86,9 +86,9 @@ export const ImageUploadNode = Node.create<ImageUploadOptions>({
               helperText="Supported formats: PNG, JPG, GIF, SVG, WebP"
               autoUpload={false}
             />
-            {error() && (
+            <Show when={error()}>
               <p class="mt-2 text-sm text-red-600 dark:text-red-400">{error()}</p>
-            )}
+            </Show>
           </div>
         ),
         dom,

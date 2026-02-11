@@ -11,7 +11,6 @@ import {
 
 import {
   CustomResourceContext,
-  CustomResourceContextValue,
   ResourceOptions,
 } from '../context';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers';
@@ -101,12 +100,12 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const [resourceData, setResourceData] = createSignal<T | undefined>(undefined);
   const [validating, setValidating] = createSignal(false);
 
+  let abortController = new AbortController();
+
   const pullFromCache = createMemo(() => props.pullFromCache ?? true);
   const swr = createMemo(() => props.swr ?? true);
 
-  const context = useContext(CustomResourceContext) as
-    | CustomResourceContextValue<T>
-    | undefined;
+  const context = useContext(CustomResourceContext);
   if (!context) {
     throw new Error('useCustomResource must be used within a CustomResourceProvider');
   }
@@ -134,7 +133,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       return props.options?.dedupeInterval ?? context.options.dedupeInterval;
     },
     get fetcher() {
-      return props.options?.fetcher ?? context.options.fetcher;
+      return (props.options?.fetcher ?? context.options.fetcher) as ResourceOptions<T>['fetcher'];
     },
     get onSuccess() {
       return props.options?.onSuccess ?? context.options.onSuccess;
@@ -142,18 +141,27 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     get onError() {
       return props.options?.onError ?? context.options.onError;
     },
+    get cacheValidator() {
+      return props.options?.cacheValidator ?? context.options.cacheValidator;
+    },
   };
 
   const retryTimers = new Set<number>();
 
   const defaultFetcher = async (url: string): Promise<T> => {
-    const res = await fetch(url);
-    const data = (await res.json()) as T;
+    const res = await fetch(url, { signal: abortController.signal });
     if (!res.ok) {
       setErrorStatus(res.status);
-      throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
+      let message: string;
+      try {
+        const body: unknown = await res.json();
+        message = typeof body === 'string' ? body : JSON.stringify(body);
+      } catch {
+        message = res.statusText || `HTTP ${res.status}`;
+      }
+      throw new Error(message);
     }
-    return data;
+    return (await res.json()) as T;
   };
 
   const wrappedFetcher = async ({
@@ -203,13 +211,13 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
         entry?.resolvedAt &&
         Date.now() - entry.resolvedAt < options.dedupeInterval!
       ) {
-        return fetchPromiseCallback(entry.lastValue);
+        return fetchPromiseCallback(entry.lastValue as T);
       }
 
       let promiseReturn: Promise<T>;
 
       if (entry?.promise) {
-        promiseReturn = entry.promise;
+        promiseReturn = entry.promise as Promise<T>;
       } else {
         promiseReturn = fetchPromise().then((data) => {
           const timeOut = setTimeout(() => {
@@ -259,7 +267,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
       if (condition === false) return false;
 
-      const cacheData = pullFromCache ? await getCacheRow(url) : null;
+      const cacheData = pullFromCache ? await getCacheRow(url, mergedOptions.cacheValidator) : null;
       const needsFetch = key ? context.refreshData?.()[key] !== false : true;
 
       return needsFetch || !cacheData;
@@ -280,10 +288,10 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   );
 
   createResource(
-    () => (((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
+    () => (props.condition?.() !== false && ((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
     async (url) => {
       if (!url) return undefined;
-      const cached = (await getCacheRow(url)) as T | null;
+      const cached = (await getCacheRow(url, mergedOptions.cacheValidator)) as T | null;
       if (cached) {
         setFromCache(true);
         setErrorStatus(undefined);
@@ -297,8 +305,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   createEffect(() => {
     if (
       resource.error &&
-      errorStatus() &&
-      !mergedOptions.errorsBlackList?.includes(errorStatus()!)
+      !(resource.error instanceof DOMException && resource.error.name === 'AbortError') &&
+      (errorStatus() === undefined || !mergedOptions.errorsBlackList?.includes(errorStatus()!))
     ) {
       const currentAttempts = attempts();
       if (currentAttempts < mergedOptions.retryCount!) {
@@ -341,9 +349,12 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   onCleanup(() => {
     clearAllRetryTimers();
+    abortController.abort();
   });
 
   const refetch = () => {
+    abortController.abort();
+    abortController = new AbortController();
     setAttempts(0);
     void originalRefetch();
   };
@@ -354,7 +365,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     errorStatus,
     setErrorStatus,
     attempts,
-    loading: () => (swr() ? false : resource.loading),
+    loading: () => (swr() ? resourceData() === undefined && resource.loading : resource.loading),
     state: () => resource.state,
     latest: () => resource.latest ?? undefined,
     refetch,

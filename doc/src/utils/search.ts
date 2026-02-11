@@ -6,11 +6,50 @@ export interface SearchDocument {
   label: string;
   category: string;
   keywords: string;
+  content: string;
 }
 
 // Auto-generate search index from routes using Vite's import.meta.glob
 // This automatically updates in dev when files are added/removed
 const routeModules = import.meta.glob('../routes/**/*.tsx', { eager: true });
+
+// Import raw source of each doc page for full-text indexing
+const rawModules = import.meta.glob<string>('../routes/(doc)/**/*.tsx', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
+
+/**
+ * Extract readable text from TSX source code.
+ * Strips imports, exports, JSX tags, and code noise to produce
+ * a searchable plain-text string.
+ */
+function extractTextFromSource(source: string): string {
+  return (
+    source
+      // Remove import/export lines
+      .replace(/^import\s.+$/gm, '')
+      .replace(/^export\s+(default\s+)?/gm, '')
+      // Remove single-line comments
+      .replace(/\/\/.*$/gm, '')
+      // Remove multi-line comments (including {/* JSX comments */})
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      // Remove JSX/HTML tags but keep their text content
+      .replace(/<[^>]+>/g, ' ')
+      // Extract string literals (both single and double quoted)
+      .replace(/['"](.*?)['"]/g, ' $1 ')
+      // Extract template literal content
+      .replace(/`([^`]*)`/g, ' $1 ')
+      // Remove remaining code symbols
+      .replace(/[{}();=<>/\\[\]|&!?@#$%^*~+]/g, ' ')
+      // Remove common code tokens
+      .replace(/\b(const|let|var|function|return|class|interface|type|extends|implements|new|if|else|switch|case|break|continue|for|while|do|try|catch|finally|throw|typeof|instanceof|void|null|undefined|true|false|this|super|import|export|default|from|as|async|await)\b/g, '')
+      // Normalize whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
+}
 
 function generateSearchIndex(): SearchDocument[] {
   const docs: SearchDocument[] = [];
@@ -46,11 +85,16 @@ function generateSearchIndex(): SearchDocument[] {
     // Generate keywords from label
     const keywords = generateKeywords(label, filename);
 
+    // Extract full-text content from raw source
+    const rawSource = rawModules[path] ?? '';
+    const content = extractTextFromSource(rawSource);
+
     docs.push({
       path: routePath,
       label,
       category,
       keywords,
+      content,
     });
   }
 
@@ -60,6 +104,7 @@ function generateSearchIndex(): SearchDocument[] {
     label: 'Icons',
     category: 'Resources',
     keywords: 'icons svg assets graphics search',
+    content: 'icons svg search browse beautiful icons for your SolidJS projects',
   });
 
   return docs;
@@ -117,13 +162,12 @@ function generateKeywords(label: string, filename: string): string {
     textarea: ['multiline', 'text'],
     sidebar: ['navigation', 'menu'],
     quickstart: ['start', 'begin', 'intro', 'getting started'],
-    installation: ['install', 'setup', 'npm', 'pnpm'],
     contributing: ['contribute', 'help', 'pr'],
     license: ['mit', 'open source'],
     floating: ['position', 'anchor', 'tooltip'],
     mutation: ['api', 'post', 'fetch', 'request'],
     intl: ['i18n', 'translate', 'locale', 'internationalization'],
-    resource: ['fetch', 'api', 'cache', 'swr'],
+    resource: ['fetch', 'api', 'cache', 'swr', 'revalidate'],
   };
 
   // Add synonyms for matching keywords
@@ -151,11 +195,12 @@ function getSearchDb() {
       label: 'string',
       category: 'string',
       keywords: 'string',
+      content: 'string',
     } as const,
   });
 
   for (const doc of searchData) {
-    insert(searchDb, doc);
+    void insert(searchDb, doc);
   }
 
   return searchDb;
@@ -166,12 +211,13 @@ export function searchDocs(query: string): SearchDocument[] {
 
   const results = search(db, {
     term: query,
-    properties: ['label', 'category', 'keywords'],
+    properties: ['label', 'category', 'keywords', 'content'],
     tolerance: 1,
     boost: {
-      label: 2,
-      category: 1,
-      keywords: 1.5,
+      label: 3,
+      keywords: 2,
+      content: 1,
+      category: 0.5,
     },
   }) as { hits: Array<{ document: SearchDocument }> };
 

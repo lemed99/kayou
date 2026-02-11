@@ -8,32 +8,23 @@ test.describe('DataTable', () => {
   // ==================== Basic Rendering ====================
 
   test('should render data table container', async ({ page }) => {
-    // DataTable uses CSS Grid with divs, not actual table elements
     const content = await page.textContent('body');
     expect(content).toContain('DataTable');
   });
 
   test('should display column headers', async ({ page }) => {
-    // Check for column header text
     const nameHeader = page.locator('text=Name').first();
-    if (await nameHeader.isVisible()) {
-      await expect(nameHeader).toBeVisible();
-    }
+    await expect(nameHeader).toBeVisible();
   });
 
   test('should display data rows', async ({ page }) => {
-    // Check for sample data content
     const johnDoe = page.locator('text=John Doe').first();
-    if (await johnDoe.isVisible()) {
-      await expect(johnDoe).toBeVisible();
-    }
+    await expect(johnDoe).toBeVisible();
   });
 
   test('should display email content', async ({ page }) => {
     const email = page.locator('text=john@example.com').first();
-    if (await email.isVisible()) {
-      await expect(email).toBeVisible();
-    }
+    await expect(email).toBeVisible();
   });
 
   // ==================== Column Headers ====================
@@ -66,50 +57,30 @@ test.describe('DataTable', () => {
   // ==================== Data Display ====================
 
   test('should display user data', async ({ page }) => {
-    const users = [
-      'John Doe',
-      'Jane Smith',
-      'Bob Johnson',
-      'Alice Williams',
-      'Charlie Brown',
-    ];
-    let foundCount = 0;
-
+    const users = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams'];
     for (const user of users) {
       const row = page.locator(`text=${user}`).first();
-      if (await row.isVisible()) {
-        foundCount++;
-      }
+      await expect(row).toBeVisible();
     }
-
-    expect(foundCount).toBeGreaterThan(0);
   });
 
   test('should display role data', async ({ page }) => {
     const roles = ['Admin', 'User', 'Editor'];
     let foundCount = 0;
-
     for (const role of roles) {
       const cell = page.locator(`text=${role}`).first();
-      if (await cell.isVisible()) {
-        foundCount++;
-      }
+      if (await cell.isVisible()) foundCount++;
     }
-
     expect(foundCount).toBeGreaterThan(0);
   });
 
   test('should display status data', async ({ page }) => {
     const statuses = ['active', 'inactive', 'pending'];
     let foundCount = 0;
-
     for (const status of statuses) {
       const cell = page.locator(`text=${status}`).first();
-      if (await cell.isVisible()) {
-        foundCount++;
-      }
+      if (await cell.isVisible()) foundCount++;
     }
-
     expect(foundCount).toBeGreaterThan(0);
   });
 
@@ -117,34 +88,27 @@ test.describe('DataTable', () => {
 
   test('should render row selection checkboxes when enabled', async ({ page }) => {
     const rowCheckbox = page.locator('input[type="checkbox"]').first();
-    if (await rowCheckbox.isVisible()) {
-      await expect(rowCheckbox).toBeVisible();
-    }
+    await expect(rowCheckbox).toBeVisible();
   });
 
   test('should toggle row selection on checkbox click', async ({ page }) => {
     const rowCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(rowCheckbox).toBeVisible();
 
-    if (await rowCheckbox.isVisible()) {
-      const initialChecked = await rowCheckbox.isChecked();
-      await rowCheckbox.click();
-      const newChecked = await rowCheckbox.isChecked();
-      expect(newChecked).toBe(!initialChecked);
-    }
+    const initialChecked = await rowCheckbox.isChecked();
+    await rowCheckbox.click();
+    const newChecked = await rowCheckbox.isChecked();
+    expect(newChecked).toBe(!initialChecked);
   });
 
   test('should support select all functionality', async ({ page }) => {
-    // Find a "select all" checkbox in the header area
     const checkboxes = page.locator('input[type="checkbox"]');
     const count = await checkboxes.count();
+    expect(count).toBeGreaterThan(1);
 
-    if (count > 1) {
-      // First checkbox is often "select all"
-      const selectAll = checkboxes.first();
-      if (await selectAll.isVisible()) {
-        await expect(selectAll).toBeVisible();
-      }
-    }
+    // First checkbox is "select all"
+    const selectAll = checkboxes.first();
+    await expect(selectAll).toBeVisible();
   });
 
   // ==================== Search Bar ====================
@@ -153,23 +117,17 @@ test.describe('DataTable', () => {
     const searchInput = page
       .locator('input[type="search"], input[placeholder*="Search"]')
       .first();
-    if (await searchInput.isVisible()) {
-      await expect(searchInput).toBeVisible();
-    }
+    await expect(searchInput).toBeVisible();
   });
 
-  test('should filter data on search', async ({ page }) => {
+  test('should accept search input', async ({ page }) => {
     const searchInput = page
       .locator('input[type="search"], input[placeholder*="Search"]')
       .first();
+    await expect(searchInput).toBeVisible();
 
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('John');
-      await page.waitForTimeout(300);
-      // Data should be filtered
-      const content = await page.textContent('body');
-      expect(content).toContain('John');
-    }
+    await searchInput.fill('John');
+    await expect(searchInput).toHaveValue('John');
   });
 
   // ==================== Filter System ====================
@@ -179,9 +137,7 @@ test.describe('DataTable', () => {
       .locator('button')
       .filter({ hasText: /Filter/i })
       .first();
-    if (await filterButton.isVisible()) {
-      await expect(filterButton).toBeVisible();
-    }
+    await expect(filterButton).toBeVisible();
   });
 
   test('should open filter popover on button click', async ({ page }) => {
@@ -189,17 +145,13 @@ test.describe('DataTable', () => {
       .locator('button')
       .filter({ hasText: /Filter/i })
       .first();
+    await expect(filterButton).toBeVisible();
 
-    if (await filterButton.isVisible()) {
-      await filterButton.click();
-      await page.waitForTimeout(300);
+    await filterButton.click();
+    await page.waitForTimeout(300);
 
-      // Filter popover should be visible
-      const popover = page.locator('[role="dialog"], [data-popover]').first();
-      if (await popover.isVisible()) {
-        await expect(popover).toBeVisible();
-      }
-    }
+    const popover = page.locator('[data-filter-popover]').first();
+    await expect(popover).toBeVisible();
   });
 
   test('should have add filter option', async ({ page }) => {
@@ -207,16 +159,11 @@ test.describe('DataTable', () => {
       .locator('button')
       .filter({ hasText: /Filter/i })
       .first();
+    await filterButton.click();
+    await page.waitForTimeout(300);
 
-    if (await filterButton.isVisible()) {
-      await filterButton.click();
-      await page.waitForTimeout(300);
-
-      const addFilter = page.locator('text=Add filter').first();
-      if (await addFilter.isVisible()) {
-        await expect(addFilter).toBeVisible();
-      }
-    }
+    const addFilter = page.locator('text=Add filter').first();
+    await expect(addFilter).toBeVisible();
   });
 
   // ==================== Pagination ====================
@@ -225,170 +172,126 @@ test.describe('DataTable', () => {
     const pagination = page
       .locator('[class*="pagination"], nav[aria-label*="pagination"]')
       .first();
-    if (await pagination.isVisible()) {
-      await expect(pagination).toBeVisible();
-    }
+    await expect(pagination).toBeVisible();
   });
 
   test('should render per-page control when enabled', async ({ page }) => {
     const perPage = page.locator('text=per page').first();
-    if (await perPage.isVisible()) {
-      await expect(perPage).toBeVisible();
-    }
-  });
-
-  // ==================== Loading State ====================
-
-  test('should render loading skeleton', async ({ page }) => {
-    // Look for loading skeleton indicators
-    const skeleton = page
-      .locator('[class*="animate-pulse"], [class*="skeleton"]')
-      .first();
-    if (await skeleton.isVisible()) {
-      await expect(skeleton).toBeVisible();
-    }
-  });
-
-  // ==================== Error State ====================
-
-  test('should render error message', async ({ page }) => {
-    const errorMessage = page.locator('text=Failed to load').first();
-    if (await errorMessage.isVisible()) {
-      await expect(errorMessage).toBeVisible();
-    }
+    await expect(perPage).toBeVisible();
   });
 
   // ==================== Expandable Table ====================
 
   test('should render expand button when expandable', async ({ page }) => {
-    const expandBtn = page.locator('button[aria-label="See more"]').first();
-    if (await expandBtn.isVisible()) {
-      await expect(expandBtn).toBeVisible();
-    }
+    const expandBtn = page.locator('button[aria-expanded]').first();
+    await expect(expandBtn).toBeVisible();
   });
 
   test('should expand inline on expand button click', async ({ page }) => {
-    const expandBtn = page.locator('button[aria-label="See more"]').first();
+    const expandBtn = page.locator('button[aria-expanded="false"]').first();
+    await expect(expandBtn).toBeVisible();
 
-    if (await expandBtn.isVisible()) {
-      await expandBtn.scrollIntoViewIfNeeded();
-      await expandBtn.click();
+    await expandBtn.scrollIntoViewIfNeeded();
+    await expandBtn.click();
 
-      await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
+    await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
 
-      // Should show more rows than the default count
-      const table = page.locator('[role="table"]').first();
-      const dataRows = table.locator('[role="row"]');
-      const rowCount = await dataRows.count();
-      // Header row + more than defaultRowsCount data rows
-      expect(rowCount).toBeGreaterThan(4);
-    }
+    // Should show more rows than the default count
+    const table = page.locator('[role="table"]').first();
+    const dataRows = table.locator('[role="row"]');
+    const rowCount = await dataRows.count();
+    // Header row + more than defaultRowsCount data rows
+    expect(rowCount).toBeGreaterThan(4);
   });
 
   test('should display data rows in expanded view', async ({ page }) => {
-    const expandBtn = page.locator('button[aria-label="See more"]').first();
+    const expandBtn = page.locator('button[aria-expanded="false"]').first();
+    await expect(expandBtn).toBeVisible();
 
-    if (await expandBtn.isVisible()) {
-      await expandBtn.scrollIntoViewIfNeeded();
-      await expandBtn.click();
+    await expandBtn.scrollIntoViewIfNeeded();
+    await expandBtn.click();
 
-      const table = page.locator('[role="table"]').first();
-      const content = await table.textContent();
-      expect(content).toContain('John Doe');
-    }
+    const table = page.locator('[role="table"]').first();
+    const content = await table.textContent();
+    expect(content).toContain('John Doe');
   });
 
   test('should collapse on expand button click again', async ({ page }) => {
-    const expandBtn = page.locator('button[aria-label="See more"]').first();
+    const expandBtn = page.locator('button[aria-expanded="false"]').first();
+    await expect(expandBtn).toBeVisible();
 
-    if (await expandBtn.isVisible()) {
-      await expandBtn.scrollIntoViewIfNeeded();
-      await expandBtn.click();
-      await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
+    await expandBtn.scrollIntoViewIfNeeded();
+    await expandBtn.click();
+    await expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
 
-      // Click again to collapse
-      const collapseBtn = page.locator('button[aria-label="Collapse table"]').first();
-      await collapseBtn.click();
-      await expect(collapseBtn).toHaveAttribute('aria-expanded', 'false');
-    }
+    // Click again to collapse — same button, now aria-expanded="true"
+    await expandBtn.click();
+    await expect(expandBtn).toHaveAttribute('aria-expanded', 'false');
   });
 
   // ==================== Custom Cell Rendering ====================
 
   test('should render custom status badges', async ({ page }) => {
-    // Look for status badges with custom styling
     const activeBadge = page.locator('[class*="bg-green"]').first();
-    if (await activeBadge.isVisible()) {
-      await expect(activeBadge).toBeVisible();
-    }
+    await expect(activeBadge).toBeVisible();
   });
 
   // ==================== Keyboard Accessibility ====================
 
   test('should be keyboard navigable', async ({ page }) => {
-    const firstInteractive = page
-      .locator('input, button')
-      .filter({ has: page.locator(':visible') })
-      .first();
+    const firstInteractive = page.locator('input, button').first();
+    await expect(firstInteractive).toBeVisible();
 
-    if (await firstInteractive.isVisible()) {
-      await firstInteractive.focus();
-      await page.keyboard.press('Tab');
-    }
+    await firstInteractive.focus();
+    await page.keyboard.press('Tab');
   });
 
   test('checkboxes should be focusable', async ({ page }) => {
     const checkbox = page.locator('input[type="checkbox"]').first();
+    await expect(checkbox).toBeVisible();
 
-    if (await checkbox.isVisible()) {
-      await checkbox.focus();
-      await expect(checkbox).toBeFocused();
-    }
+    await checkbox.focus();
+    await expect(checkbox).toBeFocused();
   });
 
   test('should toggle checkbox with Space key', async ({ page }) => {
     const checkbox = page.locator('input[type="checkbox"]').first();
+    await expect(checkbox).toBeVisible();
 
-    if (await checkbox.isVisible()) {
-      await checkbox.focus();
-      const initialChecked = await checkbox.isChecked();
-      await page.keyboard.press('Space');
-      const newChecked = await checkbox.isChecked();
-      expect(newChecked).toBe(!initialChecked);
-    }
+    await checkbox.focus();
+    const initialChecked = await checkbox.isChecked();
+    await page.keyboard.press('Space');
+    const newChecked = await checkbox.isChecked();
+    expect(newChecked).toBe(!initialChecked);
   });
 
   // ==================== CSS Grid Layout ====================
 
   test('should use CSS Grid for layout', async ({ page }) => {
-    // DataTable uses div-based CSS Grid
     const gridContainer = page.locator('[style*="grid"], [class*="grid"]').first();
-    if (await gridContainer.isVisible()) {
-      await expect(gridContainer).toBeVisible();
-    }
+    await expect(gridContainer).toBeVisible();
   });
 
   // ==================== Selected Elements Count ====================
 
   test('should display selected count when rows selected', async ({ page }) => {
-    const checkbox = page.locator('input[type="checkbox"]').first();
+    // Click second checkbox (first is "select all")
+    const checkboxes = page.locator('input[type="checkbox"]');
+    const count = await checkboxes.count();
+    expect(count).toBeGreaterThan(1);
 
-    if (await checkbox.isVisible()) {
-      await checkbox.click();
-      await page.waitForTimeout(100);
+    await checkboxes.nth(1).click();
+    await page.waitForTimeout(100);
 
-      const selectedText = page.locator('text=/\\d+ of \\d+ selected/').first();
-      if (await selectedText.isVisible()) {
-        await expect(selectedText).toBeVisible();
-      }
-    }
+    const selectedText = page.locator('text=/\\d+ of \\d+ selected/').first();
+    await expect(selectedText).toBeVisible();
   });
 
   // ==================== Multiple Tables ====================
 
-  test('should render multiple data table examples', async ({ page }) => {
+  test('should render data table page', async ({ page }) => {
     const content = await page.textContent('body');
-    expect(content).toContain('Basic Table');
+    expect(content).toContain('DataTable');
   });
 
   test('each table example should display data', async ({ page }) => {
@@ -399,14 +302,6 @@ test.describe('DataTable', () => {
 
   // ==================== Edge Cases ====================
 
-  test('should handle empty data gracefully', async ({ page }) => {
-    // Look for "no data" message in one of the examples
-    const noData = page.locator('text=No users found').first();
-    if (await noData.isVisible()) {
-      await expect(noData).toBeVisible();
-    }
-  });
-
   test('should maintain layout with varying content', async ({ page }) => {
     const content = await page.textContent('body');
     expect(content).toContain('DataTable');
@@ -416,5 +311,31 @@ test.describe('DataTable', () => {
     await page.waitForTimeout(500);
     const body = page.locator('body');
     await expect(body).toBeVisible();
+  });
+
+  // ==================== ARIA ====================
+
+  test('should have role="table" on container', async ({ page }) => {
+    const table = page.locator('[role="table"]').first();
+    await expect(table).toBeVisible();
+  });
+
+  test('should have role="rowgroup" for header and body', async ({ page }) => {
+    const rowgroups = page.locator('[role="rowgroup"]');
+    const count = await rowgroups.count();
+    // At least 2: one for header, one for body
+    expect(count).toBeGreaterThanOrEqual(2);
+  });
+
+  test('should have role="columnheader" on header cells', async ({ page }) => {
+    const headers = page.locator('[role="columnheader"]');
+    const count = await headers.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('expand button should have aria-label', async ({ page }) => {
+    const expandBtn = page.locator('button[aria-expanded]').first();
+    await expect(expandBtn).toBeVisible();
+    await expect(expandBtn).toHaveAttribute('aria-label');
   });
 });

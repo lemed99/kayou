@@ -11,7 +11,6 @@ interface Route {
 // Getting Started pages
 const gettingStartedPages = [
   { path: '/overview/quickstart', label: 'Introduction' },
-  { path: '/overview/installation', label: 'Installation' },
   { path: '/overview/contributing', label: 'Contributing' },
   { path: '/overview/license', label: 'License' },
 ];
@@ -33,30 +32,30 @@ const componentCategories: Record<string, string[]> = {
     'button',
     'checkbox',
     'date-picker',
-    'label',
     'helper-text',
+    'label',
+    'multi-select',
     'number-input',
     'password',
     'rich-text-editor',
     'select',
     'select-with-search',
-    'multi-select',
     'text-input',
     'textarea',
     'toggle-switch',
     'upload-file',
   ],
-  Layout: ['accordion', 'drawer', 'modal', 'pagination', 'popover', 'sidebar', 'tooltip'],
-  Feedback: ['alert', 'badge', 'skeleton', 'spinner'],
-  Navigation: ['breadcrumb'],
-  'Data Display': ['data-table', 'virtual-list', 'virtual-grid', 'dynamic-virtual-list'],
+  Layout: ['accordion', 'drawer', 'modal', 'popover', 'sidebar'],
+  Feedback: ['alert', 'badge', 'skeleton', 'spinner', 'tooltip'],
+  Navigation: ['breadcrumb', 'pagination'],
+  'Data Display': ['data-table', 'dynamic-virtual-list', 'virtual-grid', 'virtual-list'],
   Charts: ['area-chart', 'bar-chart', 'line-chart', 'pie-chart', 'responsive-container'],
 };
 
 // Static routes data (replaces ~solid-pages virtual module)
 const routes: Route[] = [
   {
-    path: 'ui',
+    path: 'components',
     children: Object.values(componentCategories)
       .flat()
       .map((path) => ({ path })),
@@ -87,16 +86,15 @@ const findCategoryForComponent = (componentPath: string): string | null => {
 // Derive section from path
 const getSectionFromPath = (path: string): string | null => {
   if (path.startsWith('/overview')) return 'getting-started';
-  if (path.startsWith('/ui')) return 'ui';
+  if (path.startsWith('/components')) return 'components';
   if (path.startsWith('/hooks')) return 'hooks';
-  if (path.startsWith('/icons')) return 'icons';
   return null;
 };
 
 // Derive category from path
 const getCategoryFromPath = (path: string): string | null => {
-  if (!path.startsWith('/ui/')) return null;
-  const componentPath = path.replace('/ui/', '').replace(/\/$/, '');
+  if (!path.startsWith('/components/')) return null;
+  const componentPath = path.replace('/components/', '').replace(/\/$/, '');
   return findCategoryForComponent(componentPath);
 };
 
@@ -183,7 +181,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
     }
   };
 
-  const excludedPaths = new Set(['*', '/', 'overview', 'docs', 'icons']);
+  const excludedPaths = new Set(['*', '/', 'overview', 'docs']);
   const filteredRoutes = createMemo(() => {
     return routes.filter((route) => route.path && !excludedPaths.has(route.path));
   });
@@ -283,8 +281,8 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
     const grouped = groupComponentsByCategory(route.children ?? []);
 
     return renderSection(
-      '@kayou/ui',
-      'ui',
+      'Components',
+      'components',
       <div class="space-y-3 pl-3">
         <For each={Object.entries(grouped)}>
           {([category, items]) => {
@@ -325,33 +323,13 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
       .sort((a, b) => a.path.localeCompare(b.path));
 
     return renderSection(
-      '@kayou/hooks',
+      'Hooks',
       'hooks',
       <ul class="space-y-0.5 pl-3">
         <For each={sortedChildren}>
           {(child) => renderLink(`${fullPath}/${child.path}`, formatHookPath(child.path))}
         </For>
       </ul>,
-    );
-  };
-
-  // Render Icons link (direct link, not a dropdown)
-  const renderIconsLink = (): JSX.Element => {
-    const active = () => isActivePath('/icons');
-    return (
-      <div class="mb-4">
-        <A
-          href="/icons"
-          onClick={() => setIsMobileMenuOpen(false)}
-          class={`flex items-center gap-1 py-1 text-sm font-semibold transition-colors ${
-            active()
-              ? 'text-gray-900 dark:text-white'
-              : 'text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-neutral-300'
-          }`}
-        >
-          @kayou/icons
-        </A>
-      </div>
     );
   };
 
@@ -369,9 +347,8 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
             </For>
           </ul>,
         )}
-        <Show when={getRoute('ui')}>{(route) => renderComponents(route())}</Show>
+        <Show when={getRoute('components')}>{(route) => renderComponents(route())}</Show>
         <Show when={getRoute('hooks')}>{(route) => renderHooks(route())}</Show>
-        {renderIconsLink()}
       </Show>
     </nav>
   );
@@ -379,7 +356,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   return (
     <div class="mx-auto max-w-[90rem]">
       {/* Mobile menu button */}
-      <div class="fixed top-[104px] right-0 left-0 z-20 flex h-12 items-center border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-neutral-800 dark:bg-neutral-900/95">
+      <div class="sticky top-16 z-20 flex h-12 items-center border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-neutral-800 dark:bg-neutral-900/95">
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
@@ -392,12 +369,12 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
 
       {/* Mobile drawer */}
       <Show when={isMobileMenuOpen()}>
-        <div class="fixed inset-0 z-30 lg:hidden" style={{ top: '152px' }}>
+        <div class="fixed inset-x-0 top-16 bottom-0 z-30 lg:hidden">
           <div
-            class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
+            class="absolute inset-0 bg-neutral-900/50 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div class="fixed inset-y-0 left-0 w-72 overflow-y-auto bg-white p-6 shadow-xl dark:bg-neutral-900">
+          <div class="absolute inset-y-0 left-0 w-full max-w-xs overflow-y-auto bg-white p-6 shadow-xl dark:bg-neutral-900">
             <SidebarContent />
           </div>
         </div>
@@ -412,7 +389,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
         </aside>
 
         {/* Main content */}
-        <main class="min-w-0 flex-1 pt-12 lg:pt-0">
+        <main class="min-w-0 flex-1">
           <Suspense>{props.children}</Suspense>
         </main>
       </div>

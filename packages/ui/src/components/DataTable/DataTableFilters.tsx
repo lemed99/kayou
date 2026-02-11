@@ -30,7 +30,6 @@ import Select, { MultiSelect, SelectWithSearch } from '../Select';
 import TextInput from '../TextInput';
 import {
   ActiveFilter,
-  DEFAULT_OPERATORS,
   FilterConfig,
   FilterOperator,
   FilterState,
@@ -54,6 +53,8 @@ export interface DataTableFiltersLabels {
   reset: string;
   filter: string;
   unsupportedFieldType: (type: string) => string;
+  /** Override operator labels for i18n. Merged with OPERATOR_LABELS defaults. */
+  operatorLabels?: Partial<Record<FilterOperator, string>>;
 }
 
 export const DEFAULT_DATA_TABLE_FILTERS_LABELS: DataTableFiltersLabels = {
@@ -94,9 +95,34 @@ interface FilterInputProps<T> {
 }
 
 function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
-  const dateValues = createMemo(() => props.filter.value as [Date, Date] | null);
-  const betweenValues = createMemo(
-    () => (props.filter.value as [number, number]) || [null, null],
+  const betweenValues = createMemo((): [number | null, number | null] => {
+    const v = props.filter.value;
+    if (Array.isArray(v) && v.length === 2) return v as [number | null, number | null];
+    return [null, null];
+  });
+
+  const dateRangeValues = createMemo((): [string, string] => {
+    const v = props.filter.value;
+    if (Array.isArray(v) && v.length === 2) {
+      const toStr = (d: unknown): string => {
+        if (d instanceof Date) return d.toISOString().split('T')[0];
+        if (typeof d === 'string') return d;
+        return '';
+      };
+      return [toStr(v[0]), toStr(v[1])];
+    }
+    return ['', ''];
+  });
+
+  const singleDateValue = createMemo((): string => {
+    const v = props.filter.value;
+    if (v instanceof Date) return v.toISOString().split('T')[0];
+    if (typeof v === 'string') return v;
+    return '';
+  });
+
+  const isDateType = createMemo(
+    () => props.config.fieldType === 'datepicker' || props.config.fieldType === 'dateRange',
   );
 
   return (
@@ -122,8 +148,8 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
       >
         <div class="flex flex-1 items-center gap-1">
           <NumberInput
-            value={betweenValues()[0]?.toString() || ''}
-            onValueChange={(v) => props.onChange([v ?? 0, betweenValues()[1] ?? 0])}
+            value={betweenValues()[0] != null ? String(betweenValues()[0]) : ''}
+            onValueChange={(v) => props.onChange([v ?? null, betweenValues()[1]])}
             placeholder={props.labels.min}
             sizing="sm"
             type={props.config.numberConfig?.type || 'integer'}
@@ -131,8 +157,8 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           />
           <span class="text-gray-500 dark:text-neutral-400">-</span>
           <NumberInput
-            value={betweenValues()[1]?.toString() || ''}
-            onValueChange={(v) => props.onChange([betweenValues()[0] ?? 0, v ?? 0])}
+            value={betweenValues()[1] != null ? String(betweenValues()[1]) : ''}
+            onValueChange={(v) => props.onChange([betweenValues()[0], v ?? null])}
             placeholder={props.labels.max}
             sizing="sm"
             type={props.config.numberConfig?.type || 'integer'}
@@ -161,7 +187,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         <Select
           options={props.config.options || []}
           value={(props.filter.value as string) || ''}
-          onSelect={(option) => props.onChange(option?.value || null)}
+          onSelect={(option) => props.onChange(option?.value ?? null)}
           placeholder={props.config.placeholder || props.labels.select}
           sizing="sm"
           class="min-w-[150px] flex-1"
@@ -172,7 +198,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         <SelectWithSearch
           options={props.config.options || []}
           value={(props.filter.value as string) || ''}
-          onSelect={(option) => props.onChange(option?.value || null)}
+          onSelect={(option) => props.onChange(option?.value ?? null)}
           placeholder={props.config.placeholder || props.labels.search}
           sizing="sm"
           class="min-w-[150px] flex-1"
@@ -190,29 +216,17 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         />
       </Match>
 
-      <Match when={props.config.fieldType === 'datepicker'}>
-        <DatePicker
-          type="single"
-          value={{ date: (props.filter.value as string) || '' }}
-          onChange={(v) => props.onChange(v.date || null)}
-          placeholder={props.config.placeholder || props.labels.selectDate}
-          locale={props.config.dateConfig?.locale || 'en'}
-          inputClass="min-w-[150px] flex-1"
-        />
-      </Match>
-
-      <Match when={props.config.fieldType === 'dateRange'}>
+      {/* Date types: operator determines single vs range input */}
+      <Match when={isDateType() && props.filter.operator === 'between'}>
         <DatePicker
           type="range"
           value={{
-            startDate: dateValues()?.[0]?.toISOString().split('T')[0] || '',
-            endDate: dateValues()?.[1]?.toISOString().split('T')[0] || '',
+            startDate: dateRangeValues()[0],
+            endDate: dateRangeValues()[1],
           }}
           onChange={(v) => {
-            const start = v.startDate ? new Date(v.startDate) : null;
-            const end = v.endDate ? new Date(v.endDate) : null;
-            if (start && end) {
-              props.onChange([start, end]);
+            if (v.startDate && v.endDate) {
+              props.onChange([v.startDate, v.endDate]);
             } else {
               props.onChange(null);
             }
@@ -220,6 +234,17 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.selectRange}
           locale={props.config.dateConfig?.locale || 'en'}
           inputClass="min-w-[200px] flex-1"
+        />
+      </Match>
+
+      <Match when={isDateType() && props.filter.operator !== 'between'}>
+        <DatePicker
+          type="single"
+          value={{ date: singleDateValue() }}
+          onChange={(v) => props.onChange(v.date || null)}
+          placeholder={props.config.placeholder || props.labels.selectDate}
+          locale={props.config.dateConfig?.locale || 'en'}
+          inputClass="min-w-[150px] flex-1"
         />
       </Match>
     </Switch>
@@ -235,6 +260,8 @@ interface DraftFilter {
 interface FilterRowProps<T> {
   filter: DraftFilter;
   filterConfigs: FilterConfig<T>[];
+  /** Keys already used by other draft filter rows. */
+  usedKeys: Set<string>;
   onColumnChange: (key: string) => void;
   onOperatorChange: (operator: FilterOperator) => void;
   onValueChange: (value: FilterValue) => void;
@@ -242,6 +269,7 @@ interface FilterRowProps<T> {
   getOperators: (key: string) => FilterOperator[];
   labels: DataTableFiltersLabels;
   ariaLabels: DataTableFiltersAriaLabels;
+  operatorLabels: Record<FilterOperator, string>;
 }
 
 function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
@@ -249,18 +277,21 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
     props.filterConfigs.find((fc) => fc.key === props.filter.key),
   );
 
+  // Show current column + columns not used by other rows
   const columnOptions = createMemo<Option[]>(() =>
-    props.filterConfigs.map((fc) => ({
-      value: fc.key,
-      label: fc.label,
-    })),
+    props.filterConfigs
+      .filter((fc) => fc.key === props.filter.key || !props.usedKeys.has(fc.key))
+      .map((fc) => ({
+        value: fc.key,
+        label: fc.label,
+      })),
   );
 
   const operatorOptions = createMemo<Option[]>(() => {
     const operators = props.getOperators(props.filter.key);
     return operators.map((op) => ({
       value: op,
-      label: OPERATOR_LABELS[op],
+      label: props.operatorLabels[op],
     }));
   });
 
@@ -332,6 +363,8 @@ export interface DataTableFiltersProps<T> {
   removeFilter: (key: string) => void;
   /** Clear all filters. */
   clearFilters: () => void;
+  /** Replace all filters at once (single update). */
+  replaceAllFilters: (filters: FilterState) => void;
   /** Get available operators for a filter. */
   getOperators: (key: string) => FilterOperator[];
   /** Text for the "Filter" button label. */
@@ -352,6 +385,8 @@ export interface DataTableFiltersProps<T> {
   maxVisibleChips?: number;
   /** Text for the "See more" overflow toggle. @default "See more" */
   seeMoreChipsText?: string;
+  /** Text for the "See less" overflow toggle. @default "See less" */
+  seeLessChipsText?: string;
   /** i18n labels for visible text in the DataTableFilters UI. */
   labels?: Partial<DataTableFiltersLabels>;
   /** i18n aria-labels for the DataTableFilters UI. */
@@ -364,9 +399,17 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     ...DEFAULT_DATA_TABLE_FILTERS_ARIA_LABELS,
     ...props.ariaLabels,
   }));
+  // Merge default operator labels with i18n overrides
+  const opLabels = createMemo(
+    () => ({ ...OPERATOR_LABELS, ...l().operatorLabels }) as Record<FilterOperator, string>,
+  );
+
   // Draft filters - local state for editing before submit
   const [draftFilters, setDraftFilters] = createSignal<DraftFilter[]>([]);
   const [isOpen, setIsOpen] = createSignal(false);
+
+  // Track which columns are already used by draft rows
+  const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
 
   // Sync draft filters when popover opens
   const handlePopoverOpen = () => {
@@ -384,16 +427,18 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   };
 
   const handleAddFilter = () => {
-    const firstConfig = props.filterConfigs[0];
-    if (!firstConfig) return;
+    // Pick the first unused column
+    const currentUsedKeys = usedKeys();
+    const availableConfig = props.filterConfigs.find((fc) => !currentUsedKeys.has(fc.key));
+    if (!availableConfig) return;
 
-    const operators = props.getOperators(firstConfig.key);
-    const defaultOperator = firstConfig.defaultOperator || operators[0] || 'equal';
+    const operators = props.getOperators(availableConfig.key);
+    const defaultOperator = availableConfig.defaultOperator || operators[0] || 'equal';
 
     setDraftFilters((prev) => [
       ...prev,
       {
-        key: firstConfig.key,
+        key: availableConfig.key,
         operator: defaultOperator,
         value: null,
       },
@@ -422,10 +467,15 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     setDraftFilters((prev) => {
       const updated = [...prev];
       const current = updated[index];
+      const noValue = operator === 'isEmpty' || operator === 'isNotEmpty';
+      const wasBetween = current.operator === 'between';
+      const isBetween = operator === 'between';
+      // Reset value when switching to/from between (incompatible types) or to isEmpty/isNotEmpty
+      const resetValue = noValue || wasBetween !== isBetween;
       updated[index] = {
         ...current,
         operator,
-        value: operator === 'isEmpty' || operator === 'isNotEmpty' ? null : current.value,
+        value: resetValue ? null : current.value,
       };
       return updated;
     });
@@ -448,27 +498,24 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
   const handleReset = () => {
     setDraftFilters([]);
+    props.replaceAllFilters(new Map());
+    setIsOpen(false);
   };
 
   const handleApply = () => {
-    // Clear existing filters
-    props.clearFilters();
-
-    // Apply draft filters
+    const newFilters: FilterState = new Map();
     draftFilters().forEach((filter) => {
-      props.setFilter(filter.key, filter.operator, filter.value);
+      newFilters.set(filter.key, {
+        key: filter.key,
+        operator: filter.operator,
+        value: filter.value,
+      });
     });
-
+    props.replaceAllFilters(newFilters);
     setIsOpen(false);
   };
 
   const activeFilterCount = createMemo(() => props.activeFilters().size);
-
-  const getLocalOperators = (key: string): FilterOperator[] => {
-    const config = props.filterConfigs.find((fc) => fc.key === key);
-    if (!config) return [];
-    return config.operators ?? DEFAULT_OPERATORS[config.dataType] ?? [];
-  };
 
   const handleToggle = () => {
     if (isOpen()) {
@@ -523,6 +570,19 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     });
   });
 
+  // Move focus into popover when it opens
+  createEffect(() => {
+    if (!isOpen()) return;
+    const rafId = requestAnimationFrame(() => {
+      const popover = document.querySelector('[data-filter-popover]');
+      const focusable = popover?.querySelector<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      focusable?.focus();
+    });
+    onCleanup(() => cancelAnimationFrame(rafId));
+  });
+
   const popoverContentWithAttr = () => (
     <div
       data-filter-popover
@@ -557,13 +617,15 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
                 <FilterRow
                   filter={filter()}
                   filterConfigs={props.filterConfigs}
+                  usedKeys={usedKeys()}
                   onColumnChange={(key) => handleColumnChange(index, key)}
                   onOperatorChange={(op) => handleOperatorChange(index, op)}
                   onValueChange={(val) => handleValueChange(index, val)}
                   onRemove={() => handleRemoveFilter(index)}
-                  getOperators={getLocalOperators}
+                  getOperators={props.getOperators}
                   labels={l()}
                   ariaLabels={a()}
+                  operatorLabels={opLabels()}
                 />
               </>
             )}
@@ -597,11 +659,9 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const maxChips = () => props.maxVisibleChips ?? 4;
   const [showAllChips, setShowAllChips] = createSignal(false);
 
-  const activeFiltersList = createMemo(() => {
-    const filters: ActiveFilter[] = [];
-    props.activeFilters().forEach((f) => filters.push(f));
-    return filters;
-  });
+  const activeFiltersList = createMemo(() =>
+    Array.from(props.activeFilters().values()),
+  );
 
   const visibleChips = createMemo(() => {
     const all = activeFiltersList();
@@ -618,14 +678,22 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const getChipLabel = (filter: ActiveFilter): string => {
     const config = props.filterConfigs.find((fc) => fc.key === filter.key);
     const label = config?.label || filter.key;
+    const op = opLabels()[filter.operator];
     const value = filter.value;
-    if (value === null || value === undefined) return label;
-    if (Array.isArray(value)) return `${label}: ${value.join(', ')}`;
-    return `${label} ${String(value)}`;
+    if (value === null || value === undefined) return `${label} ${op}`;
+    if (Array.isArray(value)) return `${label} ${op} ${value.join(', ')}`;
+    return `${label} ${op} ${String(value)}`;
   };
 
   return (
     <div class={twMerge('flex min-w-0 flex-wrap items-center gap-2', props.class)}>
+      {/* Screen reader announcement for filter changes */}
+      <div aria-live="polite" class="sr-only">
+        {activeFilterCount() > 0
+          ? `${activeFilterCount()} filter${activeFilterCount() !== 1 ? 's' : ''} applied`
+          : 'No filters applied'}
+      </div>
+
       <Popover position="bottom-start" content={popoverContentWithAttr} isOpen={isOpen()}>
         <div data-filter-trigger>
           <Button
@@ -656,19 +724,23 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
       {/* Inline filter chips */}
       <Show when={props.showChips && activeFilterCount() > 0}>
         <For each={visibleChips()}>
-          {(filter) => (
-            <span class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-              {getChipLabel(filter)}
-              <button
-                type="button"
-                onClick={() => props.removeFilter(filter.key)}
-                class="ml-0.5 rounded-sm text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:text-neutral-300"
-                aria-label={`Remove ${filter.key} filter`}
-              >
-                <XCloseIcon class="size-3" aria-hidden="true" />
-              </button>
-            </span>
-          )}
+          {(filter) => {
+            const chipConfig = () =>
+              props.filterConfigs.find((fc) => fc.key === filter.key);
+            return (
+              <span class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                {getChipLabel(filter)}
+                <button
+                  type="button"
+                  onClick={() => props.removeFilter(filter.key)}
+                  class="ml-0.5 rounded-sm text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:text-neutral-300"
+                  aria-label={`Remove ${chipConfig()?.label || filter.key} filter`}
+                >
+                  <XCloseIcon class="size-3" aria-hidden="true" />
+                </button>
+              </span>
+            );
+          }}
         </For>
 
         {/* Overflow toggle */}
@@ -679,8 +751,8 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             class="inline-flex items-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
           >
             {showAllChips()
-              ? (props.seeMoreChipsText ?? 'See less')
-              : `${props.seeMoreChipsText ?? 'See more'}`}
+              ? (props.seeLessChipsText ?? 'See less')
+              : (props.seeMoreChipsText ?? 'See more')}
             <ChevronDownIcon
               class={twMerge(
                 'size-3 transition-transform',

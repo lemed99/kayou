@@ -1,6 +1,5 @@
 import { JSX, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 
-import { usePortalContainer } from '../../context/PortalContainerContext';
 import { preventBackgroundScroll } from '../../helpers/preventBackgroundScroll';
 import {
   ArrowPosition,
@@ -31,13 +30,10 @@ export function useFloating(options: UseFloatingOptions): UseFloatingReturn {
   const [arrowPosition, setArrowPosition] = createSignal<ArrowPosition | null>(null);
   const [isAnchorVisible, setIsAnchorVisible] = createSignal(true);
 
-  // Check for custom portal container from context (used for docs preview, testing, etc.)
-  const portalContainerContext = usePortalContainer();
-
-  // Prefer context-provided container, then internal renderContainer
+  // Prefer explicit portalContainer option, then internal renderContainer
   const effectiveContainer = createMemo(() => {
-    const contextContainer = portalContainerContext?.container();
-    if (contextContainer) return contextContainer;
+    const portal = options.portalContainer?.();
+    if (portal) return portal;
     return renderContainer();
   });
 

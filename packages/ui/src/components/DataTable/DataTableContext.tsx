@@ -3,7 +3,6 @@ import { JSX, createContext, createSignal, onMount, useContext } from 'solid-js'
 export interface DataTableState {
   scrollTop?: number;
   searchKey?: string;
-  filterState?: Record<string, unknown>;
   expanded?: boolean;
   currentPage?: number;
   perPage?: number;
@@ -11,59 +10,91 @@ export interface DataTableState {
 }
 
 interface DataTableContextValue {
-  getState: (key: string) => DataTableState | null;
-  setState: (key: string, state: Partial<DataTableState>) => void;
-  clearState: (key: string) => void;
+  registerTable: () => string;
+  getState: (id: string) => DataTableState | null;
+  setState: (id: string, state: Partial<DataTableState>) => void;
+  clearState: (id: string) => void;
   clearAll: () => void;
+  perPageOptions: number[];
 }
 
 const STORAGE_PREFIX = 'datatable:';
 
 const DataTableContext = createContext<DataTableContextValue>();
 
-export function DataTableProvider(props: { children: JSX.Element }) {
-  const getStorageKey = (key: string) => `${STORAGE_PREFIX}${key}`;
+const DEFAULT_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-  const getState = (key: string): DataTableState | null => {
-    if (typeof sessionStorage === 'undefined') return null;
+export function DataTableProvider(props: {
+  storageKey?: string;
+  /** Per-page options available to all tables in this provider. @default [10, 25, 50, 100] */
+  perPageOptions?: number[];
+  children: JSX.Element;
+}) {
+  let nextId = 0;
+
+  const getStorageKey = () =>
+    props.storageKey ? `${STORAGE_PREFIX}${props.storageKey}` : null;
+
+  const getAllStates = (): Record<string, DataTableState> => {
+    const sk = getStorageKey();
+    if (!sk || typeof sessionStorage === 'undefined') return {};
     try {
-      const stored = sessionStorage.getItem(getStorageKey(key));
-      return stored ? (JSON.parse(stored) as DataTableState) : null;
+      const stored = sessionStorage.getItem(sk);
+      return stored
+        ? (JSON.parse(stored) as Record<string, DataTableState>)
+        : {};
     } catch {
-      return null;
+      return {};
     }
   };
 
-  const setState = (key: string, state: Partial<DataTableState>) => {
-    if (typeof sessionStorage === 'undefined') return;
+  const saveAllStates = (states: Record<string, DataTableState>) => {
+    const sk = getStorageKey();
+    if (!sk || typeof sessionStorage === 'undefined') return;
     try {
-      const existing = getState(key) || {};
-      const merged = { ...existing, ...state };
-      sessionStorage.setItem(getStorageKey(key), JSON.stringify(merged));
+      sessionStorage.setItem(sk, JSON.stringify(states));
     } catch {
       // Storage full or unavailable
     }
   };
 
-  const clearState = (key: string) => {
-    if (typeof sessionStorage === 'undefined') return;
-    sessionStorage.removeItem(getStorageKey(key));
+  const registerTable = (): string => String(nextId++);
+
+  const getState = (id: string): DataTableState | null => {
+    return getAllStates()[id] ?? null;
+  };
+
+  const setState = (id: string, state: Partial<DataTableState>) => {
+    const all = getAllStates();
+    all[id] = { ...all[id], ...state };
+    saveAllStates(all);
+  };
+
+  const clearState = (id: string) => {
+    const all = getAllStates();
+    delete all[id];
+    saveAllStates(all);
   };
 
   const clearAll = () => {
-    if (typeof sessionStorage === 'undefined') return;
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key?.startsWith(STORAGE_PREFIX)) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+    const sk = getStorageKey();
+    if (!sk || typeof sessionStorage === 'undefined') return;
+    sessionStorage.removeItem(sk);
   };
 
   return (
-    <DataTableContext.Provider value={{ getState, setState, clearState, clearAll }}>
+    <DataTableContext.Provider
+      value={{
+        registerTable,
+        getState,
+        setState,
+        clearState,
+        clearAll,
+        get perPageOptions() {
+          return props.perPageOptions ?? DEFAULT_PER_PAGE_OPTIONS;
+        },
+      }}
+    >
       {props.children}
     </DataTableContext.Provider>
   );
@@ -75,44 +106,48 @@ export function useDataTableContext() {
 
 /**
  * Hook to persist and restore DataTable state using session storage.
- * Must be used within a DataTableProvider.
+ * Must be used within a DataTableProvider for persistence to work.
+ * Auto-generates a stable table ID via the provider's counter.
  *
- * @param storageKey - Unique key to identify this table's state
  * @returns Object with state accessor and save function
  */
-export function useDataTableState(storageKey: string | undefined) {
+export function useDataTableState() {
   const context = useDataTableContext();
   const [restoredState, setRestoredState] = createSignal<DataTableState | null>(null);
   const [isRestored, setIsRestored] = createSignal(false);
 
+  // Register to get a stable ID (runs once at creation, before mount)
+  const tableId = context?.registerTable();
+
   onMount(() => {
-    if (storageKey && context) {
-      const state = context.getState(storageKey);
-      setRestoredState(state);
+    if (tableId && context) {
+      setRestoredState(context.getState(tableId));
     }
     setIsRestored(true);
   });
 
   const saveState = (state: Partial<DataTableState>) => {
-    if (storageKey && context) {
-      context.setState(storageKey, state);
+    if (tableId && context) {
+      context.setState(tableId, state);
     }
   };
 
   const clearState = () => {
-    if (storageKey && context) {
-      context.clearState(storageKey);
+    if (tableId && context) {
+      context.clearState(tableId);
     }
   };
 
   return {
     /** The restored state from session storage (null if none) */
-    restoredState: restoredState,
+    restoredState,
     /** Whether state restoration has completed */
-    isRestored: isRestored,
+    isRestored,
     /** Save partial state to session storage */
     saveState,
     /** Clear this table's state from session storage */
     clearState,
+    /** Per-page options from the provider */
+    perPageOptions: context?.perPageOptions ?? DEFAULT_PER_PAGE_OPTIONS,
   };
 }

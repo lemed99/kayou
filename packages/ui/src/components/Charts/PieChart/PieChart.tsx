@@ -36,6 +36,7 @@ export function PieChart(props: PieChartProps): JSX.Element {
       width={width()}
       height={height()}
       role="img"
+      aria-roledescription="pie chart"
       aria-label={props.ariaLabel ?? 'Pie chart'}
       aria-labelledby={props.title ? titleId : undefined}
       aria-describedby={props.ariaDescribedBy ?? (props.description ? descId : undefined)}

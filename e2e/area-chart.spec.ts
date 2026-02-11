@@ -86,11 +86,82 @@ test.describe('AreaChart', () => {
 
   // ==================== Accessibility ====================
 
-  test('should be keyboard accessible', async ({ page }) => {
-    const svg = page.locator('svg').first();
-    await svg.focus();
-    // SVG should be focusable or its container should be
+  test('should have correct ARIA attributes on SVG', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
     await expect(svg).toBeVisible();
+    await expect(svg).toHaveAttribute('aria-label');
+    await expect(svg).toHaveAttribute('tabindex', '0');
+    await expect(svg).toHaveAttribute('aria-roledescription', 'area chart');
+  });
+
+  test('should have area series aria-labels', async ({ page }) => {
+    const areaGroup = page.locator('g[aria-label^="Area series:"]').first();
+    await expect(areaGroup).toBeVisible();
+  });
+
+  test('should focus chart with Tab', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+    await expect(svg).toBeFocused();
+  });
+
+  test('should navigate data points with ArrowRight', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+    await page.waitForTimeout(100);
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+  });
+
+  test('should navigate with Home and End keys', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('Home');
+    await page.waitForTimeout(200);
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+
+    const srRegion = svg.locator('..').locator('[role="status"]');
+    const text = await srRegion.textContent();
+    expect(text).toContain('Jan');
+  });
+
+  test('should clear active state with Escape', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    await expect(tooltip).not.toBeVisible();
+  });
+
+  test('should update screen reader region on keyboard navigation', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+
+    const srRegion = svg.locator('..').locator('[role="status"]');
+    const text = await srRegion.textContent();
+    expect(text!.trim().length).toBeGreaterThan(0);
+    expect(text).toContain('revenue');
   });
 
   // ==================== Edge Cases ====================

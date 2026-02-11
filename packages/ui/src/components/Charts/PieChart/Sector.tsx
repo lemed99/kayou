@@ -10,12 +10,17 @@ import type { SectorProps } from '../types';
  */
 const ROTATION_OFFSET = Math.PI / 2;
 
-/** Padding angle between segments in radians. */
+/** Padding angle between segments in radians (donut charts only). */
 const SEGMENT_PAD_ANGLE = 0.01;
 
 /**
  * Sector renders a single arc/segment of a pie or donut chart.
  * Used internally by the Pie component.
+ *
+ * For donut charts (innerRadius > 0), segments are separated via padAngle
+ * which creates clean parallel gaps. For full pies (innerRadius === 0),
+ * padAngle gaps converge to the center creating visual artifacts, so a
+ * white stroke is used instead (same approach as Recharts).
  *
  * @example
  * // Internal usage within Pie:
@@ -28,14 +33,29 @@ const SEGMENT_PAD_ANGLE = 0.01;
  * />
  */
 export function Sector(props: SectorProps): JSX.Element {
-  const arcGen = createMemo(() =>
-    arc()
+  const isDonut = () => props.innerRadius > 0;
+
+  const arcGen = createMemo(() => {
+    const gen = arc()
       .innerRadius(props.innerRadius)
       .outerRadius(props.outerRadius)
       .startAngle(props.startAngle + ROTATION_OFFSET)
-      .endAngle(props.endAngle + ROTATION_OFFSET)
-      .padAngle(SEGMENT_PAD_ANGLE),
-  );
+      .endAngle(props.endAngle + ROTATION_OFFSET);
 
-  return <path d={arcGen()({} as DefaultArcObject)!} fill={props.fill} />;
+    if (isDonut()) {
+      gen.padAngle(SEGMENT_PAD_ANGLE);
+    }
+
+    return gen;
+  });
+
+  return (
+    <path
+      d={arcGen()({} as DefaultArcObject)!}
+      fill={props.fill}
+      stroke={isDonut() ? 'none' : 'white'}
+      stroke-width={isDonut() ? 0 : 1}
+      stroke-linejoin={isDonut() ? undefined : 'round'}
+    />
+  );
 }

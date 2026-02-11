@@ -1,4 +1,4 @@
-import { CheckCircleIcon, Scale01Icon } from '@kayou/icons';
+import { CheckCircleIcon } from '@kayou/icons';
 
 import ArticlePage from '../../../components/ArticlePage';
 
@@ -7,11 +7,6 @@ export default function LicensePage() {
     <ArticlePage
       title="License"
       description="Kayou is open source software licensed under the MIT License. Use it freely in personal and commercial projects."
-      badge={{
-        text: 'MIT License',
-        icon: <Scale01Icon class="size-4" />,
-        color: 'green',
-      }}
     >
       {/* What You Can Do */}
       <section class="mb-12">
@@ -65,7 +60,7 @@ export default function LicensePage() {
           <pre class="whitespace-pre-wrap font-mono text-sm text-gray-700 dark:text-neutral-300">
             {`MIT License
 
-Copyright (c) 2024 Exowpee
+Copyright (c) 2026 Kayou
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

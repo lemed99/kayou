@@ -2,6 +2,7 @@ import {
   For,
   type JSX,
   type ParentProps,
+  Show,
   createEffect,
   createSignal,
   onCleanup,
@@ -30,27 +31,12 @@ interface TocItem {
 interface ArticlePageProps {
   title: string;
   description?: string;
-  badge?: {
-    text: string;
-    icon?: JSX.Element;
-    color?: 'blue' | 'green' | 'purple' | 'pink' | 'orange' | 'gray';
-  };
 }
 
 export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.Element {
   const [tocItems, setTocItems] = createSignal<TocItem[]>([]);
   const [visibleSections, setVisibleSections] = createSignal<Set<string>>(new Set());
   let contentRef: HTMLDivElement | undefined;
-
-  // Badge color classes
-  const badgeColorClasses = {
-    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-    purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-    pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-    orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-    gray: 'bg-gray-100 text-gray-700 dark:bg-neutral-900 dark:text-neutral-300',
-  };
 
   // Extract headings from content and build TOC
   onMount(() => {
@@ -137,22 +123,14 @@ export default function ArticlePage(props: ParentProps<ArticlePageProps>): JSX.E
       <div ref={contentRef} class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
         {/* Header with optional badge */}
         <div class="mb-12">
-          {props.badge && (
-            <div
-              class={`mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${badgeColorClasses[props.badge.color || 'blue']}`}
-            >
-              {props.badge.icon}
-              {props.badge.text}
-            </div>
-          )}
           <h1 class="text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
             {props.title}
           </h1>
-          {props.description && (
+          <Show when={props.description}>
             <p class="mt-4 text-lg text-gray-600 dark:text-neutral-400">
               {props.description}
             </p>
-          )}
+          </Show>
         </div>
 
         {/* Article content */}

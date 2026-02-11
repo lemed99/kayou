@@ -35,13 +35,13 @@ export function XAxis(props: XAxisProps): JSX.Element {
   const isBand = () => 'bandwidth' in chart.xScale();
 
   return (
-    <g ref={axisRef} aria-hidden="true">
+    <g ref={axisRef} aria-hidden="true" class={chart.axisClass}>
       <line
         x1={chart.yAxisBBox()?.width ?? 0}
         x2={chart.width()}
         y1={chart.innerHeight()}
         y2={chart.innerHeight()}
-        stroke={props.stroke ?? '#666'}
+        stroke={props.stroke ?? 'currentColor'}
       />
       <g>
         <For each={ticks()}>
@@ -57,12 +57,12 @@ export function XAxis(props: XAxisProps): JSX.Element {
 
             return (
               <g transform={`translate(${px()},${chart.innerHeight()})`}>
-                <line y2={6} stroke={props.stroke ?? '#666'} />
+                <line y2={6} stroke={props.stroke ?? 'currentColor'} />
                 <text
                   dy={16}
                   text-anchor={angle() !== 0 ? 'end' : 'middle'}
                   font-size="10"
-                  fill="#666"
+                  fill="currentColor"
                   transform={angle() !== 0 ? `rotate(${angle()})` : undefined}
                 >
                   {format(t)}

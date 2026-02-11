@@ -57,6 +57,8 @@ export interface UseFloatingOptions {
   backgroundScrollBehavior?: BackgroundScrollBehavior;
   /** Callback when floating should close (required for 'close' and 'follow' behaviors) */
   onClose?: () => void;
+  /** Custom container for portal rendering. When provided, floating elements render inside this container instead of document.body. */
+  portalContainer?: Accessor<HTMLElement | null>;
 }
 
 export interface UseFloatingReturn {

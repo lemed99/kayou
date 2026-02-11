@@ -1,4 +1,3 @@
-/* eslint-disable solid/no-innerhtml */
 import {
   GitBranch01Icon,
   GitPullRequestIcon,
@@ -7,9 +6,8 @@ import {
 } from '@kayou/icons';
 
 import ArticlePage from '../../../components/ArticlePage';
-import { formatCodeToHTML } from '../../../helpers/formatCodeToHTML';
 
-const cloneCode = `git clone https://github.com/exowpee/kayou.git
+const cloneCode = `git clone https://github.com/kayou.git
 cd kayou
 pnpm install
 pnpm dev`;
@@ -23,12 +21,7 @@ export default function ContributingPage() {
   return (
     <ArticlePage
       title="Contributing"
-      description="We welcome contributions from the community! Whether it's fixing bugs, adding features, or improving documentation, your help makes Kayou better for everyone."
-      badge={{
-        text: 'Open Source',
-        icon: <HeartIcon class="size-4" />,
-        color: 'pink',
-      }}
+      description="We welcome contributions from the community! Whether it's fixing bugs, adding usefull features, or improving documentation, your help makes Kayou better for everyone."
     >
       {/* Ways to Contribute */}
       <section class="mb-12">
@@ -90,7 +83,9 @@ export default function ContributingPage() {
               Fork the repository on GitHub, then clone your fork locally:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-              <div innerHTML={formatCodeToHTML(cloneCode)} />
+              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+                {cloneCode}
+              </pre>
             </div>
           </div>
 
@@ -102,7 +97,9 @@ export default function ContributingPage() {
               Create a new branch for your changes:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-              <div innerHTML={formatCodeToHTML(branchCode)} />
+              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+                {branchCode}
+              </pre>
             </div>
           </div>
 
@@ -123,7 +120,9 @@ export default function ContributingPage() {
               Commit your changes with a descriptive message:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-              <div innerHTML={formatCodeToHTML(commitCode)} />
+              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+                {commitCode}
+              </pre>
             </div>
           </div>
 
@@ -284,37 +283,6 @@ export default function ContributingPage() {
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      {/* Links */}
-      <section class="mb-12 rounded-2xl bg-gray-100 p-8 dark:bg-neutral-900">
-        <h2 class="text-xl font-bold text-gray-950 dark:text-white">Resources</h2>
-        <div class="mt-4 flex flex-wrap gap-4">
-          <a
-            href="https://github.com/exowpee/kayou"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100"
-          >
-            GitHub Repository
-          </a>
-          <a
-            href="https://github.com/exowpee/kayou/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
-            Issue Tracker
-          </a>
-          <a
-            href="https://github.com/exowpee/kayou/discussions"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
-            Discussions
-          </a>
         </div>
       </section>
     </ArticlePage>

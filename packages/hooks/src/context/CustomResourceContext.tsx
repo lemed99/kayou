@@ -1,4 +1,4 @@
-import { Accessor, ParentComponent, createContext } from 'solid-js';
+import { Accessor, ParentComponent, createContext, onCleanup } from 'solid-js';
 
 /**
  * Configuration options for resource fetching behavior.
@@ -28,6 +28,8 @@ export interface ResourceOptions<T> {
   dedupeRequests?: boolean;
   /** Time in ms to cache responses for deduplication. Default: 2000 */
   dedupeInterval?: number;
+  /** Custom validator for cached data. Return true if the data is valid. Defaults to built-in validation that rejects strings, empty objects, and falsy values. */
+  cacheValidator?: (data: unknown) => boolean;
 }
 
 /**
@@ -89,6 +91,14 @@ export const CustomResourceProvider: ParentComponent<
   CustomResourceProviderProps<unknown>
 > = (props) => {
   const pendingRequests = new Map<string, PendingEntry<unknown>>();
+
+  onCleanup(() => {
+    for (const entry of pendingRequests.values()) {
+      if (entry.timeoutId) clearTimeout(entry.timeoutId);
+    }
+    pendingRequests.clear();
+  });
+
   const options: ResourceOptions<unknown> = {
     get retryCount() {
       return props.retryCount ?? 3;
@@ -116,6 +126,9 @@ export const CustomResourceProvider: ParentComponent<
     },
     get onError() {
       return props.onError;
+    },
+    get cacheValidator() {
+      return props.cacheValidator;
     },
   };
 

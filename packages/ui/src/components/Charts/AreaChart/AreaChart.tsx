@@ -48,6 +48,8 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
     'ariaDescribedBy',
     'title',
     'description',
+    'axisClass',
+    'gridClass',
   ]);
 
   const [yAxisBBox, setYAxisBBox] = createSignal<DOMRect | null>(null);
@@ -98,7 +100,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
       .nice()
       .range([innerHeight(), 0]);
     const ticks = scale.ticks();
-    if (ticks.length % 2 === 0) {
+    if (ticks.length >= 2 && ticks.length % 2 === 0) {
       scale.domain([0, ticks[ticks.length - 1] + (ticks[1] - ticks[0])]);
     }
     return scale;
@@ -112,6 +114,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
   } | null>(null);
 
   const [activePoint, setActivePoint] = createSignal<ActivePoint | null>(null);
+  const [focusedDataIndex, setFocusedDataIndex] = createSignal(-1);
 
   // Memoize x positions for binary search
   const xPositions = createMemo(() => {
@@ -119,6 +122,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
     return s.domain().map((d) => s(d) ?? 0);
   });
 
+  let svgRef: SVGSVGElement | undefined;
   let pointerRafId: number | undefined;
 
   function handlePointerMove(e: MouseEvent | TouchEvent) {
@@ -130,6 +134,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
   }
 
   function processPointer(e: MouseEvent | TouchEvent) {
+    setFocusedDataIndex(-1);
     const data = props.data;
     const key = xKey();
     const xScaleVal = xScale();
@@ -137,7 +142,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
     const areaKeysVal = areaKeys();
     const positions = xPositions();
 
-    const [x, y] = pointer(e);
+    const [x, y] = pointer(e, svgRef);
 
     if (!positions.length) return;
 
@@ -178,11 +183,81 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
     if (pointerRafId !== undefined) cancelAnimationFrame(pointerRafId);
   });
 
+  function activateByIndex(index: number) {
+    const data = props.data;
+    const key = xKey();
+    const xScaleVal = xScale();
+    const yScaleVal = yScale();
+    const areaKeysVal = areaKeys();
+
+    if (index < 0 || index >= data.length) return;
+    const d = data[index];
+    if (!d) return;
+
+    let cy = 0;
+    if (areaKeysVal.length === 1) {
+      cy = yScaleVal(Number(d[areaKeysVal[0]]));
+    } else if (areaKeysVal.length > 0) {
+      const maxKey = areaKeysVal.reduce((a, b) => (Number(d[a]) > Number(d[b]) ? a : b));
+      cy = yScaleVal(Number(d[maxKey]));
+    }
+    const cx = xScaleVal(String(d[key])) as number;
+
+    setFocusedDataIndex(index);
+    setActiveIndex({ item: d, x: cx, y: cy, cursor: [cx, cy] });
+    setActivePoint({ item: d, x: cx, y: cy });
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    const dataLength = props.data.length;
+    if (dataLength === 0) return;
+    const current = focusedDataIndex();
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown': {
+        e.preventDefault();
+        const next = current < 0 ? 0 : Math.min(current + 1, dataLength - 1);
+        activateByIndex(next);
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowUp': {
+        e.preventDefault();
+        const prev = current < 0 ? dataLength - 1 : Math.max(current - 1, 0);
+        activateByIndex(prev);
+        break;
+      }
+      case 'Home':
+        e.preventDefault();
+        activateByIndex(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        activateByIndex(dataLength - 1);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setFocusedDataIndex(-1);
+        clearActive();
+        break;
+    }
+  }
+
+  const announcement = createMemo(() => {
+    const point = activePoint();
+    if (!point || focusedDataIndex() < 0) return '';
+    const xValue = String(point.item[xKey()]);
+    const keys = areaKeys();
+    const values = keys.map((k) => `${k}: ${String(point.item[k])}`).join(', ');
+    return `${xValue}, ${values}`;
+  });
+
   const titleId = createUniqueId();
   const descId = createUniqueId();
 
   return (
-    <div class="relative h-full w-full">
+    <div class="relative h-full w-full text-gray-500 dark:text-neutral-400">
       <BaseChartContext.Provider
         value={{
           innerWidth,
@@ -205,12 +280,21 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
           tooltipPosition: 'beside',
           tooltipEnabled,
           setTooltipEnabled,
+          get axisClass() {
+            return props.axisClass ?? 'text-gray-500 dark:text-neutral-500';
+          },
+          get gridClass() {
+            return props.gridClass ?? 'text-gray-300 dark:text-neutral-800';
+          },
         }}
       >
         <svg
+          ref={svgRef}
+          tabindex={0}
           width={width()}
           height={height()}
           role="img"
+          aria-roledescription="area chart"
           aria-label={props.ariaLabel ?? 'Area chart'}
           aria-labelledby={props.title ? titleId : undefined}
           aria-describedby={
@@ -220,11 +304,18 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
             overflow: 'visible',
             width: props.rwidth === undefined ? `${width()}px` : '100%',
             height: props.rheight === undefined ? `${height()}px` : '100%',
+            outline: 'none',
           }}
+          class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           onMouseMove={handlePointerMove}
           onTouchMove={handlePointerMove}
           onMouseLeave={clearActive}
           onTouchEnd={clearActive}
+          onKeyDown={handleKeyDown}
+          onFocusOut={() => {
+            setFocusedDataIndex(-1);
+            clearActive();
+          }}
           viewBox={`0 0 ${width()} ${height()}`}
         >
           <Show when={props.title}>
@@ -261,6 +352,9 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
           </AreaChartContext.Provider>
         </svg>
         <ChartTooltipOverlay />
+        <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+          {announcement()}
+        </div>
       </BaseChartContext.Provider>
     </div>
   );

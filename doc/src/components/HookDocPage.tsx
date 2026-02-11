@@ -1,4 +1,3 @@
-/* eslint-disable solid/no-innerhtml */
 import {
   For,
   type JSX,
@@ -9,6 +8,7 @@ import {
 } from 'solid-js';
 
 import {
+  AlertTriangleIcon,
   CheckIcon,
   Copy01Icon,
   Database01Icon,
@@ -16,13 +16,11 @@ import {
 } from '@kayou/icons';
 
 import { dedent } from '../helpers/dedent';
-import { formatCodeToHTML } from '../helpers/formatCodeToHTML';
 import BaseDocPage, {
-  type ExampleDefinition,
   type RelatedItemDefinition,
   type SectionId,
-  getExampleId,
 } from './BaseDocPage';
+import ReadonlyCode from './ReadonlyCode';
 
 interface ParameterDefinition {
   name: string;
@@ -38,6 +36,35 @@ interface ReturnPropertyDefinition {
   description: string;
 }
 
+interface ProviderPropDefinition {
+  name: string;
+  type: string;
+  default: string;
+  description: string;
+  required?: boolean;
+}
+
+interface ProviderDefinition {
+  name: string;
+  description: string;
+  props: ProviderPropDefinition[];
+  example?: string;
+}
+
+interface TypePropertyDefinition {
+  name: string;
+  type: string;
+  default?: string;
+  description: string;
+}
+
+interface TypeDefinition {
+  name: string;
+  description: string;
+  props?: TypePropertyDefinition[];
+  values?: string[];
+}
+
 interface HookDocPageProps {
   title: string;
   description: string;
@@ -46,8 +73,9 @@ interface HookDocPageProps {
   parameters?: ParameterDefinition[];
   returns?: ReturnPropertyDefinition[];
   returnType?: string;
-  examples?: ExampleDefinition[];
   usage?: string;
+  provider?: ProviderDefinition;
+  types?: TypeDefinition[];
 }
 
 export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.Element {
@@ -55,28 +83,25 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
   const relatedContexts = createMemo(() => props.relatedContexts ?? []);
   const parametersArray = createMemo(() => props.parameters ?? []);
   const returnsArray = createMemo(() => props.returns ?? []);
-  const examplesArray = createMemo(() => props.examples ?? []);
+  const typesArray = createMemo(() => props.types ?? []);
 
-  // Compute which sections have content
   const visibleSections = createMemo(() => {
     const sections = new Set<SectionId>();
     if (relatedHooks().length > 0) sections.add('related-hooks');
     if (relatedContexts().length > 0) sections.add('related-contexts');
+    if (props.provider) sections.add('provider');
     if (props.usage) sections.add('usage');
     if (parametersArray().length > 0) sections.add('props');
-    sections.add('returns'); // Always show returns section
-    if (examplesArray().length > 0) sections.add('examples');
+    sections.add('returns');
+    if (typesArray().length > 0) sections.add('types');
     return sections;
   });
-
-  const exampleTitles = createMemo(() => examplesArray().map((e) => e.title));
 
   return (
     <BaseDocPage
       title={props.title}
       description={props.description}
       visibleSections={visibleSections()}
-      exampleTitles={exampleTitles()}
     >
       <Show when={relatedHooks().length > 0}>
         <section id="related-hooks" class="mb-8 scroll-mt-20">
@@ -247,18 +272,171 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
         </Show>
       </section>
 
-      <Show when={examplesArray().length > 0}>
-        <section id="examples" class="mb-8 scroll-mt-20">
-          <h2 class="mb-4 text-2xl font-medium">Examples</h2>
+      <Show when={props.provider}>
+        <section id="provider" class="mb-10 scroll-mt-20">
+          <h2 class="mb-4 flex items-center gap-2 text-2xl font-medium">
+            Required Provider
+            <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-normal text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              Required
+            </span>
+          </h2>
+          <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+            <div class="flex gap-3">
+              <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                <AlertTriangleIcon class="size-5" />
+              </div>
+              <div>
+                <h3 class="font-medium text-amber-900 dark:text-amber-200">
+                  {props.provider!.name}
+                </h3>
+                <p class="mt-1 text-sm text-amber-800 dark:text-amber-300">
+                  {props.provider!.description}
+                </p>
+              </div>
+            </div>
+          </div>
+          <Show when={props.provider!.example}>
+            <div class="mb-6">
+              <h3 class="mb-2 text-lg font-medium">Setup Example</h3>
+              <CodeBlock code={props.provider!.example!} />
+            </div>
+          </Show>
+          <Show when={props.provider!.props.length > 0}>
+            <h3 class="mb-3 text-lg font-medium">Provider Props</h3>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
+                <thead class="bg-gray-50 dark:bg-neutral-900">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                      Prop
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                      Type
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                      Description
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                      Default
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+                  <For each={props.provider!.props}>
+                    {(prop) => (
+                      <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
+                        <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                          <span class="flex items-center gap-2">
+                            {prop.name}
+                            <Show when={prop.required}>
+                              <span class="text-xs text-red-500">*</span>
+                            </Show>
+                          </span>
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4 text-xs">
+                          <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                            {prop.type}
+                          </code>
+                        </td>
+                        <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                          {prop.description}
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4 text-xs">
+                          <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
+                            {prop.default}
+                          </code>
+                        </td>
+                      </tr>
+                    )}
+                  </For>
+                </tbody>
+              </table>
+            </div>
+          </Show>
+        </section>
+      </Show>
+
+      <Show when={typesArray().length > 0}>
+        <section id="types" class="mb-8 scroll-mt-20">
+          <h2 class="mb-4 text-2xl font-medium">Types</h2>
           <div class="space-y-6">
-            <For each={examplesArray()}>
-              {(example) => (
-                <div id={getExampleId(example.title)} class="scroll-mt-16">
-                  <CodeExample
-                    title={example.title}
-                    description={example.description}
-                    code={example.code}
-                  />
+            <For each={typesArray()}>
+              {(typeDef) => (
+                <div>
+                  <Show
+                    when={typeDef.values}
+                    fallback={
+                      <>
+                        <h3 class="mb-2 text-xl font-medium">{typeDef.name}</h3>
+                        <p class="mb-4 text-gray-600 dark:text-neutral-400">
+                          {typeDef.description}
+                        </p>
+                        <Show when={typeDef.props && typeDef.props.length > 0}>
+                          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
+                              <thead class="bg-gray-50 dark:bg-neutral-900">
+                                <tr>
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                    Property
+                                  </th>
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                    Type
+                                  </th>
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                    Description
+                                  </th>
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                    Default
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+                                <For each={typeDef.props}>
+                                  {(prop) => (
+                                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
+                                      <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                        {prop.name}
+                                      </td>
+                                      <td class="px-6 py-4 text-xs whitespace-nowrap">
+                                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                                          {prop.type}
+                                        </code>
+                                      </td>
+                                      <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                                        {prop.description}
+                                      </td>
+                                      <td class="px-6 py-4 text-xs whitespace-nowrap">
+                                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
+                                          {prop.default ?? '-'}
+                                        </code>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </For>
+                              </tbody>
+                            </table>
+                          </div>
+                        </Show>
+                      </>
+                    }
+                  >
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+                      <div class="mb-2 flex items-center gap-2">
+                        <code class="font-mono text-sm font-medium text-gray-900 dark:text-white">
+                          {typeDef.name}
+                        </code>
+                        <span class="text-gray-400">=</span>
+                      </div>
+                      <code class="font-mono text-sm text-blue-600 dark:text-blue-400">
+                        {typeDef.values!.map((v) => `"${v}"`).join(' | ')}
+                      </code>
+                      <Show when={typeDef.description}>
+                        <p class="mt-3 text-sm text-gray-600 dark:text-neutral-400">
+                          {typeDef.description}
+                        </p>
+                      </Show>
+                    </div>
+                  </Show>
                 </div>
               )}
             </For>
@@ -267,6 +445,7 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
       </Show>
 
       {props.children}
+
     </BaseDocPage>
   );
 }
@@ -293,7 +472,7 @@ function CodeBlock(props: { code: string }): JSX.Element {
   };
 
   return (
-    <div class="group relative">
+    <div class="group relative rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={() => void handleCopy()}
@@ -305,62 +484,7 @@ function CodeBlock(props: { code: string }): JSX.Element {
         </Show>
         {copied() ? 'Copied!' : 'Copy'}
       </button>
-      <div innerHTML={formatCodeToHTML(code())} />
-    </div>
-  );
-}
-
-interface CodeExampleProps {
-  title: string;
-  description?: string;
-  code?: string;
-}
-
-function CodeExample(props: CodeExampleProps): JSX.Element {
-  const [copied, setCopied] = createSignal(false);
-  const code = () => (props.code ? dedent`${props.code}` : '');
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(code());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = code();
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  return (
-    <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-neutral-800">
-      <div class="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
-        <h3 class="text-lg font-medium dark:text-white">{props.title}</h3>
-      </div>
-      <Show when={props.description}>
-        <div class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/50">
-          <p class="text-sm text-gray-600 dark:text-neutral-400">{props.description}</p>
-        </div>
-      </Show>
-      <div class="group relative">
-        <button
-          type="button"
-          onClick={() => void handleCopy()}
-          class="absolute right-3 top-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity hover:bg-gray-300 group-hover:opacity-100 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
-          aria-label={copied() ? 'Copied!' : 'Copy code'}
-        >
-          <Show when={copied()} fallback={<Copy01Icon class="size-4" />}>
-            <CheckIcon class="size-4 text-green-600" />
-          </Show>
-          {copied() ? 'Copied!' : 'Copy'}
-        </button>
-        <div innerHTML={formatCodeToHTML(code())} />
-      </div>
+      <ReadonlyCode code={code()} />
     </div>
   );
 }

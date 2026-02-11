@@ -1,5 +1,4 @@
-// Contexts - @exowpee/solidly-hooks
-export { IntlContext, IntlProvider, type IntlProviderProps } from './IntlContext';
+// Contexts - @kayou/hooks
 export {
   CustomResourceContext,
   CustomResourceProvider,
@@ -8,6 +7,7 @@ export {
   type PendingEntry,
   type ResourceOptions,
 } from './CustomResourceContext';
+export { IntlContext, IntlProvider, type IntlProviderProps } from './IntlContext';
 export {
   ThemeContext,
   ThemeProvider,
@@ -20,11 +20,3 @@ export {
   type ToastAPI,
   type ToastMethodProps,
 } from './ToastContext';
-export {
-  PortalContainerContext,
-  PortalContainerProvider,
-  usePortalContainer,
-  type PortalContainerContextValue,
-  type PortalContainerProviderProps,
-} from './PortalContainerContext';
-// Note: PortalContainerProvider creates a container in document.body with dark mode support

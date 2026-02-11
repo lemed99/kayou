@@ -38,6 +38,10 @@ export interface BaseChartContextType {
   /** Whether a ChartTooltip component is mounted. */
   tooltipEnabled: Accessor<boolean>;
   setTooltipEnabled: Setter<boolean>;
+  /** CSS class applied to axis elements (XAxis, YAxis). */
+  axisClass?: string;
+  /** CSS class applied to the CartesianGrid element. */
+  gridClass?: string;
 }
 
 export interface LineChartContextType {
@@ -102,6 +106,10 @@ export type LineChartProps = ParentProps<{
   title?: string;
   /** Description displayed in SVG for accessibility. */
   description?: string;
+  /** CSS class applied to axis elements (XAxis, YAxis). */
+  axisClass?: string;
+  /** CSS class applied to the CartesianGrid element. */
+  gridClass?: string;
 }>;
 
 export interface YAxisProps {
@@ -216,7 +224,11 @@ export interface BarChartContextType {
   setXAxisBBox: Setter<DOMRect | null>;
   data: readonly Record<string, unknown>[];
   registeredBars: Accessor<readonly string[]>;
-  registerBar: (k: string) => void;
+  registerBar: (k: string, stackId?: string) => void;
+  /** For stacked bars: returns the cumulative y-value below this bar's segment. */
+  getStackBase: (dataKey: string, dataIndex: number) => number;
+  /** Returns true if the bar is the topmost in its stack group (or not stacked at all). */
+  isTopOfStack: (dataKey: string) => boolean;
   activeIndex: Accessor<{
     item: Record<string, unknown>;
     barKey: string;
@@ -268,6 +280,10 @@ export type BarChartProps = ParentProps<{
   barGap?: number;
   /** Spacing between bar groups (0-1, percentage of step). @default 0.2 */
   barCategoryGap?: number;
+  /** CSS class applied to axis elements (XAxis, YAxis). */
+  axisClass?: string;
+  /** CSS class applied to the CartesianGrid element. */
+  gridClass?: string;
 }>;
 
 export interface BarProps {
@@ -350,6 +366,10 @@ export type AreaChartProps = ParentProps<{
   title?: string;
   /** Description displayed in SVG for accessibility. */
   description?: string;
+  /** CSS class applied to axis elements (XAxis, YAxis). */
+  axisClass?: string;
+  /** CSS class applied to the CartesianGrid element. */
+  gridClass?: string;
 }>;
 
 export interface AreaProps {

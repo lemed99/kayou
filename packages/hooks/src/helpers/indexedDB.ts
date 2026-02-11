@@ -1,7 +1,7 @@
 const isEmptyObject = (obj: unknown) =>
   !!obj && typeof obj === 'object' && Object.keys(obj).length === 0;
 
-const isValidCacheData = (data: unknown): boolean => {
+export const isValidCacheData = (data: unknown): boolean => {
   if (data && typeof data === 'string') return false;
   if (JSON.stringify(data) !== '[]' && isEmptyObject(data)) return false;
   if (
@@ -50,13 +50,14 @@ class NativeCache {
     });
   }
 
-  async get(key: string): Promise<unknown> {
+  async get(key: string, validator?: (data: unknown) => boolean): Promise<unknown> {
     if (!key) return null;
 
     try {
       const db = await this.getDB();
       const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
+      const validate = validator ?? isValidCacheData;
 
       return new Promise((resolve, reject) => {
         const request = store.get(key);
@@ -69,7 +70,7 @@ class NativeCache {
             return;
           }
 
-          if (!isValidCacheData(result.value)) {
+          if (!validate(result.value)) {
             resolve(null);
             return;
           }
@@ -141,6 +142,6 @@ export const insertOrUpdateCacheRow = async (key: string, value: unknown) => {
   await cache.set(key, value);
 };
 
-export const getCacheRow = async (key: string): Promise<unknown> => {
-  return cache.get(key);
+export const getCacheRow = async (key: string, validator?: (data: unknown) => boolean): Promise<unknown> => {
+  return cache.get(key, validator);
 };

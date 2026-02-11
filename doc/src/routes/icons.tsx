@@ -1,4 +1,3 @@
-/* eslint-disable solid/no-innerhtml */
 import {
   Component,
   For,
@@ -12,7 +11,6 @@ import {
 import * as Icons from '@kayou/icons';
 import { useLocation } from '@solidjs/router';
 
-import { formatCodeToHTML } from '../helpers/formatCodeToHTML';
 
 /** Icon component type */
 type IconComponent = Component<{ class?: string } & JSX.SvgSVGAttributes<SVGSVGElement>>;
@@ -388,27 +386,6 @@ const categorizeIcon = (name: string): string => {
   )
     return 'Weather';
 
-  // Social - facebook, twitter/x, instagram, linkedin, github, tiktok, discord, slack, whatsapp, telegram, reddit, dribbble, twitch, spotify, pinterest, snapchat
-  if (
-    lowerName.includes('facebook') ||
-    lowerName.includes('twitterx') ||
-    lowerName.includes('instagram') ||
-    lowerName.includes('linkedin') ||
-    lowerName.includes('github') ||
-    lowerName.includes('tiktok') ||
-    lowerName.includes('discord') ||
-    lowerName.includes('slack') ||
-    lowerName.includes('whatsapp') ||
-    lowerName.includes('telegram') ||
-    lowerName.includes('reddit') ||
-    lowerName.includes('dribbble') ||
-    lowerName.includes('twitch') ||
-    lowerName.includes('spotify') ||
-    lowerName.includes('pinterest') ||
-    lowerName.includes('snapchat')
-  )
-    return 'Social';
-
   return 'General';
 };
 
@@ -449,16 +426,6 @@ const hashToCategory = (hash: string): string | null => {
   const categories = Object.keys(iconsByCategory());
   return categories.find((cat) => cat.toLowerCase().replace(/[&\s]+/g, '-') === normalized) ?? null;
 };
-
-const codeExample = `import { ArrowRightIcon, CheckIcon } from '@kayou/icons';
-
-function MyComponent() {
-  return (
-    <button class="flex items-center gap-2">
-      Continue <ArrowRightIcon class="size-5" />
-    </button>
-  );
-}`;
 
 export default function IconsPage() {
   const location = useLocation();
@@ -519,15 +486,11 @@ export default function IconsPage() {
             <span class="font-medium text-gray-900 dark:text-white">
               {allIcons.length} icons
             </span>
-            <span>·</span>
-            <span>Free & open source</span>
-            <span>·</span>
-            <span>SolidJS</span>
           </div>
 
           {/* Main headline */}
           <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white">
-            Beautiful hand-crafted SVG icons for your SolidJS projects.
+            Beautiful SVG icons for your SolidJS projects.
           </h1>
 
           {/* Links */}
@@ -595,7 +558,7 @@ export default function IconsPage() {
             <span>
               {filteredIcons().length}{' '}
               {filteredIcons().length === 1 ? 'icon' : 'icons'}
-              {selectedCategory() && (
+              <Show when={selectedCategory()}>
                 <span>
                   {' '}
                   in{' '}
@@ -603,8 +566,8 @@ export default function IconsPage() {
                     {selectedCategory()}
                   </span>
                 </span>
-              )}
-              {searchQuery() && (
+              </Show>
+              <Show when={searchQuery()}>
                 <span>
                   {' '}
                   matching "
@@ -613,7 +576,7 @@ export default function IconsPage() {
                   </span>
                   "
                 </span>
-              )}
+              </Show>
             </span>
           </Show>
         </div>
@@ -670,30 +633,6 @@ export default function IconsPage() {
             </For>
           </div>
         </Show>
-      </div>
-
-      {/* How to use Section */}
-      <div class="border-t border-gray-200 bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900">
-        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <h2 class="text-2xl font-bold text-gray-950 dark:text-white">How to use</h2>
-          <div class="mt-6 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-            <div innerHTML={formatCodeToHTML(codeExample)} />
-          </div>
-          <div class="mt-6 flex flex-wrap gap-6">
-            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-neutral-400">
-              <Icons.CheckCircleIcon class="size-5 text-green-500" />
-              <span>Tree-shakeable</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-neutral-400">
-              <Icons.CheckCircleIcon class="size-5 text-green-500" />
-              <span>TypeScript support</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-neutral-400">
-              <Icons.CheckCircleIcon class="size-5 text-green-500" />
-              <span>SSR compatible</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

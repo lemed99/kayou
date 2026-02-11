@@ -106,9 +106,89 @@ test.describe('BarChart', () => {
 
   // ==================== Accessibility ====================
 
-  test('should be accessible', async ({ page }) => {
-    const svg = page.locator('svg').first();
+  test('should have correct ARIA attributes on SVG', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
     await expect(svg).toBeVisible();
+    await expect(svg).toHaveAttribute('aria-label');
+    await expect(svg).toHaveAttribute('tabindex', '0');
+    await expect(svg).toHaveAttribute('aria-roledescription', 'bar chart');
+  });
+
+  test('should have bar series aria-labels', async ({ page }) => {
+    const barGroup = page.locator('g[aria-label^="Bar series:"]').first();
+    await expect(barGroup).toBeVisible();
+  });
+
+  test('should focus chart with Tab and show focus ring', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+    await expect(svg).toBeFocused();
+  });
+
+  test('should navigate data points with ArrowRight', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+    await page.waitForTimeout(100);
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+  });
+
+  test('should navigate with Home and End keys', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('Home');
+    await page.waitForTimeout(200);
+
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+
+    // Screen reader region should have first data point
+    const srRegion = svg.locator('..').locator('[role="status"]');
+    const text = await srRegion.textContent();
+    expect(text).toContain('Jan');
+
+    await page.keyboard.press('End');
+    await page.waitForTimeout(200);
+    const textEnd = await srRegion.textContent();
+    expect(textEnd).not.toContain('Jan');
+  });
+
+  test('should clear active state with Escape', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+    const tooltip = page.locator('[role="tooltip"]');
+    await expect(tooltip).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    await expect(tooltip).not.toBeVisible();
+  });
+
+  test('should update screen reader region on keyboard navigation', async ({ page }) => {
+    const svg = page.locator('svg[role="img"]').first();
+    await svg.scrollIntoViewIfNeeded();
+    await svg.focus();
+
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(200);
+
+    const srRegion = svg.locator('..').locator('[role="status"]');
+    const text = await srRegion.textContent();
+    expect(text!.trim().length).toBeGreaterThan(0);
+    // Should contain data series name
+    expect(text).toContain('revenue');
   });
 
   // ==================== Edge Cases ====================

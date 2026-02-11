@@ -40,6 +40,13 @@ const Navbar: Component = () => {
   const [searchQuery, setSearchQuery] = createSignal('');
   const [selectedIndex, setSelectedIndex] = createSignal(0);
   const [searchResults, setSearchResults] = createSignal<SearchDocument[]>([]);
+  let searchInputRef: HTMLInputElement | undefined;
+
+  const openSearch = () => {
+    setIsSearchOpen(true);
+    // Focus synchronously so mobile browsers open the keyboard (user gesture requirement)
+    searchInputRef?.focus();
+  };
 
   // Perform search with Orama when query changes
   createEffect(() => {
@@ -87,7 +94,7 @@ const Navbar: Component = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsSearchOpen(true);
+        openSearch();
       }
       if (e.key === 'Escape') {
         setIsSearchOpen(false);
@@ -162,9 +169,6 @@ const Navbar: Component = () => {
               </div>
               <span class="text-xl font-bold text-gray-900 dark:text-white">Kayou</span>
             </A>
-            <span class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
-              v1.0.0
-            </span>
           </div>
 
           <div class="flex items-center">
@@ -185,13 +189,13 @@ const Navbar: Component = () => {
                 )}
               </For>
             </div>
-            <div class="mx-4 h-8 w-1 border-r border-gray-200 dark:border-neutral-700" />
+            <div class="hidden lg:block mx-4 h-8 w-1 border-r border-gray-200 dark:border-neutral-700" />
             {/* Right: Search + GitHub + Dark Mode */}
             <div class="flex items-center gap-2">
               {/* Search Button */}
               <button
                 type="button"
-                onClick={() => setIsSearchOpen(true)}
+                onClick={openSearch}
                 class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400 dark:hover:bg-neutral-700"
               >
                 <SearchRefractionIcon class="size-4" />
@@ -203,13 +207,12 @@ const Navbar: Component = () => {
 
               {/* GitHub Link with Stars */}
               <a
-                href="https://github.com/exowpee/kayou"
+                href="https://github.com/kayou"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="hidden items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 sm:flex dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <GitHubIcon />
-                <span class="font-medium">1.2K</span>
               </a>
 
               {/* Dark Mode Toggle */}
@@ -245,7 +248,7 @@ const Navbar: Component = () => {
 
         {/* Mobile Menu */}
         <Show when={isMobileMenuOpen()}>
-          <div class="border-t border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-neutral-800 dark:bg-neutral-900">
+          <div class="border-y border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-neutral-800 dark:bg-neutral-900">
             <div class="flex flex-col gap-4">
               <For each={navLinks}>
                 {(link) => (
@@ -254,7 +257,7 @@ const Navbar: Component = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     class={`flex items-center rounded-lg text-base font-medium transition-colors ${
                       isActive(link.href, link.activePaths)
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400'
+                        ? 'text-blue-600 dark:text-blue-400'
                         : 'text-gray-600 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
                     }`}
                   >
@@ -283,12 +286,12 @@ const Navbar: Component = () => {
                 <SearchRefractionIcon class="size-4" />
               </div>
               <input
-                ref={(el) => el.focus()}
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search documentation..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
+                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
               />
             </div>
 

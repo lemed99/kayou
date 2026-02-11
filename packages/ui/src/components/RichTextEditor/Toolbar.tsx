@@ -326,7 +326,10 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                           class={`flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-left text-sm transition-colors ${'text-gray-700 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-700'}`}
                         >
                           <Show when={option.icon} fallback={<span />}>
-                            {option.icon && <option.icon />}
+                            {(Icon) => {
+                              const Comp = Icon();
+                              return <Comp />;
+                            }}
                           </Show>
                           <span class="flex-1">{option.label}</span>
                           <Show when={getCurrentHeadingLevel() === option.level}>

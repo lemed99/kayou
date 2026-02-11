@@ -1184,21 +1184,3 @@ export { QuoteIcon } from './quote';
 export { SuperscriptIcon } from './superscript';
 export { TaskListIcon } from './task-list';
 export { HighlighterIcon } from './highlighter';
-
-// Social media icons
-export { FacebookIcon } from './facebook';
-export { TwitterXIcon } from './twitter-x';
-export { InstagramIcon } from './instagram';
-export { LinkedinIcon } from './linkedin';
-export { GithubIcon } from './github';
-export { TiktokIcon } from './tiktok';
-export { DiscordIcon } from './discord';
-export { SlackIcon } from './slack';
-export { WhatsappIcon } from './whatsapp';
-export { TelegramIcon } from './telegram';
-export { RedditIcon } from './reddit';
-export { DribbbleIcon } from './dribbble';
-export { TwitchIcon } from './twitch';
-export { SpotifyIcon } from './spotify';
-export { PinterestIcon } from './pinterest';
-export { SnapchatIcon } from './snapchat';

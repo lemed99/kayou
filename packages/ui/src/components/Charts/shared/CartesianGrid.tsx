@@ -19,11 +19,11 @@ export function CartesianGrid(props: CartesianGridProps): JSX.Element {
     return y.ticks(count).map((v) => y(v));
   });
 
-  const stroke = createMemo(() => props.stroke ?? '#ccc');
+  const stroke = createMemo(() => props.stroke ?? 'currentColor');
   const strokeDasharray = createMemo(() => props.strokeDasharray ?? '3 3');
 
   return (
-    <g aria-hidden="true">
+    <g aria-hidden="true" class={chart.gridClass}>
       <Show when={props.horizontal !== false}>
         <g>
           <For each={yTicks()}>

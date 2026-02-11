@@ -101,9 +101,15 @@ export interface DataTableProps<T> {
   /** Whether row selection is enabled. */
   rowSelection?: boolean;
   /** Error state for the table. */
-  error: unknown;
+  error?: unknown;
   /** Callback fired when page changes. */
   onPageChange?: (page: number) => void;
+  /** Callback fired when search value changes. */
+  onSearchChange?: (search: string) => void;
+  /** Callback fired when per-page value changes. */
+  onPerPageChange?: (perPage: number) => void;
+  /** Callback fired when row selection changes. */
+  onSelectionChange?: (selectedIndices: Set<number>) => void;
   /** Whether to show the search bar. */
   searchBar?: boolean;
   /** Whether to allow column configuration. */
@@ -148,12 +154,10 @@ export interface DataTableProps<T> {
   // Filter system props
   /** Filter configurations for automatic filter UI generation. */
   filterConfigs?: FilterConfig<T>[];
-  /** Controlled filter state (for external mode). */
+  /** Controlled filter state. */
   filterState?: FilterState;
-  /** Callback when filters change (for controlled mode). */
+  /** Callback fired when filters change. The consumer is responsible for filtering or fetching data. */
   onFiltersChange?: (filters: FilterState) => void;
-  /** Filter mode: 'internal' applies filters locally, 'external' for server-side filtering. @default 'internal' */
-  filterMode?: 'internal' | 'external';
   /** Text for the "Add filter" link. */
   addFilterText?: string;
   /** Text for the "Reset" button. */
@@ -162,8 +166,6 @@ export interface DataTableProps<T> {
   applyText?: string;
   /** Text when no filters are applied. */
   noFiltersText?: string;
-  /** Unique key for persisting table state to session storage. Requires DataTableProvider. */
-  storageKey?: string;
 }
 
 /**
@@ -179,14 +181,13 @@ export function DataTable<T extends Record<string, unknown>>(
     ...props.ariaLabels,
   }));
 
-  // State persistence (storageKey is a static identifier, won't change)
-  const storageKey = untrack(() => props.storageKey);
-  const { restoredState, isRestored, saveState } = useDataTableState(storageKey);
+  // State persistence (auto-generated ID via DataTableProvider)
+  const { restoredState, isRestored, saveState, perPageOptions } = useDataTableState();
 
   const [searchKey, setSearchKey] = createSignal('');
   const [selectedRows, setSelectedRows] = createSignal<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = createSignal(1);
-  const [perPage, setPerPage] = createSignal(10);
+  const [perPage, setPerPage] = createSignal(perPageOptions[0] ?? 10);
   const [columns, setColumns] = createSignal<DataTableColumnProps<T>[]>([]);
   const [tableRef, setTableRef] = createSignal<HTMLDivElement | undefined>();
   const [tableWidth, setTableWidth] = createSignal(0);
@@ -210,17 +211,13 @@ export function DataTable<T extends Record<string, unknown>>(
     () => expanded() && (!!props.rowHeight || !!props.estimatedRowHeight),
   );
 
-  // Filter system integration
-  const filterHook = createMemo(() => {
-    if (!props.filterConfigs || props.filterConfigs.length === 0) return null;
-    return useDataTableFilters<T>({
-      data: () => props.data,
-      filterConfigs: props.filterConfigs,
-      filters: props.filterState,
-      onFiltersChange: props.onFiltersChange,
-      filterMode: props.filterMode ?? 'internal',
-    });
+  // Filter system integration — called unconditionally at the top level
+  const filterHook = useDataTableFilters<T>({
+    filterConfigs: () => props.filterConfigs ?? [],
+    filters: () => props.filterState,
+    onFiltersChange: (filters) => props.onFiltersChange?.(filters),
   });
+  const hasFilters = createMemo(() => (props.filterConfigs?.length ?? 0) > 0);
 
   // Restore state from session storage
   createEffect(() => {
@@ -249,11 +246,12 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
-  // Base data after filter system is applied
-  const baseData = createMemo(() => {
-    const hook = filterHook();
-    if (hook) return hook.filteredData();
-    return props.data;
+  const baseData = createMemo(() => props.data);
+
+  // Clear selection when underlying data changes
+  createEffect(() => {
+    baseData(); // track
+    setSelectedRows(new Set<number>());
   });
 
   const allSelected = createMemo(() => {
@@ -280,11 +278,16 @@ export function DataTable<T extends Record<string, unknown>>(
     }
   });
 
+  const updateSelection = (newSet: Set<number>) => {
+    setSelectedRows(newSet);
+    props.onSelectionChange?.(newSet);
+  };
+
   const toggleSelectAll = () => {
     if (allSelected()) {
-      setSelectedRows(new Set<number>());
+      updateSelection(new Set<number>());
     } else {
-      setSelectedRows(new Set(baseData().map((_, idx) => idx)));
+      updateSelection(new Set(baseData().map((_, idx) => idx)));
     }
   };
 
@@ -295,12 +298,22 @@ export function DataTable<T extends Record<string, unknown>>(
     } else {
       newSelected.add(index);
     }
-    setSelectedRows(newSelected);
+    updateSelection(newSelected);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     props.onPageChange?.(page);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchKey(value);
+    props.onSearchChange?.(value);
+  };
+
+  const handlePerPageChange = (value: number) => {
+    setPerPage(value);
+    props.onPerPageChange?.(value);
   };
 
   const defaultRowsCount = createMemo(() => props.defaultRowsCount ?? 5);
@@ -327,14 +340,15 @@ export function DataTable<T extends Record<string, unknown>>(
       `${props.rowSelection ? '40px ' : ''}${columns()
         .map((col, i) => {
           const scope = tableRef();
-          const minWidth = scope
-            ? Math.max(
-                ...Array.from(scope.querySelectorAll(`[data-column="${col.key}"]`)).map(
-                  (e) => (e as HTMLElement).offsetWidth,
-                ),
+          const widths = scope
+            ? Array.from(scope.querySelectorAll(`[data-column="${col.key}"]`)).map(
+                (e) => (e as HTMLElement).offsetWidth,
               )
-            : 0;
-          return `minmax(${Math.max(0, minWidth + 48)}px, ${Math.max(0, (tableWidth() * (col.width + sharedPercentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`;
+            : [];
+          const measured = widths.length > 0 ? Math.max(...widths) + 48 : 0;
+          const colMinWidth = col.minWidth ?? 120;
+          const minWidth = Math.max(measured, colMinWidth);
+          return `minmax(${minWidth}px, ${Math.max(0, (tableWidth() * (col.width + sharedPercentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`;
         })
         .join(' ')}`,
     );
@@ -444,20 +458,18 @@ export function DataTable<T extends Record<string, unknown>>(
     onCleanup(() => el.removeEventListener('scroll', handleInfiniteScroll));
   });
 
-  const baseRowClass = createMemo(() =>
-    twMerge(
-      'grid w-fit bg-white hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/50',
-      'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
-    ),
+  const baseRowClass = twMerge(
+    'grid w-fit bg-white hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/50',
+    'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
   );
 
-  const List = (row: T, index: Accessor<number>) => (
+  const renderRow = (row: T, index: Accessor<number>) => (
     <div
       role="row"
       class={
         selectedRows().has(index())
-          ? `${baseRowClass()} bg-neutral-100 dark:bg-neutral-800`
-          : baseRowClass()
+          ? `${baseRowClass} bg-neutral-100 dark:bg-neutral-800`
+          : baseRowClass
       }
       style={{
         'grid-template-columns': rowGridStyle(),
@@ -523,13 +535,13 @@ export function DataTable<T extends Record<string, unknown>>(
       loading={<LoadingMoreSpinner />}
       rowClass="border-b border-gray-200 last:border-b-0 dark:border-neutral-800"
     >
-      {(item: unknown, index: Accessor<number>) => List(item as T, index)}
+      {(item: unknown, index: Accessor<number>) => renderRow(item as T, index)}
     </Dynamic>
   );
 
   const hasToolbar = createMemo(
     () =>
-      !!filterHook() || !!(props.filters && !filterHook()) || !!props.configureColumns,
+      hasFilters() || !!(props.filters && !hasFilters()) || !!props.configureColumns,
   );
 
   return (
@@ -547,7 +559,7 @@ export function DataTable<T extends Record<string, unknown>>(
               <input
                 ref={setSearchRef}
                 value={searchKey()}
-                onInput={(e) => setSearchKey(e.target.value)}
+                onInput={(e) => handleSearchChange(e.target.value)}
                 placeholder={l().searchPlaceholder}
                 aria-label={a().search}
                 onFocus={(e) => e.target.select()}
@@ -558,7 +570,7 @@ export function DataTable<T extends Record<string, unknown>>(
                   type="button"
                   aria-label={a().clearSearch}
                   onClick={() => {
-                    setSearchKey('');
+                    handleSearchChange('');
                     searchRef()?.focus();
                   }}
                   class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
@@ -581,27 +593,26 @@ export function DataTable<T extends Record<string, unknown>>(
             {/* Left: Filters */}
             <div class="flex min-w-0 flex-1 items-center gap-2">
               {/* Filter System (when filterConfigs is provided) */}
-              <Show when={filterHook()}>
-                {(hook) => (
-                  <DataTableFilters
-                    filterConfigs={props.filterConfigs!}
-                    activeFilters={hook().activeFilters}
-                    setFilter={hook().setFilter}
-                    removeFilter={hook().removeFilter}
-                    clearFilters={hook().clearFilters}
-                    getOperators={hook().getOperators}
-                    filterButtonText={props.filterButtonText}
-                    addFilterText={props.addFilterText}
-                    resetText={props.resetText}
-                    applyText={props.applyText}
-                    noFiltersText={props.noFiltersText}
-                    showChips
-                  />
-                )}
+              <Show when={hasFilters()}>
+                <DataTableFilters
+                  filterConfigs={props.filterConfigs!}
+                  activeFilters={filterHook.activeFilters}
+                  setFilter={filterHook.setFilter}
+                  removeFilter={filterHook.removeFilter}
+                  clearFilters={filterHook.clearFilters}
+                  replaceAllFilters={filterHook.replaceAllFilters}
+                  getOperators={filterHook.getOperators}
+                  filterButtonText={props.filterButtonText}
+                  addFilterText={props.addFilterText}
+                  resetText={props.resetText}
+                  applyText={props.applyText}
+                  noFiltersText={props.noFiltersText}
+                  showChips
+                />
               </Show>
 
               {/* Custom Filters (legacy, when filters JSX is provided) */}
-              <Show when={props.filters && !filterHook()}>
+              <Show when={props.filters && !hasFilters()}>
                 <div class="flex items-center py-1">
                   <FilterFunnel01Icon class="mr-2 size-5" />
                   <p>{props.filterButtonText || l().filter}</p>
@@ -661,53 +672,55 @@ export function DataTable<T extends Record<string, unknown>>(
         {/* Scrollable data area (header + body) */}
         <div class="flex min-w-0 flex-col overflow-x-auto">
           {/* Table Header */}
-          <div
-            ref={setHeaderRef}
-            role="row"
-            class={twMerge(
-              'grid w-fit border-b border-gray-200 bg-gray-100 text-xs font-bold uppercase text-gray-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
-              !props.searchBar &&
-                !props.filters &&
-                !hasToolbar() &&
-                !(props.rowSelection && selectedRows().size > 0)
-                ? 'rounded-t-lg'
-                : '',
-            )}
-            style={{
-              'grid-template-columns': rowGridStyle(),
-            }}
-          >
-            <Show when={props.rowSelection}>
-              <div role="columnheader" class="flex items-center py-3 pl-6">
-                <Checkbox
-                  checked={allSelected()}
-                  onChange={toggleSelectAll}
-                  aria-label="Select all rows"
-                />
-              </div>
-            </Show>
-
-            <For each={columns()}>
-              {(column) => (
-                <div
-                  role="columnheader"
-                  class="flex items-center gap-1 whitespace-nowrap px-6 py-3"
-                  title={column.tooltip || column.label}
-                >
-                  <span>{column.label}</span>
-                  <Show when={column.tooltip}>
-                    <Tooltip
-                      content={column.tooltip}
-                      theme="auto"
-                      placement="top"
-                      class="capitalize"
-                    >
-                      <InfoCircleIcon aria-hidden="true" />
-                    </Tooltip>
-                  </Show>
-                </div>
+          <div role="rowgroup">
+            <div
+              ref={setHeaderRef}
+              role="row"
+              class={twMerge(
+                'grid w-fit border-b border-gray-200 bg-gray-100 text-xs font-bold uppercase text-gray-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
+                !props.searchBar &&
+                  !props.filters &&
+                  !hasToolbar() &&
+                  !(props.rowSelection && selectedRows().size > 0)
+                  ? 'rounded-t-lg'
+                  : '',
               )}
-            </For>
+              style={{
+                'grid-template-columns': rowGridStyle(),
+              }}
+            >
+              <Show when={props.rowSelection}>
+                <div role="columnheader" class="flex items-center py-3 pl-6">
+                  <Checkbox
+                    checked={allSelected()}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all rows"
+                  />
+                </div>
+              </Show>
+
+              <For each={columns()}>
+                {(column) => (
+                  <div
+                    role="columnheader"
+                    class="flex items-center gap-1 whitespace-nowrap px-6 py-3"
+                    title={column.tooltip || column.label}
+                  >
+                    <span>{column.label}</span>
+                    <Show when={column.tooltip}>
+                      <Tooltip
+                        content={column.tooltip}
+                        theme="auto"
+                        placement="top"
+                        class="capitalize"
+                      >
+                        <InfoCircleIcon aria-hidden="true" />
+                      </Tooltip>
+                    </Show>
+                  </div>
+                )}
+              </For>
+            </div>
           </div>
 
           {/* Table Body */}
@@ -715,7 +728,7 @@ export function DataTable<T extends Record<string, unknown>>(
             role="rowgroup"
             aria-busy={props.loading || props.validating}
             class="relative flex flex-col"
-            style={{ width: `${rowWidth()}px` }}
+            style={{ width: rowWidth() > 0 ? `${rowWidth()}px` : undefined }}
           >
             <Show
               when={!props.loading && !props.error}
@@ -772,11 +785,9 @@ export function DataTable<T extends Record<string, unknown>>(
               </Show>
               {/* Plain rendering when not virtualized */}
               <Show when={!useVirtualization()}>
-                {/* <div> */}
                 <For each={filteredData()} fallback={<NoItemsComponent />}>
-                  {List}
+                  {renderRow}
                 </For>
-                {/* </div> */}
               </Show>
             </Show>
           </div>
@@ -787,6 +798,7 @@ export function DataTable<T extends Record<string, unknown>>(
           <button
             type="button"
             aria-expanded={expanded()}
+            aria-label={expanded() ? (props.collapseText ?? 'Collapse') : props.seeMoreText}
             onClick={() => setExpanded((v) => !v)}
             class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
           >
@@ -818,15 +830,13 @@ export function DataTable<T extends Record<string, unknown>>(
               <Show when={props.perPageControl}>
                 <div class="flex items-center gap-2">
                   <Select
-                    options={[
-                      { value: '10', label: '10' },
-                      { value: '25', label: '25' },
-                      { value: '50', label: '50' },
-                      { value: '100', label: '100' },
-                    ]}
+                    options={perPageOptions.map((n) => ({
+                      value: String(n),
+                      label: String(n),
+                    }))}
                     sizing="xs"
                     value={String(perPage())}
-                    onSelect={(option) => setPerPage(Number(option?.value || 10))}
+                    onSelect={(option) => handlePerPageChange(Number(option?.value || 10))}
                     fitContent={true}
                     aria-label={props.elementsPerPageText}
                   />

@@ -1,5 +1,3 @@
-import { JSX } from 'solid-js';
-
 import { type Option } from '../../shared';
 
 /**
@@ -7,6 +5,7 @@ import { type Option } from '../../shared';
  */
 export type FilterOperator =
   | 'equal'
+  | 'notEqual'
   | 'contains'
   | 'include'
   | 'greaterThan'
@@ -43,7 +42,7 @@ export type FilterValue =
   | boolean
   | Date
   | string[]
-  | [number, number]
+  | [number | null, number | null]
   | [Date, Date]
   | null;
 
@@ -121,32 +120,13 @@ export interface ActiveFilter {
 export type FilterState = Map<string, ActiveFilter>;
 
 /**
- * Column configuration with optional inline filter config.
- */
-export interface DataTableColumnProps<T> {
-  /** Column header label. */
-  label: string;
-  /** Key to access the column data from row objects. */
-  key: string;
-  /** Custom render function for cell content. */
-  render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
-  /** Column width as percentage of table width. */
-  width: number;
-  /** Minimum column width in pixels. Defaults to 120. */
-  minWidth?: number;
-  /** Tooltip text for the column header. */
-  tooltip?: string;
-  /** Optional inline filter configuration for this column. */
-  filter?: Omit<FilterConfig<T>, 'key' | 'label'>;
-}
-
-/**
  * Default operators by data type.
  */
 export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
-  string: ['contains', 'equal', 'isEmpty', 'isNotEmpty'],
+  string: ['contains', 'equal', 'notEqual', 'isEmpty', 'isNotEmpty'],
   number: [
     'equal',
+    'notEqual',
     'greaterThan',
     'lessThan',
     'gte',
@@ -155,9 +135,9 @@ export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
     'isEmpty',
     'isNotEmpty',
   ],
-  date: ['equal', 'greaterThan', 'lessThan', 'between', 'isEmpty', 'isNotEmpty'],
+  date: ['equal', 'notEqual', 'greaterThan', 'lessThan', 'between', 'isEmpty', 'isNotEmpty'],
   array: ['include', 'isEmpty', 'isNotEmpty'],
-  boolean: ['equal'],
+  boolean: ['equal', 'notEqual'],
 };
 
 /**
@@ -165,6 +145,7 @@ export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
  */
 export const OPERATOR_LABELS: Record<FilterOperator, string> = {
   equal: 'equals',
+  notEqual: 'not equal',
   contains: 'contains',
   include: 'includes',
   greaterThan: 'greater than',

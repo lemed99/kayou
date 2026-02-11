@@ -33,156 +33,67 @@ export default function UseToastPage() {
       usage={`
         import { useToast, ToastProvider } from '@kayou/hooks';
       `}
-      examples={[
-        {
-          title: 'Basic Setup',
-          description: 'Wrap your app with ToastProvider and define toast methods.',
-          code: `
-            import { ToastProvider } from '@kayou/hooks';
+      provider={{
+        name: 'ToastProvider',
+        description:
+          'Wraps your application to provide toast notification context to all useToast hooks. Manages toast rendering, positioning, and auto-dismiss behavior.',
+        example: `
+          import { ToastProvider } from '@kayou/hooks';
 
-            // Define your toast components
-            const toastMethods = {
-              success: (props) => (
-                <div class="rounded-lg bg-green-500 px-4 py-2 text-white">
-                  {props.message}
-                </div>
-              ),
-              error: (props) => (
-                <div class="rounded-lg bg-red-500 px-4 py-2 text-white">
-                  {props.message}
-                </div>
-              ),
-            };
+          const methods = {
+            success: (props) => (
+              <div onMouseEnter={props.pause} onMouseLeave={props.play}>
+                {props.message}
+                <button onClick={props.dismiss}>\u00d7</button>
+              </div>
+            ),
+          };
 
-            function App() {
-              return (
-                <ToastProvider methods={toastMethods}>
-                  <MyComponent />
-                </ToastProvider>
-              );
-            }
-          `,
-        },
-        {
-          title: 'Showing Toasts',
-          description: 'Use the hook to show toasts from any component.',
-          code: `
-            import { useToast } from '@kayou/hooks';
-
-            function MyComponent() {
-              const toast = useToast();
-
-              const handleSuccess = () => {
-                toast.success('Operation completed!');
-              };
-
-              const handleError = () => {
-                toast.error('Something went wrong');
-              };
-
-              return (
-                <div class="space-x-2">
-                  <button onClick={handleSuccess}>Show Success</button>
-                  <button onClick={handleError}>Show Error</button>
-                </div>
-              );
-            }
-          `,
-        },
-        {
-          title: 'With Options',
-          description: 'Customize toast position and duration.',
-          code: `
-            const toast = useToast();
-
-            // Show toast at bottom-center for 5 seconds
-            toast.success('Saved!', {
-              position: 'bottom-center',
-              duration: 5000,
-            });
-
-            // Show toast that doesn't auto-dismiss
-            const id = toast.error('Connection lost', {
-              duration: 0, // Won't auto-dismiss
-            });
-
-            // Manually dismiss later
-            toast.dismiss(id);
-          `,
-        },
-        {
-          title: 'Interactive Toast',
-          description: 'Create toasts with pause/play on hover.',
-          code: `
-            const toastMethods = {
-              info: (props) => (
-                <div
-                  class="rounded-lg bg-blue-500 px-4 py-2 text-white"
-                  onMouseEnter={props.pause}
-                  onMouseLeave={props.play}
-                >
-                  {props.message}
-                  <button onClick={props.dismiss} class="ml-2">×</button>
-                </div>
-              ),
-            };
-
-            // In ToastProvider, pauseOnHover is true by default
-            <ToastProvider methods={toastMethods} pauseOnHover={true}>
-              {children}
-            </ToastProvider>
-          `,
-        },
-        {
-          title: 'ToastProvider Props',
-          description: 'Configuration options for ToastProvider.',
-          code: `
-            interface ToastProviderProps {
-              // Required: Object mapping method names to toast components
-              methods: Record<string, Component<ToastMethodProps>>;
-
-              // Default position for all toasts
-              position?: 'top-left' | 'top-center' | 'top-right'
-                       | 'bottom-left' | 'bottom-center' | 'bottom-right';
-              // Default: 'top-right'
-
-              // Default duration in milliseconds (0 = no auto-dismiss)
-              duration?: number; // Default: 3000
-
-              // Pause timer when hovering over toast
-              pauseOnHover?: boolean; // Default: true
-
-              // Gap between toasts in pixels
-              gutter?: number; // Default: 16
-            }
-          `,
-        },
-        {
-          title: 'ToastMethodProps',
-          description: 'Props passed to your toast components.',
-          code: `
-            interface ToastMethodProps {
-              // The message passed to the toast method
-              message: string;
-
-              // Whether the toast timer is paused
-              paused: () => boolean;
-
-              // The duration setting for this toast
-              duration: number;
-
-              // Function to dismiss this toast
-              dismiss: () => void;
-
-              // Function to pause the auto-dismiss timer
-              pause: () => void;
-
-              // Function to resume the auto-dismiss timer
-              play: () => void;
-            }
-          `,
-        },
-      ]}
+          function App() {
+            return (
+              <ToastProvider methods={methods} position="top-right" duration={3000}>
+                <MyApp />
+              </ToastProvider>
+            );
+          }
+        `,
+        props: [
+          {
+            name: 'methods',
+            type: 'Record<string, Component<ToastMethodProps>>',
+            required: true,
+            default: '-',
+            description:
+              'Custom render components for each toast type. Each receives message, dismiss, pause, and play props.',
+          },
+          {
+            name: 'position',
+            type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+            default: "'top-right'",
+            description: 'Position of toast notifications on screen.',
+          },
+          {
+            name: 'duration',
+            type: 'number',
+            default: '3000',
+            description:
+              'Default duration in milliseconds before a toast auto-dismisses. Set to 0 for persistent toasts.',
+          },
+          {
+            name: 'pauseOnHover',
+            type: 'boolean',
+            default: 'true',
+            description:
+              'Whether to pause the auto-dismiss timer when hovering over a toast.',
+          },
+          {
+            name: 'gutter',
+            type: 'number',
+            default: '16',
+            description: 'Gap in pixels between stacked toast notifications.',
+          },
+        ],
+      }}
     />
   );
 }

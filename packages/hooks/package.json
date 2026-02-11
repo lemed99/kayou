@@ -17,7 +17,9 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
-    "lint": "eslint '**/*.{ts,tsx}' --fix"
+    "lint": "eslint '**/*.{ts,tsx}' --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "@formatjs/intl": "^3.1.0",
@@ -38,15 +40,17 @@
   },
   "devDependencies": {
     "@solid-primitives/presence": "^0.1.2",
+    "jsdom": "^28.0.0",
     "solid-js": "^1.9.9",
     "tailwind-merge": "^3.4.0",
     "typescript": "^5.9.2",
     "vite": "^6.3.6",
-    "vite-plugin-solid": "^2.11.8"
+    "vite-plugin-solid": "^2.11.8",
+    "vitest": "^4.0.18"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/exowpee/kayou"
+    "url": "https://github.com/kayou"
   },
   "license": "MIT",
   "keywords": [

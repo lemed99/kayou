@@ -45,9 +45,6 @@ export {
   ThemeProvider,
   ToastContext,
   ToastProvider,
-  PortalContainerContext,
-  PortalContainerProvider,
-  usePortalContainer,
   type IntlProviderProps,
   type CustomResourceContextValue,
   type CustomResourceProviderProps,
@@ -57,9 +54,7 @@ export {
   type ThemeType,
   type ToastAPI,
   type ToastMethodProps,
-  type PortalContainerContextValue,
-  type PortalContainerProviderProps,
 } from './context';
 
 // Helpers (for advanced use cases)
-export { cache, getCacheRow, insertOrUpdateCacheRow, preventBackgroundScroll } from './helpers';
+export { cache, getCacheRow, insertOrUpdateCacheRow, isValidCacheData, preventBackgroundScroll } from './helpers';

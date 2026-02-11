@@ -17,9 +17,7 @@ export function YAxis(props: YAxisProps): JSX.Element {
   let axisRef: SVGGElement | undefined;
   const chart = useBaseChart();
   const ticks = createMemo<number[]>(() => {
-    let t = chart.yScale().ticks();
-    t = t.filter((_, i) => i % 2 === 0);
-    return t;
+    return chart.yScale().ticks(props.tickCount ?? 5);
   });
   const [axisBBox, setAxisBBox] = createSignal<DOMRect | null>(null);
 
@@ -36,13 +34,13 @@ export function YAxis(props: YAxisProps): JSX.Element {
   });
 
   return (
-    <g ref={axisRef} aria-hidden="true">
+    <g ref={axisRef} aria-hidden="true" class={chart.axisClass}>
       <line
         x1={axisBBox()?.width ?? 0}
         x2={axisBBox()?.width ?? 0}
         y1={0}
         y2={chart.innerHeight()}
-        stroke={props.stroke ?? '#666'}
+        stroke={props.stroke ?? 'currentColor'}
       />
       <g>
         <For each={ticks()}>
@@ -51,14 +49,14 @@ export function YAxis(props: YAxisProps): JSX.Element {
               <line
                 x1={axisBBox()?.width ?? 0}
                 x2={(axisBBox()?.width ?? 0) - 6}
-                stroke={props.stroke ?? '#666'}
+                stroke={props.stroke ?? 'currentColor'}
               />
               <text
                 x={(axisBBox()?.width ?? 0) - 9}
                 dy={getTickDy(i(), ticks().length)}
                 text-anchor="end"
                 font-size="10"
-                fill="#666"
+                fill="currentColor"
               >
                 {props.tickFormatter ? props.tickFormatter(t) : t}
               </text>

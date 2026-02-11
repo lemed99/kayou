@@ -45,7 +45,7 @@ export function ChartTooltip(props: ChartTooltipProps): JSX.Element {
             x2={chart.activePoint()!.x}
             y1={0}
             y2={chart.innerHeight()}
-            stroke={props.stroke ?? '#ccc'}
+            stroke={props.stroke ?? 'currentColor'}
             stroke-dasharray="4 4"
             aria-hidden="true"
           />
@@ -56,7 +56,7 @@ export function ChartTooltip(props: ChartTooltipProps): JSX.Element {
           y={0}
           width={chart.activePoint()!.bandWidth}
           height={chart.innerHeight()}
-          fill={props.stroke ?? '#d1d5db'}
+          fill={props.stroke ?? 'currentColor'}
           fill-opacity={0.3}
           aria-hidden="true"
         />
@@ -152,16 +152,19 @@ export function ChartTooltipOverlay(): JSX.Element {
           when={chart.customTooltip()}
           fallback={
             <div class="border border-gray-200 bg-white px-2 py-1.5 text-xs shadow dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
-              <div class="whitespace-nowrap">
-                <b>{String(chart.activePoint()!.item[chart.xKey()])}</b>
-              </div>
-              <For each={chart.registeredKeys()}>
-                {(k) => (
-                  <div class="whitespace-nowrap">
-                    {String(k)}: {String(chart.activePoint()!.item[k] as number)}
-                  </div>
-                )}
-              </For>
+              <strong class="block whitespace-nowrap">
+                {String(chart.activePoint()!.item[chart.xKey()])}
+              </strong>
+              <dl class="mt-0.5">
+                <For each={chart.registeredKeys()}>
+                  {(k) => (
+                    <div class="flex gap-1 whitespace-nowrap">
+                      <dt>{String(k)}:</dt>
+                      <dd>{String(chart.activePoint()!.item[k] as number)}</dd>
+                    </div>
+                  )}
+                </For>
+              </dl>
             </div>
           }
         >
