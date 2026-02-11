@@ -17,7 +17,10 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint '**/*.{ts,tsx}' --fix",
+    "format": "prettier --check '**/*.{ts,tsx}'",
+    "format:fix": "prettier --write '**/*.{ts,tsx}'",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -253,7 +253,9 @@ export function BarChart(allProps: BarChartProps): JSX.Element {
     const ys = yScale();
     const keys = barKeys();
     const centers = bandCenters();
-    const [mx] = pointer(e, svgRef);
+    const sourceEvent = 'touches' in e ? e.touches[0] : e;
+    if (!sourceEvent) return;
+    const [mx] = pointer(sourceEvent, svgRef);
 
     const domain = s.domain();
     if (!domain.length) return;

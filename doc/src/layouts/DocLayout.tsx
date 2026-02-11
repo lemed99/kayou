@@ -265,6 +265,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
         <button
           type="button"
           onClick={() => toggleSection(sectionKey)}
+          aria-expanded={isExpanded()}
           class="flex w-full cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-neutral-300"
         >
           <ChevronIcon expanded={isExpanded()} />
@@ -293,6 +294,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
                 <button
                   type="button"
                   onClick={() => toggleCategory(category)}
+                  aria-expanded={isCatExpanded()}
                   class={`flex w-full cursor-pointer items-center gap-1 py-1 text-xs font-semibold tracking-wider uppercase ${
                     isCatExpanded()
                       ? 'text-gray-900 dark:text-white'
@@ -360,6 +362,8 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
+          aria-label="Toggle navigation menu"
+          aria-expanded={isMobileMenuOpen()}
           class="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700 dark:text-neutral-300"
         >
           <Menu01Icon class="size-5" />
@@ -389,7 +393,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
         </aside>
 
         {/* Main content */}
-        <main class="min-w-0 flex-1">
+        <main class="min-w-0 w-full">
           <Suspense>{props.children}</Suspense>
         </main>
       </div>

@@ -6,17 +6,16 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  onMount,
 } from 'solid-js';
 
-import * as Icons from '@kayou/icons';
+import { Copy01Icon, SearchSmIcon, Star01Icon } from '@kayou/icons';
 import { useLocation } from '@solidjs/router';
-
 
 /** Icon component type */
 type IconComponent = Component<{ class?: string } & JSX.SvgSVGAttributes<SVGSVGElement>>;
 
-// Get all icon names from the exports
-const allIcons = Object.entries(Icons).filter(([name]) => name.endsWith('Icon'));
+type IconEntry = { name: string; component: IconComponent };
 
 // Categorize icons by category
 const categorizeIcon = (name: string): string => {
@@ -389,27 +388,26 @@ const categorizeIcon = (name: string): string => {
   return 'General';
 };
 
-// Build categorized icon list
-const iconsByCategory = createMemo(() => {
-  const categories: Record<string, { name: string; component: IconComponent }[]> = {};
+function buildCategorizedIcons(
+  allIcons: IconEntry[],
+): Record<string, IconEntry[]> {
+  const categories: Record<string, IconEntry[]> = {};
 
-  for (const [name, component] of allIcons) {
-    const category = categorizeIcon(name);
+  for (const entry of allIcons) {
+    const category = categorizeIcon(entry.name);
     if (!categories[category]) {
       categories[category] = [];
     }
-    categories[category].push({ name, component: component as IconComponent });
+    categories[category].push(entry);
   }
 
-  // Sort categories alphabetically
-  const sortedCategories: Record<string, { name: string; component: IconComponent }[]> =
-    {};
+  const sorted: Record<string, IconEntry[]> = {};
   for (const key of Object.keys(categories).sort()) {
-    sortedCategories[key] = categories[key].sort((a, b) => a.name.localeCompare(b.name));
+    sorted[key] = categories[key].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  return sortedCategories;
-});
+  return sorted;
+}
 
 // Format icon name for display
 const formatIconName = (name: string): string => {
@@ -420,12 +418,33 @@ const formatIconName = (name: string): string => {
 };
 
 // Convert hash to category name for matching
-const hashToCategory = (hash: string): string | null => {
+const hashToCategory = (
+  hash: string,
+  categories: Record<string, IconEntry[]>,
+): string | null => {
   if (!hash) return null;
   const normalized = hash.replace('#', '').toLowerCase();
-  const categories = Object.keys(iconsByCategory());
-  return categories.find((cat) => cat.toLowerCase().replace(/[&\s]+/g, '-') === normalized) ?? null;
+  return (
+    Object.keys(categories).find(
+      (cat) => cat.toLowerCase().replace(/[&\s]+/g, '-') === normalized,
+    ) ?? null
+  );
 };
+
+// Async loader for all icons — keeps them out of the shared bundle
+async function loadAllIcons(): Promise<{
+  allIcons: IconEntry[];
+  byCategory: Record<string, IconEntry[]>;
+}> {
+  const mod = await import('@kayou/icons');
+  const allIcons = Object.entries(mod)
+    .filter(([name]) => name.endsWith('Icon'))
+    .map(([name, component]) => ({
+      name,
+      component: component as IconComponent,
+    }));
+  return { allIcons, byCategory: buildCategorizedIcons(allIcons) };
+}
 
 export default function IconsPage() {
   const location = useLocation();
@@ -433,16 +452,29 @@ export default function IconsPage() {
   const [selectedCategory, setSelectedCategory] = createSignal<string | null>(null);
   const [copiedIcon, setCopiedIcon] = createSignal<string | null>(null);
 
+  const [iconsData, setIconsData] = createSignal<{
+    allIcons: IconEntry[];
+    byCategory: Record<string, IconEntry[]>;
+  } | null>(null);
+
+  onMount(() => {
+    void loadAllIcons().then(setIconsData);
+  });
+
+  const byCategory = () => iconsData()?.byCategory ?? {};
+  const allIconsList = () => iconsData()?.allIcons ?? [];
+
   // Sync selected category from URL hash
   createEffect(() => {
     const hash = location.hash;
-    setSelectedCategory(hashToCategory(hash));
+    const categories = byCategory();
+    setSelectedCategory(hashToCategory(hash, categories));
   });
 
   const filteredIcons = createMemo(() => {
     const query = searchQuery().toLowerCase();
     const category = selectedCategory();
-    const categories = iconsByCategory();
+    const categories = byCategory();
 
     const result: { name: string; component: IconComponent; category: string }[] = [];
 
@@ -477,14 +509,14 @@ export default function IconsPage() {
       <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950/20">
         {/* Decorative icon */}
         <div class="pointer-events-none absolute -right-20 -top-20 opacity-[0.07] dark:opacity-[0.04]">
-          <Icons.Star01Icon class="size-[500px] text-blue-600" />
+          <Star01Icon class="size-[500px] text-blue-600" />
         </div>
 
         <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           {/* Stats bar */}
           <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-neutral-400">
             <span class="font-medium text-gray-900 dark:text-white">
-              {allIcons.length} icons
+              {allIconsList().length} icons
             </span>
           </div>
 
@@ -501,7 +533,7 @@ export default function IconsPage() {
       <div class="border-t border-gray-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="flex items-center gap-4 py-6">
-            <Icons.SearchSmIcon class="size-5 text-gray-400" />
+            <SearchSmIcon class="size-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search all icons..."
@@ -528,7 +560,7 @@ export default function IconsPage() {
             >
               All
             </button>
-            <For each={Object.keys(iconsByCategory())}>
+            <For each={Object.keys(byCategory())}>
               {(category) => (
                 <button
                   type="button"
@@ -549,89 +581,98 @@ export default function IconsPage() {
 
       {/* Main Content */}
       <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Results Header */}
-        <div class="mb-4 text-sm text-gray-600 dark:text-neutral-400">
-          <Show
-            when={searchQuery() || selectedCategory()}
-            fallback={<span>Showing all {allIcons.length} icons</span>}
-          >
-            <span>
-              {filteredIcons().length}{' '}
-              {filteredIcons().length === 1 ? 'icon' : 'icons'}
-              <Show when={selectedCategory()}>
-                <span>
-                  {' '}
-                  in{' '}
-                  <span class="font-medium text-gray-900 dark:text-white">
-                    {selectedCategory()}
-                  </span>
-                </span>
-              </Show>
-              <Show when={searchQuery()}>
-                <span>
-                  {' '}
-                  matching "
-                  <span class="font-medium text-gray-900 dark:text-white">
-                    {searchQuery()}
-                  </span>
-                  "
-                </span>
-              </Show>
-            </span>
-          </Show>
-        </div>
-
-        {/* Icons Grid */}
         <Show
-          when={filteredIcons().length > 0}
+          when={iconsData()}
           fallback={
-            <div class="flex flex-col items-center justify-center py-20">
-              <div class="rounded-full bg-gray-100 p-4 dark:bg-neutral-900">
-                <Icons.SearchSmIcon class="size-8 text-gray-400" />
-              </div>
-              <h3 class="mt-4 text-lg font-medium text-gray-950 dark:text-white">
-                No icons found
-              </h3>
-              <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                Try a different search term or category.
-              </p>
+            <div class="flex items-center justify-center py-20">
+              <p class="text-sm text-gray-400 dark:text-neutral-500">Loading icons...</p>
             </div>
           }
         >
-          <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            <For each={filteredIcons()}>
-              {(icon) => {
-                const IconComponent = icon.component;
-                return (
-                  <div class="group relative flex flex-col items-center gap-2 rounded-xl border border-transparent cursor-pointer bg-gray-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
-                    <div class="flex size-5 items-center justify-center text-gray-700 transition-colors group-hover:text-blue-600 dark:text-neutral-300 dark:group-hover:text-blue-400">
-                      <IconComponent class="size-5" />
-                    </div>
-                    <span class="w-full truncate text-center text-xs text-gray-500 group-hover:text-blue-600 dark:text-neutral-400 dark:group-hover:text-blue-400">
-                      {formatIconName(icon.name)}
+          {/* Results Header */}
+          <div class="mb-4 text-sm text-gray-600 dark:text-neutral-400">
+            <Show
+              when={searchQuery() || selectedCategory()}
+              fallback={<span>Showing all {allIconsList().length} icons</span>}
+            >
+              <span>
+                {filteredIcons().length}{' '}
+                {filteredIcons().length === 1 ? 'icon' : 'icons'}
+                <Show when={selectedCategory()}>
+                  <span>
+                    {' '}
+                    in{' '}
+                    <span class="font-medium text-gray-900 dark:text-white">
+                      {selectedCategory()}
                     </span>
-
-                    {/* Copy button on hover */}
-                    <button
-                      onClick={(e) => copyIconName(icon.name, e)}
-                      class="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-sm transition-opacity hover:bg-gray-100 group-hover:opacity-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                      title={`Copy ${icon.name}`}
-                    >
-                      <Icons.Copy01Icon class="size-3" />
-                      Copy
-                    </button>
-
-                    {/* Copied overlay */}
-                    <Show when={copiedIcon() === icon.name}>
-                      <div class="absolute inset-0 flex items-center justify-center rounded-xl bg-green-500 text-xs font-medium text-white">
-                        Copied!
-                      </div>
-                    </Show>
-                  </div>
-                );
-              }}
-            </For>
+                  </span>
+                </Show>
+                <Show when={searchQuery()}>
+                  <span>
+                    {' '}
+                    matching "
+                    <span class="font-medium text-gray-900 dark:text-white">
+                      {searchQuery()}
+                    </span>
+                    "
+                  </span>
+                </Show>
+              </span>
+            </Show>
           </div>
+
+          {/* Icons Grid */}
+          <Show
+            when={filteredIcons().length > 0}
+            fallback={
+              <div class="flex flex-col items-center justify-center py-20">
+                <div class="rounded-full bg-gray-100 p-4 dark:bg-neutral-900">
+                  <SearchSmIcon class="size-8 text-gray-400" />
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-950 dark:text-white">
+                  No icons found
+                </h3>
+                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                  Try a different search term or category.
+                </p>
+              </div>
+            }
+          >
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <For each={filteredIcons()}>
+                {(icon) => {
+                  const IconComponent = icon.component;
+                  return (
+                    <div class="group relative flex flex-col items-center gap-2 rounded-xl border border-transparent cursor-pointer bg-gray-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
+                      <div class="flex size-5 items-center justify-center text-gray-700 transition-colors group-hover:text-blue-600 dark:text-neutral-300 dark:group-hover:text-blue-400">
+                        <IconComponent class="size-5" />
+                      </div>
+                      <span class="w-full truncate text-center text-xs text-gray-500 group-hover:text-blue-600 dark:text-neutral-400 dark:group-hover:text-blue-400">
+                        {formatIconName(icon.name)}
+                      </span>
+
+                      {/* Copy button on hover */}
+                      <button
+                        onClick={(e) => copyIconName(icon.name, e)}
+                        class="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-sm transition-opacity hover:bg-gray-100 group-hover:opacity-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                        title={`Copy ${icon.name}`}
+                      >
+                        <Copy01Icon class="size-3" />
+                        Copy
+                      </button>
+
+                      {/* Copied overlay */}
+                      <Show when={copiedIcon() === icon.name}>
+                        <div class="absolute inset-0 flex items-center justify-center rounded-xl bg-green-500 text-xs font-medium text-white">
+                          Copied!
+                        </div>
+                      </Show>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
+          </Show>
         </Show>
       </div>
     </div>

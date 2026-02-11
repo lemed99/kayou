@@ -71,16 +71,10 @@ export default function MultiSelectPage() {
           description: 'Placeholder text when no selection',
         },
         {
-          name: 'searchPlaceholder',
-          type: 'string',
-          default: '-',
-          description: 'Placeholder text for the search input',
-        },
-        {
-          name: 'noSearchResultPlaceholder',
-          type: 'string',
-          default: '-',
-          description: 'Message shown when search yields no results',
+          name: 'labels',
+          type: 'Partial<SelectLabels>',
+          default: '{ noResults: "No results found", searchPlaceholder: "Search..." }',
+          description: 'i18n labels for visible texts (noResults, searchPlaceholder)',
         },
         {
           name: 'clearValues',
@@ -195,7 +189,7 @@ export default function MultiSelectPage() {
                 onMultiSelect={() => {}}
                 withSearch
                 label="Countries"
-                searchPlaceholder="Search countries..."
+                labels={{ searchPlaceholder: "Search countries..." }}
                 placeholder="Select countries"
               />
             </div>

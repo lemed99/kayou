@@ -142,7 +142,9 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
     const areaKeysVal = areaKeys();
     const positions = xPositions();
 
-    const [x, y] = pointer(e, svgRef);
+    const sourceEvent = 'touches' in e ? e.touches[0] : e;
+    if (!sourceEvent) return;
+    const [x, y] = pointer(sourceEvent, svgRef);
 
     if (!positions.length) return;
 

@@ -29,10 +29,12 @@ import {
 
 export interface SelectLabels {
   noResults: string;
+  searchPlaceholder: string;
 }
 
 export const DEFAULT_SELECT_LABELS: SelectLabels = {
   noResults: 'No results found',
+  searchPlaceholder: 'Search...',
 };
 
 export interface SelectAriaLabels {
@@ -54,12 +56,10 @@ interface MergedSelectProps
   values?: string[];
   clearValues?: boolean;
   withSearch?: boolean;
-  searchPlaceholder?: string;
   clearValue?: boolean;
   autoFillSearchKey?: boolean;
   idValue?: string;
   optionRowHeight?: number;
-  noSearchResultPlaceholder?: string;
   cta?: JSX.Element;
   isLoadingMore?: boolean;
   onLoadMore?: (scrollProgress: number) => void;
@@ -518,7 +518,7 @@ const useSelect = <T extends MergedSelectProps>(
                         each={filteredOptions()}
                         fallback={
                           <div class="whitespace-nowrap px-2 py-1.5 text-sm">
-                            {props.noSearchResultPlaceholder || selectLabels().noResults}
+                            {selectLabels().noResults}
                           </div>
                         }
                       >
@@ -543,7 +543,7 @@ const useSelect = <T extends MergedSelectProps>(
                     setScrollPosition={setScrollTop}
                     fallback={
                       <div class="whitespace-nowrap px-2 py-1.5 text-sm">
-                        {props.noSearchResultPlaceholder || selectLabels().noResults}
+                        {selectLabels().noResults}
                       </div>
                     }
                   >
@@ -583,6 +583,7 @@ const useSelect = <T extends MergedSelectProps>(
     searchRef,
     Layout,
     setSearchRef,
+    selectLabels,
   };
 };
 

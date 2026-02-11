@@ -57,15 +57,13 @@ export default function HomePage() {
       <div class="mx-auto max-w-4xl text-center">
 
         <h1 class="text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl dark:text-white">
-          Production-ready UI
+          Enterprise grade UI
           <span class="text-blue-600 dark:text-blue-500"> for SolidJS</span>
         </h1>
 
         <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600 dark:text-neutral-300">
-          35+ accessible UI components and
-          <span class="font-semibold text-blue-600 dark:text-blue-500 italic text-2xl"> utility hooks</span>,
-          styled with Tailwind CSS and built for production. From form controls and data
-          tables to virtual lists, charting, and data fetching.
+          35+ fully accessible UI components styled with Tailwind CSS, and high level hooks
+          built for production. SSR ready but SPA was the main target here!
         </p>
 
         <div class="mt-10 flex items-center justify-center">
@@ -73,7 +71,7 @@ export default function HomePage() {
             href="/overview/quickstart"
             class="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-gray-950 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100"
           >
-            Get Started
+            Explore Kayou
             <ArrowNarrowRightIcon class="size-4" />
           </A>
         </div>

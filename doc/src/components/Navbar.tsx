@@ -17,9 +17,8 @@ import {
 } from '@kayou/icons';
 import { A, useLocation, useNavigate } from '@solidjs/router';
 
-import { type SearchDocument, searchDocs } from '../utils/search';
+import type { SearchDocument } from '../utils/search';
 
-// GitHub icon not available in @kayou/icons
 const GitHubIcon = () => (
   <svg class="size-5" fill="currentColor" viewBox="0 0 24 24">
     <path
@@ -44,11 +43,12 @@ const Navbar: Component = () => {
 
   const openSearch = () => {
     setIsSearchOpen(true);
-    // Focus synchronously so mobile browsers open the keyboard (user gesture requirement)
     searchInputRef?.focus();
   };
 
-  // Perform search with Orama when query changes
+  // Perform search with Orama when query changes (lazy-loaded)
+  let searchModule: typeof import('../utils/search') | null = null;
+
   createEffect(() => {
     const query = searchQuery().trim();
     if (!query) {
@@ -56,9 +56,17 @@ const Navbar: Component = () => {
       return;
     }
 
-    const results = searchDocs(query);
-    setSearchResults(results);
-    setSelectedIndex(0);
+    if (searchModule) {
+      setSearchResults(searchModule.searchDocs(query));
+      setSelectedIndex(0);
+    } else {
+      const capturedQuery = query;
+      void import('../utils/search').then((mod) => {
+        searchModule = mod;
+        setSearchResults(mod.searchDocs(capturedQuery));
+        setSelectedIndex(0);
+      });
+    }
   });
 
   // Navigate to selected result
@@ -135,7 +143,7 @@ const Navbar: Component = () => {
       label: 'Docs',
       activePaths: ['/overview', '/hooks'],
     },
-    { href: '/ui/button', label: 'Components', activePaths: ['/ui'] },
+    { href: '/components/button', label: 'Components', activePaths: ['/components'] },
     { href: '/icons', label: 'Icons', activePaths: ['/icons'] },
   ];
 
@@ -147,24 +155,9 @@ const Navbar: Component = () => {
           {/* Left: Logo + Version */}
           <div class="flex items-center gap-3">
             <A href="/" class="flex items-center gap-2">
-              <div class="flex size-8 items-center justify-center">
-                <svg class="size-7" viewBox="0 0 64 64" fill="none">
-                  <defs>
-                    <mask id="k">
-                      <rect width="64" height="64" fill="white" />
-                      <rect x="20" y="16" width="7" height="32" rx="1.5" fill="black" />
-                      <path d="M27 30 L27 24 L42 16 L46 20 Z" fill="black" />
-                      <path d="M27 34 L27 40 L42 48 L46 44 Z" fill="black" />
-                    </mask>
-                  </defs>
-                  <ellipse
-                    cx="32"
-                    cy="33"
-                    rx="28"
-                    ry="27"
-                    class="fill-gray-900 dark:fill-white"
-                    mask="url(#k)"
-                  />
+              <div class="flex size-8 items-center justify-center text-black dark:text-white">
+                <svg width="28" height="28" fill="currentColor">
+                  <path d="M.652.014c1.934-.013 3.868 0 5.802.04.65.305.848.795.596 1.47A128.113 128.113 0 0 1 1.606 6.81c-.678.288-1.195.116-1.55-.516a100.192 100.192 0 0 1 0-5.644C.216.396.416.184.652.014ZM10.031.014c1.75-.013 3.498 0 5.246.04.331.12.557.344.676.675l1.828 4.134c.168.666-.057 1.13-.676 1.39a94.284 94.284 0 0 1-5.206.915c-.183 0-.355-.04-.517-.12a169.016 169.016 0 0 0-3.894-3.02c-.327-.425-.394-.889-.2-1.39A142.41 142.41 0 0 0 10.032.013ZM17.98.014c3.184-.038 6.363.002 9.538.12.192.132.338.304.437.516.04 1.006.053 2.013.04 3.02-.108.335-.32.586-.636.756-2.247.445-4.499.855-6.756 1.232a6.134 6.134 0 0 1-1.034.08.921.921 0 0 1-.596-.398 181.108 181.108 0 0 0-1.748-3.895c-.21-.73.042-1.206.755-1.43ZM5.58 4.306c.393-.043.764.024 1.113.2 2.926 2.276 5.84 4.568 8.743 6.875.153.302.193.62.12.954l-1.272 4.769c-.182.498-.54.75-1.073.755-1.563.15-3.126.256-4.69.318a1.418 1.418 0 0 1-.437-.358A488.718 488.718 0 0 1 4.268 6.294a1.32 1.32 0 0 1 .08-.795c.398-.412.809-.81 1.232-1.193ZM26.405 5.499c.688-.168 1.205.044 1.55.636.053 4 .053 8.001 0 12.002-.278.596-.742.821-1.39.676a540.48 540.48 0 0 1-12.36-9.658c-.277-.705-.078-1.222.595-1.55 3.884-.68 7.753-1.382 11.605-2.106ZM3.434 18.693c-.874.063-1.748.116-2.623.16a1.132 1.132 0 0 1-.755-.716 223.296 223.296 0 0 1 0-8.426l.159-.318A35.276 35.276 0 0 1 2.24 7.446c.72-.385 1.263-.213 1.63.517a483.386 483.386 0 0 1 2.98 9.419c.02.485-.193.83-.635 1.033-.928.097-1.856.19-2.782.278ZM16.708 12.97c.266-.013.531 0 .795.04a288.522 288.522 0 0 1 6.438 4.928c.446.332.592.77.437 1.312a353.846 353.846 0 0 0-4.053 7.948c-.146.358-.398.61-.755.756-2.12.053-4.24.053-6.36 0a1.23 1.23 0 0 1-.516-.597c-.053-.402-.026-.8.08-1.192a720.34 720.34 0 0 0 3.338-12.48c.13-.301.33-.54.596-.715ZM10.985 27.914c-.976.076-1.957.103-2.941.08-.135.012-.268-.001-.397-.04a1383.948 1383.948 0 0 1-7.512-6.558c-.288-.678-.116-1.194.517-1.55 3.826-.349 7.655-.68 11.485-.994.74-.066 1.204.252 1.391.954-.677 2.603-1.379 5.2-2.106 7.79a.866.866 0 0 1-.437.318ZM25.372 19.727c.293-.013.584 0 .874.04.586.39 1.13.828 1.63 1.311.13 2.062.157 4.128.08 6.2-.12.331-.345.556-.676.675-1.67.053-3.339.053-5.008 0-.572-.255-.797-.693-.676-1.311l3.339-6.518c.137-.151.283-.284.437-.397ZM.652 23.78c.367-.04.711.026 1.033.2l2.742 2.424c.237.58.117 1.07-.357 1.47a19.137 19.137 0 0 1-3.418.08 2.031 2.031 0 0 1-.517-.438 15.825 15.825 0 0 1-.08-3.1c.162-.253.36-.465.597-.636Z"/>
                 </svg>
               </div>
               <span class="text-xl font-bold text-gray-900 dark:text-white">Kayou</span>
@@ -196,11 +189,12 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={openSearch}
-                class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors hover:bg-gray-100 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                aria-label="Search documentation"
+                class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400"
               >
                 <SearchRefractionIcon class="size-4" />
                 <span class="hidden sm:inline">Search</span>
-                <kbd class="ml-2 hidden rounded border border-gray-300 bg-white px-1.5 py-0.5 text-xs font-medium text-gray-400 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
+                <kbd class="ml-2 hidden rounded border border-gray-300 bg-white px-1.5 py-0.5 text-xs font-medium text-neutral-500 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
                   ⌘K
                 </kbd>
               </button>
@@ -210,7 +204,8 @@ const Navbar: Component = () => {
                 href="https://github.com/kayou"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="hidden items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 sm:flex dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                aria-label="GitHub repository"
+                class="flex items-center rounded-lg p-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <GitHubIcon />
               </a>
@@ -255,7 +250,7 @@ const Navbar: Component = () => {
                   <A
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    class={`flex items-center rounded-lg text-base font-medium transition-colors ${
+                    class={`flex items-center rounded-lg text-base transition-colors ${
                       isActive(link.href, link.activePaths)
                         ? 'text-blue-600 dark:text-blue-400'
                         : 'text-gray-600 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
@@ -280,7 +275,7 @@ const Navbar: Component = () => {
               setSearchQuery('');
             }}
           />
-          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900">
+          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900 dark:border dark:border-neutral-700">
             <div class="relative border-b border-gray-200 p-4 dark:border-neutral-800">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-7">
                 <SearchRefractionIcon class="size-4" />
@@ -288,6 +283,7 @@ const Navbar: Component = () => {
               <input
                 ref={searchInputRef}
                 type="text"
+                aria-label="Search documentation"
                 placeholder="Search documentation..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}

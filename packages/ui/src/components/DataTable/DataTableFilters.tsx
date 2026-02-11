@@ -407,6 +407,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   // Draft filters - local state for editing before submit
   const [draftFilters, setDraftFilters] = createSignal<DraftFilter[]>([]);
   const [isOpen, setIsOpen] = createSignal(false);
+  const [popoverRef, setPopoverRef] = createSignal<HTMLDivElement | undefined>();
 
   // Track which columns are already used by draft rows
   const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
@@ -539,7 +540,8 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
       }
 
       // Don't close if clicking inside the popover content
-      if (target.closest('[data-filter-popover]')) {
+      const popoverEl = popoverRef();
+      if (popoverEl && popoverEl.contains(target)) {
         return;
       }
 
@@ -574,8 +576,9 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   createEffect(() => {
     if (!isOpen()) return;
     const rafId = requestAnimationFrame(() => {
-      const popover = document.querySelector('[data-filter-popover]');
-      const focusable = popover?.querySelector<HTMLElement>(
+      const el = popoverRef();
+      if (!el) return;
+      const focusable = el.querySelector<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
       );
       focusable?.focus();
@@ -585,6 +588,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
   const popoverContentWithAttr = () => (
     <div
+      ref={setPopoverRef}
       data-filter-popover
       class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-neutral-900 dark:ring-neutral-700"
     >

@@ -3,9 +3,9 @@ import { JSX, Show, splitProps } from 'solid-js';
 import { ClearContentButton, type Option } from '../../shared';
 import TextInput, { type TextInputProps } from '../TextInput';
 import { OptionLabel, optionClass } from './selectUtils';
-import useSelect from './useSelect';
+import useSelect, { type SelectAriaLabels, type SelectLabels } from './useSelect';
 
-export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> {
+export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
   /** Array of options to display in the dropdown. */
   options: Option[];
   /** Callback when an option is selected. */
@@ -20,14 +20,16 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect'> 
   value?: string;
   /** Height of each option row for virtualization. */
   optionRowHeight?: number;
-  /** Text shown when no search results match. Defaults to 'No results found'. */
-  noSearchResultPlaceholder?: string;
   /** Custom call-to-action element at bottom of dropdown. */
   cta?: JSX.Element;
   /** Show loading spinner when loading more items (infinite scroll). */
   isLoadingMore?: boolean;
   /** Callback when user scrolls near bottom of list (infinite scroll). */
   onLoadMore?: (scrollProgress: number) => void;
+  /** i18n labels for visible texts */
+  labels?: Partial<SelectLabels>;
+  /** i18n aria labels for screen-reader-only texts */
+  ariaLabels?: Partial<SelectAriaLabels>;
 }
 
 export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Element {
@@ -39,7 +41,6 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
     'idValue',
     'value',
     'optionRowHeight',
-    'noSearchResultPlaceholder',
     'cta',
     'isLoadingMore',
     'onLoadMore',
@@ -49,6 +50,8 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
     'disabled',
     'isLoading',
     'placeholder',
+    'labels',
+    'ariaLabels',
   ]);
 
   const {

@@ -83,10 +83,10 @@ export default function SelectWithSearchPage() {
           description: 'Placeholder text when no selection',
         },
         {
-          name: 'noSearchResultPlaceholder',
-          type: 'string',
-          default: '"No results found"',
-          description: 'Message shown when search yields no results',
+          name: 'labels',
+          type: 'Partial<SelectLabels>',
+          default: '{ noResults: "No results found", searchPlaceholder: "Search..." }',
+          description: 'i18n labels for visible texts (noResults, searchPlaceholder)',
         },
         {
           name: 'optionRowHeight',

@@ -142,7 +142,9 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
     const lineKeysVal = lineKeys();
     const positions = xPositions();
 
-    const [x, y] = pointer(e, svgRef);
+    const sourceEvent = 'touches' in e ? e.touches[0] : e;
+    if (!sourceEvent) return;
+    const [x, y] = pointer(sourceEvent, svgRef);
 
     if (!positions.length) return;
 

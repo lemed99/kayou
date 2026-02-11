@@ -1,9 +1,10 @@
-import { For, createSignal } from 'solid-js';
+import { For, Suspense, createSignal, lazy } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-import ArticlePage from '../../../components/ArticlePage';
-import ReadonlyCode from '../../../components/ReadonlyCode';
+import BaseDocPage from '../../../components/BaseDocPage';
+
+const ReadonlyCode = lazy(() => import('../../../components/ReadonlyCode'));
 
 const packageManagers = [
   { name: 'npm', command: 'npm install @kayou/ui' },
@@ -92,6 +93,14 @@ function PriceTag(props) {
   );
 }`;
 
+function CodeFallback(props: { code: string }) {
+  return (
+    <pre class="overflow-auto bg-[#282c34] p-3 font-mono text-xs text-[#abb2bf]">
+      <code>{props.code}</code>
+    </pre>
+  );
+}
+
 function InstallSection() {
   const [active, setActive] = createSignal(0);
 
@@ -133,7 +142,7 @@ function InstallSection() {
 
 export default function QuickstartPage() {
   return (
-    <ArticlePage
+    <BaseDocPage
       title="Quickstart"
       description="Get up and running with Kayou in under 5 minutes."
     >
@@ -168,7 +177,9 @@ export default function QuickstartPage() {
           Import components and hooks directly from the package:
         </p>
         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-          <ReadonlyCode code={usageCode} />
+          <Suspense fallback={<CodeFallback code={usageCode} />}>
+            <ReadonlyCode code={usageCode} />
+          </Suspense>
         </div>
       </section>
 
@@ -185,7 +196,9 @@ export default function QuickstartPage() {
 
         <h3 class="mt-6 text-lg font-medium text-gray-950 dark:text-white">Standalone</h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-          <ReadonlyCode code={iconStandaloneCode} />
+          <Suspense fallback={<CodeFallback code={iconStandaloneCode} />}>
+            <ReadonlyCode code={iconStandaloneCode} />
+          </Suspense>
         </div>
 
         <h3 class="mt-6 text-lg font-medium text-gray-950 dark:text-white">With components</h3>
@@ -195,7 +208,9 @@ export default function QuickstartPage() {
           prop. Pass the icon component reference directly — no need to render it yourself.
         </p>
         <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-          <ReadonlyCode code={iconWithComponentCode} />
+          <Suspense fallback={<CodeFallback code={iconWithComponentCode} />}>
+            <ReadonlyCode code={iconWithComponentCode} />
+          </Suspense>
         </div>
       </section>
 
@@ -208,14 +223,18 @@ export default function QuickstartPage() {
 
         <h3 class="mt-6 text-lg font-medium text-gray-950 dark:text-white">Data mutation</h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-          <ReadonlyCode code={hooksUsageCode} />
+          <Suspense fallback={<CodeFallback code={hooksUsageCode} />}>
+            <ReadonlyCode code={hooksUsageCode} />
+          </Suspense>
         </div>
 
         <h3 class="mt-6 text-lg font-medium text-gray-950 dark:text-white">Internationalization</h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800">
-          <ReadonlyCode code={hooksIntlCode} />
+          <Suspense fallback={<CodeFallback code={hooksIntlCode} />}>
+            <ReadonlyCode code={hooksIntlCode} />
+          </Suspense>
         </div>
       </section>
-    </ArticlePage>
+    </BaseDocPage>
   );
 }

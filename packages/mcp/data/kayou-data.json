@@ -1575,16 +1575,10 @@
           "description": "Placeholder text when no selection"
         },
         {
-          "name": "searchPlaceholder",
-          "type": "string",
-          "default": "-",
-          "description": "Placeholder text for the search input"
-        },
-        {
-          "name": "noSearchResultPlaceholder",
-          "type": "string",
-          "default": "-",
-          "description": "Message shown when search yields no results"
+          "name": "labels",
+          "type": "Partial<SelectLabels>",
+          "default": "{ noResults: \"No results found\", searchPlaceholder: \"Search...\" }",
+          "description": "i18n labels for visible texts (noResults, searchPlaceholder)"
         },
         {
           "name": "clearValues",
@@ -1647,7 +1641,7 @@
           "description": "MultiSelect with initial selected values."
         }
       ],
-      "usage": "import { MultiSelect } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal([]);\n\n        <MultiSelect\n          options={[\n            { value: 'opt1', label: 'Option 1' },\n            { value: 'opt2', label: 'Option 2' },\n          ]}\n          onMultiSelect={(opts) => setSelected(opts || [])}\n          placeholder=\"Select options\"\n        />\n\n        // With search functionality\n        <MultiSelect\n          options={options}\n          onMultiSelect={handleSelect}\n          withSearch\n          searchPlaceholder=\"Search...\"\n        />\n\n        // With label and controlled values\n        <MultiSelect\n          options={options}\n          values={selected().map(o => o.value)}\n          onMultiSelect={setSelected}\n          label=\"Categories\"\n          helperText=\"Select multiple categories\"\n        />\n\n        // Custom display value\n        <MultiSelect\n          options={options}\n          values={selectedValues}\n          displayValue={\\`\\${selectedValues.length} selected\\"
+      "usage": "import { MultiSelect } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal([]);\n\n        <MultiSelect\n          options={[\n            { value: 'opt1', label: 'Option 1' },\n            { value: 'opt2', label: 'Option 2' },\n          ]}\n          onMultiSelect={(opts) => setSelected(opts || [])}\n          placeholder=\"Select options\"\n        />\n\n        // With search functionality\n        <MultiSelect\n          options={options}\n          onMultiSelect={handleSelect}\n          withSearch\n          labels={{ searchPlaceholder: \"Search...\" }}\n        />\n\n        // With label and controlled values\n        <MultiSelect\n          options={options}\n          values={selected().map(o => o.value)}\n          onMultiSelect={setSelected}\n          label=\"Categories\"\n          helperText=\"Select multiple categories\"\n        />\n\n        // Custom display value\n        <MultiSelect\n          options={options}\n          values={selectedValues}\n          displayValue={\\`\\${selectedValues.length} selected\\"
     },
     {
       "name": "NumberInput",
@@ -2407,10 +2401,10 @@
           "description": "Placeholder text when no selection"
         },
         {
-          "name": "noSearchResultPlaceholder",
-          "type": "string",
-          "default": "\"No results found\"",
-          "description": "Message shown when search yields no results"
+          "name": "labels",
+          "type": "Partial<SelectLabels>",
+          "default": "{ noResults: \"No results found\", searchPlaceholder: \"Search...\" }",
+          "description": "i18n labels for visible texts (noResults, searchPlaceholder)"
         },
         {
           "name": "optionRowHeight",

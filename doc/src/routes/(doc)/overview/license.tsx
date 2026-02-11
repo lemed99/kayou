@@ -1,10 +1,10 @@
 import { CheckCircleIcon } from '@kayou/icons';
 
-import ArticlePage from '../../../components/ArticlePage';
+import BaseDocPage from '../../../components/BaseDocPage';
 
 export default function LicensePage() {
   return (
-    <ArticlePage
+    <BaseDocPage
       title="License"
       description="Kayou is open source software licensed under the MIT License. Use it freely in personal and commercial projects."
     >
@@ -127,6 +127,6 @@ SOFTWARE.`}
           </div>
         </div>
       </section>
-    </ArticlePage>
+    </BaseDocPage>
   );
 }

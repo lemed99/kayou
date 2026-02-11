@@ -156,3 +156,35 @@ export const OPERATOR_LABELS: Record<FilterOperator, string> = {
   isEmpty: 'is empty',
   isNotEmpty: 'is not empty',
 };
+
+/**
+ * Sort direction for DataTable columns.
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * A single sort entry for multi-column sorting.
+ */
+export interface SortEntry {
+  key: string;
+  direction: SortDirection;
+}
+
+/**
+ * A saved table configuration that captures the display state of a DataTable.
+ * Stored in localStorage as JSON.
+ */
+export interface SavedTableConfig {
+  /** Unique identifier. */
+  id: string;
+  /** User-provided display name. */
+  name: string;
+  /** Visible column keys. */
+  columns: string[];
+  /** Sort entries. */
+  sorts: SortEntry[];
+  /** Serialized FilterState as Map entries (Map is not JSON-serializable). */
+  filters: [string, ActiveFilter][];
+  /** Rows per page. */
+  perPage: number;
+}

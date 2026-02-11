@@ -3,8 +3,10 @@ import {
   type JSX,
   type ParentProps,
   Show,
+  Suspense,
   createMemo,
   createSignal,
+  lazy,
 } from 'solid-js';
 
 import {
@@ -18,9 +20,8 @@ import {
 import { dedent } from '../helpers/dedent';
 import BaseDocPage, {
   type RelatedItemDefinition,
-  type SectionId,
 } from './BaseDocPage';
-import ReadonlyCode from './ReadonlyCode';
+const ReadonlyCode = lazy(() => import('./ReadonlyCode'));
 
 interface ParameterDefinition {
   name: string;
@@ -85,23 +86,10 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
   const returnsArray = createMemo(() => props.returns ?? []);
   const typesArray = createMemo(() => props.types ?? []);
 
-  const visibleSections = createMemo(() => {
-    const sections = new Set<SectionId>();
-    if (relatedHooks().length > 0) sections.add('related-hooks');
-    if (relatedContexts().length > 0) sections.add('related-contexts');
-    if (props.provider) sections.add('provider');
-    if (props.usage) sections.add('usage');
-    if (parametersArray().length > 0) sections.add('props');
-    sections.add('returns');
-    if (typesArray().length > 0) sections.add('types');
-    return sections;
-  });
-
   return (
     <BaseDocPage
       title={props.title}
       description={props.description}
-      visibleSections={visibleSections()}
     >
       <Show when={relatedHooks().length > 0}>
         <section id="related-hooks" class="mb-8 scroll-mt-20">
@@ -484,7 +472,15 @@ function CodeBlock(props: { code: string }): JSX.Element {
         </Show>
         {copied() ? 'Copied!' : 'Copy'}
       </button>
-      <ReadonlyCode code={code()} />
+      <Suspense
+        fallback={
+          <pre class="overflow-auto bg-[#282c34] p-3 font-mono text-xs text-[#abb2bf]">
+            <code>{code()}</code>
+          </pre>
+        }
+      >
+        <ReadonlyCode code={code()} />
+      </Suspense>
     </div>
   );
 }

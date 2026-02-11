@@ -15,7 +15,7 @@ function discoverRoutes(): string[] {
   ['docs', 'icons'].forEach((r) => routes.push(`/${r}`));
 
   // Add doc routes
-  ['ui', 'hooks', 'overview'].forEach((section) => {
+  ['components', 'hooks', 'overview'].forEach((section) => {
     const dir = join(routesDir, '(doc)', section);
     try {
       readdirSync(dir).forEach((file) => {
@@ -49,6 +49,7 @@ export default defineConfig({
           '@kayou/icons': join(__dirname, '../packages/icons/src'),
           'assert': 'assert/',
         },
+        dedupe: ['tailwind-merge', 'solid-js'],
       },
     };
   },

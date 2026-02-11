@@ -7,7 +7,11 @@
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start"
+    "start": "vinxi start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint '**/*.{ts,tsx}' --fix",
+    "format": "prettier --check --ignore-path .prettierignore '**/*.{ts,tsx}'",
+    "format:fix": "prettier --write --ignore-path .prettierignore '**/*.{ts,tsx}'"
   },
   "devDependencies": {
     "@babel/generator": "^7.28.6",

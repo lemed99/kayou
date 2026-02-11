@@ -1,17 +1,33 @@
-import { format } from 'prettier/standalone';
-import babelPlugin from 'prettier/plugins/babel';
-import estreePlugin from 'prettier/plugins/estree';
+let prettierPromise: Promise<{
+  format: typeof import('prettier/standalone').format;
+  opts: object;
+}> | null = null;
 
-const prettierOpts = {
-  parser: 'babel' as const,
-  plugins: [babelPlugin, estreePlugin],
-  printWidth: 80,
-  tabWidth: 2,
-  singleQuote: true,
-  jsxSingleQuote: false,
-  trailingComma: 'all' as const,
-  semi: true,
-};
+function getPrettier() {
+  if (!prettierPromise) {
+    prettierPromise = (async () => {
+      const [{ format }, babelPlugin, estreePlugin] = await Promise.all([
+        import('prettier/standalone'),
+        import('prettier/plugins/babel').then((m) => m.default),
+        import('prettier/plugins/estree').then((m) => m.default),
+      ]);
+      return {
+        format,
+        opts: {
+          parser: 'babel' as const,
+          plugins: [babelPlugin, estreePlugin],
+          printWidth: 80,
+          tabWidth: 2,
+          singleQuote: true,
+          jsxSingleQuote: false,
+          trailingComma: 'all' as const,
+          semi: true,
+        },
+      };
+    })();
+  }
+  return prettierPromise;
+}
 
 // Placeholder for `...` ellipsis in JSX that Prettier can't parse
 const ELLIPSIS_PLACEHOLDER = '__ELLIPSIS__={true}';
@@ -27,12 +43,13 @@ function restore(code: string): string {
 
 /** Try formatting a single chunk, wrapping bare JSX in a fragment if needed. */
 async function formatChunk(chunk: string): Promise<string> {
+  const { format, opts } = await getPrettier();
   const clean = sanitize(chunk);
   const isBareJsx = /^\s*(\/\/.*\n\s*)?</.test(clean);
 
   if (!isBareJsx) {
     try {
-      const result = await format(clean, prettierOpts);
+      const result = await format(clean, opts);
       return restore(result.trimEnd());
     } catch {
       // Not valid JS — try fragment wrap below
@@ -41,7 +58,7 @@ async function formatChunk(chunk: string): Promise<string> {
 
   try {
     const wrapped = `<>\n${clean}\n</>;\n`;
-    const result = await format(wrapped, prettierOpts);
+    const result = await format(wrapped, opts);
     const trimmed = result.trimEnd();
     const lines = trimmed.split('\n');
 
@@ -66,9 +83,11 @@ async function formatChunk(chunk: string): Promise<string> {
  * containing bare JSX mixed with imports/comments.
  */
 export async function formatCode(code: string): Promise<string> {
+  const { format, opts } = await getPrettier();
+
   // First try formatting the whole thing as-is
   try {
-    const result = await format(sanitize(code), prettierOpts);
+    const result = await format(sanitize(code), opts);
     return restore(result.trimEnd());
   } catch {
     // Fall through to chunk-based formatting

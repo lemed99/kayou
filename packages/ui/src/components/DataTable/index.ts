@@ -6,6 +6,7 @@ export {
   DEFAULT_DATA_TABLE_LABELS,
   type DataTableAriaLabels,
   DEFAULT_DATA_TABLE_ARIA_LABELS,
+  type DataTableProps,
 } from './DataTable';
 
 // DataTable context for state persistence
@@ -41,4 +42,7 @@ export type {
   FilterState,
   FilterValue,
   NumberFilterConfig,
+  SavedTableConfig,
+  SortDirection,
+  SortEntry,
 } from './types';

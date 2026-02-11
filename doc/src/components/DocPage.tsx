@@ -3,8 +3,12 @@ import {
   type JSX,
   type ParentProps,
   Show,
+  Suspense,
   createMemo,
   createSignal,
+  lazy,
+  onCleanup,
+  onMount,
 } from 'solid-js';
 
 import {
@@ -21,10 +25,9 @@ import { dedent } from '../helpers/dedent';
 import BaseDocPage, {
   type KeyConceptDefinition,
   type RelatedItemDefinition,
-  type SectionId,
 } from './BaseDocPage';
-import Playground from './Playground';
-import ReadonlyCode from './ReadonlyCode';
+const ReadonlyCode = lazy(() => import('./ReadonlyCode'));
+const Playground = lazy(() => import('./Playground'));
 
 interface PropDefinition {
   name: string;
@@ -91,26 +94,10 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
   const relatedContextsArray = createMemo(() => props.relatedContexts ?? []);
   const dependenciesArray = createMemo(() => props.dependencies ?? []);
 
-  const visibleSections = createMemo(() => {
-    const sections = new Set<SectionId>();
-    if (dependenciesArray().length > 0) sections.add('dependencies');
-    if (props.keyConcepts && props.keyConcepts.length > 0) sections.add('key-concepts');
-    if (props.provider) sections.add('provider');
-    if (relatedHooksArray().length > 0) sections.add('related-hooks');
-    if (relatedContextsArray().length > 0) sections.add('related-contexts');
-    if (props.usage) sections.add('usage');
-    if (propsArray().length > 0) sections.add('props');
-    if (jsxSubComponents().length > 0) sections.add('sub-components');
-    if (typeDefinitions().length > 0) sections.add('types');
-    if (props.playground) sections.add('playground');
-    return sections;
-  });
-
   return (
     <BaseDocPage
       title={props.title}
       description={props.description}
-      visibleSections={visibleSections()}
     >
       <Show when={dependenciesArray().length > 0}>
         <section id="dependencies" class="mb-10 scroll-mt-20">
@@ -544,14 +531,58 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
       </Show>
 
       <Show when={props.playground}>
-        <section id="playground" class="mb-8 scroll-mt-20">
-          <h2 class="mb-4 text-2xl font-medium">Playground</h2>
-          <Playground code={props.playground!} />
-        </section>
+        <PlaygroundSection code={props.playground!} />
       </Show>
 
       {props.children}
     </BaseDocPage>
+  );
+}
+
+function PlaygroundSection(props: { code: string }): JSX.Element {
+  const [visible, setVisible] = createSignal(false);
+  let sectionRef!: HTMLElement;
+
+  onMount(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(sectionRef);
+    onCleanup(() => observer.disconnect());
+  });
+
+  return (
+    <section ref={sectionRef} id="playground" class="mb-8 scroll-mt-20">
+      <h2 class="mb-4 text-2xl font-medium">Playground</h2>
+      <Show
+        when={visible()}
+        fallback={
+          <div class="flex min-h-[400px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900">
+            <p class="text-sm text-gray-400 dark:text-neutral-500">
+              Loading playground...
+            </p>
+          </div>
+        }
+      >
+        <Suspense
+          fallback={
+            <div class="flex min-h-[400px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900">
+              <p class="text-sm text-gray-400 dark:text-neutral-500">
+                Loading playground...
+              </p>
+            </div>
+          }
+        >
+          <Playground code={props.code} />
+        </Suspense>
+      </Show>
+    </section>
   );
 }
 
@@ -589,7 +620,15 @@ export function CodeBlock(props: { code: string }): JSX.Element {
         </Show>
         {copied() ? 'Copied!' : 'Copy'}
       </button>
-      <ReadonlyCode code={code()} />
+      <Suspense
+        fallback={
+          <pre class="overflow-auto bg-[#282c34] p-3 font-mono text-xs text-[#abb2bf]">
+            <code>{code()}</code>
+          </pre>
+        }
+      >
+        <ReadonlyCode code={code()} />
+      </Suspense>
     </div>
   );
 }

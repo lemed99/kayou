@@ -4,7 +4,6 @@ import {
   type ParentProps,
   Show,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   onMount,
@@ -14,22 +13,33 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
 import { A, useLocation } from '@solidjs/router';
 
-// Shared SECTIONS constant for TOC
-export const SECTIONS = [
-  { id: 'dependencies', title: 'Dependencies' },
-  { id: 'key-concepts', title: 'Key Concepts' },
-  { id: 'provider', title: 'Required Provider' },
-  { id: 'related-hooks', title: 'Related Hooks' },
-  { id: 'related-contexts', title: 'Related Contexts' },
-  { id: 'usage', title: 'Usage' },
-  { id: 'props', title: 'Props' },
-  { id: 'sub-components', title: 'Sub-components' },
-  { id: 'types', title: 'Types' },
-  { id: 'returns', title: 'Returns' },
-  { id: 'playground', title: 'Playground' },
-] as const;
+export interface RelatedItemDefinition {
+  name: string;
+  path: string;
+  description: string;
+}
 
-export type SectionId = (typeof SECTIONS)[number]['id'];
+export interface KeyConceptDefinition {
+  term: string;
+  explanation: string;
+}
+
+interface TocItem {
+  id: string;
+  text: string;
+}
+
+// Throttle helper for scroll performance
+const throttle = <T extends (...args: unknown[]) => void>(fn: T, delay: number): T => {
+  let lastCall = 0;
+  return ((...args: unknown[]) => {
+    const now = Date.now();
+    if (now - lastCall >= delay) {
+      lastCall = now;
+      fn(...args);
+    }
+  }) as T;
+};
 
 // Navigation pages for prev/next footer
 const gettingStartedPages = [
@@ -100,41 +110,16 @@ const buildAllPages = (): Array<{ path: string; label: string }> => {
 
 const allPages = buildAllPages();
 
-// Throttle helper for scroll performance
-const throttle = <T extends (...args: unknown[]) => void>(fn: T, delay: number): T => {
-  let lastCall = 0;
-  return ((...args: unknown[]) => {
-    const now = Date.now();
-    if (now - lastCall >= delay) {
-      lastCall = now;
-      fn(...args);
-    }
-  }) as T;
-};
-
-export interface RelatedItemDefinition {
-  name: string;
-  path: string;
-  description: string;
-}
-
-export interface KeyConceptDefinition {
-  term: string;
-  explanation: string;
-}
-
 interface BaseDocPageProps {
   title: string;
   description: string;
-  /** Which sections have content (used to filter TOC) */
-  visibleSections: Set<SectionId>;
 }
 
 // Previous/Next navigation footer
 function PrevNextFooter(): JSX.Element {
   const location = useLocation();
 
-  const navigation = createMemo(() => {
+  const navigation = () => {
     const currentPath = location.pathname.replace(/\/$/, '');
     const currentIndex = allPages.findIndex((page) => page.path === currentPath);
     if (currentIndex === -1) return { prev: null, next: null };
@@ -142,7 +127,7 @@ function PrevNextFooter(): JSX.Element {
       prev: currentIndex > 0 ? allPages[currentIndex - 1] : null,
       next: currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null,
     };
-  });
+  };
 
   return (
     <Show when={navigation().prev || navigation().next}>
@@ -187,55 +172,64 @@ function PrevNextFooter(): JSX.Element {
 }
 
 export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.Element {
+  const [tocItems, setTocItems] = createSignal<TocItem[]>([]);
   const [visibleSections, setVisibleSections] = createSignal<Set<string>>(new Set());
-  const [elementCache, setElementCache] = createSignal<Map<string, HTMLElement>>(
-    new Map(),
-  );
+  let contentRef: HTMLDivElement | undefined;
 
-  // Initialize from hash on mount (SSR-safe)
+  // Extract headings from content and build TOC
   onMount(() => {
+    if (!contentRef) return;
+
+    const headings = contentRef.querySelectorAll('h2');
+    const items: TocItem[] = [];
+
+    headings.forEach((heading) => {
+      // Extract only direct text nodes (ignore child elements like badge spans)
+      const text = Array.from(heading.childNodes)
+        .filter((node) => node.nodeType === 3)
+        .map((node) => node.textContent?.trim())
+        .filter(Boolean)
+        .join(' ');
+
+      if (!heading.id) {
+        heading.id =
+          text
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') || '';
+      }
+
+      heading.classList.add('scroll-mt-20');
+
+      items.push({
+        id: heading.id,
+        text: text || heading.textContent || '',
+      });
+    });
+
+    setTocItems(items);
+
+    // Initialize from hash
     const initialHash = window.location.hash.slice(1);
     if (initialHash) {
       setVisibleSections(new Set([initialHash]));
-      // Scroll to the anchor after content has rendered
       requestAnimationFrame(() => {
         document.getElementById(initialHash)?.scrollIntoView({ behavior: 'instant' });
       });
     }
   });
 
-  // Filter sections to only show those with content
-  const visibleSectionsConfig = createMemo(() => {
-    return SECTIONS.filter((section) => props.visibleSections.has(section.id));
-  });
-
-  // Cache element references
+  // Scroll tracking for TOC highlighting
   createEffect(() => {
-    const sections = visibleSectionsConfig();
-    const cache = new Map<string, HTMLElement>();
-
-    for (const section of sections) {
-      const el = document.getElementById(section.id);
-      if (el) cache.set(section.id, el);
-    }
-
-    setElementCache(cache);
-  });
-
-  // Optimized scroll handler with throttling
-  createEffect(() => {
-    const cache = elementCache();
-    if (cache.size === 0) return;
-
-    const sections = visibleSectionsConfig();
-    const allIds = sections.map((s) => s.id);
+    const items = tocItems();
+    if (items.length === 0) return;
 
     const handleScroll = throttle(() => {
       const newVisibleSections = new Set<string>();
-      const headerOffset = 56;
+      const headerOffset = 80;
 
-      for (const id of allIds) {
-        const element = cache.get(id);
+      for (const item of items) {
+        const element = document.getElementById(item.id);
         if (!element) continue;
 
         const rect = element.getBoundingClientRect();
@@ -245,7 +239,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
         const isVisible = elementBottom > headerOffset && elementTop < window.innerHeight;
 
         if (isVisible) {
-          newVisibleSections.add(id);
+          newVisibleSections.add(item.id);
         }
       }
 
@@ -266,9 +260,9 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
   });
 
   return (
-    <div class="grid w-full max-w-2xl grid-cols-1 gap-10 xl:max-w-6xl xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
+    <div class="grid w-full grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
       {/* Main content */}
-      <div class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
+      <div ref={contentRef} class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
         <div class="mb-8">
           <h1 class="text-4xl font-medium">{props.title}</h1>
         </div>
@@ -277,7 +271,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
           {props.description}
         </p>
 
-        {/* Type-specific content rendered via children */}
+        {/* Content rendered via children */}
         {props.children}
 
         {/* Previous/Next navigation footer */}
@@ -292,22 +286,22 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
               On this page
             </h3>
             <ul class="flex flex-col gap-2 text-xs">
-              <For each={visibleSectionsConfig()}>
-                {(section) => (
+              <For each={tocItems()}>
+                {(item) => (
                   <li>
                     <a
                       aria-current={
-                        visibleSections().has(section.id) ? 'location' : undefined
+                        visibleSections().has(item.id) ? 'location' : undefined
                       }
-                      href={`#${section.id}`}
+                      href={`#${item.id}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
-                        history.replaceState(null, '', `#${section.id}`);
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        history.replaceState(null, '', `#${item.id}`);
                       }}
                       class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-neutral-400 dark:hover:text-white dark:aria-[current]:text-white"
                     >
-                      {section.title}
+                      {item.text}
                     </a>
                   </li>
                 )}

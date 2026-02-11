@@ -1,51 +1,90 @@
 import {
-  Accessor,
-  For,
   JSX,
   Show,
   createEffect,
   createMemo,
   createSignal,
+  createUniqueId,
   onCleanup,
   untrack,
 } from 'solid-js';
-import { Dynamic } from 'solid-js/web';
 
-import {
-  Columns03Icon,
-  Expand01Icon,
-  FilterFunnel01Icon,
-  InfoCircleIcon,
-  Minimize01Icon,
-  SearchRefractionIcon,
-  XCloseIcon,
-} from '@kayou/icons';
-import { twMerge } from 'tailwind-merge';
+import { Expand01Icon, Minimize01Icon } from '@kayou/icons';
 
 import Button from '../Button';
-import Checkbox from '../Checkbox';
-import { DynamicVirtualList } from '../DynamicVirtualList';
-import Pagination from '../Pagination';
-import Select, { MultiSelect } from '../Select';
-import Skeleton from '../Skeleton';
-import Spinner from '../Spinner';
-import Tooltip from '../Tooltip';
-import { VirtualList } from '../VirtualList';
 import { useDataTableState } from './DataTableContext';
-import { DataTableFilters } from './DataTableFilters';
-import { FilterConfig, FilterState } from './types';
+import { DataTableBody } from './DataTableBody';
+import { DataTableFooter } from './DataTableFooter';
+import { DataTableHeader } from './DataTableHeader';
+import { DataTableInternalContext } from './DataTableInternalContext';
+import { DataTableSearch } from './DataTableSearch';
+import { DataTableToolbar } from './DataTableToolbar';
+import { FilterConfig, FilterState, SortEntry } from './types';
+import { useDataTableConfigs } from './useDataTableConfigs';
 import { useDataTableFilters } from './useDataTableFilters';
 
 export interface DataTableLabels {
   searchPlaceholder: string;
   filter: string;
+  addFilter: string;
+  resetFilter: string;
+  applyFilter: string;
+  noFilters: string;
   columns: string;
+  sortAscending: string;
+  sortDescending: string;
+  clearSort: string;
+  sortPriority: string;
+  error: string;
+  noData: string;
+  seeMore: string;
+  collapse: string;
+  elementsPerPage: string;
+  selectedElements: (count: number, total: number) => string;
+  saveConfiguration: string;
+  configurations: string;
+  defaultConfiguration: string;
+  saveConfigTitle: string;
+  editConfigTitle: string;
+  configNameLabel: string;
+  configNamePlaceholder: string;
+  save: string;
+  deleteConfiguration: string;
+  confirmDelete: string;
+  cancel: string;
+  maxConfigsReached: string;
 }
 
 export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   searchPlaceholder: 'Search...',
   filter: 'Filter',
+  addFilter: 'Add filter',
+  resetFilter: 'Reset',
+  applyFilter: 'Apply',
+  noFilters: 'No filters are being applied.',
   columns: 'Columns',
+  sortAscending: 'Sort ascending',
+  sortDescending: 'Sort descending',
+  clearSort: 'Clear sort',
+  sortPriority: 'Sort priority',
+  error: 'An error occurred',
+  noData: 'No data available',
+  seeMore: 'See more',
+  collapse: 'See less',
+  elementsPerPage: 'per page',
+  selectedElements: (count, total) => `${count} of ${total} selected`,
+  saveConfiguration: 'Save configuration',
+  configurations: 'Configurations',
+  defaultConfiguration: 'Default',
+  saveConfigTitle: 'Save configuration',
+  editConfigTitle: 'Edit configuration',
+  configNameLabel: 'Configuration name',
+  configNamePlaceholder: 'Enter a name...',
+  save: 'Save',
+  deleteConfiguration: 'Delete',
+  confirmDelete: 'Confirm deletion?',
+  cancel: 'Cancel',
+  maxConfigsReached: 'Maximum of 3 configurations reached',
 };
 
 export interface DataTableAriaLabels {
@@ -62,9 +101,6 @@ export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
   refreshingData: 'Refreshing data',
 };
 
-/**
- * Column configuration for the DataTable component.
- */
 export interface DataTableColumnProps<T> {
   /** Column header label. */
   label: string;
@@ -80,9 +116,6 @@ export interface DataTableColumnProps<T> {
   tooltip?: string;
 }
 
-/**
- * Props for the DataTable component.
- */
 export interface DataTableProps<T> {
   /** Array of data rows to display. */
   data: T[];
@@ -104,12 +137,12 @@ export interface DataTableProps<T> {
   error?: unknown;
   /** Callback fired when page changes. */
   onPageChange?: (page: number) => void;
-  /** Callback fired when search value changes. */
+  /** Callback fired when search value changes (debounced by searchDebounceMs). */
   onSearchChange?: (search: string) => void;
   /** Callback fired when per-page value changes. */
   onPerPageChange?: (perPage: number) => void;
-  /** Callback fired when row selection changes. */
-  onSelectionChange?: (selectedIndices: Set<number>) => void;
+  /** Callback fired when row selection changes. Emits selected row keys. */
+  onSelectionChange?: (selectedKeys: Set<string>) => void;
   /** Whether to show the search bar. */
   searchBar?: boolean;
   /** Whether to allow column configuration. */
@@ -130,20 +163,6 @@ export interface DataTableProps<T> {
   isLoadingMore?: boolean;
   /** Callback fired when scrolling past 80% of the list (infinite scroll). Requires virtualization. */
   onLoadMore?: (scrollProgress: number) => void;
-  /** Message to display on error. */
-  errorMessage: string;
-  /** Message to display when no data. */
-  noDataMessage: string;
-  /** Text for the "see more" expand button. */
-  seeMoreText: string;
-  /** Text for the collapse button when expanded. Defaults to seeMoreText. */
-  collapseText?: string;
-  /** Text for the filter button. */
-  filterButtonText?: string;
-  /** Text label for elements per page control. */
-  elementsPerPageText: string;
-  /** Function to format selected elements text. */
-  selectedElementsText: (count: number, total: number) => string;
   /** Whether to show the footer. @default true */
   footer?: boolean;
   /** i18n labels for visible text in the DataTable UI. */
@@ -156,22 +175,30 @@ export interface DataTableProps<T> {
   filterConfigs?: FilterConfig<T>[];
   /** Controlled filter state. */
   filterState?: FilterState;
-  /** Callback fired when filters change. The consumer is responsible for filtering or fetching data. */
+  /** Callback fired when filters change. */
   onFiltersChange?: (filters: FilterState) => void;
-  /** Text for the "Add filter" link. */
-  addFilterText?: string;
-  /** Text for the "Reset" button. */
-  resetText?: string;
-  /** Text for the "Apply" button. */
-  applyText?: string;
-  /** Text when no filters are applied. */
-  noFiltersText?: string;
+
+  // Row identity
+  /** Key or accessor to uniquely identify rows. Required when rowSelection is true. */
+  rowKey?: string | ((row: T) => string);
+
+  // Sorting
+  /** Sort state (controlled). Each entry has a key and direction. */
+  sorts?: SortEntry[];
+  /** Callback when sort changes. Click to single-sort, Shift+click to add columns. */
+  onSortsChange?: (sorts: SortEntry[]) => void;
+  /** Which columns can be sorted. Defaults to all if onSortsChange is provided. */
+  sortableColumns?: string[];
+
+  // Search debounce
+  /** Debounce delay for onSearchChange in ms. @default 300 */
+  searchDebounceMs?: number;
+
+  // Saved configurations
+  /** Stable key for localStorage config persistence. Enables saved configurations. */
+  configStorageKey?: string;
 }
 
-/**
- * DataTable component for displaying tabular data with virtualization,
- * pagination, sorting, filtering, and row selection.
- */
 export function DataTable<T extends Record<string, unknown>>(
   props: DataTableProps<T>,
 ): JSX.Element {
@@ -181,11 +208,12 @@ export function DataTable<T extends Record<string, unknown>>(
     ...props.ariaLabels,
   }));
 
-  // State persistence (auto-generated ID via DataTableProvider)
-  const { restoredState, isRestored, saveState, perPageOptions } = useDataTableState();
+  const tableId = createUniqueId();
+  const { restoredState, isRestored, saveState, perPageOptions } = useDataTableState(tableId);
 
+  // --- Signals ---
   const [searchKey, setSearchKey] = createSignal('');
-  const [selectedRows, setSelectedRows] = createSignal<Set<number>>(new Set());
+  const [selectedRows, setSelectedRows] = createSignal<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = createSignal(1);
   const [perPage, setPerPage] = createSignal(perPageOptions[0] ?? 10);
   const [columns, setColumns] = createSignal<DataTableColumnProps<T>[]>([]);
@@ -199,11 +227,49 @@ export function DataTable<T extends Record<string, unknown>>(
   const [rowGridStyle, setRowGridStyle] = createSignal('');
   const [headerRef, setHeaderRef] = createSignal<HTMLDivElement | undefined>();
   const [rowWidth, setRowWidth] = createSignal(0);
-  // Compute a fixed rootHeight for virtualization when expanded
+
+  // --- Row identity ---
+  const getRowKey = (row: T, index: number): string => {
+    if (!props.rowKey) return String(index);
+    if (typeof props.rowKey === 'function') return props.rowKey(row);
+    return String(row[props.rowKey as keyof T]);
+  };
+
+  // --- Sorting ---
+  const sortableColumnsSet = createMemo(() => {
+    if (props.sortableColumns) return new Set(props.sortableColumns);
+    if (props.onSortsChange) return new Set(props.columns.map((c) => c.key));
+    return new Set<string>();
+  });
+
+  const sorts = createMemo<SortEntry[]>(() => props.sorts ?? []);
+
+  const handleSortClick = (key: string) => {
+    if (!props.onSortsChange) return;
+    const current = sorts();
+    const idx = current.findIndex((s) => s.key === key);
+
+    if (idx === -1) {
+      // Not sorted yet: add as ascending
+      props.onSortsChange([...current, { key, direction: 'asc' }]);
+    } else {
+      const entry = current[idx];
+      if (entry.direction === 'asc') {
+        // Ascending → descending
+        const updated = [...current];
+        updated[idx] = { key, direction: 'desc' };
+        props.onSortsChange(updated);
+      } else {
+        // Descending → remove from sorts
+        props.onSortsChange(current.filter((_, i) => i !== idx));
+      }
+    }
+  };
+
+  // --- Virtualization ---
   const expandedHeight = createMemo(() => {
     const rh = props.rowHeight ?? props.estimatedRowHeight ?? 0;
-    if (rh === 0) return 400; // fallback
-    // Show ~10 rows worth of height, capped at 70vh equivalent (~600px)
+    if (rh === 0) return 400;
     return Math.min(rh * 10, 600);
   });
 
@@ -211,7 +277,7 @@ export function DataTable<T extends Record<string, unknown>>(
     () => expanded() && (!!props.rowHeight || !!props.estimatedRowHeight),
   );
 
-  // Filter system integration — called unconditionally at the top level
+  // --- Filter system ---
   const filterHook = useDataTableFilters<T>({
     filterConfigs: () => props.filterConfigs ?? [],
     filters: () => props.filterState,
@@ -219,7 +285,46 @@ export function DataTable<T extends Record<string, unknown>>(
   });
   const hasFilters = createMemo(() => (props.filterConfigs?.length ?? 0) > 0);
 
-  // Restore state from session storage
+  // --- Saved configurations ---
+  const defaultColumnKeys = createMemo(
+    () => props.defaultColumns ?? props.columns.map((c) => c.key),
+  );
+
+  const configStorageKey = untrack(() => props.configStorageKey);
+  const configHook = configStorageKey
+    ? useDataTableConfigs({
+        storageKey: configStorageKey,
+        currentColumns: () => columns().map((c) => c.key),
+        currentSorts: sorts,
+        currentFilters: filterHook.activeFilters,
+        currentPerPage: perPage,
+        defaultColumns: defaultColumnKeys,
+        defaultPerPage: perPageOptions[0] ?? 10,
+      })
+    : null;
+
+  const handleActivateConfig = (id: string | null) => {
+    if (!configHook) return;
+    configHook.activateConfig(id);
+    if (id === null) {
+      setColumns(
+        props.columns.filter((c) => defaultColumnKeys().includes(c.key)),
+      );
+      handlePerPageChange(perPageOptions[0] ?? 10);
+      props.onSortsChange?.([]);
+      filterHook.replaceAllFilters(new Map());
+    } else {
+      const config = configHook.getConfig(id);
+      if (!config) return;
+      setColumns(props.columns.filter((c) => config.columns.includes(c.key)));
+      handlePerPageChange(config.perPage);
+      props.onSortsChange?.(config.sorts);
+      filterHook.replaceAllFilters(new Map(config.filters));
+    }
+    handlePageChange(1);
+  };
+
+  // --- State restoration ---
   createEffect(() => {
     if (!isRestored()) return;
     const state = restoredState();
@@ -234,7 +339,7 @@ export function DataTable<T extends Record<string, unknown>>(
     }
   });
 
-  // Save state changes to session storage (debounced for scroll)
+  // --- State persistence ---
   createEffect(() => {
     if (!isRestored()) return;
     saveState({
@@ -246,12 +351,34 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
+  // --- Data ---
   const baseData = createMemo(() => props.data);
+  const defaultRowsCount = createMemo(() => props.defaultRowsCount ?? 5);
 
-  // Clear selection when underlying data changes
+  const filteredData = createMemo(() => {
+    const filtered = baseData();
+    if (expanded()) return filtered;
+    if (props.expandable && baseData().length > defaultRowsCount())
+      return filtered.slice(0, defaultRowsCount());
+    return filtered;
+  });
+
+  // --- Selection ---
   createEffect(() => {
-    baseData(); // track
-    setSelectedRows(new Set<number>());
+    const data = baseData();
+    if (!props.rowKey) {
+      // Index-based mode: clear on data change
+      setSelectedRows(new Set<string>());
+      return;
+    }
+    // Key-based mode: prune stale keys
+    const validKeys = new Set(data.map((row, idx) => getRowKey(row, idx)));
+    const current = selectedRows();
+    const pruned = new Set([...current].filter((k) => validKeys.has(k)));
+    if (pruned.size !== current.size) {
+      setSelectedRows(pruned);
+      props.onSelectionChange?.(pruned);
+    }
   });
 
   const allSelected = createMemo(() => {
@@ -260,11 +387,33 @@ export function DataTable<T extends Record<string, unknown>>(
     return selectedRows().size === len;
   });
 
+  const updateSelection = (newSet: Set<string>) => {
+    setSelectedRows(newSet);
+    props.onSelectionChange?.(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected()) {
+      updateSelection(new Set<string>());
+    } else {
+      updateSelection(new Set(baseData().map((row, idx) => getRowKey(row, idx))));
+    }
+  };
+
+  const toggleSelectRow = (key: string) => {
+    const newSelected = new Set(selectedRows());
+    if (newSelected.has(key)) {
+      newSelected.delete(key);
+    } else {
+      newSelected.add(key);
+    }
+    updateSelection(newSelected);
+  };
+
+  // --- Columns ---
   createEffect(() => {
-    // Track props.columns and props.defaultColumns as dependencies
     const propsColumns = props.columns;
     const defaultCols = props.defaultColumns;
-    // Read current columns without creating a dependency to avoid infinite loop
     const currentKeys = untrack(() => columns().map((c) => c.key));
     if (currentKeys.length === 0) {
       setColumns(
@@ -278,54 +427,7 @@ export function DataTable<T extends Record<string, unknown>>(
     }
   });
 
-  const updateSelection = (newSet: Set<number>) => {
-    setSelectedRows(newSet);
-    props.onSelectionChange?.(newSet);
-  };
-
-  const toggleSelectAll = () => {
-    if (allSelected()) {
-      updateSelection(new Set<number>());
-    } else {
-      updateSelection(new Set(baseData().map((_, idx) => idx)));
-    }
-  };
-
-  const toggleSelectRow = (index: number) => {
-    const newSelected = new Set(selectedRows());
-    if (newSelected.has(index)) {
-      newSelected.delete(index);
-    } else {
-      newSelected.add(index);
-    }
-    updateSelection(newSelected);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    props.onPageChange?.(page);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchKey(value);
-    props.onSearchChange?.(value);
-  };
-
-  const handlePerPageChange = (value: number) => {
-    setPerPage(value);
-    props.onPerPageChange?.(value);
-  };
-
-  const defaultRowsCount = createMemo(() => props.defaultRowsCount ?? 5);
-
-  const filteredData = createMemo(() => {
-    const filtered = baseData();
-    if (expanded()) return filtered;
-    if (props.expandable && baseData().length > defaultRowsCount())
-      return filtered.slice(0, defaultRowsCount());
-    return filtered;
-  });
-
+  // --- Grid layout ---
   const sharedPercentage = () => {
     if (columns().length === 0) return 0;
     const allColumnsPercentage = props.columns.reduce((acc, v) => acc + v.width, 0);
@@ -335,25 +437,36 @@ export function DataTable<T extends Record<string, unknown>>(
 
   createEffect(() => {
     if (tableWidth() === 0) return;
+    // Capture reactive values synchronously for SolidJS tracking
+    const tw = tableWidth();
+    const cols = columns();
+    const rs = props.rowSelection;
+    const sp = sharedPercentage();
+    const scope = tableRef();
 
-    setRowGridStyle(
-      `${props.rowSelection ? '40px ' : ''}${columns()
-        .map((col, i) => {
-          const scope = tableRef();
-          const widths = scope
-            ? Array.from(scope.querySelectorAll(`[data-column="${col.key}"]`)).map(
-                (e) => (e as HTMLElement).offsetWidth,
-              )
-            : [];
-          const measured = widths.length > 0 ? Math.max(...widths) + 48 : 0;
-          const colMinWidth = col.minWidth ?? 120;
-          const minWidth = Math.max(measured, colMinWidth);
-          return `minmax(${minWidth}px, ${Math.max(0, (tableWidth() * (col.width + sharedPercentage())) / 100 - (i === 0 ? (props.rowSelection ? 40 : 0) : 0))}px)`;
-        })
-        .join(' ')}`,
-    );
+    // Double rAF ensures layout has settled before DOM measurement
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setRowGridStyle(
+          `${rs ? '40px ' : ''}${cols
+            .map((col, i) => {
+              const widths = scope
+                ? Array.from(
+                    scope.querySelectorAll(`[data-column="${col.key}"]`),
+                  ).map((e) => (e as HTMLElement).offsetWidth)
+                : [];
+              const measured = widths.length > 0 ? Math.max(...widths) + 48 : 0;
+              const colMinWidth = col.minWidth ?? 120;
+              const minWidth = Math.max(measured, colMinWidth);
+              return `minmax(${minWidth}px, ${Math.max(0, (tw * (col.width + sp)) / 100 - (i === 0 ? (rs ? 40 : 0) : 0))}px)`;
+            })
+            .join(' ')}`,
+        );
+      });
+    });
   });
 
+  // --- Resize observers ---
   createEffect(() => {
     let resizeObserver: ResizeObserver | undefined;
     let rafId: number | undefined;
@@ -372,7 +485,6 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
-  // Track header row width for body container
   createEffect(() => {
     let resizeObserver: ResizeObserver | undefined;
     let rafId: number | undefined;
@@ -391,18 +503,16 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
-  // Save and restore scroll position for virtualized lists
+  // --- Scroll position persistence ---
   createEffect(() => {
     const el = virtualContainerRef();
     if (!el || !isRestored()) return;
 
-    // Restore scroll position
     const state = restoredState();
     if (state?.scrollTop !== undefined) {
       el.scrollTop = state.scrollTop;
     }
 
-    // Save scroll position on scroll (debounced)
     let scrollSaveTimeout: ReturnType<typeof setTimeout> | undefined;
     const handleScrollSave = () => {
       if (scrollSaveTimeout) clearTimeout(scrollSaveTimeout);
@@ -418,7 +528,7 @@ export function DataTable<T extends Record<string, unknown>>(
     });
   });
 
-  // Infinite scroll for virtualized lists
+  // --- Infinite scroll ---
   createEffect(() => {
     if (!useVirtualization() || !props.onLoadMore) return;
 
@@ -458,92 +568,35 @@ export function DataTable<T extends Record<string, unknown>>(
     onCleanup(() => el.removeEventListener('scroll', handleInfiniteScroll));
   });
 
-  const baseRowClass = twMerge(
-    'grid w-fit bg-white hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/50',
-    'border-b border-gray-200 last:border-b-0 dark:border-neutral-800',
-  );
+  // --- Handlers ---
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    props.onPageChange?.(page);
+  };
 
-  const renderRow = (row: T, index: Accessor<number>) => (
-    <div
-      role="row"
-      class={
-        selectedRows().has(index())
-          ? `${baseRowClass} bg-neutral-100 dark:bg-neutral-800`
-          : baseRowClass
-      }
-      style={{
-        'grid-template-columns': rowGridStyle(),
-      }}
-    >
-      <Show when={props.rowSelection}>
-        <div role="cell" class="flex items-center py-3 pl-6">
-          <Checkbox
-            checked={selectedRows().has(index())}
-            onChange={() => toggleSelectRow(index())}
-            aria-label={`Select row ${index() + 1}`}
-          />
-        </div>
-      </Show>
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const handleSearchChange = (value: string) => {
+    setSearchKey(value);
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    const delay = props.searchDebounceMs ?? 300;
+    if (delay === 0) {
+      props.onSearchChange?.(value);
+    } else {
+      searchDebounceTimer = setTimeout(() => {
+        props.onSearchChange?.(value);
+      }, delay);
+    }
+  };
+  onCleanup(() => {
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  });
 
-      <For each={columns()}>
-        {(column) => (
-          <div
-            role="cell"
-            class="flex shrink-0 items-center px-6 py-4 text-gray-900 dark:text-white"
-          >
-            <Show
-              when={column.render}
-              fallback={<span data-column={column.key}>{String(row[column.key])}</span>}
-            >
-              <span data-column={column.key}>
-                {column.render!(row[column.key], row, index())}
-              </span>
-            </Show>
-          </div>
-        )}
-      </For>
-    </div>
-  );
+  const handlePerPageChange = (value: number) => {
+    setPerPage(value);
+    props.onPerPageChange?.(value);
+  };
 
-  const NoItemsComponent = () => (
-    <div class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white">
-      {props.noDataMessage}
-    </div>
-  );
-
-  const LoadingMoreSpinner = () => (
-    <Show when={props.isLoadingMore}>
-      <div class="flex items-center justify-center py-3">
-        <Spinner color="gray" size="sm" />
-      </div>
-    </Show>
-  );
-
-  const VirtualizedList = () => (
-    <Dynamic
-      component={props.rowHeight ? VirtualList : DynamicVirtualList}
-      items={() => filteredData() as unknown as readonly unknown[]}
-      rootHeight={expandedHeight()}
-      rowHeight={props.rowHeight ? props.rowHeight + 1 : undefined!} // +1 because of rowClass border-b
-      estimatedRowHeight={
-        props.estimatedRowHeight ? props.estimatedRowHeight + 1 : undefined!
-      }
-      containerWidth="100%"
-      containerPadding={0}
-      fallback={<NoItemsComponent />}
-      setContainerRef={setVirtualContainerRef}
-      loading={<LoadingMoreSpinner />}
-      rowClass="border-b border-gray-200 last:border-b-0 dark:border-neutral-800"
-    >
-      {(item: unknown, index: Accessor<number>) => renderRow(item as T, index)}
-    </Dynamic>
-  );
-
-  const hasToolbar = createMemo(
-    () =>
-      hasFilters() || !!(props.filters && !hasFilters()) || !!props.configureColumns,
-  );
-
+  // --- Render ---
   return (
     <div class="w-full min-w-0">
       <div
@@ -551,311 +604,177 @@ export function DataTable<T extends Record<string, unknown>>(
         role="table"
         class="flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
       >
-        {/* Search Section */}
-        <Show when={props.searchBar}>
-          <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-neutral-800">
-            <div class="relative flex w-full max-w-md items-center">
-              <SearchRefractionIcon class="size-5 text-gray-400 dark:text-neutral-500" />
-              <input
-                ref={setSearchRef}
-                value={searchKey()}
-                onInput={(e) => handleSearchChange(e.target.value)}
-                placeholder={l().searchPlaceholder}
-                aria-label={a().search}
-                onFocus={(e) => e.target.select()}
-                class="w-full bg-transparent py-3 pl-2 text-sm outline-none dark:text-white"
-              />
-              <Show when={searchKey()}>
-                <button
-                  type="button"
-                  aria-label={a().clearSearch}
-                  onClick={() => {
-                    handleSearchChange('');
-                    searchRef()?.focus();
-                  }}
-                  class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
-                >
-                  <XCloseIcon class="size-4" aria-hidden="true" />
-                </button>
-              </Show>
-            </div>
-          </div>
-        </Show>
+        <DataTableInternalContext.Provider
+          value={{
+            columns,
+            get allColumns() {
+              return props.columns;
+            },
+            setColumns,
+            filteredData,
+            baseData,
+            rowGridStyle,
+            rowWidth,
+            setHeaderRef,
+            get rowSelection() {
+              return props.rowSelection ?? false;
+            },
+            selectedRows,
+            allSelected,
+            toggleSelectAll,
+            toggleSelectRow,
+            getRowKey,
+            searchKey,
+            handleSearchChange,
+            searchRef,
+            setSearchRef,
+            currentPage,
+            handlePageChange,
+            perPage,
+            handlePerPageChange,
+            perPageOptions,
+            expanded,
+            toggleExpanded: () => setExpanded((v) => !v),
+            sorts,
+            onSortClick: handleSortClick,
+            sortableColumns: sortableColumnsSet,
+            useVirtualization,
+            setVirtualContainerRef,
+            expandedHeight,
+            labels: l,
+            ariaLabels: a,
+            get loading() {
+              return props.loading;
+            },
+            get validating() {
+              return props.validating;
+            },
+            get error() {
+              return props.error;
+            },
+            get rowHeight() {
+              return props.rowHeight;
+            },
+            get estimatedRowHeight() {
+              return props.estimatedRowHeight;
+            },
+            get isLoadingMore() {
+              return props.isLoadingMore;
+            },
+            get pageTotal() {
+              return props.pageTotal;
+            },
+            get perPageControl() {
+              return props.perPageControl;
+            },
+            get expandable() {
+              return props.expandable;
+            },
+            get defaultRowsCount() {
+              return props.defaultRowsCount ?? 5;
+            },
+            get footer() {
+              return props.footer;
+            },
+            get searchBar() {
+              return props.searchBar;
+            },
+            get configureColumns() {
+              return props.configureColumns;
+            },
+            get filters() {
+              return props.filters;
+            },
+            get activeFilterCount() {
+              return props.activeFilterCount;
+            },
+            get configEnabled() {
+              return !!configHook;
+            },
+            configs: configHook?.configs ?? (() => []),
+            activeConfigId: configHook?.activeConfigId ?? (() => null),
+            isDirty: configHook?.isDirty ?? (() => false),
+            isAtLimit: configHook?.isAtLimit ?? (() => false),
+            hasConfigs: configHook?.hasConfigs ?? (() => false),
+            onSaveConfig: configHook?.saveConfig ?? (() => false),
+            onUpdateConfig: configHook?.updateConfig ?? (() => {}),
+            onDeleteConfig: configHook?.deleteConfig ?? (() => {}),
+            onActivateConfig: handleActivateConfig,
+            getConfig: configHook?.getConfig ?? (() => undefined),
+          }}
+        >
+          {/* Search */}
+          <Show when={props.searchBar}>
+            <DataTableSearch />
+          </Show>
 
-        {/* Toolbar: Filters + Chips + Columns + Expand */}
-        <Show when={hasToolbar()}>
-          <div
-            class={twMerge(
-              'flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-6 py-2 dark:border-neutral-800',
-              !props.searchBar ? 'rounded-t-lg' : '',
-            )}
-          >
-            {/* Left: Filters */}
-            <div class="flex min-w-0 flex-1 items-center gap-2">
-              {/* Filter System (when filterConfigs is provided) */}
-              <Show when={hasFilters()}>
-                <DataTableFilters
-                  filterConfigs={props.filterConfigs!}
-                  activeFilters={filterHook.activeFilters}
-                  setFilter={filterHook.setFilter}
-                  removeFilter={filterHook.removeFilter}
-                  clearFilters={filterHook.clearFilters}
-                  replaceAllFilters={filterHook.replaceAllFilters}
-                  getOperators={filterHook.getOperators}
-                  filterButtonText={props.filterButtonText}
-                  addFilterText={props.addFilterText}
-                  resetText={props.resetText}
-                  applyText={props.applyText}
-                  noFiltersText={props.noFiltersText}
-                  showChips
+          {/* Toolbar */}
+          <DataTableToolbar
+            hasFilters={hasFilters}
+            filterConfigs={props.filterConfigs}
+            filterHook={filterHook}
+          />
+
+          {/* Selected Items Section */}
+          <Show when={props.rowSelection && selectedRows().size > 0}>
+            <div class="flex shrink-0 items-center border-b border-gray-200 px-6 py-3 dark:border-neutral-800">
+              <div class="flex items-center gap-3">
+                <Button size="xs" color="light" aria-label="Bulk actions">
+                  ···
+                </Button>
+                <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
+                  {l().selectedElements(
+                    selectedRows().size,
+                    baseData().length,
+                  )}
+                </span>
+              </div>
+            </div>
+          </Show>
+
+          {/* Scrollable data area */}
+          <div class="flex min-w-0 flex-col overflow-x-auto">
+            <DataTableHeader />
+            <DataTableBody />
+          </div>
+
+          {/* See more / Collapse trigger */}
+          <Show when={props.expandable && baseData().length > defaultRowsCount()}>
+            <button
+              type="button"
+              aria-expanded={expanded()}
+              aria-label={
+                expanded()
+                  ? l().collapse
+                  : l().seeMore
+              }
+              onClick={() => setExpanded((v) => !v)}
+              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
+            >
+              <Show
+                when={expanded()}
+                fallback={
+                  <>
+                    <span>{l().seeMore}</span>
+                    <Expand01Icon
+                      class="size-3 transition-all group-hover:size-4"
+                      aria-hidden="true"
+                    />
+                  </>
+                }
+              >
+                <span>{l().collapse}</span>
+                <Minimize01Icon
+                  class="size-3 transition-all group-hover:size-4"
+                  aria-hidden="true"
                 />
               </Show>
+            </button>
+          </Show>
 
-              {/* Custom Filters (legacy, when filters JSX is provided) */}
-              <Show when={props.filters && !hasFilters()}>
-                <div class="flex items-center py-1">
-                  <FilterFunnel01Icon class="mr-2 size-5" />
-                  <p>{props.filterButtonText || l().filter}</p>
-                  <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-neutral-200 dark:text-neutral-900">
-                    {props.activeFilterCount ?? 0}
-                  </span>
-                </div>
-              </Show>
-            </div>
-
-            {/* Right: Columns + Expand */}
-            <div class="flex shrink-0 items-center gap-2">
-              {/* Column Configuration */}
-              <Show when={props.configureColumns}>
-                <MultiSelect
-                  sizing="sm"
-                  options={props.columns.map((c) => ({
-                    label: c.label,
-                    value: c.key,
-                  }))}
-                  onMultiSelect={(options) => {
-                    setColumns(
-                      props.columns.filter((c) =>
-                        options?.map((o) => o.value).includes(c.key),
-                      ),
-                    );
-                  }}
-                  values={columns().map((c) => c.key)}
-                  displayValue={l().columns}
-                  icon={() => <Columns03Icon class="size-5" />}
-                  fitContent={true}
-                />
-              </Show>
-            </div>
-          </div>
-        </Show>
-
-        {/* Selected Items Section */}
-        <Show when={props.rowSelection && selectedRows().size > 0}>
-          <div
-            class={twMerge(
-              'flex shrink-0 items-center border-b border-gray-200 px-6 py-3 dark:border-neutral-800',
-              !props.searchBar && !props.filters ? 'rounded-t-lg' : '',
-            )}
-          >
-            <div class="flex items-center gap-3">
-              <Button size="xs" color="light" aria-label="Bulk actions">
-                ···
-              </Button>
-              <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
-                {props.selectedElementsText(selectedRows().size, baseData().length)}
-              </span>
-            </div>
-          </div>
-        </Show>
-
-        {/* Scrollable data area (header + body) */}
-        <div class="flex min-w-0 flex-col overflow-x-auto">
-          {/* Table Header */}
-          <div role="rowgroup">
-            <div
-              ref={setHeaderRef}
-              role="row"
-              class={twMerge(
-                'grid w-fit border-b border-gray-200 bg-gray-100 text-xs font-bold uppercase text-gray-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
-                !props.searchBar &&
-                  !props.filters &&
-                  !hasToolbar() &&
-                  !(props.rowSelection && selectedRows().size > 0)
-                  ? 'rounded-t-lg'
-                  : '',
-              )}
-              style={{
-                'grid-template-columns': rowGridStyle(),
-              }}
-            >
-              <Show when={props.rowSelection}>
-                <div role="columnheader" class="flex items-center py-3 pl-6">
-                  <Checkbox
-                    checked={allSelected()}
-                    onChange={toggleSelectAll}
-                    aria-label="Select all rows"
-                  />
-                </div>
-              </Show>
-
-              <For each={columns()}>
-                {(column) => (
-                  <div
-                    role="columnheader"
-                    class="flex items-center gap-1 whitespace-nowrap px-6 py-3"
-                    title={column.tooltip || column.label}
-                  >
-                    <span>{column.label}</span>
-                    <Show when={column.tooltip}>
-                      <Tooltip
-                        content={column.tooltip}
-                        theme="auto"
-                        placement="top"
-                        class="capitalize"
-                      >
-                        <InfoCircleIcon aria-hidden="true" />
-                      </Tooltip>
-                    </Show>
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-
-          {/* Table Body */}
-          <div
-            role="rowgroup"
-            aria-busy={props.loading || props.validating}
-            class="relative flex flex-col"
-            style={{ width: rowWidth() > 0 ? `${rowWidth()}px` : undefined }}
-          >
-            <Show
-              when={!props.loading && !props.error}
-              fallback={
-                <div>
-                  <Show when={props.loading}>
-                    <div
-                      role="status"
-                      aria-live="polite"
-                      aria-label={a().loadingData}
-                      class={twMerge('grid bg-white dark:bg-neutral-900')}
-                      style={{
-                        'grid-template-columns': rowGridStyle(),
-                      }}
-                    >
-                      <Show when={props.rowSelection}>
-                        <div class="flex items-center pl-6">
-                          <Skeleton width={16} height={16} />
-                        </div>
-                      </Show>
-                      <For each={columns()}>
-                        {() => (
-                          <div class="px-6 py-5">
-                            <Skeleton width={100} height={10} />
-                          </div>
-                        )}
-                      </For>
-                    </div>
-                  </Show>
-                  <Show when={props.error}>
-                    <div
-                      role="alert"
-                      class="whitespace-nowrap px-6 py-4 text-center font-medium text-red-600 dark:text-red-400"
-                    >
-                      {props.errorMessage}
-                    </div>
-                  </Show>
-                </div>
-              }
-            >
-              <Show when={props.validating}>
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-label={a().refreshingData}
-                  class="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white/60 dark:bg-neutral-900/60"
-                >
-                  <Spinner />
-                </div>
-              </Show>
-              {/* Virtualized rendering when expanded */}
-              <Show when={useVirtualization()}>
-                <VirtualizedList />
-              </Show>
-              {/* Plain rendering when not virtualized */}
-              <Show when={!useVirtualization()}>
-                <For each={filteredData()} fallback={<NoItemsComponent />}>
-                  {renderRow}
-                </For>
-              </Show>
-            </Show>
-          </div>
-        </div>
-
-        {/* See more / Collapse trigger */}
-        <Show when={props.expandable && baseData().length > defaultRowsCount()}>
-          <button
-            type="button"
-            aria-expanded={expanded()}
-            aria-label={expanded() ? (props.collapseText ?? 'Collapse') : props.seeMoreText}
-            onClick={() => setExpanded((v) => !v)}
-            class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
-          >
-            <Show
-              when={expanded()}
-              fallback={
-                <>
-                  <span>{props.seeMoreText}</span>
-                  <Expand01Icon
-                    class="size-3 transition-all group-hover:size-4"
-                    aria-hidden="true"
-                  />
-                </>
-              }
-            >
-              <span>{props.collapseText ?? props.seeMoreText}</span>
-              <Minimize01Icon
-                class="size-3 transition-all group-hover:size-4"
-                aria-hidden="true"
-              />
-            </Show>
-          </button>
-        </Show>
-
-        {/* Table Footer */}
-        <Show when={props.footer ?? true}>
-          <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row dark:border-neutral-800">
-            <div class="flex items-center gap-4">
-              <Show when={props.perPageControl}>
-                <div class="flex items-center gap-2">
-                  <Select
-                    options={perPageOptions.map((n) => ({
-                      value: String(n),
-                      label: String(n),
-                    }))}
-                    sizing="xs"
-                    value={String(perPage())}
-                    onSelect={(option) => handlePerPageChange(Number(option?.value || 10))}
-                    fitContent={true}
-                    aria-label={props.elementsPerPageText}
-                  />
-                  <span class="whitespace-nowrap text-sm text-gray-700 dark:text-neutral-300">
-                    {props.elementsPerPageText}
-                  </span>
-                </div>
-              </Show>
-            </div>
-
-            <Show when={props.pageTotal && props.pageTotal > 1}>
-              <Pagination
-                total={props.pageTotal!}
-                page={currentPage()}
-                onChange={handlePageChange}
-              />
-            </Show>
-          </div>
-        </Show>
+          {/* Footer */}
+          <DataTableFooter />
+        </DataTableInternalContext.Provider>
       </div>
     </div>
   );

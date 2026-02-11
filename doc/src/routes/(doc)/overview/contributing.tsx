@@ -5,7 +5,7 @@ import {
   MessageSquare01Icon,
 } from '@kayou/icons';
 
-import ArticlePage from '../../../components/ArticlePage';
+import BaseDocPage from '../../../components/BaseDocPage';
 
 const cloneCode = `git clone https://github.com/kayou.git
 cd kayou
@@ -19,7 +19,7 @@ git push origin feature/my-new-feature`;
 
 export default function ContributingPage() {
   return (
-    <ArticlePage
+    <BaseDocPage
       title="Contributing"
       description="We welcome contributions from the community! Whether it's fixing bugs, adding usefull features, or improving documentation, your help makes Kayou better for everyone."
     >
@@ -285,6 +285,6 @@ export default function ContributingPage() {
           </table>
         </div>
       </section>
-    </ArticlePage>
+    </BaseDocPage>
   );
 }

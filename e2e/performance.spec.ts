@@ -24,7 +24,7 @@ async function measureChartHover(
 ): Promise<number[]> {
   return page.evaluate(
     async ({ selector, steps }) => {
-      const svg = document.querySelector(selector) as SVGSVGElement | null;
+      const svg = document.querySelector(selector);
       if (!svg) return [];
       const rect = svg.getBoundingClientRect();
       const frames: number[] = [];
@@ -55,7 +55,7 @@ async function measureScroll(
 ): Promise<{ frames: number[]; maxDomCount: number }> {
   return page.evaluate(
     async ({ containerSel, childSel, steps }) => {
-      const el = document.querySelector(containerSel) as HTMLElement | null;
+      const el = document.querySelector(containerSel);
       if (!el) return { frames: [], maxDomCount: 0 };
 
       const maxScroll = el.scrollHeight - el.clientHeight;

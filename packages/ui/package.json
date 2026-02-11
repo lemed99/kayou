@@ -17,7 +17,10 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
-    "lint": "eslint '**/*.{ts,tsx}' --fix"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint '**/*.{ts,tsx}' --fix",
+    "format": "prettier --check '**/*.{ts,tsx}'",
+    "format:fix": "prettier --write '**/*.{ts,tsx}'"
   },
   "peerDependencies": {
     "@formatjs/intl": "^3.1.0",

@@ -27,10 +27,6 @@ export interface NumberInputProps extends ExtendedTextInputProps {
   type?: 'integer' | 'float';
   /** Callback with typed numeric value. Returns number or null if empty. */
   onValueChange?: (value: number | null) => void;
-  /** Accessible label for increment button. Defaults to 'Increase value'. */
-  arrowUpLabel?: string;
-  /** Accessible label for decrement button. Defaults to 'Decrease value'. */
-  arrowDownLabel?: string;
   /** Wrap around when stepping past min/max. Requires both min and max to be set. Defaults to false. */
   wrap?: boolean;
 }
@@ -73,8 +69,6 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     'ref',
     'showArrows',
     'allowNegativeValues',
-    'arrowUpLabel',
-    'arrowDownLabel',
     'ariaLabels',
     'wrap',
     'value',
@@ -475,11 +469,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       onArrowDownMouseUp={handleArrowDownMouseUp}
       upBtnRef={(el) => (upBtnRef = el)}
       downBtnRef={(el) => (downBtnRef = el)}
-      ariaLabels={{
-        ...local.ariaLabels,
-        ...(local.arrowUpLabel ? { increase: local.arrowUpLabel } : {}),
-        ...(local.arrowDownLabel ? { decrease: local.arrowDownLabel } : {}),
-      }}
+      ariaLabels={local.ariaLabels}
     />
   );
 };

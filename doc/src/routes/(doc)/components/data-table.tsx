@@ -4,7 +4,7 @@ export default function DataTablePage() {
   return (
     <DocPage
       title="DataTable"
-      description="Table with virtualization, pagination, row selection, and a comprehensive filter system."
+      description="Table with virtualization, pagination, row selection, sorting, and a comprehensive filter system."
       dependencies={[
         {
           name: 'tailwind-merge',
@@ -47,6 +47,16 @@ export default function DataTablePage() {
           explanation:
             'onLoadMore fires at 80% scroll when virtualization is enabled, allowing progressive data loading.',
         },
+        {
+          term: 'Sorting',
+          explanation:
+            'Controlled multi-column sorting via sorts/onSortsChange. Click column headers to add them to the sort stack. Click again to cycle direction (asc → desc → remove). The consumer handles actual data sorting.',
+        },
+        {
+          term: 'Row Identity',
+          explanation:
+            'Use rowKey to identify rows by a stable key (e.g. "id") instead of index. Selections persist across data changes when rowKey is set.',
+        },
       ]}
       props={[
         {
@@ -76,48 +86,6 @@ export default function DataTablePage() {
           type: 'unknown',
           default: '-',
           description: 'Error state for the table',
-          required: true,
-        },
-        {
-          name: 'errorMessage',
-          type: 'string',
-          default: '-',
-          description: 'Message to display when error is truthy',
-          required: true,
-        },
-        {
-          name: 'noDataMessage',
-          type: 'string',
-          default: '-',
-          description: 'Message to display when data array is empty',
-          required: true,
-        },
-        {
-          name: 'seeMoreText',
-          type: 'string',
-          default: '-',
-          description: 'Text for the expandable "see more" button',
-          required: true,
-        },
-        {
-          name: 'filterButtonText',
-          type: 'string',
-          default: '"Filter"',
-          description: 'Text for the filter button that opens the popover',
-        },
-        {
-          name: 'elementsPerPageText',
-          type: 'string',
-          default: '-',
-          description: 'Text label for the per-page control',
-          required: true,
-        },
-        {
-          name: 'selectedElementsText',
-          type: '(count: number, total: number) => string',
-          default: '-',
-          description: 'Function to format the selected elements text',
-          required: true,
         },
         {
           name: 'validating',
@@ -132,10 +100,24 @@ export default function DataTablePage() {
           description: 'Whether row selection checkboxes are enabled',
         },
         {
+          name: 'rowKey',
+          type: 'string | ((row: T) => string)',
+          default: '-',
+          description:
+            'Key or accessor to uniquely identify rows. When set, selections persist across data changes. Falls back to index-based selection if not provided.',
+        },
+        {
           name: 'searchBar',
           type: 'boolean',
           default: 'false',
           description: 'Whether to show the search bar',
+        },
+        {
+          name: 'searchDebounceMs',
+          type: 'number',
+          default: '300',
+          description:
+            'Debounce delay in ms for the onSearchChange callback. Set to 0 to disable debouncing.',
         },
         {
           name: 'configureColumns',
@@ -163,6 +145,34 @@ export default function DataTablePage() {
           description: 'Array of column keys to show by default',
         },
         {
+          name: 'sorts',
+          type: 'SortEntry[]',
+          default: '[]',
+          description:
+            'Sort state (controlled). Each entry has a key and direction.',
+        },
+        {
+          name: 'onSortsChange',
+          type: '(sorts: SortEntry[]) => void',
+          default: '-',
+          description:
+            'Callback when sort changes. Each click adds/cycles/removes a column in the sort stack.',
+        },
+        {
+          name: 'sortableColumns',
+          type: 'string[]',
+          default: '-',
+          description:
+            'Which columns can be sorted. Defaults to all columns if onSortsChange is provided.',
+        },
+        {
+          name: 'configStorageKey',
+          type: 'string',
+          default: '-',
+          description:
+            'Stable key for localStorage config persistence. When provided, enables saved configurations (up to 3 per table).',
+        },
+        {
           name: 'pageTotal',
           type: 'number',
           default: '-',
@@ -178,7 +188,8 @@ export default function DataTablePage() {
           name: 'onSearchChange',
           type: '(search: string) => void',
           default: '-',
-          description: 'Callback fired when the search value changes',
+          description:
+            'Callback fired when the search value changes (debounced by searchDebounceMs)',
         },
         {
           name: 'onPerPageChange',
@@ -188,9 +199,10 @@ export default function DataTablePage() {
         },
         {
           name: 'onSelectionChange',
-          type: '(selectedIndices: Set<number>) => void',
+          type: '(selectedKeys: Set<string>) => void',
           default: '-',
-          description: 'Callback fired when row selection changes',
+          description:
+            'Callback fired when row selection changes. Emits a Set of row keys (strings).',
         },
         {
           name: 'perPageControl',
@@ -247,30 +259,6 @@ export default function DataTablePage() {
             'Callback fired when filters change. The consumer is responsible for filtering or fetching data.',
         },
         {
-          name: 'addFilterText',
-          type: 'string',
-          default: '"Add filter"',
-          description: 'Text for the add filter link in the filter popover',
-        },
-        {
-          name: 'resetText',
-          type: 'string',
-          default: '"Reset"',
-          description: 'Text for the reset button in the filter popover',
-        },
-        {
-          name: 'applyText',
-          type: 'string',
-          default: '"Filter"',
-          description: 'Text for the apply/submit button in the filter popover',
-        },
-        {
-          name: 'noFiltersText',
-          type: 'string',
-          default: '"No filters are being applied."',
-          description: 'Text shown when no filters have been added yet',
-        },
-        {
           name: 'filters',
           type: 'JSX.Element',
           default: '-',
@@ -320,7 +308,7 @@ export default function DataTablePage() {
               type: 'string',
               default: '-',
               description:
-                'Session storage key for persisting table state (scroll position, search, expanded, page, per-page, selected columns). Each table gets an auto-generated ID within this key.',
+                'Session storage key for persisting table state. Each table instance is automatically assigned a unique internal ID.',
             },
           ],
         },
@@ -346,6 +334,162 @@ export default function DataTablePage() {
               type: 'string',
               default: '"Columns"',
               description: 'Label for the columns configuration button.',
+            },
+            {
+              name: 'sortAscending',
+              type: 'string',
+              default: '"Sort ascending"',
+              description: 'Aria label for the sort ascending action.',
+            },
+            {
+              name: 'sortDescending',
+              type: 'string',
+              default: '"Sort descending"',
+              description: 'Tooltip and aria label for the sort descending action.',
+            },
+            {
+              name: 'clearSort',
+              type: 'string',
+              default: '"Clear sort"',
+              description: 'Tooltip and aria label shown when clicking will clear the sort.',
+            },
+            {
+              name: 'sortPriority',
+              type: 'string',
+              default: '"Sort priority"',
+              description: 'Aria label prefix for sort priority badges (e.g. "Sort priority 1").',
+            },
+            {
+              name: 'addFilter',
+              type: 'string',
+              default: '"Add filter"',
+              description: 'Text for the add filter link in the filter popover.',
+            },
+            {
+              name: 'resetFilter',
+              type: 'string',
+              default: '"Reset"',
+              description: 'Text for the reset button in the filter popover.',
+            },
+            {
+              name: 'applyFilter',
+              type: 'string',
+              default: '"Apply"',
+              description: 'Text for the apply/submit button in the filter popover.',
+            },
+            {
+              name: 'noFilters',
+              type: 'string',
+              default: '"No filters are being applied."',
+              description: 'Text shown when no filters have been added.',
+            },
+            {
+              name: 'error',
+              type: 'string',
+              default: '"An error occurred"',
+              description: 'Message displayed when the table is in an error state.',
+            },
+            {
+              name: 'noData',
+              type: 'string',
+              default: '"No data available"',
+              description: 'Message displayed when the data array is empty.',
+            },
+            {
+              name: 'seeMore',
+              type: 'string',
+              default: '"See more"',
+              description: 'Text for the expand button.',
+            },
+            {
+              name: 'collapse',
+              type: 'string',
+              default: '"See less"',
+              description: 'Text for the collapse button when expanded.',
+            },
+            {
+              name: 'elementsPerPage',
+              type: 'string',
+              default: '"per page"',
+              description: 'Text label for the per-page control.',
+            },
+            {
+              name: 'selectedElements',
+              type: '(count: number, total: number) => string',
+              default: '(c, t) => `${c} of ${t} selected`',
+              description: 'Function to format the selected elements count text.',
+            },
+            {
+              name: 'saveConfiguration',
+              type: 'string',
+              default: '"Save configuration"',
+              description: 'Text for the save configuration button.',
+            },
+            {
+              name: 'configurations',
+              type: 'string',
+              default: '"Configurations"',
+              description: 'Text for the configurations popover trigger button.',
+            },
+            {
+              name: 'defaultConfiguration',
+              type: 'string',
+              default: '"Default"',
+              description: 'Text for the default configuration option.',
+            },
+            {
+              name: 'saveConfigTitle',
+              type: 'string',
+              default: '"Save configuration"',
+              description: 'Title for the save configuration drawer.',
+            },
+            {
+              name: 'editConfigTitle',
+              type: 'string',
+              default: '"Edit configuration"',
+              description: 'Title for the edit configuration drawer.',
+            },
+            {
+              name: 'configNameLabel',
+              type: 'string',
+              default: '"Configuration name"',
+              description: 'Label for the configuration name text input.',
+            },
+            {
+              name: 'configNamePlaceholder',
+              type: 'string',
+              default: '"Enter a name..."',
+              description: 'Placeholder for the configuration name text input.',
+            },
+            {
+              name: 'save',
+              type: 'string',
+              default: '"Save"',
+              description: 'Text for the save/submit button in the drawer.',
+            },
+            {
+              name: 'deleteConfiguration',
+              type: 'string',
+              default: '"Delete"',
+              description: 'Text for the delete configuration button.',
+            },
+            {
+              name: 'confirmDelete',
+              type: 'string',
+              default: '"Confirm deletion?"',
+              description: 'Text for the delete confirmation prompt.',
+            },
+            {
+              name: 'cancel',
+              type: 'string',
+              default: '"Cancel"',
+              description: 'Text for the cancel button in the delete confirmation.',
+            },
+            {
+              name: 'maxConfigsReached',
+              type: 'string',
+              default: '"Maximum of 3 configurations reached"',
+              description: 'Text shown when the maximum number of saved configurations is reached.',
             },
           ],
         },
@@ -387,6 +531,7 @@ import { createSignal } from 'solid-js';
 
 export default function Example() {
   const [page, setPage] = createSignal(1);
+  const [sorts, setSorts] = createSignal([]);
 
   const users = [
     { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', age: 32, department: 'Engineering', notes: 'Manages social media campaigns and brand partnerships.' },
@@ -494,35 +639,38 @@ export default function Example() {
       <DataTable
         data={users}
         columns={columns}
+        rowKey="id"
         searchBar
         rowSelection
         configureColumns
-        defaultColumns={['name', 'email', 'status', 'role', 'department', 'notes']}
+        configStorageKey="users-table"
+        defaultColumns={['name', 'email', 'status', 'role', 'age', 'department', 'notes']}
         expandable
         defaultRowsCount={4}
         estimatedRowHeight={56}
+        sorts={sorts()}
+        onSortsChange={setSorts}
+        sortableColumns={['name', 'age', 'status']}
         filterConfigs={filterConfigs}
         onFiltersChange={(filters) => {
           console.log('Active filters:', [...filters.entries()].map(([k, f]) => \`\${k}: \${f.operator} \${f.value}\`));
         }}
-        filterButtonText="Filter"
-        addFilterText="Add filter"
-        resetText="Reset"
-        applyText="Apply"
         pageTotal={3}
         onPageChange={setPage}
         onSearchChange={(search) => console.log('search:', search)}
         onPerPageChange={(pp) => console.log('perPage:', pp)}
-        onSelectionChange={(sel) => console.log('selection:', sel.size)}
+        onSelectionChange={(sel) => console.log('selection:', [...sel])}
         perPageControl
         footer
         loading={false}
-        errorMessage="Failed to load data"
-        noDataMessage="No users found"
-        seeMoreText="See more"
-        collapseText="See less"
-        elementsPerPageText="per page"
-        selectedElementsText={(count, total) => \`\${count} of \${total} selected\`}
+        labels={{
+          error: 'Failed to load data',
+          noData: 'No users found',
+          seeMore: 'See more',
+          collapse: 'See less',
+          elementsPerPage: 'per page',
+          selectedElements: (count, total) => \`\${count} of \${total} selected\`,
+        }}
       />
     </DataTableProvider>
   );
@@ -531,9 +679,14 @@ export default function Example() {
       usage={`
         import { DataTable, type FilterConfig } from '@kayou/ui';
 
-        // Basic usage
-        <DataTable data={users} columns={columns} loading={isLoading()} errorMessage="Error" noDataMessage="No data" seeMoreText="See more"
-              collapseText="See less" elementsPerPageText="per page" selectedElementsText={(c, t) => \`\${c}/\${t}\`} />
+        // Basic usage (all text is configurable via labels)
+        <DataTable data={users} columns={columns} loading={isLoading()} labels={{ error: 'Error', noData: 'No data' }} />
+
+        // With sorting (click columns to add to sort stack)
+        <DataTable data={users} columns={columns} sorts={sorts()} onSortsChange={setSorts} sortableColumns={['name', 'age']} ... />
+
+        // With row identity (selections persist across data changes)
+        <DataTable data={users} columns={columns} rowKey="id" rowSelection onSelectionChange={(keys) => console.log(keys)} ... />
 
         // With filters and pagination
         <DataTable data={users} columns={columns} rowSelection searchBar filterConfigs={filterConfigs} pageTotal={10} onPageChange={setPage} ... />

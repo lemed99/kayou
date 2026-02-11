@@ -42,12 +42,6 @@ export interface MultiSelectProps
   /** Custom display value to show in the input (overrides computed value) */
   displayValue?: string;
 
-  /** Message shown when search yields no results */
-  noSearchResultPlaceholder?: string;
-
-  /** Placeholder text for the search input */
-  searchPlaceholder?: string;
-
   /** Custom element to render at the bottom of the dropdown */
   cta?: JSX.Element;
 
@@ -74,8 +68,6 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     'optionRowHeight',
     'withSearch',
     'displayValue',
-    'noSearchResultPlaceholder',
-    'searchPlaceholder',
     'cta',
     'isLoadingMore',
     'onLoadMore',
@@ -107,6 +99,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     isOpen,
     listboxId,
     searchInputId,
+    selectLabels,
   } = useSelect(local, 'multiSelect');
 
   const getOptionId = (option: Option | null) =>
@@ -191,7 +184,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
               ref={setSearchRef}
               value={searchKey()}
               onInput={handleSearchChange}
-              placeholder={local.searchPlaceholder}
+              placeholder={selectLabels().searchPlaceholder}
               onFocus={(e) => e.target.select()}
               class="w-full max-w-xs bg-transparent py-3 pl-2 text-sm outline-none dark:text-white"
               onKeyDown={(e) => handleKeyDown(e, true)}

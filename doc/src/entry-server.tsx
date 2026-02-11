@@ -8,7 +8,27 @@ export default createHandler(() => (
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta name="theme-color" content="#000000" />
+          <meta
+            name="description"
+            content="35+ accessible, production-ready UI components and utility hooks for SolidJS. Styled with Tailwind CSS. Includes forms, data tables, charts, date pickers, and more."
+          />
           <title>Kayou UI - Component Library</title>
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          {/* OpenGraph */}
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content="Kayou UI - Component Library" />
+          <meta
+            property="og:description"
+            content="35+ accessible, production-ready UI components and utility hooks for SolidJS. Styled with Tailwind CSS."
+          />
+          <meta property="og:site_name" content="Kayou UI" />
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:title" content="Kayou UI - Component Library" />
+          <meta
+            name="twitter:description"
+            content="35+ accessible, production-ready UI components and utility hooks for SolidJS. Styled with Tailwind CSS."
+          />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
