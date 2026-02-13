@@ -13,8 +13,11 @@ export interface SearchDocument {
 // This automatically updates in dev when files are added/removed
 const routeModules = import.meta.glob('../routes/**/*.tsx', { eager: true });
 
-// Import raw source of each doc page for full-text indexing
-const rawModules = import.meta.glob<string>('../routes/(doc)/**/*.tsx', {
+// Import raw source of each doc page for full-text indexing.
+// Use the same broad glob as routeModules — parentheses in (doc) are
+// interpreted as extglob syntax by fast-glob, so a literal "(doc)" pattern
+// silently matches nothing. Filtering happens in generateSearchIndex().
+const rawModules = import.meta.glob<string>('../routes/**/*.tsx', {
   eager: true,
   query: '?raw',
   import: 'default',
@@ -65,14 +68,14 @@ function generateSearchIndex(): SearchDocument[] {
     // Only process files inside (doc) folder
     if (!path.includes('(doc)/')) continue;
 
-    // Extract route path: ../routes/(doc)/ui/button.tsx -> /ui/button
+    // Extract route path: ../routes/(doc)/components/button.tsx -> /components/button
     const routePath = path
       .replace(/^.*\(doc\)/, '')
       .replace('.tsx', '');
 
     // Determine category from path
     let category = 'Getting Started';
-    if (routePath.startsWith('/ui/')) {
+    if (routePath.startsWith('/components/')) {
       category = 'Components';
     } else if (routePath.startsWith('/hooks/')) {
       category = 'Hooks';

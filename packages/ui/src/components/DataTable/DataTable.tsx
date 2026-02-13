@@ -114,6 +114,7 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
 };
 
 export interface DataTableAriaLabels {
+  table: string;
   search: string;
   clearSearch: string;
   loadingData: string;
@@ -123,6 +124,7 @@ export interface DataTableAriaLabels {
 }
 
 export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
+  table: 'Data table',
   search: 'Search',
   clearSearch: 'Clear search',
   loadingData: 'Loading data',
@@ -448,7 +450,7 @@ export function DataTable<T extends Record<string, unknown>>(
   const baseData = () => props.data;
   const defaultRowsCount = createMemo(() => props.defaultRowsCount ?? 5);
 
-  const filteredData = createMemo(() => {
+  const visibleData = createMemo(() => {
     const filtered = baseData();
     if (expanded()) return filtered;
     if (props.expandable && baseData().length > defaultRowsCount())
@@ -459,7 +461,8 @@ export function DataTable<T extends Record<string, unknown>>(
   // --- Selection ---
   createEffect(() => {
     const data = baseData();
-    if (!props.rowKey) {
+    const rk = props.rowKey; // track rowKey changes
+    if (!rk) {
       // Index-based mode: clear on data change
       setSelectedRows(new Set<string>());
       return;
@@ -538,7 +541,7 @@ export function DataTable<T extends Record<string, unknown>>(
   createEffect(() => {
     // Track reactive deps that affect content widths
     const cols = columns();
-    filteredData(); // track data changes
+    visibleData(); // track data changes
     const scope = tableRef();
     const header = headerRef();
     const hasLocking = props.columnLocking ?? false;
@@ -546,8 +549,9 @@ export function DataTable<T extends Record<string, unknown>>(
     if (!scope || cols.length === 0) return;
 
     // Double rAF ensures layout has settled before DOM measurement
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    let innerRafId: number | undefined;
+    const outerRafId = requestAnimationFrame(() => {
+      innerRafId = requestAnimationFrame(() => {
         const widths = new Map<string, number>();
         for (const col of cols) {
           const bodyCells = Array.from(
@@ -570,6 +574,10 @@ export function DataTable<T extends Record<string, unknown>>(
         }
         setMeasuredMinWidths(widths);
       });
+    });
+    onCleanup(() => {
+      cancelAnimationFrame(outerRafId);
+      if (innerRafId !== undefined) cancelAnimationFrame(innerRafId);
     });
   });
 
@@ -694,9 +702,10 @@ export function DataTable<T extends Record<string, unknown>>(
     onCleanup(() => el.removeEventListener('scroll', computeStickyOffset));
   });
 
-  // Recompute when sticky column changes (user clicks lock/unlock)
+  // Recompute when sticky column or columns change
   createEffect(() => {
     stickyColumnKey(); // track
+    columns(); // track — column reorder/change invalidates cached DOM ref
     _stickyCell = null; // invalidate cached cell reference
     computeStickyOffset();
   });
@@ -798,6 +807,7 @@ export function DataTable<T extends Record<string, unknown>>(
 
   const handlePerPageChange = (value: number) => {
     setPerPage(value);
+    handlePageChange(1);
     props.onPerPageChange?.(value);
   };
 
@@ -807,6 +817,7 @@ export function DataTable<T extends Record<string, unknown>>(
       <div
         ref={setTableRef}
         role="table"
+        aria-label={a().table}
         class="flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
       >
         <DataTableInternalContext.Provider
@@ -816,7 +827,7 @@ export function DataTable<T extends Record<string, unknown>>(
               return props.columns;
             },
             setColumns,
-            filteredData,
+            visibleData,
             baseData,
             rowGridStyle,
             rowWidth,

@@ -36,7 +36,7 @@ function LockedRowOverlay<T extends Record<string, unknown>>(): JSX.Element {
   const lockedRowInfo = createMemo(() => {
     const key = ctx.lockedRowKey();
     if (!key) return null;
-    const data = ctx.filteredData();
+    const data = ctx.visibleData();
     for (let i = 0; i < data.length; i++) {
       if (ctx.getRowKey(data[i], i) === key) {
         return { row: data[i], index: i };
@@ -100,7 +100,7 @@ function LockedRowOverlay<T extends Record<string, unknown>>(): JSX.Element {
     <Show when={lockedRowInfo() && pinPosition() !== null}>
       <div
         data-locked-overlay
-        class="pointer-events-auto absolute left-0 z-20 shadow-md"
+        class="pointer-events-none absolute left-0 z-20 shadow-md"
         style={{
           top: pinPosition() === 'top' ? '0' : undefined,
           bottom: pinPosition() === 'bottom' ? '0' : undefined,
@@ -142,7 +142,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
   const VirtualizedList = () => (
     <Dynamic
       component={ctx.rowHeight && !ctx.expandRow ? VirtualList : DynamicVirtualList}
-      items={() => ctx.filteredData() as unknown as readonly unknown[]}
+      items={() => ctx.visibleData() as unknown as readonly unknown[]}
       rootHeight={ctx.expandedHeight()}
       rowHeight={ctx.rowHeight ? ctx.rowHeight + BORDER_WIDTH : undefined!}
       estimatedRowHeight={
@@ -177,29 +177,33 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
                 role="status"
                 aria-live="polite"
                 aria-label={ctx.ariaLabels().loadingData}
-                class={twMerge('grid bg-white dark:bg-neutral-900')}
-                style={{
-                  'grid-template-columns': ctx.rowGridStyle(),
-                }}
               >
-                <Show when={ctx.rowSelection}>
-                  <div class="flex items-center pl-6">
-                    <Skeleton width={16} height={16} />
-                  </div>
-                </Show>
-                <For each={ctx.columns()}>
-                  {() => (
-                    <div class="px-6 py-5">
-                      <Skeleton width={100} height={10} />
+                <div
+                  role="row"
+                  class={twMerge('grid bg-white dark:bg-neutral-900')}
+                  style={{
+                    'grid-template-columns': ctx.rowGridStyle(),
+                  }}
+                >
+                  <Show when={ctx.rowSelection}>
+                    <div role="cell" class="flex items-center pl-6">
+                      <Skeleton width={16} height={16} />
                     </div>
-                  )}
-                </For>
+                  </Show>
+                  <For each={ctx.columns()}>
+                    {() => (
+                      <div role="cell" class="px-6 py-5">
+                        <Skeleton width={100} height={10} />
+                      </div>
+                    )}
+                  </For>
+                </div>
               </div>
             </Show>
             <Show when={ctx.error}>
               <div
                 role="alert"
-                class="whitespace-nowrap px-6 py-4 text-center font-medium text-red-600 dark:text-red-400"
+                class="px-6 py-4 text-center font-medium text-red-600 dark:text-red-400"
               >
                 {ctx.labels().error}
               </div>
@@ -221,7 +225,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
           <VirtualizedList />
         </Show>
         <Show when={!ctx.useVirtualization()}>
-          <For each={ctx.filteredData()} fallback={<NoItemsComponent />}>
+          <For each={ctx.visibleData()} fallback={<NoItemsComponent />}>
             {(row, index) => <DataTableRow row={row} index={index} />}
           </For>
         </Show>

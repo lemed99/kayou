@@ -20,6 +20,15 @@ interface DataTableRowProps<T> {
   index: Accessor<number>;
 }
 
+function formatCellValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint')
+    return value.toString();
+  return String(value as string);
+}
+
 export function DataTableRow<T extends Record<string, unknown>>(
   props: DataTableRowProps<T>,
 ): JSX.Element {
@@ -85,7 +94,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
     // Only handle row-level keys when the row itself has focus
     if (e.target !== e.currentTarget) return;
 
-    const total = ctx.filteredData().length;
+    const total = ctx.visibleData().length;
     switch (e.key) {
       case 'ArrowDown': {
         e.preventDefault();
@@ -174,7 +183,12 @@ export function DataTableRow<T extends Record<string, unknown>>(
         role="row"
         class={rowClasses()}
         style={{ 'grid-template-columns': ctx.rowGridStyle() }}
-        tabindex={0}
+        tabindex={
+          ctx.focusedRowIndex() === props.index() ||
+          (ctx.focusedRowIndex() === -1 && props.index() === 0)
+            ? 0
+            : -1
+        }
         data-row-index={props.index()}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -260,7 +274,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
               <Show
                 when={column.render}
                 fallback={
-                  <span data-column={column.key}>{String(props.row[column.key])}</span>
+                  <span data-column={column.key}>{formatCellValue(props.row[column.key])}</span>
                 }
               >
                 <ErrorBoundary
@@ -270,7 +284,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
                       title={String(err)}
                       class="text-red-500"
                     >
-                      {String(props.row[column.key])}
+                      {formatCellValue(props.row[column.key])}
                     </span>
                   )}
                 >

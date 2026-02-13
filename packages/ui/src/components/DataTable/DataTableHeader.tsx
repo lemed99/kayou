@@ -1,4 +1,4 @@
-import { For, JSX, Show } from 'solid-js';
+import { For, JSX, Show, onCleanup } from 'solid-js';
 
 import {
   ChevronDownIcon,
@@ -47,6 +47,8 @@ export function DataTableHeader(): JSX.Element {
 
   // --- Column resizing ---
 
+  let cleanupResize: (() => void) | undefined;
+
   const startResize = (key: string, e: MouseEvent) => {
     // Skip if this is part of a double-click (used for reset)
     if (e.detail >= 2) return;
@@ -62,14 +64,20 @@ export function DataTableHeader(): JSX.Element {
       ctx.onColumnResize(key, newWidth);
     };
 
-    const onMouseUp = () => {
+    const cleanup = () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      cleanupResize = undefined;
     };
+
+    const onMouseUp = () => cleanup();
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    cleanupResize = cleanup;
   };
+
+  onCleanup(() => cleanupResize?.());
 
   return (
     <div role="rowgroup">

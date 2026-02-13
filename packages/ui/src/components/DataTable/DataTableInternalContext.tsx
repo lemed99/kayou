@@ -16,7 +16,7 @@ export interface DataTableInternalContextValue<T> {
   columns: Accessor<DataTableColumnProps<T>[]>;
   allColumns: DataTableColumnProps<T>[];
   setColumns: (cols: DataTableColumnProps<T>[]) => void;
-  filteredData: Accessor<T[]>;
+  visibleData: Accessor<T[]>;
   baseData: Accessor<T[]>;
 
   // Layout

@@ -260,7 +260,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
   });
 
   return (
-    <div class="grid w-full grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_var(--container-2xs)]">
+    <div class="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_200px]">
       {/* Main content */}
       <div ref={contentRef} class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0">
         <div class="mb-8">
