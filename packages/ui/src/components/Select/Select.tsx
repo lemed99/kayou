@@ -20,6 +20,24 @@ export interface SelectOption {
 }
 
 /**
+ * Props passed to a custom trigger element for the Select component.
+ */
+export interface SelectTriggerProps {
+  /** The currently selected option, or null if none selected. */
+  selectedOption: () => SelectOption | null;
+  /** Whether the dropdown is currently open. */
+  isOpen: () => boolean;
+  /** Keyboard event handler for arrow keys, Enter, Escape, etc. Attach to your trigger element. */
+  onKeyDown: (e: KeyboardEvent & { currentTarget: HTMLElement; target: Element }) => void;
+  /** ID of the listbox element, for `aria-controls`. */
+  listboxId: string;
+  /** ID of the currently highlighted option, for `aria-activedescendant`. */
+  highlightedOptionId: () => string | undefined;
+  /** Whether the select is disabled. */
+  disabled?: boolean;
+}
+
+/**
  * Props for the Select component.
  */
 export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
@@ -33,6 +51,8 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   optionRowHeight?: number;
   /** How to handle background scroll when dropdown is open. @default 'close' */
   backgroundScrollBehavior?: BackgroundScrollBehavior;
+  /** Custom trigger element. When provided, replaces the default TextInput. */
+  inputComponent?: (triggerProps: SelectTriggerProps) => JSX.Element;
 }
 
 /**
@@ -49,6 +69,7 @@ export default function Select(props: SelectProps): JSX.Element {
     'label',
     'required',
     'backgroundScrollBehavior',
+    'inputComponent',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
@@ -80,37 +101,48 @@ export default function Select(props: SelectProps): JSX.Element {
   return (
     <Layout
       inputComponent={
-        <div>
-          <TextInput
-            {...otherProps}
-            ref={setInputRef}
-            required={local.required}
-            value={selectedOption()?.label || ''}
-            placeholder={props.placeholder}
-            class="w-full"
-            onKeyDown={handleKeyDown}
-            role="combobox"
-            aria-expanded={isOpen()}
-            aria-controls={listboxId}
-            aria-activedescendant={getOptionId(highlightedOption())}
-            aria-haspopup="listbox"
-            inputMode="none"
-            autocomplete="off"
-            style={{
-              'caret-color': 'transparent',
-              'padding-right': '36px',
-              cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
-              ...(typeof local.style === 'object' && local.style !== null
-                ? local.style
-                : {}),
-            }}
-          />
+        local.inputComponent ? (
+          local.inputComponent({
+            selectedOption,
+            isOpen,
+            onKeyDown: handleKeyDown,
+            listboxId,
+            highlightedOptionId: () => getOptionId(highlightedOption()),
+            disabled: props.disabled,
+          })
+        ) : (
+          <div>
+            <TextInput
+              {...otherProps}
+              ref={setInputRef}
+              required={local.required}
+              value={selectedOption()?.label || ''}
+              placeholder={props.placeholder}
+              class="w-full"
+              onKeyDown={handleKeyDown}
+              role="combobox"
+              aria-expanded={isOpen()}
+              aria-controls={listboxId}
+              aria-activedescendant={getOptionId(highlightedOption())}
+              aria-haspopup="listbox"
+              inputMode="none"
+              autocomplete="off"
+              style={{
+                'caret-color': 'transparent',
+                'padding-right': '36px',
+                cursor: props.disabled || props.isLoading ? 'not-allowed' : 'pointer',
+                ...(typeof local.style === 'object' && local.style !== null
+                  ? local.style
+                  : {}),
+              }}
+            />
 
-          <ChevronDownButton
-            onFocus={() => inputRef()?.focus()}
-            disabled={props.disabled || props.isLoading}
-          />
-        </div>
+            <ChevronDownButton
+              onFocus={() => inputRef()?.focus()}
+              disabled={props.disabled || props.isLoading}
+            />
+          </div>
+        )
       }
       optionsComponent={(option) => (
         <div

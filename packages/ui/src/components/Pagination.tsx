@@ -1,4 +1,11 @@
-import { Component, JSX, createEffect, createMemo, createSignal, splitProps } from 'solid-js';
+import {
+  Component,
+  JSX,
+  createEffect,
+  createMemo,
+  createSignal,
+  splitProps,
+} from 'solid-js';
 
 import {
   ChevronLeftDoubleIcon,
@@ -42,7 +49,8 @@ export const DEFAULT_PAGINATION_ARIA_LABELS: PaginationAriaLabels = {
 /**
  * Props for the Pagination component.
  */
-export interface PaginationProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface PaginationProps
+  extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /**
    * Total number of pages.
    */
@@ -72,7 +80,7 @@ const NavigationButton = (props: {
   tooltip: string;
   ariaLabel: string;
 }) => (
-  <Tooltip hidden={props.disabled} content={props.tooltip} theme="auto">
+  <Tooltip hidden={props.disabled} content={props.tooltip}>
     <Button
       color="gray"
       onClick={props.onClick}
@@ -115,10 +123,7 @@ const Pagination: Component<PaginationProps> = (props): JSX.Element => {
   };
 
   return (
-    <div
-      {...divProps}
-      class={`flex items-center gap-6 ${local.class ?? ''}`}
-    >
+    <div {...divProps} class={`flex items-center gap-6 ${local.class ?? ''}`}>
       <div class="flex items-center gap-1 italic dark:text-white" aria-current="page">
         <p>{l().page}</p>
         <NumberInput

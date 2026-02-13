@@ -1,4 +1,4 @@
-export { default, default as Select } from './Select';
+export { default, default as Select, type SelectTriggerProps } from './Select';
 export { default as MultiSelect } from './MultiSelect';
 export { default as SelectWithSearch } from './SelectWithSearch';
 export {

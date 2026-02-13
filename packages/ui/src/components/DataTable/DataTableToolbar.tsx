@@ -1,6 +1,6 @@
 import { Accessor, JSX, Show, createMemo } from 'solid-js';
 
-import { Columns03Icon, FilterFunnel01Icon } from '@kayou/icons';
+import { Columns03Icon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import { MultiSelect } from '../Select';
@@ -30,7 +30,6 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
   const hasToolbar = createMemo(
     () =>
       props.hasFilters() ||
-      !!(ctx.filters && !props.hasFilters()) ||
       !!ctx.configureColumns ||
       (ctx.configEnabled && (ctx.hasConfigs() || ctx.isDirty())),
   );
@@ -63,15 +62,6 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
             />
           </Show>
 
-          <Show when={ctx.filters && !props.hasFilters()}>
-            <div class="flex items-center py-1">
-              <FilterFunnel01Icon class="mr-2 size-5" />
-              <p>{ctx.labels().filter}</p>
-              <span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white dark:bg-neutral-200 dark:text-neutral-900">
-                {ctx.activeFilterCount ?? 0}
-              </span>
-            </div>
-          </Show>
         </div>
 
         {/* Right: Configs + Columns */}

@@ -63,7 +63,7 @@ export default function HomePage() {
 
         <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600 dark:text-neutral-300">
           35+ fully accessible UI components styled with Tailwind CSS, and high level hooks
-          built for production. SSR ready but SPA was the main target here!
+          built for production. SSR ready but CSR was the main target here!
         </p>
 
         <div class="mt-10 flex items-center justify-center">

@@ -22,6 +22,11 @@ export default function SelectPage() {
           term: 'Keyboard Navigation',
           explanation: 'Arrow keys, Enter, Escape, and Home/End supported.',
         },
+        {
+          term: 'Custom Trigger',
+          explanation:
+            'Pass inputComponent to replace the default TextInput with any element (e.g. a button).',
+        },
       ]}
       props={[
         {
@@ -99,6 +104,13 @@ export default function SelectPage() {
           description: 'Whether the select is in a loading state',
         },
         {
+          name: 'inputComponent',
+          type: '(triggerProps: SelectTriggerProps) => JSX.Element',
+          default: '-',
+          description:
+            'Custom trigger element. When provided, replaces the default TextInput. Receives select state (selectedOption, isOpen, onKeyDown, listboxId, highlightedOptionId, disabled) for rendering and accessibility.',
+        },
+        {
           name: 'backgroundScrollBehavior',
           type: '"prevent" | "close" | "follow"',
           default: '"close"',
@@ -119,6 +131,19 @@ export default function SelectPage() {
         },
       ]}
       subComponents={[
+        {
+          name: 'SelectTriggerProps',
+          kind: 'type',
+          description: 'Props passed to a custom trigger element via the inputComponent render function',
+          props: [
+            { name: 'selectedOption', type: '() => SelectOption | null', default: '-', description: 'Accessor for the currently selected option' },
+            { name: 'isOpen', type: '() => boolean', default: '-', description: 'Accessor for whether the dropdown is open' },
+            { name: 'onKeyDown', type: '(e: KeyboardEvent) => void', default: '-', description: 'Keyboard handler for arrow keys, Enter, Escape, etc.' },
+            { name: 'listboxId', type: 'string', default: '-', description: 'ID of the listbox element, for aria-controls' },
+            { name: 'highlightedOptionId', type: '() => string | undefined', default: '-', description: 'ID of the highlighted option, for aria-activedescendant' },
+            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether the select is disabled' },
+          ],
+        },
         {
           name: 'SelectLabels',
           kind: 'type',
@@ -170,6 +195,27 @@ export default function SelectPage() {
                 value={selected()}
                 onSelect={(opt) => setSelected(opt?.value)}
               />
+
+              {/* Custom trigger (button) */}
+              <Select
+                options={fruitOptions}
+                onSelect={(opt) => {}}
+                inputComponent={(triggerProps) => (
+                  <button
+                    type="button"
+                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-200 dark:hover:bg-neutral-700"
+                    onKeyDown={triggerProps.onKeyDown}
+                    role="combobox"
+                    aria-expanded={triggerProps.isOpen()}
+                    aria-controls={triggerProps.listboxId}
+                    aria-activedescendant={triggerProps.highlightedOptionId()}
+                    aria-haspopup="listbox"
+                    disabled={triggerProps.disabled}
+                  >
+                    {triggerProps.selectedOption()?.label ?? 'Pick a fruit...'}
+                  </button>
+                )}
+              />
             </div>
           );
         }
@@ -181,6 +227,23 @@ export default function SelectPage() {
         <Select options={options} label="Category" required onSelect={handleSelect} />
         <Select options={options} color="failure" helperText="Required" onSelect={handleSelect} />
         <Select options={largeList} optionRowHeight={32} onSelect={handleSelect} />
+
+        {/* Custom trigger element */}
+        <Select
+          options={options}
+          onSelect={handleSelect}
+          inputComponent={(triggerProps) => (
+            <button
+              onKeyDown={triggerProps.onKeyDown}
+              role="combobox"
+              aria-expanded={triggerProps.isOpen()}
+              aria-controls={triggerProps.listboxId}
+              aria-haspopup="listbox"
+            >
+              {triggerProps.selectedOption()?.label ?? 'Choose...'}
+            </button>
+          )}
+        />
       `}
       relatedHooks={[
         {

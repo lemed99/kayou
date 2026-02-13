@@ -1,7 +1,15 @@
 import { Accessor, JSX, createContext, useContext } from 'solid-js';
 
 import { DataTableAriaLabels, DataTableColumnProps, DataTableLabels } from './DataTable';
-import { SavedTableConfig, SortEntry } from './types';
+import { SavedTableConfig, SortAction, SortEntry } from './types';
+
+export interface ContextMenuState<T> {
+  x: number;
+  y: number;
+  rowKey: string;
+  row: T;
+  index: number;
+}
 
 export interface DataTableInternalContextValue<T> {
   // Data
@@ -37,13 +45,13 @@ export interface DataTableInternalContextValue<T> {
   handlePerPageChange: (value: number) => void;
   perPageOptions: number[];
 
-  // Expansion
+  // Expansion (table-level see-more)
   expanded: Accessor<boolean>;
   toggleExpanded: () => void;
 
   // Sorting
   sorts: Accessor<SortEntry[]>;
-  onSortClick: (key: string) => void;
+  onSortSelect: (key: string, direction: SortAction) => void;
   sortableColumns: Accessor<Set<string>>;
 
   // Virtual
@@ -68,6 +76,47 @@ export interface DataTableInternalContextValue<T> {
   onActivateConfig: (id: string | null) => void;
   getConfig: (id: string) => SavedTableConfig | undefined;
 
+  // Row click
+  onRowClick?: (row: T, index: number) => void;
+
+  // Custom empty state
+  emptyState?: JSX.Element;
+
+  // Row class/style
+  rowClass?: string | ((row: T, index: number) => string);
+
+  // Column locking (sticky)
+  columnLocking: boolean;
+  stickyColumnKey: Accessor<string | null>;
+  toggleStickyColumn: (key: string) => void;
+
+  // Row locking (pin to viewport on vertical scroll)
+  rowLocking: boolean;
+  lockedRowKey: Accessor<string | null>;
+  toggleLockedRow: (key: string) => void;
+  virtualContainerRef: Accessor<HTMLElement | undefined>;
+
+  // Column resizing
+  columnResizing: boolean;
+  resizedWidths: Accessor<Map<string, number>>;
+  onColumnResize: (key: string, width: number) => void;
+  resetColumnResize: (key: string) => void;
+
+  // Row expansion (per-row detail panels)
+  expandRow?: (row: T) => JSX.Element;
+  expandedRows: Accessor<Set<string>>;
+  toggleRowExpansion: (key: string) => void;
+
+  // Keyboard navigation
+  focusedRowIndex: Accessor<number>;
+  setFocusedRowIndex: (index: number) => void;
+
+  // Right-click context menu
+  rowContextMenu?: (row: T, index: number, closeMenu: () => void) => JSX.Element;
+  contextMenuState: Accessor<ContextMenuState<T> | null>;
+  openContextMenu: (e: MouseEvent, row: T, index: number) => void;
+  closeContextMenu: () => void;
+
   // Props pass-through
   loading: boolean;
   validating?: boolean;
@@ -77,13 +126,9 @@ export interface DataTableInternalContextValue<T> {
   isLoadingMore?: boolean;
   pageTotal?: number;
   perPageControl?: boolean;
-  expandable?: boolean;
-  defaultRowsCount: number;
   footer?: boolean;
   searchBar?: boolean;
   configureColumns?: boolean;
-  filters?: JSX.Element;
-  activeFilterCount?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

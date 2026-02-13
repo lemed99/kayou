@@ -43,6 +43,7 @@ export type {
   FilterValue,
   NumberFilterConfig,
   SavedTableConfig,
+  SortAction,
   SortDirection,
   SortEntry,
 } from './types';

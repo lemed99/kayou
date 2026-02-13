@@ -107,6 +107,69 @@ export default function DataTablePage() {
             'Key or accessor to uniquely identify rows. When set, selections persist across data changes. Falls back to index-based selection if not provided.',
         },
         {
+          name: 'bulkActions',
+          type: '(selectedKeys: Set<string>, clearSelection: () => void) => JSX.Element',
+          default: '-',
+          description:
+            'Render prop for bulk action buttons shown in the selection bar when rows are selected. Receives the selected keys and a function to clear the selection.',
+        },
+        {
+          name: 'onRowClick',
+          type: '(row: T, index: number) => void',
+          default: '-',
+          description:
+            'Callback fired when a data row is clicked. Does not fire when clicking checkboxes or expand buttons.',
+        },
+        {
+          name: 'emptyState',
+          type: 'JSX.Element',
+          default: '-',
+          description:
+            'Custom JSX to show when data is empty. Falls back to the noData label text.',
+        },
+        {
+          name: 'rowClass',
+          type: 'string | ((row: T, index: number) => string)',
+          default: '-',
+          description:
+            'Additional CSS class(es) for data rows. Can be a static string or a function that returns a class per row.',
+        },
+        {
+          name: 'columnLocking',
+          type: 'boolean',
+          default: 'false',
+          description:
+            'Allow users to lock a column so it stays visible during horizontal scroll. A lock icon appears on hover in column headers. Only one column at a time.',
+        },
+        {
+          name: 'columnResizing',
+          type: 'boolean',
+          default: 'false',
+          description:
+            'Enable column resizing by dragging the border between column headers.',
+        },
+        {
+          name: 'rowLocking',
+          type: 'boolean',
+          default: 'false',
+          description:
+            'Allow users to lock a single row so it pins to the viewport edge when scrolled past. A lock icon appears on hover. Only works with virtualization.',
+        },
+        {
+          name: 'expandRow',
+          type: '(row: T) => JSX.Element',
+          default: '-',
+          description:
+            'Render prop for per-row detail panels. Shows an expand/collapse button on each row. The panel animates open below the row.',
+        },
+        {
+          name: 'rowContextMenu',
+          type: '(row: T, index: number, closeMenu: () => void) => JSX.Element',
+          default: '-',
+          description:
+            'Render prop for a right-click context menu on rows. Renders a popover at the click position.',
+        },
+        {
           name: 'searchBar',
           type: 'boolean',
           default: 'false',
@@ -164,13 +227,6 @@ export default function DataTablePage() {
           default: '-',
           description:
             'Which columns can be sorted. Defaults to all columns if onSortsChange is provided.',
-        },
-        {
-          name: 'configStorageKey',
-          type: 'string',
-          default: '-',
-          description:
-            'Stable key for localStorage config persistence. When provided, enables saved configurations (up to 3 per table).',
         },
         {
           name: 'pageTotal',
@@ -259,18 +315,6 @@ export default function DataTablePage() {
             'Callback fired when filters change. The consumer is responsible for filtering or fetching data.',
         },
         {
-          name: 'filters',
-          type: 'JSX.Element',
-          default: '-',
-          description: 'Custom filter components (legacy, use filterConfigs instead)',
-        },
-        {
-          name: 'activeFilterCount',
-          type: 'number',
-          default: '0',
-          description: 'Number of active filters to display (for custom filters)',
-        },
-        {
           name: 'footer',
           type: 'boolean',
           default: 'true',
@@ -294,7 +338,7 @@ export default function DataTablePage() {
           name: 'DataTableProvider',
           kind: 'component',
           description:
-            'Context provider for shared DataTable configuration. Provides per-page options and optional state persistence via sessionStorage.',
+            'Context provider for shared DataTable configuration. Provides per-page options, state persistence via sessionStorage, and saved config persistence via localStorage.',
           props: [
             {
               name: 'perPageOptions',
@@ -308,7 +352,7 @@ export default function DataTablePage() {
               type: 'string',
               default: '-',
               description:
-                'Session storage key for persisting table state. Each table instance is automatically assigned a unique internal ID.',
+                'Storage key for persisting table state (sessionStorage) and saved configurations (localStorage). Each table instance is automatically assigned a unique internal ID.',
             },
           ],
         },
@@ -491,6 +535,60 @@ export default function DataTablePage() {
               default: '"Maximum of 3 configurations reached"',
               description: 'Text shown when the maximum number of saved configurations is reached.',
             },
+            {
+              name: 'createNewConfiguration',
+              type: 'string',
+              default: '"Create new configuration"',
+              description: 'Title for the create new option in the choose drawer.',
+            },
+            {
+              name: 'createNewConfigurationDescription',
+              type: 'string',
+              default: '"Save current settings as a new configuration"',
+              description: 'Description for the create new option in the choose drawer.',
+            },
+            {
+              name: 'updateCurrentConfiguration',
+              type: 'string',
+              default: '"Update current configuration"',
+              description: 'Title for the update current option in the choose drawer.',
+            },
+            {
+              name: 'updateCurrentConfigurationDescription',
+              type: 'string',
+              default: '"Overwrite the active configuration with current settings"',
+              description: 'Description for the update current option in the choose drawer.',
+            },
+            {
+              name: 'back',
+              type: 'string',
+              default: '"Back"',
+              description: 'Text for the back button when navigating from create form to choose screen.',
+            },
+            {
+              name: 'expandRow',
+              type: 'string',
+              default: '"Expand row"',
+              description: 'Aria label for the expand row button.',
+            },
+            {
+              name: 'collapseRow',
+              type: 'string',
+              default: '"Collapse row"',
+              description: 'Aria label for the collapse row button.',
+            },
+            {
+              name: 'lockColumn',
+              type: 'string',
+              default: '"Lock column"',
+              description: 'Tooltip and aria label for the lock column button.',
+            },
+            {
+              name: 'unlockColumn',
+              type: 'string',
+              default: '"Unlock column"',
+              description: 'Tooltip and aria label for the unlock column button.',
+            },
           ],
         },
         {
@@ -526,7 +624,7 @@ export default function DataTablePage() {
         },
       ]}
       playground={`
-import { DataTable, DataTableProvider, Select } from '@kayou/ui';
+import { Button, DataTable, DataTableProvider, Select } from '@kayou/ui';
 import { createSignal } from 'solid-js';
 
 export default function Example() {
@@ -546,6 +644,44 @@ export default function Example() {
     { id: 10, name: 'Hannah Lee', email: 'hannah@example.com', role: 'User', status: 'inactive', age: 31, department: 'Sales', notes: 'Transferred to the London office.' },
     { id: 11, name: 'Ivan Petrov', email: 'ivan@example.com', role: 'User', status: 'active', age: 27, department: 'Support', notes: 'Tier 2 support specialist handling escalations.' },
     { id: 12, name: 'Julia Martinez', email: 'julia@example.com', role: 'Editor', status: 'pending', age: 33, department: 'HR', notes: 'New hire.' },
+    { id: 13, name: 'Kevin O\\'Brien', email: 'kevin@example.com', role: 'User', status: 'active', age: 36, department: 'Engineering', notes: 'Backend services and API design.' },
+    { id: 14, name: 'Laura Nguyen', email: 'laura@example.com', role: 'Admin', status: 'active', age: 44, department: 'Engineering', notes: 'Infrastructure and DevOps lead.' },
+    { id: 15, name: 'Marcus Taylor', email: 'marcus@example.com', role: 'User', status: 'active', age: 23, department: 'Support', notes: 'Tier 1 support, night shift.' },
+    { id: 16, name: 'Nina Patel', email: 'nina@example.com', role: 'Editor', status: 'active', age: 30, department: 'Marketing', notes: 'Manages email campaigns and newsletters.' },
+    { id: 17, name: 'Oscar Fernandez', email: 'oscar@example.com', role: 'User', status: 'inactive', age: 52, department: 'Sales', notes: 'Retired from active sales, advisory role.' },
+    { id: 18, name: 'Patricia Wong', email: 'patricia@example.com', role: 'Admin', status: 'active', age: 39, department: 'HR', notes: 'Compensation and benefits specialist.' },
+    { id: 19, name: 'Quentin Blake', email: 'quentin@example.com', role: 'User', status: 'pending', age: 25, department: 'Engineering', notes: 'Intern converting to full-time.' },
+    { id: 20, name: 'Rachel Adams', email: 'rachel@example.com', role: 'Editor', status: 'active', age: 34, department: 'Marketing', notes: 'SEO and analytics lead.' },
+    { id: 21, name: 'Samuel Green', email: 'samuel@example.com', role: 'User', status: 'active', age: 29, department: 'Engineering', notes: 'Mobile development specialist.' },
+    { id: 22, name: 'Tara Singh', email: 'tara@example.com', role: 'Admin', status: 'active', age: 47, department: 'Engineering', notes: 'Security and compliance officer.' },
+    { id: 23, name: 'Ulrich Braun', email: 'ulrich@example.com', role: 'User', status: 'active', age: 33, department: 'Sales', notes: 'EMEA regional account manager.' },
+    { id: 24, name: 'Valentina Rossi', email: 'valentina@example.com', role: 'Editor', status: 'active', age: 28, department: 'Marketing', notes: 'Social media and community management.' },
+    { id: 25, name: 'William Harris', email: 'william@example.com', role: 'User', status: 'inactive', age: 55, department: 'HR', notes: 'On sabbatical.' },
+    { id: 26, name: 'Xena Cooper', email: 'xena@example.com', role: 'User', status: 'active', age: 31, department: 'Support', notes: 'Customer success manager for enterprise clients.' },
+    { id: 27, name: 'Yusuf Ahmed', email: 'yusuf@example.com', role: 'Admin', status: 'active', age: 42, department: 'Engineering', notes: 'Data platform and analytics infrastructure.' },
+    { id: 28, name: 'Zoe Mitchell', email: 'zoe@example.com', role: 'Editor', status: 'pending', age: 26, department: 'Marketing', notes: 'Joining the design content team.' },
+    { id: 29, name: 'Aaron Phillips', email: 'aaron@example.com', role: 'User', status: 'active', age: 37, department: 'Engineering', notes: 'QA automation and testing frameworks.' },
+    { id: 30, name: 'Bianca Torres', email: 'bianca@example.com', role: 'User', status: 'active', age: 24, department: 'Support', notes: 'Bilingual support agent, English and Spanish.' },
+    { id: 31, name: 'Carlos Rivera', email: 'carlos@example.com', role: 'Admin', status: 'active', age: 46, department: 'Sales', notes: 'Head of sales, North America.' },
+    { id: 32, name: 'Daphne Laurent', email: 'daphne@example.com', role: 'Editor', status: 'active', age: 32, department: 'HR', notes: 'Training and onboarding programs.' },
+    { id: 33, name: 'Ethan Park', email: 'ethan@example.com', role: 'User', status: 'active', age: 27, department: 'Engineering', notes: 'Frontend performance optimization.' },
+    { id: 34, name: 'Freya Johansson', email: 'freya@example.com', role: 'User', status: 'inactive', age: 40, department: 'Marketing', notes: 'Moved to partner relations team.' },
+    { id: 35, name: 'Gabriel Santos', email: 'gabriel@example.com', role: 'Admin', status: 'active', age: 38, department: 'Engineering', notes: 'Cloud architecture and cost optimization.' },
+    { id: 36, name: 'Hana Yamamoto', email: 'hana@example.com', role: 'Editor', status: 'active', age: 29, department: 'Marketing', notes: 'Product marketing and launch coordination.' },
+    { id: 37, name: 'Isaac Cohen', email: 'isaac@example.com', role: 'User', status: 'pending', age: 22, department: 'Support', notes: 'New graduate, starting next month.' },
+    { id: 38, name: 'Jasmine Ali', email: 'jasmine@example.com', role: 'User', status: 'active', age: 35, department: 'Engineering', notes: 'Machine learning and recommendation systems.' },
+    { id: 39, name: 'Kyle Morgan', email: 'kyle@example.com', role: 'Editor', status: 'active', age: 43, department: 'Sales', notes: 'Sales enablement content and demo scripts.' },
+    { id: 40, name: 'Lily Zhang', email: 'lily@example.com', role: 'Admin', status: 'active', age: 36, department: 'HR', notes: 'Diversity and inclusion initiatives.' },
+    { id: 41, name: 'Mason Reed', email: 'mason@example.com', role: 'User', status: 'active', age: 30, department: 'Engineering', notes: 'Database administration and query optimization.' },
+    { id: 42, name: 'Nora Eriksson', email: 'nora@example.com', role: 'User', status: 'active', age: 28, department: 'Marketing', notes: 'Event planning and conference logistics.' },
+    { id: 43, name: 'Oliver Grant', email: 'oliver@example.com', role: 'Editor', status: 'inactive', age: 48, department: 'Engineering', notes: 'Transitioned to external consulting.' },
+    { id: 44, name: 'Priya Sharma', email: 'priya@example.com', role: 'Admin', status: 'active', age: 34, department: 'Support', notes: 'Head of customer support operations.' },
+    { id: 45, name: 'Ryan O\\'Connor', email: 'ryan@example.com', role: 'User', status: 'active', age: 26, department: 'Engineering', notes: 'CI/CD pipelines and build tooling.' },
+    { id: 46, name: 'Sofia Morales', email: 'sofia@example.com', role: 'Editor', status: 'active', age: 31, department: 'Marketing', notes: 'Video production and creative direction.' },
+    { id: 47, name: 'Thomas Weber', email: 'thomas@example.com', role: 'User', status: 'pending', age: 39, department: 'Sales', notes: 'Pending background check completion.' },
+    { id: 48, name: 'Uma Krishnan', email: 'uma@example.com', role: 'User', status: 'active', age: 33, department: 'Engineering', notes: 'Accessibility and internationalization specialist.' },
+    { id: 49, name: 'Victor Dumont', email: 'victor@example.com', role: 'Admin', status: 'active', age: 51, department: 'HR', notes: 'Legal compliance and policy oversight.' },
+    { id: 50, name: 'Wendy Chu', email: 'wendy@example.com', role: 'Editor', status: 'active', age: 27, department: 'Engineering', notes: 'Technical writing and API documentation.' },
   ];
 
   const departmentOptions = [
@@ -579,7 +715,7 @@ export default function Example() {
       ),
     },
     { key: 'role', label: 'Role', width: 10 },
-    { key: 'age', label: 'Age', width: 5 },
+    { key: 'age', label: 'Age', width: 8 },
     {
       key: 'department',
       label: 'Department',
@@ -635,15 +771,24 @@ export default function Example() {
   ];
 
   return (
-    <DataTableProvider perPageOptions={[5, 10, 25, 50]}>
+    <DataTableProvider storageKey="users" perPageOptions={[5, 10, 25, 50]}>
       <DataTable
         data={users}
         columns={columns}
         rowKey="id"
         searchBar
         rowSelection
+        bulkActions={(selectedKeys, clearSelection) => (
+          <>
+            <Button size="xs" color="failure" onClick={() => { console.log('Delete:', [...selectedKeys]); clearSelection(); }}>
+              Delete
+            </Button>
+            <Button size="xs" color="light" onClick={() => console.log('Export:', [...selectedKeys])}>
+              Export
+            </Button>
+          </>
+        )}
         configureColumns
-        configStorageKey="users-table"
         defaultColumns={['name', 'email', 'status', 'role', 'age', 'department', 'notes']}
         expandable
         defaultRowsCount={4}
@@ -663,6 +808,29 @@ export default function Example() {
         perPageControl
         footer
         loading={false}
+        onRowClick={(row, index) => console.log('Row clicked:', row.name, index)}
+        columnLocking
+        columnResizing
+        rowLocking
+        expandRow={(row) => (
+          <div class="px-6 py-4 text-sm text-gray-600 dark:text-neutral-400">
+            <p><strong>Notes:</strong> {String(row.notes)}</p>
+            <p class="mt-1"><strong>Department:</strong> {String(row.department)}</p>
+          </div>
+        )}
+        rowContextMenu={(row, _index, closeMenu) => (
+          <div class="py-1">
+            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => { console.log('View', row.name); closeMenu(); }}>
+              View profile
+            </button>
+            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => { console.log('Edit', row.name); closeMenu(); }}>
+              Edit
+            </button>
+            <button class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-neutral-800" onClick={() => { console.log('Delete', row.name); closeMenu(); }}>
+              Delete
+            </button>
+          </div>
+        )}
         labels={{
           error: 'Failed to load data',
           noData: 'No users found',

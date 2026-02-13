@@ -277,7 +277,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
           triggerRef = el;
           refs.setReference(el);
         }}
-        class="w-fit"
+        class="w-full"
         tabindex={merged.onHover ? undefined : 0}
         role={merged.onHover ? undefined : 'button'}
         aria-haspopup="dialog"

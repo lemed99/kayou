@@ -2,11 +2,11 @@ import { Accessor, createMemo, createSignal } from 'solid-js';
 
 import { ActiveFilter, FilterState, SavedTableConfig, SortEntry } from './types';
 
-const STORAGE_PREFIX = 'datatable-configs:';
 const MAX_CONFIGS = 3;
 
 interface UseDataTableConfigsOptions {
-  storageKey: string;
+  readConfigs: () => SavedTableConfig[];
+  writeConfigs: (configs: SavedTableConfig[]) => void;
   currentColumns: Accessor<string[]>;
   currentSorts: Accessor<SortEntry[]>;
   currentFilters: Accessor<FilterState>;
@@ -50,33 +50,12 @@ function filtersEqual(
 export function useDataTableConfigs(
   options: UseDataTableConfigsOptions,
 ): UseDataTableConfigsResult {
-  const fullKey = `${STORAGE_PREFIX}${options.storageKey}`;
-
-  const readConfigs = (): SavedTableConfig[] => {
-    if (typeof localStorage === 'undefined') return [];
-    try {
-      const stored = localStorage.getItem(fullKey);
-      return stored ? (JSON.parse(stored) as SavedTableConfig[]) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const writeConfigs = (configs: SavedTableConfig[]) => {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      localStorage.setItem(fullKey, JSON.stringify(configs));
-    } catch {
-      // Storage full or unavailable
-    }
-  };
-
-  const [configs, setConfigs] = createSignal<SavedTableConfig[]>(readConfigs());
+  const [configs, setConfigs] = createSignal<SavedTableConfig[]>(options.readConfigs());
   const [activeConfigId, setActiveConfigId] = createSignal<string | null>(null);
 
   const persistAndSet = (newConfigs: SavedTableConfig[]) => {
     setConfigs(newConfigs);
-    writeConfigs(newConfigs);
+    options.writeConfigs(newConfigs);
   };
 
   const hasConfigs = createMemo(() => configs().length > 0);

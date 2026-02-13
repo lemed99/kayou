@@ -163,6 +163,12 @@ export const OPERATOR_LABELS: Record<FilterOperator, string> = {
 export type SortDirection = 'asc' | 'desc';
 
 /**
+ * Sort action includes 'asc', 'desc', and '' (clear sort).
+ * Used internally by sort handlers; '' removes the column from the sort stack.
+ */
+export type SortAction = SortDirection | '';
+
+/**
  * A single sort entry for multi-column sorting.
  */
 export interface SortEntry {

@@ -99,6 +99,14 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
           local.class,
         )}
         type="checkbox"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.currentTarget.click();
+          }
+          if (typeof inputProps.onKeyDown === 'function') {
+            inputProps.onKeyDown(e);
+          }
+        }}
       />
       <Show when={local.label && labelPosition() === 'right'}>
         <span

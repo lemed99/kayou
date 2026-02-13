@@ -11,15 +11,14 @@ import {
 
 import { Expand01Icon, Minimize01Icon } from '@kayou/icons';
 
-import Button from '../Button';
-import { useDataTableState } from './DataTableContext';
 import { DataTableBody } from './DataTableBody';
+import { useDataTableState } from './DataTableContext';
 import { DataTableFooter } from './DataTableFooter';
 import { DataTableHeader } from './DataTableHeader';
 import { DataTableInternalContext } from './DataTableInternalContext';
 import { DataTableSearch } from './DataTableSearch';
 import { DataTableToolbar } from './DataTableToolbar';
-import { FilterConfig, FilterState, SortEntry } from './types';
+import { FilterConfig, FilterState, SortAction, SortEntry } from './types';
 import { useDataTableConfigs } from './useDataTableConfigs';
 import { useDataTableFilters } from './useDataTableFilters';
 
@@ -53,6 +52,19 @@ export interface DataTableLabels {
   confirmDelete: string;
   cancel: string;
   maxConfigsReached: string;
+  createNewConfiguration: string;
+  createNewConfigurationDescription: string;
+  updateCurrentConfiguration: string;
+  updateCurrentConfigurationDescription: string;
+  back: string;
+  expandRow: string;
+  collapseRow: string;
+  lockColumn: string;
+  unlockColumn: string;
+  resizeColumn: string;
+  resetColumnSize: string;
+  lockRow: string;
+  unlockRow: string;
 }
 
 export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
@@ -85,6 +97,20 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   confirmDelete: 'Confirm deletion?',
   cancel: 'Cancel',
   maxConfigsReached: 'Maximum of 3 configurations reached',
+  createNewConfiguration: 'Create new configuration',
+  createNewConfigurationDescription: 'Save current settings as a new configuration',
+  updateCurrentConfiguration: 'Update current configuration',
+  updateCurrentConfigurationDescription:
+    'Overwrite the active configuration with current settings',
+  back: 'Back',
+  expandRow: 'Expand row',
+  collapseRow: 'Collapse row',
+  lockColumn: 'Lock column',
+  unlockColumn: 'Unlock column',
+  resizeColumn: 'Resize column',
+  resetColumnSize: 'Double-click to reset',
+  lockRow: 'Lock row',
+  unlockRow: 'Unlock row',
 };
 
 export interface DataTableAriaLabels {
@@ -92,6 +118,8 @@ export interface DataTableAriaLabels {
   clearSearch: string;
   loadingData: string;
   refreshingData: string;
+  selectAllRows: string;
+  expand: string;
 }
 
 export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
@@ -99,6 +127,8 @@ export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
   clearSearch: 'Clear search',
   loadingData: 'Loading data',
   refreshingData: 'Refreshing data',
+  selectAllRows: 'Select all rows',
+  expand: 'Expand',
 };
 
 export interface DataTableColumnProps<T> {
@@ -110,7 +140,7 @@ export interface DataTableColumnProps<T> {
   render?: (value?: unknown, record?: T, index?: number) => JSX.Element;
   /** Column width as percentage of table width. */
   width: number;
-  /** Minimum column width in pixels. Defaults to 120. */
+  /** Minimum column width in pixels. */
   minWidth?: number;
   /** Tooltip text for the column header. */
   tooltip?: string;
@@ -149,10 +179,6 @@ export interface DataTableProps<T> {
   configureColumns?: boolean;
   /** Whether the table can be expanded to show all rows inline. */
   expandable?: boolean;
-  /** Custom filter components. */
-  filters?: JSX.Element;
-  /** Number of active filters to display (for custom filters). @default 0 */
-  activeFilterCount?: number;
   /** Whether to show per-page control. */
   perPageControl?: boolean;
   /** Fixed row height for virtualization. */
@@ -194,9 +220,33 @@ export interface DataTableProps<T> {
   /** Debounce delay for onSearchChange in ms. @default 300 */
   searchDebounceMs?: number;
 
-  // Saved configurations
-  /** Stable key for localStorage config persistence. Enables saved configurations. */
-  configStorageKey?: string;
+  // Bulk actions
+  /** Render prop for bulk action buttons shown when rows are selected. */
+  bulkActions?: (selectedKeys: Set<string>, clearSelection: () => void) => JSX.Element;
+
+  // Row interaction
+  /** Callback fired when a data row is clicked (not checkboxes or expand buttons). */
+  onRowClick?: (row: T, index: number) => void;
+  /** Custom JSX to show when data is empty. Falls back to labels().noData text. */
+  emptyState?: JSX.Element;
+  /** Additional CSS class(es) for data rows. Can be a static string or a function per row. */
+  rowClass?: string | ((row: T, index: number) => string);
+
+  // Layout
+  /** Allow users to lock a column so it stays visible during horizontal scroll. Only one column at a time. */
+  columnLocking?: boolean;
+  /** Enable column resizing by dragging header borders. */
+  columnResizing?: boolean;
+  /** Allow users to lock a single row so it pins to the viewport edge when scrolled past. Only works with virtualization. */
+  rowLocking?: boolean;
+
+  // Row expansion (per-row detail panels)
+  /** Render prop for row detail panels. Shows an expand/collapse button per row. */
+  expandRow?: (row: T) => JSX.Element;
+
+  // Right-click context menu
+  /** Render prop for a right-click context menu on rows. */
+  rowContextMenu?: (row: T, index: number, closeMenu: () => void) => JSX.Element;
 }
 
 export function DataTable<T extends Record<string, unknown>>(
@@ -209,7 +259,15 @@ export function DataTable<T extends Record<string, unknown>>(
   }));
 
   const tableId = createUniqueId();
-  const { restoredState, isRestored, saveState, perPageOptions } = useDataTableState(tableId);
+  const {
+    restoredState,
+    isRestored,
+    saveState,
+    perPageOptions,
+    configEnabled,
+    readConfigs,
+    writeConfigs,
+  } = useDataTableState(tableId);
 
   // --- Signals ---
   const [searchKey, setSearchKey] = createSignal('');
@@ -227,6 +285,44 @@ export function DataTable<T extends Record<string, unknown>>(
   const [rowGridStyle, setRowGridStyle] = createSignal('');
   const [headerRef, setHeaderRef] = createSignal<HTMLDivElement | undefined>();
   const [rowWidth, setRowWidth] = createSignal(0);
+  const [resizedWidths, setResizedWidths] = createSignal<Map<string, number>>(new Map());
+  const [expandedRows, setExpandedRows] = createSignal<Set<string>>(new Set());
+  const [focusedRowIndex, setFocusedRowIndex] = createSignal(-1);
+  const [lockedRowKey, setLockedRowKey] = createSignal<string | null>(null);
+  const toggleLockedRow = (key: string) => {
+    setLockedRowKey((prev) => (prev === key ? null : key));
+  };
+  const [contextMenuState, setContextMenuState] = createSignal<{
+    x: number;
+    y: number;
+    rowKey: string;
+    row: T;
+    index: number;
+  } | null>(null);
+
+  // --- Row expansion ---
+  const toggleRowExpansion = (key: string) => {
+    const newSet = new Set(expandedRows());
+    if (newSet.has(key)) {
+      newSet.delete(key);
+    } else {
+      newSet.add(key);
+    }
+    setExpandedRows(newSet);
+  };
+
+  // --- Context menu ---
+  const openContextMenu = (e: MouseEvent, row: T, index: number) => {
+    e.preventDefault();
+    setContextMenuState({
+      x: e.clientX,
+      y: e.clientY,
+      rowKey: getRowKey(row, index),
+      row,
+      index,
+    });
+  };
+  const closeContextMenu = () => setContextMenuState(null);
 
   // --- Row identity ---
   const getRowKey = (row: T, index: number): string => {
@@ -244,25 +340,24 @@ export function DataTable<T extends Record<string, unknown>>(
 
   const sorts = createMemo<SortEntry[]>(() => props.sorts ?? []);
 
-  const handleSortClick = (key: string) => {
+  const handleSortSelect = (key: string, direction: SortAction) => {
     if (!props.onSortsChange) return;
     const current = sorts();
     const idx = current.findIndex((s) => s.key === key);
 
-    if (idx === -1) {
-      // Not sorted yet: add as ascending
-      props.onSortsChange([...current, { key, direction: 'asc' }]);
-    } else {
-      const entry = current[idx];
-      if (entry.direction === 'asc') {
-        // Ascending → descending
-        const updated = [...current];
-        updated[idx] = { key, direction: 'desc' };
-        props.onSortsChange(updated);
-      } else {
-        // Descending → remove from sorts
+    if (direction === '') {
+      // Reset: remove this key from sorts
+      if (idx !== -1) {
         props.onSortsChange(current.filter((_, i) => i !== idx));
       }
+    } else if (idx === -1) {
+      // Not sorted yet: add with chosen direction
+      props.onSortsChange([...current, { key, direction }]);
+    } else {
+      // Already sorted: update direction
+      const updated = [...current];
+      updated[idx] = { key, direction };
+      props.onSortsChange(updated);
     }
   };
 
@@ -290,10 +385,10 @@ export function DataTable<T extends Record<string, unknown>>(
     () => props.defaultColumns ?? props.columns.map((c) => c.key),
   );
 
-  const configStorageKey = untrack(() => props.configStorageKey);
-  const configHook = configStorageKey
+  const configHook = configEnabled
     ? useDataTableConfigs({
-        storageKey: configStorageKey,
+        readConfigs,
+        writeConfigs,
         currentColumns: () => columns().map((c) => c.key),
         currentSorts: sorts,
         currentFilters: filterHook.activeFilters,
@@ -307,9 +402,7 @@ export function DataTable<T extends Record<string, unknown>>(
     if (!configHook) return;
     configHook.activateConfig(id);
     if (id === null) {
-      setColumns(
-        props.columns.filter((c) => defaultColumnKeys().includes(c.key)),
-      );
+      setColumns(props.columns.filter((c) => defaultColumnKeys().includes(c.key)));
       handlePerPageChange(perPageOptions[0] ?? 10);
       props.onSortsChange?.([]);
       filterHook.replaceAllFilters(new Map());
@@ -352,7 +445,7 @@ export function DataTable<T extends Record<string, unknown>>(
   });
 
   // --- Data ---
-  const baseData = createMemo(() => props.data);
+  const baseData = () => props.data;
   const defaultRowsCount = createMemo(() => props.defaultRowsCount ?? 5);
 
   const filteredData = createMemo(() => {
@@ -435,35 +528,74 @@ export function DataTable<T extends Record<string, unknown>>(
     return (allColumnsPercentage - displayedColumnsPercentage) / columns().length;
   };
 
+  // Cached per-column min-widths from DOM measurement.
+  // Only re-measured when columns or data change, NOT on every resize.
+  const [measuredMinWidths, setMeasuredMinWidths] = createSignal<Map<string, number>>(
+    new Map(),
+  );
+
+  // Expensive: reads DOM to measure content widths per column
   createEffect(() => {
-    if (tableWidth() === 0) return;
-    // Capture reactive values synchronously for SolidJS tracking
-    const tw = tableWidth();
+    // Track reactive deps that affect content widths
     const cols = columns();
-    const rs = props.rowSelection;
-    const sp = sharedPercentage();
+    filteredData(); // track data changes
     const scope = tableRef();
+    const header = headerRef();
+    const hasLocking = props.columnLocking ?? false;
+
+    if (!scope || cols.length === 0) return;
 
     // Double rAF ensures layout has settled before DOM measurement
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        setRowGridStyle(
-          `${rs ? '40px ' : ''}${cols
-            .map((col, i) => {
-              const widths = scope
-                ? Array.from(
-                    scope.querySelectorAll(`[data-column="${col.key}"]`),
-                  ).map((e) => (e as HTMLElement).offsetWidth)
-                : [];
-              const measured = widths.length > 0 ? Math.max(...widths) + 48 : 0;
-              const colMinWidth = col.minWidth ?? 120;
-              const minWidth = Math.max(measured, colMinWidth);
-              return `minmax(${minWidth}px, ${Math.max(0, (tw * (col.width + sp)) / 100 - (i === 0 ? (rs ? 40 : 0) : 0))}px)`;
-            })
-            .join(' ')}`,
-        );
+        const widths = new Map<string, number>();
+        for (const col of cols) {
+          const bodyCells = Array.from(
+            scope.querySelectorAll(`[data-column="${col.key}"]`),
+          ).map((e) => (e as HTMLElement).offsetWidth);
+
+          const headerCell = header?.querySelector<HTMLElement>(
+            `[data-column-key="${col.key}"]>div`,
+          );
+          const headerMeasured = headerCell ? headerCell.offsetWidth : 0;
+          const bodyMeasured = bodyCells.length > 0 ? Math.max(...bodyCells) + 48 : 0;
+
+          let controlsWidth = 0;
+          if (hasLocking) controlsWidth += 20;
+
+          widths.set(
+            col.key,
+            Math.max(bodyMeasured, headerMeasured + controlsWidth + 48, col.minWidth ?? 0),
+          );
+        }
+        setMeasuredMinWidths(widths);
       });
     });
+  });
+
+  // Cheap: pure math to compute the grid template string from cached measurements
+  createEffect(() => {
+    const tw = tableWidth();
+    if (tw === 0) return;
+
+    const cols = columns();
+    const rs = props.rowSelection;
+    const sp = sharedPercentage();
+    const hasExpandColumn = !!props.expandRow && !!props.onRowClick;
+    const rw = resizedWidths();
+    const cached = measuredMinWidths();
+
+    const prefix = `${rs ? '40px ' : ''}${hasExpandColumn ? '36px ' : ''}`;
+    setRowGridStyle(
+      `${prefix}${cols
+        .map((col, i) => {
+          const resized = rw.get(col.key);
+          if (resized !== undefined) return `${resized}px`;
+          const minWidth = cached.get(col.key) ?? col.minWidth ?? 0;
+          return `minmax(${minWidth}px, ${Math.max(0, (tw * (col.width + sp)) / 100 - (i === 0 ? (rs ? 40 : 0) : 0))}px)`;
+        })
+        .join(' ')}`,
+    );
   });
 
   // --- Resize observers ---
@@ -501,6 +633,72 @@ export function DataTable<T extends Record<string, unknown>>(
       if (rafId) cancelAnimationFrame(rafId);
       resizeObserver?.disconnect();
     });
+  });
+
+  // --- Column locking (sticky) ---
+  const [stickyColumnKey, setStickyColumnKey] = createSignal<string | null>(null);
+  const toggleStickyColumn = (key: string) => {
+    setStickyColumnKey((prev) => (prev === key ? null : key));
+  };
+
+  // Horizontal scroll tracking — computes a transform offset for the sticky column
+  // so it pins to the left or right edge when it would scroll out of view.
+  // Uses `offsetLeft`/`offsetWidth` (unaffected by CSS transforms) for measurement.
+  const [scrollContainerRef, setScrollContainerRef] = createSignal<
+    HTMLDivElement | undefined
+  >();
+
+  let _stickyCell: HTMLElement | null = null;
+
+  const computeStickyOffset = () => {
+    const el = scrollContainerRef();
+    if (!el) return;
+
+    const stickyKey = stickyColumnKey();
+    if (!stickyKey) {
+      el.style.setProperty('--dt-sticky-offset', '0px');
+      return;
+    }
+
+    const row = headerRef();
+    if (!row) return;
+
+    if (!_stickyCell) {
+      _stickyCell = row.querySelector<HTMLElement>(`[data-column-key="${stickyKey}"]`);
+    }
+    const cell = _stickyCell;
+    if (!cell) return;
+
+    const scrollLeft = el.scrollLeft;
+    const viewportWidth = el.clientWidth;
+    const columnLeft = cell.offsetLeft;
+    const columnWidth = cell.offsetWidth;
+
+    let offset = 0;
+    if (columnLeft < scrollLeft) {
+      // Column left edge scrolled past the table left edge → pin to left
+      offset = scrollLeft - columnLeft;
+    } else if (columnLeft + columnWidth > scrollLeft + viewportWidth) {
+      // Column right edge scrolled past the table right edge → pin to right
+      offset = scrollLeft + viewportWidth - (columnLeft + columnWidth);
+    }
+
+    el.style.setProperty('--dt-sticky-offset', `${offset}px`);
+  };
+
+  createEffect(() => {
+    const el = scrollContainerRef();
+    if (!el || !props.columnLocking) return;
+
+    el.addEventListener('scroll', computeStickyOffset, { passive: true });
+    onCleanup(() => el.removeEventListener('scroll', computeStickyOffset));
+  });
+
+  // Recompute when sticky column changes (user clicks lock/unlock)
+  createEffect(() => {
+    stickyColumnKey(); // track
+    _stickyCell = null; // invalidate cached cell reference
+    computeStickyOffset();
   });
 
   // --- Scroll position persistence ---
@@ -566,6 +764,13 @@ export function DataTable<T extends Record<string, unknown>>(
 
     el.addEventListener('scroll', handleInfiniteScroll, { passive: true });
     onCleanup(() => el.removeEventListener('scroll', handleInfiniteScroll));
+  });
+
+  // --- Row locking: positioning context for overlay ---
+  createEffect(() => {
+    const el = virtualContainerRef();
+    if (!el || !props.rowLocking) return;
+    el.style.position = 'relative';
   });
 
   // --- Handlers ---
@@ -636,7 +841,7 @@ export function DataTable<T extends Record<string, unknown>>(
             expanded,
             toggleExpanded: () => setExpanded((v) => !v),
             sorts,
-            onSortClick: handleSortClick,
+            onSortSelect: handleSortSelect,
             sortableColumns: sortableColumnsSet,
             useVirtualization,
             setVirtualContainerRef,
@@ -667,12 +872,6 @@ export function DataTable<T extends Record<string, unknown>>(
             get perPageControl() {
               return props.perPageControl;
             },
-            get expandable() {
-              return props.expandable;
-            },
-            get defaultRowsCount() {
-              return props.defaultRowsCount ?? 5;
-            },
             get footer() {
               return props.footer;
             },
@@ -682,12 +881,57 @@ export function DataTable<T extends Record<string, unknown>>(
             get configureColumns() {
               return props.configureColumns;
             },
-            get filters() {
-              return props.filters;
+            get onRowClick() {
+              return props.onRowClick;
             },
-            get activeFilterCount() {
-              return props.activeFilterCount;
+            get emptyState() {
+              return props.emptyState;
             },
+            get rowClass() {
+              return props.rowClass;
+            },
+            get columnLocking() {
+              return props.columnLocking ?? false;
+            },
+            stickyColumnKey,
+            toggleStickyColumn,
+            get rowLocking() {
+              return (props.rowLocking ?? false) && useVirtualization();
+            },
+            lockedRowKey,
+            toggleLockedRow,
+            virtualContainerRef,
+            get columnResizing() {
+              return props.columnResizing ?? false;
+            },
+            resizedWidths,
+            onColumnResize: (key: string, width: number) => {
+              setResizedWidths((prev) => {
+                const m = new Map(prev);
+                m.set(key, width);
+                return m;
+              });
+            },
+            resetColumnResize: (key: string) => {
+              setResizedWidths((prev) => {
+                const m = new Map(prev);
+                m.delete(key);
+                return m;
+              });
+            },
+            get expandRow() {
+              return props.expandRow;
+            },
+            expandedRows,
+            toggleRowExpansion,
+            focusedRowIndex,
+            setFocusedRowIndex,
+            get rowContextMenu() {
+              return props.rowContextMenu;
+            },
+            contextMenuState,
+            openContextMenu,
+            closeContextMenu,
             get configEnabled() {
               return !!configHook;
             },
@@ -715,25 +959,24 @@ export function DataTable<T extends Record<string, unknown>>(
             filterHook={filterHook}
           />
 
-          {/* Selected Items Section */}
+          {/* Bulk Actions Bar */}
           <Show when={props.rowSelection && selectedRows().size > 0}>
-            <div class="flex shrink-0 items-center border-b border-gray-200 px-6 py-3 dark:border-neutral-800">
-              <div class="flex items-center gap-3">
-                <Button size="xs" color="light" aria-label="Bulk actions">
-                  ···
-                </Button>
-                <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
-                  {l().selectedElements(
-                    selectedRows().size,
-                    baseData().length,
-                  )}
-                </span>
-              </div>
+            <div class="flex shrink-0 items-center gap-3 border-b border-gray-200 px-6 py-3 dark:border-neutral-800">
+              <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
+                {l().selectedElements(selectedRows().size, baseData().length)}
+              </span>
+              <Show when={props.bulkActions}>
+                {(renderActions) => (
+                  <div class="flex items-center gap-2">
+                    {renderActions()(selectedRows(), () => updateSelection(new Set()))}
+                  </div>
+                )}
+              </Show>
             </div>
           </Show>
 
           {/* Scrollable data area */}
-          <div class="flex min-w-0 flex-col overflow-x-auto">
+          <div ref={setScrollContainerRef} class="flex min-w-0 flex-col overflow-x-auto">
             <DataTableHeader />
             <DataTableBody />
           </div>
@@ -743,11 +986,7 @@ export function DataTable<T extends Record<string, unknown>>(
             <button
               type="button"
               aria-expanded={expanded()}
-              aria-label={
-                expanded()
-                  ? l().collapse
-                  : l().seeMore
-              }
+              aria-label={expanded() ? l().collapse : l().seeMore}
               onClick={() => setExpanded((v) => !v)}
               class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
             >

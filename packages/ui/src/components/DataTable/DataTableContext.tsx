@@ -1,5 +1,7 @@
 import { JSX, createContext, createSignal, onMount, useContext } from 'solid-js';
 
+import { SavedTableConfig } from './types';
+
 export interface DataTableState {
   scrollTop?: number;
   searchKey?: string;
@@ -15,9 +17,13 @@ interface DataTableContextValue {
   clearState: (id: string) => void;
   clearAll: () => void;
   perPageOptions: number[];
+  configEnabled: boolean;
+  getConfigs: (id: string) => SavedTableConfig[];
+  setConfigs: (id: string, configs: SavedTableConfig[]) => void;
 }
 
-const STORAGE_PREFIX = 'datatable:';
+const STATE_STORAGE_PREFIX = 'datatable:';
+const CONFIG_STORAGE_PREFIX = 'datatable-configs:';
 
 const DataTableContext = createContext<DataTableContextValue>();
 
@@ -29,11 +35,16 @@ export function DataTableProvider(props: {
   perPageOptions?: number[];
   children: JSX.Element;
 }) {
-  const getStorageKey = () =>
-    props.storageKey ? `${STORAGE_PREFIX}${props.storageKey}` : null;
+  const getStateStorageKey = () =>
+    props.storageKey ? `${STATE_STORAGE_PREFIX}${props.storageKey}` : null;
+
+  const getConfigStorageKey = () =>
+    props.storageKey ? `${CONFIG_STORAGE_PREFIX}${props.storageKey}` : null;
+
+  // --- State persistence (sessionStorage) ---
 
   const getAllStates = (): Record<string, DataTableState> => {
-    const sk = getStorageKey();
+    const sk = getStateStorageKey();
     if (!sk || typeof sessionStorage === 'undefined') return {};
     try {
       const stored = sessionStorage.getItem(sk);
@@ -46,7 +57,7 @@ export function DataTableProvider(props: {
   };
 
   const saveAllStates = (states: Record<string, DataTableState>) => {
-    const sk = getStorageKey();
+    const sk = getStateStorageKey();
     if (!sk || typeof sessionStorage === 'undefined') return;
     try {
       sessionStorage.setItem(sk, JSON.stringify(states));
@@ -72,9 +83,44 @@ export function DataTableProvider(props: {
   };
 
   const clearAll = () => {
-    const sk = getStorageKey();
+    const sk = getStateStorageKey();
     if (!sk || typeof sessionStorage === 'undefined') return;
     sessionStorage.removeItem(sk);
+  };
+
+  // --- Config persistence (localStorage) ---
+
+  const getAllConfigs = (): Record<string, SavedTableConfig[]> => {
+    const sk = getConfigStorageKey();
+    if (!sk || typeof localStorage === 'undefined') return {};
+    try {
+      const stored = localStorage.getItem(sk);
+      return stored
+        ? (JSON.parse(stored) as Record<string, SavedTableConfig[]>)
+        : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const saveAllConfigs = (configs: Record<string, SavedTableConfig[]>) => {
+    const sk = getConfigStorageKey();
+    if (!sk || typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(sk, JSON.stringify(configs));
+    } catch {
+      // Storage full or unavailable
+    }
+  };
+
+  const getConfigs = (id: string): SavedTableConfig[] => {
+    return getAllConfigs()[id] ?? [];
+  };
+
+  const setConfigs = (id: string, configs: SavedTableConfig[]) => {
+    const all = getAllConfigs();
+    all[id] = configs;
+    saveAllConfigs(all);
   };
 
   return (
@@ -87,6 +133,11 @@ export function DataTableProvider(props: {
         get perPageOptions() {
           return props.perPageOptions ?? DEFAULT_PER_PAGE_OPTIONS;
         },
+        get configEnabled() {
+          return !!getConfigStorageKey();
+        },
+        getConfigs,
+        setConfigs,
       }}
     >
       {props.children}
@@ -130,6 +181,21 @@ export function useDataTableState(tableId?: string) {
     }
   };
 
+  const configEnabled = context?.configEnabled ?? false;
+
+  const readConfigs = (): SavedTableConfig[] => {
+    if (tableId && context) {
+      return context.getConfigs(tableId);
+    }
+    return [];
+  };
+
+  const writeConfigs = (configs: SavedTableConfig[]) => {
+    if (tableId && context) {
+      context.setConfigs(tableId, configs);
+    }
+  };
+
   return {
     /** The restored state from session storage (null if none) */
     restoredState,
@@ -141,5 +207,11 @@ export function useDataTableState(tableId?: string) {
     clearState,
     /** Per-page options from the provider */
     perPageOptions: context?.perPageOptions ?? DEFAULT_PER_PAGE_OPTIONS,
+    /** Whether config persistence is enabled (provider has storageKey) */
+    configEnabled,
+    /** Read saved configs for this table from localStorage */
+    readConfigs,
+    /** Write saved configs for this table to localStorage */
+    writeConfigs,
   };
 }

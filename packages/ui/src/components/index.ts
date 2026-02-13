@@ -61,6 +61,7 @@ export {
   default as Select,
   SelectWithSearch,
   type SelectLabels,
+  type SelectTriggerProps,
 } from './Select';
 
 // DataTable
