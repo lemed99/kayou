@@ -14,15 +14,7 @@ export const DEFAULT_SPINNER_ARIA_LABELS: SpinnerAriaLabels = {
 /**
  * Color variants for the Spinner component.
  */
-export type SpinnerColor =
-  | 'gray'
-  | 'dark'
-  | 'failure'
-  | 'info'
-  | 'light'
-  | 'success'
-  | 'warning'
-  | 'blue';
+export type SpinnerColor = 'info' | 'danger' | 'black' | 'white' | 'transparent';
 
 /**
  * Size variants for the Spinner component.
@@ -50,16 +42,13 @@ export interface SpinnerProps extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 
 }
 
 const theme = {
-  base: 'inline animate-spin text-gray-200 dark:text-neutral-700',
+  base: 'inline animate-spin text-neutral-300',
   color: {
-    failure: 'fill-red-700 dark:fill-red-500',
-    gray: 'fill-gray-600 dark:fill-neutral-300',
-    info: 'fill-blue-600 dark:fill-neutral-50',
-    success: 'fill-green-700 dark:fill-green-600',
-    dark: 'fill-gray-800 dark:fill-neutral-300',
-    warning: 'fill-yellow-400',
-    blue: 'fill-blue-600',
-    light: 'fill-gray-600 dark:fill-neutral-300',
+    danger: 'fill-red-700',
+    info: 'fill-blue-600',
+    black: 'fill-black',
+    white: 'fill-white',
+    transparent: 'fill-transparent',
   },
   size: {
     xs: 'w-3 h-3',

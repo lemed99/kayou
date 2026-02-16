@@ -3,7 +3,7 @@ import { JSX, Show, createMemo, createSignal, splitProps } from 'solid-js';
 import { SearchRefractionIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
-import { ChevronDownButton, ClearContentButton } from '../../shared';
+import { ChevronDownButton, ClearContentButton, type Option } from '../../shared';
 import Checkbox from '../Checkbox';
 import TextInput, { type TextInputProps } from '../TextInput';
 import { optionClass } from './selectUtils';
@@ -12,12 +12,6 @@ import useSelect, {
   type SelectAriaLabels,
   type SelectLabels,
 } from './useSelect';
-
-interface Option {
-  value: string;
-  label: string;
-  labelWrapper?: (label: string) => JSX.Element;
-}
 
 export interface MultiSelectProps
   extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
@@ -171,9 +165,9 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
       }
       preOptionsComponent={
         <Show when={local.withSearch === true}>
-          <div class="relative flex min-w-[210px] items-center border-b border-gray-200 px-3 dark:border-neutral-800">
+          <div class="relative flex min-w-[210px] items-center border-b border-neutral-200 px-3 dark:border-neutral-800">
             <SearchRefractionIcon
-              class="size-4 text-gray-400 dark:text-neutral-500"
+              class="size-4 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <label for={searchInputId} class="sr-only">
@@ -200,7 +194,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
                   setHighlightedOption(null);
                   (searchRef() as HTMLElement)?.focus();
                 }}
-                class="ml-3 h-full cursor-pointer text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500"
+                class="ml-3 h-full cursor-pointer text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500"
               />
             </Show>
           </div>
@@ -211,14 +205,16 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
           id={getOptionId(option)}
           role="option"
           aria-selected={selectedOptions().some((o) => o.value === option.value)}
+          aria-disabled={option.disabled || undefined}
           class={twMerge(optionClass(option, highlightedOption()), 'p-0')}
-          onMouseEnter={() => setHighlightedOption(option)}
+          onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >
           <Checkbox
             labelClass="px-2 py-1.5 w-full font-normal"
             class="flex items-center"
             onChange={() => handleOptionClick(option)}
             checked={selectedOptions().some((o) => o.value === option.value)}
+            disabled={option.disabled}
             label={option.labelWrapper ? option.labelWrapper(option.label) : option.label}
           />
         </div>

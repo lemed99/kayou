@@ -39,7 +39,7 @@ export interface TextareaProps
 const theme = {
   base: 'p-2.5 text-sm block w-full rounded-lg border disabled:cursor-not-allowed disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
   colors: {
-    gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500 dark:focus:outline-blue-500',
+    gray: 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:outline-blue-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500 dark:focus:outline-blue-500',
     info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-400 dark:bg-blue-100 dark:focus:outline-blue-500',
     failure:
       'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:outline-red-500',
@@ -70,9 +70,7 @@ const Textarea = (props: TextareaProps): JSX.Element => {
   const helperId = createMemo(() =>
     local.helperText ? `${inputId()}-helper` : undefined,
   );
-  const ariaInvalid = createMemo(() =>
-    color() === 'failure' ? true : undefined,
-  );
+  const ariaInvalid = createMemo(() => (color() === 'failure' ? true : undefined));
   const ariaBusy = createMemo(() => (local.isLoading ? true : undefined));
 
   return (
@@ -81,14 +79,16 @@ const Textarea = (props: TextareaProps): JSX.Element => {
         <div class="mb-1 block">
           <Label value={local.label} color={color()} for={inputId()} />
           <Show when={props.required}>
-            <span class="ml-0.5 font-medium text-red-500" aria-hidden="true">*</span>
+            <span class="ml-0.5 font-medium text-red-500" aria-hidden="true">
+              *
+            </span>
           </Show>
         </div>
       </Show>
       <div class="relative w-full">
         <Show when={local.isLoading}>
           <div class="pointer-events-none absolute left-2.5 top-2.5 flex items-center">
-            <Spinner size="sm" color={color()} />
+            <Spinner size="sm" color="transparent" />
           </div>
         </Show>
 

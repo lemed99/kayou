@@ -112,7 +112,7 @@ export default function ModalPage() {
             <div>
               <Button onClick={() => setShow(true)}>Open Modal</Button>
               <Modal show={show()} title="Confirm Action" onClose={() => setShow(false)}>
-                <p class="text-gray-600 dark:text-neutral-300">
+                <p class="text-neutral-600 dark:text-neutral-300">
                   Are you sure you want to proceed? This action cannot be undone.
                 </p>
                 <div class="mt-4 flex justify-end gap-2">

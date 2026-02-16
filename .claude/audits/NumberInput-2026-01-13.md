@@ -90,9 +90,9 @@ if (minValue !== undefined && formatted < minValue) formatted = minValue;
 const setButtonActive = (btn: HTMLButtonElement | undefined, active: boolean) => {
   if (!btn) return;
   if (active) {
-    btn.classList.add('bg-gray-200', 'dark:bg-gray-600');
+    btn.classList.add('bg-neutral-200', 'dark:bg-neutral-600');
   } else {
-    btn.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+    btn.classList.remove('bg-neutral-200', 'dark:bg-neutral-600');
   }
 };
 ```

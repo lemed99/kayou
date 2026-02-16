@@ -28,7 +28,7 @@ const helperTextTheme = {
   content: 'text-xs font-normal',
   colors: {
     failure: 'text-red-600 dark:text-red-500',
-    gray: 'text-gray-500 dark:text-neutral-400',
+    gray: 'text-neutral-500 dark:text-neutral-400',
     info: 'text-blue-600 dark:text-blue-500',
     warning: 'text-yellow-600 dark:text-yellow-500',
     success: 'text-green-600 dark:text-green-500',

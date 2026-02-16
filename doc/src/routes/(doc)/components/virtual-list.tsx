@@ -183,7 +183,7 @@ export default function Example() {
           max={199}
           value={targetIndex()}
           onInput={(e) => setTargetIndex(Number(e.target.value))}
-          class="w-20 rounded border border-gray-300 px-2 py-1"
+          class="w-20 rounded border border-neutral-300 px-2 py-1"
         />
         <button
           onClick={() => listHandle?.scrollToIndex(targetIndex(), 'smooth')}
@@ -193,7 +193,7 @@ export default function Example() {
         </button>
       </div>
 
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-neutral-600">
         Scroll position: {scrollPos()}px
         {selectedId() !== null ? \` | Selected: User \${selectedId() + 1}\` : ''}
       </p>
@@ -205,7 +205,7 @@ export default function Example() {
         rootHeight={300}
         rowHeight={56}
         containerWidth={350}
-        rowClass="border-b border-gray-100"
+        rowClass="border-b border-neutral-100"
         role="listbox"
         aria-label="User list"
         aria-activedescendant={
@@ -213,7 +213,7 @@ export default function Example() {
         }
         setScrollPosition={setScrollPos}
         fallback={
-          <div class="p-8 text-center text-gray-500">No items to display</div>
+          <div class="p-8 text-center text-neutral-500">No items to display</div>
         }
       >
         {(item) => (
@@ -224,12 +224,12 @@ export default function Example() {
             class={\`cursor-pointer p-2 transition-colors \${
               selectedId() === item.id
                 ? 'bg-blue-100 text-blue-900'
-                : 'bg-white hover:bg-gray-50'
+                : 'bg-white hover:bg-neutral-50'
             }\`}
             onClick={() => setSelectedId(item.id)}
           >
             <div class="font-medium">{item.name}</div>
-            <div class="text-sm text-gray-500">{item.email}</div>
+            <div class="text-sm text-neutral-500">{item.email}</div>
           </div>
         )}
       </VirtualList>

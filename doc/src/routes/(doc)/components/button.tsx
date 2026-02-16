@@ -35,7 +35,7 @@ export default function ButtonPage() {
         },
         {
           name: 'color',
-          type: '"info" | "gray" | "dark" | "failure" | "light" | "success" | "warning" | "blue"',
+          type: '"info" | "danger" | "black" | "white" | "transparent',
           default: '"info"',
           description: 'Sets the color variant',
         },
@@ -112,11 +112,10 @@ export default function ButtonPage() {
             <div class="flex flex-col gap-4">
               <div class="flex flex-wrap gap-2">
                 <Button color="info">Info</Button>
-                <Button color="success">Success</Button>
-                <Button color="failure">Failure</Button>
-                <Button color="warning">Warning</Button>
-                <Button color="dark">Dark</Button>
-                <Button color="light">Light</Button>
+                <Button color="danger">Danger</Button>
+                <Button color="black">Black</Button>
+                <Button color="white">White</Button>
+                <Button color="transparent">Transparent</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button size="xs">Extra Small</Button>
@@ -125,7 +124,7 @@ export default function ButtonPage() {
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button icon={PlusIcon}>Create</Button>
-                <Button icon={ArrowRightIcon} iconPlacement="right" color="dark">Next</Button>
+                <Button icon={ArrowRightIcon} iconPlacement="right">Next</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button isLoading={isLoading()} onClick={handleClick}>

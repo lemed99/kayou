@@ -231,7 +231,7 @@ const Panel = (props: PanelProps): JSX.Element => {
   return (
     <div
       class={twMerge(
-        'border-gray-200 dark:border-neutral-800',
+        'border-neutral-200 dark:border-neutral-800',
         props.isSeparated ? 'rounded-lg border' : 'border-b',
         !props.isSimple &&
           !props.isSeparated &&
@@ -248,7 +248,7 @@ const Panel = (props: PanelProps): JSX.Element => {
         aria-controls={panelId()}
         class={twMerge(
           'flex w-full cursor-pointer items-center justify-between p-3 text-left transition-all duration-200',
-          props.isOpen && !props.isSimple && 'bg-gray-100/60 dark:bg-neutral-800',
+          props.isOpen && !props.isSimple && 'bg-neutral-100/60 dark:bg-neutral-800',
           props.isSeparated && 'rounded-t-lg',
           props.isSeparated && !props.isOpen && 'rounded-b-lg',
           isHighlighted() && (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
@@ -286,7 +286,7 @@ const Panel = (props: PanelProps): JSX.Element => {
           role="region"
           aria-labelledby={triggerId()}
           class={twMerge(
-            'overflow-hidden border-t border-gray-200 dark:border-neutral-800',
+            'overflow-hidden border-t border-neutral-200 dark:border-neutral-800',
             !props.isSimple && 'dark:bg-neutral-900/50',
             props.isSeparated && 'rounded-b-lg',
             props.panel.contentClass,

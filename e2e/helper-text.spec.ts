@@ -29,7 +29,7 @@ test.describe('HelperText', () => {
   test('should render gray variant with gray text color', async ({ page }) => {
     const gray = page.getByText('This is a neutral hint', { exact: true });
     const classes = await gray.getAttribute('class');
-    expect(classes).toContain('text-gray-500');
+    expect(classes).toContain('text-neutral-500');
   });
 
   test('should render info variant with blue text color', async ({ page }) => {
@@ -76,7 +76,9 @@ test.describe('HelperText', () => {
   // ==================== Validation Messages ====================
 
   test('should render failure validation message', async ({ page }) => {
-    const failure = page.getByText('Password must be at least 8 characters', { exact: true });
+    const failure = page.getByText('Password must be at least 8 characters', {
+      exact: true,
+    });
     await expect(failure).toBeVisible();
     const classes = await failure.getAttribute('class');
     expect(classes).toContain('text-red-600');

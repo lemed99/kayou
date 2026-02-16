@@ -40,7 +40,7 @@ test.describe('Label', () => {
       const labels = section.locator('label');
 
       const expected = [
-        { text: 'Default label', color: 'text-gray-900' },
+        { text: 'Default label', color: 'text-neutral-900' },
         { text: 'Info label', color: 'text-blue-500' },
         { text: 'Success label', color: 'text-green-700' },
         { text: 'Warning label', color: 'text-yellow-500' },

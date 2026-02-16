@@ -151,7 +151,7 @@ export default function PopoverPage() {
               content={
                 <div class="w-64 p-4">
                   <h4 class="font-semibold dark:text-white">Popover Title</h4>
-                  <p class="mt-1 text-sm text-gray-600 dark:text-neutral-300">
+                  <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
                     This is the popover content. Click outside or press Escape to close.
                   </p>
                 </div>

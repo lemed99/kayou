@@ -1,4 +1,5 @@
 import { For, JSX, Show, createEffect, createSignal } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 
 import {
   AlignCenterIcon,
@@ -36,6 +37,7 @@ import {
 import { Editor } from '@tiptap/core';
 
 import Popover from '../Popover';
+import Select, { type Option } from '../Select';
 import Tooltip from '../Tooltip';
 import {
   DEFAULT_TOOLBAR_CONFIG,
@@ -79,8 +81,8 @@ function ToolbarButton(props: ToolbarButtonProps): JSX.Element {
         aria-pressed={active()}
         class={`flex size-8 items-center justify-center rounded transition-colors ${
           active()
-            ? 'bg-gray-200 text-gray-900 dark:bg-neutral-700 dark:text-white'
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
+            ? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white'
+            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
         } ${props.disabled ? 'cursor-not-allowed opacity-50' : ''}`}
       >
         {props.children}
@@ -221,12 +223,55 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
   };
 
   // Heading dropdown options
-  const headingOptions = () => [
-    { level: 0, label: l().normalText, icon: null },
-    { level: 1, label: l().heading1, icon: Heading1Icon },
-    { level: 2, label: l().heading2, icon: Heading2Icon },
-    { level: 3, label: l().heading3, icon: Heading3Icon },
-    { level: 4, label: l().heading4, icon: Heading4Icon },
+  const HEADING_ICONS: Record<string, (props: Record<string, unknown>) => JSX.Element> = {
+    '1': Heading1Icon,
+    '2': Heading2Icon,
+    '3': Heading3Icon,
+    '4': Heading4Icon,
+  };
+
+  const headingSelectOptions = (): Option[] => [
+    { value: '0', label: l().normalText },
+    {
+      value: '1',
+      label: l().heading1,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <Heading1Icon />
+          {label}
+        </span>
+      ),
+    },
+    {
+      value: '2',
+      label: l().heading2,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <Heading2Icon />
+          {label}
+        </span>
+      ),
+    },
+    {
+      value: '3',
+      label: l().heading3,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <Heading3Icon />
+          {label}
+        </span>
+      ),
+    },
+    {
+      value: '4',
+      label: l().heading4,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <Heading4Icon />
+          {label}
+        </span>
+      ),
+    },
   ];
 
   const getCurrentHeadingLevel = () => {
@@ -250,10 +295,43 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
   };
 
   // List dropdown options
-  const listOptions = () => [
-    { type: 'bulletList', label: l().bulletList, icon: ListIcon },
-    { type: 'orderedList', label: l().orderedList, icon: OrderedListIcon },
-    { type: 'taskList', label: l().taskList, icon: TaskListIcon },
+  const LIST_ICONS: Record<string, (props: Record<string, unknown>) => JSX.Element> = {
+    bulletList: ListIcon,
+    orderedList: OrderedListIcon,
+    taskList: TaskListIcon,
+  };
+
+  const listSelectOptions = (): Option[] => [
+    {
+      value: 'bulletList',
+      label: l().bulletList,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <ListIcon />
+          {label}
+        </span>
+      ),
+    },
+    {
+      value: 'orderedList',
+      label: l().orderedList,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <OrderedListIcon />
+          {label}
+        </span>
+      ),
+    },
+    {
+      value: 'taskList',
+      label: l().taskList,
+      labelWrapper: (label: string) => (
+        <span class="flex items-center gap-2">
+          <TaskListIcon />
+          {label}
+        </span>
+      ),
+    },
   ];
 
   const getCurrentListType = () => {
@@ -279,8 +357,8 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
   };
 
   return (
-    <div class="min-w-0 overflow-x-auto border-b border-gray-200 bg-gray-50 dark:border-neutral-800 dark:bg-neutral-800">
-      <div class="flex w-max items-center divide-x divide-gray-200 p-1.5 dark:divide-neutral-800">
+    <div class="min-w-0 overflow-x-auto border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800">
+      <div class="flex w-max items-center divide-x divide-neutral-200 p-1.5 dark:divide-neutral-800">
         {/* Undo/Redo */}
         <Show when={config().history}>
           <ToolbarGroup>
@@ -314,88 +392,74 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
           <ToolbarGroup>
             {/* Headings Dropdown */}
             <Show when={config().headings}>
-              <Popover
-                position="bottom-start"
-                content={
-                  <div class="max-h-[200px] overflow-y-auto p-1">
-                    <For each={headingOptions()}>
-                      {(option) => (
-                        <button
-                          type="button"
-                          onClick={() => setHeading(option.level)}
-                          class={`flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-left text-sm transition-colors ${'text-gray-700 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-700'}`}
-                        >
-                          <Show when={option.icon} fallback={<span />}>
-                            {(Icon) => {
-                              const Comp = Icon();
-                              return <Comp />;
-                            }}
-                          </Show>
-                          <span class="flex-1">{option.label}</span>
-                          <Show when={getCurrentHeadingLevel() === option.level}>
-                            <CheckIcon aria-hidden="true" />
-                          </Show>
-                        </button>
-                      )}
-                    </For>
-                  </div>
-                }
-              >
-                <Tooltip content={l().textStyle} placement="bottom">
-                  <button
-                    type="button"
-                    disabled={props.disabled}
-                    class="flex h-8 items-center gap-1 rounded px-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
-                  >
-                    <Show when={getCurrentHeadingLevel() > 0} fallback={l().normal}>
-                      {`H${getCurrentHeadingLevel()}`}
-                    </Show>
-                    <ChevronDownIcon class="size-3" />
-                  </button>
-                </Tooltip>
-              </Popover>
+              <Select
+                options={headingSelectOptions()}
+                value={String(getCurrentHeadingLevel())}
+                onSelect={(opt) => {
+                  if (opt) setHeading(Number(opt.value));
+                }}
+                disabled={props.disabled}
+                inputComponent={(triggerProps) => {
+                  const level = () => getCurrentHeadingLevel();
+                  const Icon = () => HEADING_ICONS[String(level())];
+                  return (
+                    <Tooltip content={l().textStyle} placement="bottom">
+                      <button
+                        type="button"
+                        disabled={triggerProps.disabled}
+                        onKeyDown={triggerProps.onKeyDown}
+                        role="combobox"
+                        aria-expanded={triggerProps.isOpen()}
+                        aria-controls={triggerProps.listboxId}
+                        aria-activedescendant={triggerProps.highlightedOptionId()}
+                        aria-haspopup="listbox"
+                        aria-label={l().textStyle}
+                        class="flex h-8 items-center gap-1 rounded px-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+                      >
+                        <Show when={Icon()} fallback={l().normal}>
+                          {(Ic) => <Dynamic component={Ic()} />}
+                        </Show>
+                        <ChevronDownIcon class="size-3" />
+                      </button>
+                    </Tooltip>
+                  );
+                }}
+              />
             </Show>
 
             {/* Lists Dropdown */}
             <Show when={config().lists}>
-              <Popover
-                position="bottom-start"
-                content={
-                  <div class="max-h-[200px] overflow-y-auto p-1">
-                    <For each={listOptions()}>
-                      {(option) => (
-                        <button
-                          type="button"
-                          onClick={() => setList(option.type)}
-                          class={`flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded px-2 py-1.5 text-left text-sm transition-colors ${'text-gray-700 hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-700'}`}
-                        >
-                          <option.icon />
-                          <span class="flex-1">{option.label}</span>
-                          <Show when={getCurrentListType() === option.type}>
-                            <CheckIcon aria-hidden="true" />
-                          </Show>
-                        </button>
-                      )}
-                    </For>
-                  </div>
-                }
-              >
-                <Tooltip content={l().listStyle} placement="bottom">
-                  <button
-                    type="button"
-                    disabled={props.disabled}
-                    class="flex h-8 items-center gap-1 rounded px-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
-                  >
-                    <Show when={getCurrentListType()} fallback={<ListIcon />}>
-                      {(listType) => {
-                        const opt = listOptions().find((o) => o.type === listType());
-                        return opt ? <opt.icon /> : <ListIcon />;
-                      }}
-                    </Show>
-                    <ChevronDownIcon class="size-3" />
-                  </button>
-                </Tooltip>
-              </Popover>
+              <Select
+                options={listSelectOptions()}
+                value={getCurrentListType() ?? ''}
+                onSelect={(opt) => {
+                  if (opt) setList(opt.value);
+                }}
+                disabled={props.disabled}
+                inputComponent={(triggerProps) => {
+                  const listType = () => getCurrentListType();
+                  const Icon = () => LIST_ICONS[listType() ?? ''] ?? ListIcon;
+                  return (
+                    <Tooltip content={l().listStyle} placement="bottom">
+                      <button
+                        type="button"
+                        disabled={triggerProps.disabled}
+                        onKeyDown={triggerProps.onKeyDown}
+                        role="combobox"
+                        aria-expanded={triggerProps.isOpen()}
+                        aria-controls={triggerProps.listboxId}
+                        aria-activedescendant={triggerProps.highlightedOptionId()}
+                        aria-haspopup="listbox"
+                        aria-label={l().listStyle}
+                        class="flex h-8 items-center gap-1 rounded px-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+                      >
+                        <Dynamic component={Icon()} />
+                        <ChevronDownIcon class="size-3" />
+                      </button>
+                    </Tooltip>
+                  );
+                }}
+              />
             </Show>
 
             {/* Blockquote */}
@@ -487,7 +551,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                 position="bottom-start"
                 content={
                   <div class="p-2">
-                    <div class="mb-2 text-xs font-medium text-gray-500 dark:text-neutral-400">
+                    <div class="mb-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       {l().highlight}
                     </div>
                     <div class="grid grid-cols-4 gap-1">
@@ -497,7 +561,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                             <button
                               type="button"
                               onClick={() => setHighlightColor(item.color)}
-                              class="size-7 rounded border border-gray-200 transition-transform hover:scale-110 dark:border-neutral-700"
+                              class="size-7 rounded border border-neutral-200 transition-transform hover:scale-110 dark:border-neutral-700"
                               style={{ 'background-color': item.color }}
                               aria-label={item.name}
                             />
@@ -508,7 +572,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                     <button
                       type="button"
                       onClick={() => setHighlightColor(null)}
-                      class="mt-2 w-full rounded px-2 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                      class="mt-2 w-full rounded px-2 py-1 text-xs text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
                     >
                       {l().removeHighlight}
                     </button>
@@ -521,8 +585,8 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                     disabled={props.disabled}
                     class={`flex h-8 items-center gap-1 rounded px-2 transition-colors ${
                       isActive('highlight')()
-                        ? 'bg-gray-200 text-gray-900 dark:bg-neutral-700 dark:text-white'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
+                        ? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
                     } disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     <HighlighterIcon />
@@ -553,7 +617,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         }
                       }}
                       placeholder={l().enterUrl}
-                      class="h-8 w-56 rounded border border-gray-300 bg-white px-2 text-sm focus:border-blue-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      class="h-8 w-56 rounded border border-neutral-300 bg-white px-2 text-sm focus:border-blue-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                       autofocus
                     />
                     <Tooltip content={l().applyLink} placement="bottom">
@@ -561,19 +625,19 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         type="button"
                         onClick={applyLink}
                         disabled={!linkUrl()}
-                        class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+                        class="flex size-8 items-center justify-center rounded text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
                         aria-label={l().applyLink}
                       >
                         <CheckIcon />
                       </button>
                     </Tooltip>
-                    <div class="mx-0.5 h-6 w-px bg-gray-200 dark:bg-neutral-700" />
+                    <div class="mx-0.5 h-6 w-px bg-neutral-200 dark:bg-neutral-700" />
                     <Tooltip content={l().openInNewWindow} placement="bottom">
                       <button
                         type="button"
                         onClick={openLinkInNewWindow}
                         disabled={!linkUrl()}
-                        class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+                        class="flex size-8 items-center justify-center rounded text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
                         aria-label={l().openInNewWindow}
                       >
                         <LinkExternal01Icon />
@@ -584,7 +648,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         type="button"
                         onClick={removeLink}
                         disabled={!isActive('link')()}
-                        class="flex size-8 items-center justify-center rounded text-gray-600 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-red-400"
+                        class="flex size-8 items-center justify-center rounded text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-red-400"
                         aria-label={l().removeLink}
                       >
                         <Trash01Icon />
@@ -600,8 +664,8 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                     aria-label={l().link}
                     class={`flex size-8 items-center justify-center rounded transition-colors ${
                       isActive('link')()
-                        ? 'bg-gray-200 text-gray-900 dark:bg-neutral-700 dark:text-white'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
+                        ? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white'
                     } ${props.disabled ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     <Link01Icon />

@@ -360,9 +360,9 @@ function useReturnFocus() {
 
 ### Common Issues in This Codebase
 
-1. **Gray text on white:** `text-gray-400` on white may fail contrast
+1. **Gray text on white:** `text-neutral-400` on white may fail contrast
 2. **Disabled states:** Ensure disabled text still meets 3:1 minimum
-3. **Placeholder text:** Often too light - use `text-gray-600` minimum
+3. **Placeholder text:** Often too light - use `text-neutral-600` minimum
 
 ## Testing Checklist
 

@@ -1,12 +1,12 @@
 import {
-  Component,
-  For,
-  type JSX,
-  Show,
-  createEffect,
-  createMemo,
-  createSignal,
-  onMount,
+    Component,
+    For,
+    type JSX,
+    Show,
+    createEffect,
+    createMemo,
+    createSignal,
+    onMount,
 } from 'solid-js';
 
 import { Copy01Icon, SearchSmIcon, Star01Icon } from '@kayou/icons';
@@ -506,7 +506,7 @@ export default function IconsPage() {
   return (
     <div class="min-h-screen bg-white dark:bg-neutral-900">
       {/* Header */}
-      <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950/20">
+      <div class="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-blue-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-blue-950/20">
         {/* Decorative icon */}
         <div class="pointer-events-none absolute -right-20 -top-20 opacity-[0.07] dark:opacity-[0.04]">
           <Star01Icon class="size-[500px] text-blue-600" />
@@ -514,14 +514,14 @@ export default function IconsPage() {
 
         <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           {/* Stats bar */}
-          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-neutral-400">
-            <span class="font-medium text-gray-900 dark:text-white">
+          <div class="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+            <span class="font-medium text-neutral-900 dark:text-white">
               {allIconsList().length} icons
             </span>
           </div>
 
           {/* Main headline */}
-          <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white">
+          <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl dark:text-white">
             Beautiful SVG icons for your SolidJS projects.
           </h1>
 
@@ -530,23 +530,23 @@ export default function IconsPage() {
       </div>
 
       {/* Search bar */}
-      <div class="border-t border-gray-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900">
+      <div class="border-t border-neutral-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="flex items-center gap-4 py-6">
-            <SearchSmIcon class="size-5 text-gray-400" />
+            <SearchSmIcon class="size-5 text-neutral-400" />
             <input
               type="text"
               placeholder="Search all icons..."
               value={searchQuery()}
               onInput={(e) => setSearchQuery(e.currentTarget.value)}
-              class="flex-1 border-0 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder-gray-500"
+              class="flex-1 border-0 bg-transparent text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder-neutral-500"
             />
           </div>
         </div>
       </div>
 
       {/* Category Filter */}
-      <div class="border-b border-gray-100 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <div class="border-b border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="flex flex-wrap gap-2 py-4">
             <button
@@ -554,8 +554,8 @@ export default function IconsPage() {
               onClick={() => setSelectedCategory(null)}
               class={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                 selectedCategory() === null
-                  ? 'bg-gray-900 text-white dark:bg-white dark:text-neutral-900'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
               }`}
             >
               All
@@ -567,8 +567,8 @@ export default function IconsPage() {
                   onClick={() => setSelectedCategory(category)}
                   class={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     selectedCategory() === category
-                      ? 'bg-gray-900 text-white dark:bg-white dark:text-neutral-900'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
                   }`}
                 >
                   {category}
@@ -585,12 +585,12 @@ export default function IconsPage() {
           when={iconsData()}
           fallback={
             <div class="flex items-center justify-center py-20">
-              <p class="text-sm text-gray-400 dark:text-neutral-500">Loading icons...</p>
+              <p class="text-sm text-neutral-400 dark:text-neutral-500">Loading icons...</p>
             </div>
           }
         >
           {/* Results Header */}
-          <div class="mb-4 text-sm text-gray-600 dark:text-neutral-400">
+          <div class="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
             <Show
               when={searchQuery() || selectedCategory()}
               fallback={<span>Showing all {allIconsList().length} icons</span>}
@@ -602,7 +602,7 @@ export default function IconsPage() {
                   <span>
                     {' '}
                     in{' '}
-                    <span class="font-medium text-gray-900 dark:text-white">
+                    <span class="font-medium text-neutral-900 dark:text-white">
                       {selectedCategory()}
                     </span>
                   </span>
@@ -611,7 +611,7 @@ export default function IconsPage() {
                   <span>
                     {' '}
                     matching "
-                    <span class="font-medium text-gray-900 dark:text-white">
+                    <span class="font-medium text-neutral-900 dark:text-white">
                       {searchQuery()}
                     </span>
                     "
@@ -626,13 +626,13 @@ export default function IconsPage() {
             when={filteredIcons().length > 0}
             fallback={
               <div class="flex flex-col items-center justify-center py-20">
-                <div class="rounded-full bg-gray-100 p-4 dark:bg-neutral-900">
-                  <SearchSmIcon class="size-8 text-gray-400" />
+                <div class="rounded-full bg-neutral-100 p-4 dark:bg-neutral-900">
+                  <SearchSmIcon class="size-8 text-neutral-400" />
                 </div>
-                <h3 class="mt-4 text-lg font-medium text-gray-950 dark:text-white">
+                <h3 class="mt-4 text-lg font-medium text-neutral-950 dark:text-white">
                   No icons found
                 </h3>
-                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                   Try a different search term or category.
                 </p>
               </div>
@@ -643,18 +643,18 @@ export default function IconsPage() {
                 {(icon) => {
                   const IconComponent = icon.component;
                   return (
-                    <div class="group relative flex flex-col items-center gap-2 rounded-xl border border-transparent cursor-pointer bg-gray-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
-                      <div class="flex size-5 items-center justify-center text-gray-700 transition-colors group-hover:text-blue-600 dark:text-neutral-300 dark:group-hover:text-blue-400">
+                    <div class="group relative flex flex-col items-center gap-2 rounded-xl border border-transparent cursor-pointer bg-neutral-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
+                      <div class="flex size-5 items-center justify-center text-neutral-700 transition-colors group-hover:text-blue-600 dark:text-neutral-300 dark:group-hover:text-blue-400">
                         <IconComponent class="size-5" />
                       </div>
-                      <span class="w-full truncate text-center text-xs text-gray-500 group-hover:text-blue-600 dark:text-neutral-400 dark:group-hover:text-blue-400">
+                      <span class="w-full truncate text-center text-xs text-neutral-500 group-hover:text-blue-600 dark:text-neutral-400 dark:group-hover:text-blue-400">
                         {formatIconName(icon.name)}
                       </span>
 
                       {/* Copy button on hover */}
                       <button
                         onClick={(e) => copyIconName(icon.name, e)}
-                        class="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-sm transition-opacity hover:bg-gray-100 group-hover:opacity-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                        class="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-neutral-700 opacity-0 shadow-sm transition-opacity hover:bg-neutral-100 group-hover:opacity-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
                         title={`Copy ${icon.name}`}
                       >
                         <Copy01Icon class="size-3" />

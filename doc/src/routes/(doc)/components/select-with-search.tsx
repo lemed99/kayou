@@ -19,6 +19,11 @@ export default function SelectWithSearchPage() {
           explanation: 'optionRowHeight enables rendering only visible options.',
         },
         {
+          term: 'Disabled Options',
+          explanation:
+            'Individual options can be disabled to prevent selection while remaining visible.',
+        },
+        {
           term: 'Infinite Scroll',
           explanation: 'onLoadMore callback enables loading more options on scroll.',
         },
@@ -40,9 +45,9 @@ export default function SelectWithSearchPage() {
       props={[
         {
           name: 'options',
-          type: 'Array<{ value: string; label: string }>',
+          type: 'Option[]',
           default: '-',
-          description: 'Array of options to display in the dropdown',
+          description: 'Array of options to display in the dropdown. Set disabled on individual options to prevent selection.',
           required: true,
         },
         {
@@ -159,6 +164,17 @@ export default function SelectWithSearchPage() {
       ]}
       subComponents={[
         {
+          name: 'Option',
+          kind: 'type',
+          description: 'Option item shared by Select, SelectWithSearch, and MultiSelect',
+          props: [
+            { name: 'value', type: 'string', default: '-', description: 'Unique value identifying this option' },
+            { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
+            { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
+            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+          ],
+        },
+        {
           name: 'SelectLabels',
           kind: 'type',
           description: 'Visible text labels for the dropdown',
@@ -192,12 +208,28 @@ export default function SelectWithSearchPage() {
           ];
 
           return (
-            <div class="w-72">
+            <div class="flex flex-col gap-6 w-72">
               <SelectWithSearch
                 options={countryOptions}
                 onSelect={(opt) => {}}
                 placeholder="Search countries..."
                 label="Country"
+                autoFillSearchKey
+              />
+
+              {/* Disabled options */}
+              <SelectWithSearch
+                options={[
+                  { value: 'us', label: 'United States' },
+                  { value: 'uk', label: 'United Kingdom', disabled: true },
+                  { value: 'ca', label: 'Canada' },
+                  { value: 'au', label: 'Australia', disabled: true },
+                  { value: 'de', label: 'Germany' },
+                ]}
+                onSelect={(opt) => {}}
+                placeholder="Search countries..."
+                label="With Disabled Options"
+                helperText="UK and Australia are disabled"
                 autoFillSearchKey
               />
             </div>
@@ -210,6 +242,17 @@ export default function SelectWithSearchPage() {
         <SelectWithSearch options={options} onSelect={handleSelect} placeholder="Search..." />
         <SelectWithSearch options={options} onSelect={handleSelect} autoFillSearchKey />
         <SelectWithSearch options={options} onSelect={handleSelect} label="Category" idValue="preselected" />
+
+        {/* Disabled options */}
+        <SelectWithSearch
+          options={[
+            { value: '1', label: 'Available' },
+            { value: '2', label: 'Unavailable', disabled: true },
+            { value: '3', label: 'Also available' },
+          ]}
+          onSelect={handleSelect}
+          autoFillSearchKey
+        />
       `}
     />
   );

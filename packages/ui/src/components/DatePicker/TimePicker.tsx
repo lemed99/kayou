@@ -84,14 +84,6 @@ const TimePicker = (props: TimePickerProps) => {
     }
   };
 
-  const handleEscape = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopPropagation();
-      props.onEscape?.();
-    }
-  };
-
   const [timePickerRef, setTimePickerRef] = createSignal<HTMLDivElement>();
 
   createEffect(() => {
@@ -117,16 +109,15 @@ const TimePicker = (props: TimePickerProps) => {
   return (
     <div
       ref={setTimePickerRef}
-      class="flex items-center justify-center gap-2 border-t border-gray-300 py-3 dark:border-neutral-800"
+      class="flex items-center justify-center gap-2 border-t border-neutral-300 py-3 dark:border-neutral-800"
       role="group"
       aria-label={props.ariaLabels.timePicker}
     >
-      <div class="flex w-fit items-center justify-center gap-0.5 rounded-lg border border-gray-200 dark:border-neutral-800">
+      <div class="flex w-fit items-center justify-center gap-0.5 rounded-lg border border-neutral-200 dark:border-neutral-800">
         <NumberInput
           value={displayHour()}
           sizing="sm"
           onValueChange={handleHourChange}
-          onKeyDown={handleEscape}
           placeholder="00"
           style={{
             border: 'none',
@@ -138,15 +129,15 @@ const TimePicker = (props: TimePickerProps) => {
           wrap
           class="w-10"
           aria-label={props.ariaLabels.hour}
+          onFocus={(e) => e.target.select()}
         />
-        <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
+        <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
         <NumberInput
           value={displayMinute()}
           sizing="sm"
           onValueChange={(v) => {
             if (v !== null) props.onMinuteChange(v);
           }}
-          onKeyDown={handleEscape}
           placeholder="00"
           style={{
             border: 'none',
@@ -159,16 +150,16 @@ const TimePicker = (props: TimePickerProps) => {
           wrap
           class="w-10"
           aria-label={props.ariaLabels.minute}
+          onFocus={(e) => e.target.select()}
         />
         <Show when={props.showSeconds}>
-          <span class="font-medium text-gray-400 dark:text-neutral-500">:</span>
+          <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
           <NumberInput
             value={displaySecond()}
             sizing="sm"
             onValueChange={(v) => {
               if (v !== null) props.onSecondChange(v);
             }}
-            onKeyDown={handleEscape}
             placeholder="00"
             style={{
               border: 'none',
@@ -181,10 +172,11 @@ const TimePicker = (props: TimePickerProps) => {
             wrap
             class="w-10"
             aria-label={props.ariaLabels.second}
+            onFocus={(e) => e.target.select()}
           />
         </Show>
         <Show when={is12h()}>
-          <span class="h-5 w-1 bg-gray-200 dark:bg-neutral-700" />
+          <span class="h-5 w-1 bg-neutral-200 dark:bg-neutral-700" />
           <Select
             options={periodOptions}
             value={period()}

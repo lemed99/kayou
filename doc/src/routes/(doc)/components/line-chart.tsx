@@ -239,13 +239,13 @@ export default function LineChartPage() {
         {
           name: 'axisClass',
           type: 'string',
-          default: '"text-gray-500 dark:text-neutral-500"',
+          default: '"text-neutral-500 dark:text-neutral-500"',
           description: 'CSS class applied to axis elements (XAxis, YAxis)',
         },
         {
           name: 'gridClass',
           type: 'string',
-          default: '"text-gray-300 dark:text-neutral-800"',
+          default: '"text-neutral-300 dark:text-neutral-800"',
           description: 'CSS class applied to the CartesianGrid element',
         },
         {

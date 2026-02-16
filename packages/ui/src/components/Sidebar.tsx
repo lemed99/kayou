@@ -195,7 +195,8 @@ const sidebarTheme = {
 const sidebarItemTheme = {
   item: {
     active: 'bg-blue-800/10 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    inactive: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800',
+    inactive:
+      'text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800',
     base: 'cursor-pointer text-sm flex items-center justify-center rounded-md px-2.5 py-2 font-normal relative',
     collapsed: {
       noIcon: 'font-bold',
@@ -217,7 +218,7 @@ const sidebarCollapseTheme = {
       base: 'size-5 transition duration-75 flex shrink-0',
       open: {
         off: '',
-        on: 'text-gray-900 dark:text-white',
+        on: 'text-neutral-900 dark:text-white',
       },
     },
     label: {
@@ -228,7 +229,7 @@ const sidebarCollapseTheme = {
   },
   item: {
     active: 'bg-blue-800/10 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    inactive: 'text-gray-900 dark:text-white',
+    inactive: 'text-neutral-900 dark:text-white',
     collapsed: {
       insideCollapse: 'w-full pl-5',
     },
@@ -395,7 +396,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
           content={
             <div class="min-w-[180px]">
               <Show when={!isSidebarOpen()}>
-                <div class="rounded-t border-b border-gray-200 bg-gray-50 py-2.5 pl-7 pr-2.5 text-xs font-semibold dark:border-neutral-800 dark:bg-neutral-800 dark:text-white">
+                <div class="rounded-t border-b border-neutral-200 bg-neutral-50 py-2.5 pl-7 pr-2.5 text-xs font-semibold dark:border-neutral-800 dark:bg-neutral-800 dark:text-white">
                   {mn.label}
                 </div>
               </Show>
@@ -408,7 +409,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
                       class={
                         sb.isActive
                           ? ''
-                          : 'hover:bg-gray-100/75 dark:hover:bg-neutral-800'
+                          : 'hover:bg-neutral-100/75 dark:hover:bg-neutral-800'
                       }
                       isActive={sb.isActive}
                       id={sb.id}
@@ -493,7 +494,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
                     aria-label={isSidebarOpen() ? a().collapse : a().expand}
                     aria-expanded={isSidebarOpen()}
                     class={twMerge(
-                      'text-gray-900 dark:text-white',
+                      'text-neutral-900 dark:text-white',
                       isSidebarOpen() ? 'cursor-w-resize' : 'cursor-e-resize',
                     )}
                     onClick={() => {
@@ -535,7 +536,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
 
             {/* Border separator between header and body */}
             <Show when={headerItems().length > 0 || pinnedItemsData().length > 0}>
-              <div class="mt-2 border-b border-gray-200 dark:border-neutral-800" />
+              <div class="mt-2 border-b border-neutral-200 dark:border-neutral-800" />
             </Show>
           </div>
         </Show>
@@ -618,7 +619,7 @@ const SidebarItemComponent = (props: SidebarItemProps) => {
             sidebarItemTheme.item.icon.base,
             props.isActive
               ? 'text-blue-800 dark:text-blue-300'
-              : 'text-gray-900 dark:text-white',
+              : 'text-neutral-900 dark:text-white',
           ),
         })}
       </Show>
@@ -656,7 +657,7 @@ const SidebarItemComponent = (props: SidebarItemProps) => {
                   'cursor-pointer',
                   props.isPinned
                     ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-400 dark:text-neutral-500',
+                    : 'text-neutral-400 dark:text-neutral-500',
                 )}
                 aria-label={
                   props.isPinned
@@ -758,7 +759,7 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
           props.isActive && !props.isItemCollapsed
             ? sidebarCollapseTheme.item.active
             : sidebarCollapseTheme.item.inactive,
-          props.hoveredItem === props.id ? 'bg-gray-100 dark:bg-neutral-800' : '',
+          props.hoveredItem === props.id ? 'bg-neutral-100 dark:bg-neutral-800' : '',
           props.class,
         )}
       >
@@ -774,7 +775,7 @@ const SidebarCollapse = (props: SidebarCollapseProps) => {
               ],
               props.isActive && !props.isItemCollapsed
                 ? 'text-blue-800 dark:text-blue-300'
-                : 'text-gray-900 dark:text-white',
+                : 'text-neutral-900 dark:text-white',
             ),
           })}
         </Show>

@@ -234,6 +234,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const [minute, setMinute] = createSignal(0);
   const [second, setSecond] = createSignal(0);
 
+  const [hoveredDate, setHoveredDate] = createSignal<Date | null>(null);
+  const [usingKeyboard, setUsingKeyboard] = createSignal(false);
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
   const [announcement, setAnnouncement] = createSignal('');
 
@@ -323,36 +325,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const closeCalendar = () => {
     setIsOpen(false);
     setFocusedDate(null);
+    setHoveredDate(null);
     inputRef()?.focus();
     props.onBlur?.();
-  };
-
-  /**
-   * Notifies parent of value changes.
-   */
-  const notifyChange = (value: DateValue) => {
-    props.onChange?.(value);
-  };
-
-  /**
-   * Handles hour change from time picker (does not fire onChange).
-   */
-  const handleHourChange = (newHour: number) => {
-    setHour(newHour);
-  };
-
-  /**
-   * Handles minute change from time picker (does not fire onChange).
-   */
-  const handleMinuteChange = (newMinute: number) => {
-    setMinute(newMinute);
-  };
-
-  /**
-   * Handles second change from time picker (does not fire onChange).
-   */
-  const handleSecondChange = (newSecond: number) => {
-    setSecond(newSecond);
   };
 
   /**
@@ -406,7 +381,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const handleApply = () => {
     const value = buildCurrentValue();
     setDatesObjectValue(value);
-    notifyChange(value);
+    props.onChange?.(value);
     closeCalendar();
   };
 
@@ -441,7 +416,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         } else {
           const newValue: DateValue = { date: dateISO };
           setDatesObjectValue(newValue);
-          notifyChange(newValue);
+          props.onChange?.(newValue);
           announce(`Selected ${dateLabel}`);
           closeCalendar();
         }
@@ -458,7 +433,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         }
         setDatesObjectValue('multipleDates', newDates);
         if (!hasFooter()) {
-          notifyChange({ multipleDates: newDates });
+          props.onChange?.({ multipleDates: newDates });
         }
         focusCurrentDateButton();
         break;
@@ -471,7 +446,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           const newValue = { startDate: dateISO, endDate: undefined };
           setDatesObjectValue(newValue);
           if (!hasFooter()) {
-            notifyChange(newValue);
+            props.onChange?.(newValue);
           }
           announce(`Range start: ${dateLabel}. ${a().rangeStartSelected}`);
           focusCurrentDateButton();
@@ -490,11 +465,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             };
           }
           setDatesObjectValue(newValue);
+          setHoveredDate(null);
           if (hasFooter()) {
             announce(`Range end: ${dateLabel}. Range selected.`);
             focusCurrentDateButton();
           } else {
-            notifyChange(newValue);
+            props.onChange?.(newValue);
             announce(`Range end: ${dateLabel}. Range selected.`);
             closeCalendar();
           }
@@ -522,7 +498,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       setDatesObjectValue(newValue);
       setCurrentDate(parseDate(value.date));
       if (!hasFooter()) {
-        notifyChange(newValue);
+        props.onChange?.(newValue);
         closeCalendar();
       }
     } else if (value.startDate && value.endDate) {
@@ -536,7 +512,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       if (hasFooter()) {
         // Wait for Apply
       } else {
-        notifyChange(newValue);
+        props.onChange?.(newValue);
         closeCalendar();
       }
     }
@@ -580,6 +556,29 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (type() !== 'range') return false;
     if (!datesObjectValue.startDate || !datesObjectValue.endDate) return false;
     return isInRange(date, datesObjectValue.startDate, datesObjectValue.endDate);
+  };
+
+  // Memoize preview range boundaries so each button only does a cheap Date comparison
+  const previewRange = createMemo(() => {
+    if (type() !== 'range') return null;
+    if (!datesObjectValue.startDate || datesObjectValue.endDate) return null;
+    const hovered = hoveredDate();
+    if (!hovered) return null;
+    const start = parseDate(datesObjectValue.startDate);
+    return hovered >= start ? { start, end: hovered } : { start: hovered, end: start };
+  });
+
+  const isDateInPreviewRange = (date: Date): boolean => {
+    const range = previewRange();
+    if (!range) return false;
+    return date > range.start && date < range.end;
+  };
+
+  const isPreviewEndpoint = (date: Date): boolean => {
+    if (!previewRange()) return false;
+    const hovered = hoveredDate();
+    if (!hovered) return false;
+    return isSameDay(date, hovered);
   };
 
   /**
@@ -743,6 +742,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const handleCalendarKeyDown = (e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
     const isDateButton = target.getAttribute('role') === 'gridcell';
+
+    if (isDateButton && !usingKeyboard()) {
+      setUsingKeyboard(true);
+      setHoveredDate(null);
+    }
 
     switch (e.key) {
       case 'Escape': {
@@ -919,6 +923,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
   createEffect(() => {
     const handleClickOutside = (event: PointerEvent) => {
+      if (!isOpen()) return;
+
       const floating = refs.floating();
       const reference = refs.reference();
       const target = event.target as HTMLElement;
@@ -952,7 +958,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   };
 
   return (
-    <div class={twMerge('relative w-full text-gray-700 dark:text-neutral-200')}>
+    <div class={twMerge('relative w-full text-neutral-700 dark:text-neutral-200')}>
       {/* Hidden input for form integration (ISO format for server-side parsing) */}
       <Show when={props.name}>
         <input
@@ -1029,7 +1035,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             onClick={() => {
               setDatesObjectValue(reconcile({}));
               if (!hasFooter()) {
-                notifyChange({});
+                props.onChange?.({});
               }
               focusInput();
             }}
@@ -1161,7 +1167,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               } as JSX.CSSProperties
             }
             class={twMerge(
-              'z-50 w-fit rounded-lg border border-gray-300 bg-white px-2.5 py-3 text-gray-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
+              'z-50 w-fit rounded-lg border border-neutral-300 bg-white px-2.5 py-3 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
             )}
           >
             <div class="flex gap-3">
@@ -1184,6 +1190,20 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   isSingletonDateSelected={isSingletonDateSelected}
                   isRangeDateSelected={isRangeDateSelected}
                   isDateInRange={isDateInRange}
+                  isDateInPreviewRange={isDateInPreviewRange}
+                  isPreviewEndpoint={isPreviewEndpoint}
+                  onDateHover={(date) => {
+                    if (date === null) {
+                      setHoveredDate(null);
+                    } else if (!usingKeyboard()) {
+                      setHoveredDate(date);
+                    }
+                  }}
+                  onDateMouseMove={() => {
+                    if (usingKeyboard()) {
+                      setUsingKeyboard(false);
+                    }
+                  }}
                   isDateDisabled={isDateDisabled}
                   minDate={minDate()}
                   maxDate={maxDate()}
@@ -1200,9 +1220,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                     hour={hour}
                     minute={minute}
                     second={second}
-                    onHourChange={handleHourChange}
-                    onMinuteChange={handleMinuteChange}
-                    onSecondChange={handleSecondChange}
+                    onHourChange={setHour}
+                    onMinuteChange={setMinute}
+                    onSecondChange={setSecond}
                     onEscape={closeCalendar}
                     format={timeFormat()}
                     minuteStep={minuteStep()}
@@ -1213,10 +1233,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 </Show>
                 <Show when={hasFooter()}>
                   <div
-                    class="flex justify-end gap-2 border-t border-gray-300 pt-3 dark:border-neutral-800"
+                    class="flex justify-end gap-2 border-t border-neutral-300 pt-3 dark:border-neutral-800"
                     data-footer
                   >
-                    <Button color="light" size="sm" onClick={handleCancel}>
+                    <Button color="transparent" size="sm" onClick={handleCancel}>
                       {l().cancel}
                     </Button>
                     <Button size="sm" onClick={handleApply}>

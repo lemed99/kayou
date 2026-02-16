@@ -13,14 +13,18 @@ test.describe('Checkbox', () => {
 
   test('renders checkbox with label', async ({ page }) => {
     const section = exampleSection(page, 'Basic Checkbox');
-    const checkbox = section.getByRole('checkbox', { name: 'Accept terms and conditions' });
+    const checkbox = section.getByRole('checkbox', {
+      name: 'Accept terms and conditions',
+    });
     await expect(checkbox).toBeVisible();
     await expect(checkbox).not.toBeChecked();
   });
 
   test('toggles on click', async ({ page }) => {
     const section = exampleSection(page, 'Basic Checkbox');
-    const checkbox = section.getByRole('checkbox', { name: 'Accept terms and conditions' });
+    const checkbox = section.getByRole('checkbox', {
+      name: 'Accept terms and conditions',
+    });
     await checkbox.click();
     await expect(checkbox).toBeChecked();
     await checkbox.click();
@@ -30,7 +34,9 @@ test.describe('Checkbox', () => {
   test('toggles when clicking label text', async ({ page }) => {
     const section = exampleSection(page, 'Basic Checkbox');
     const labelSpan = section.getByText('Accept terms and conditions', { exact: true });
-    const checkbox = section.getByRole('checkbox', { name: 'Accept terms and conditions' });
+    const checkbox = section.getByRole('checkbox', {
+      name: 'Accept terms and conditions',
+    });
     await labelSpan.click();
     await expect(checkbox).toBeChecked();
   });
@@ -48,7 +54,9 @@ test.describe('Checkbox', () => {
 
   test('toggles with Space key', async ({ page }) => {
     const section = exampleSection(page, 'Basic Checkbox');
-    const checkbox = section.getByRole('checkbox', { name: 'Accept terms and conditions' });
+    const checkbox = section.getByRole('checkbox', {
+      name: 'Accept terms and conditions',
+    });
     await checkbox.focus();
     await expect(checkbox).toBeFocused();
     await page.keyboard.press('Space');
@@ -86,7 +94,7 @@ test.describe('Checkbox', () => {
   test('dark variant has gray checked background', async ({ page }) => {
     const section = exampleSection(page, 'Color Variants');
     const dark = section.getByRole('checkbox', { name: 'Dark checkbox' });
-    await expect(dark).toHaveClass(/checked:bg-gray-800/);
+    await expect(dark).toHaveClass(/checked:bg-neutral-800/);
   });
 
   // ── Label Position ───────────────────────────────────────────────

@@ -8,6 +8,7 @@ import NumberInput from '../NumberInput';
 import type { DatePickerAriaLabels } from './DatePicker';
 import {
   addMonths,
+  getDaysLong,
   getDaysShort,
   getMonthsShort,
   isSameDay,
@@ -48,6 +49,14 @@ export interface CalendarProps {
   isRangeDateSelected: (date: Date) => { start: boolean; end: boolean };
   /** Function to check if a date falls within the selected range. */
   isDateInRange: (date: Date) => boolean;
+  /** Function to check if a date falls within the hover preview range. */
+  isDateInPreviewRange?: (date: Date) => boolean;
+  /** Function to check if a date is the hovered endpoint of the preview range. */
+  isPreviewEndpoint?: (date: Date) => boolean;
+  /** Callback when a date is hovered (for range preview). */
+  onDateHover?: (date: Date | null) => void;
+  /** Callback when mouse moves over a date (to detect mouse-to-keyboard switch). */
+  onDateMouseMove?: () => void;
   /** Function to check if a date is disabled. */
   isDateDisabled: (date: Date) => boolean;
   /** Minimum selectable date. */
@@ -163,12 +172,13 @@ const Calendar = (props: CalendarProps) => {
 
   // Get day headers in correct order based on weekStartsOn
   const dayHeaders = createMemo(() => {
-    const allDays = getDaysShort(props.locale); // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
-    if (props.weekStartsOn === 0) {
-      // Rotate to start from Sunday: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
-      return [allDays[6], ...allDays.slice(0, 6)];
-    }
-    return allDays;
+    const shortDays = getDaysShort(props.locale);
+    const longDays = getDaysLong(props.locale);
+    const short =
+      props.weekStartsOn === 0 ? [shortDays[6], ...shortDays.slice(0, 6)] : shortDays;
+    const long =
+      props.weekStartsOn === 0 ? [longDays[6], ...longDays.slice(0, 6)] : longDays;
+    return short.map((s, i) => ({ short: s, long: long[i] }));
   });
 
   const handleDateClick = (date: Date) => {
@@ -401,6 +411,8 @@ const Calendar = (props: CalendarProps) => {
   const rangeSelection = (date: Date) => props.isRangeDateSelected(date);
   const isInCurrentMonth = (date: Date) => isCurrentMonth(date);
   const isInDateRange = (date: Date) => props.isDateInRange(date);
+  const isInPreviewRange = (date: Date) => props.isDateInPreviewRange?.(date) ?? false;
+  const isPreviewEnd = (date: Date) => props.isPreviewEndpoint?.(date) ?? false;
   const isDisabled = (date: Date) => props.isDateDisabled(date);
   const isToday = (date: Date) => isSameDay(date, new Date());
 
@@ -446,7 +458,7 @@ const Calendar = (props: CalendarProps) => {
     >
       <div
         data-calendar-header
-        class="flex items-center space-x-1.5 rounded-md border border-gray-300 px-2 py-1.5 dark:border-neutral-800"
+        class="flex items-center space-x-1.5 rounded-md border border-neutral-300 px-2 py-1.5 dark:border-neutral-800"
       >
         <Show when={!showMonthSelector() && !showYearSelector()}>
           <div class="flex-none">
@@ -455,7 +467,7 @@ const Calendar = (props: CalendarProps) => {
               type="button"
               onClick={() => navigateMonth(-1)}
               aria-label={props.ariaLabels.previousMonth}
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-neutral-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
             >
               <ChevronLeftIcon class="size-5" />
             </button>
@@ -469,7 +481,7 @@ const Calendar = (props: CalendarProps) => {
               onClick={openMonthSelector}
               aria-label={props.ariaLabels.selectMonth}
               aria-expanded={showMonthSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-neutral-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
             >
               {getMonthsShort(props.locale)[props.currentDate().getMonth()]}
             </button>
@@ -481,7 +493,7 @@ const Calendar = (props: CalendarProps) => {
               onClick={openYearSelector}
               aria-label={props.ariaLabels.selectYear}
               aria-expanded={showYearSelector()}
-              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              class="w-full cursor-pointer rounded-md px-3 py-[0.55rem] uppercase tracking-wide transition-all duration-300 hover:bg-neutral-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
             >
               {props.currentDate().getFullYear()}
             </button>
@@ -494,7 +506,7 @@ const Calendar = (props: CalendarProps) => {
               type="button"
               onClick={() => navigateMonth(1)}
               aria-label={props.ariaLabels.nextMonth}
-              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-gray-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+              class="cursor-pointer rounded-full p-[0.45rem] transition-all duration-300 hover:bg-neutral-100 focus:bg-blue-100/50 focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
             >
               <ChevronRightIcon class="size-5" />
             </button>
@@ -506,17 +518,17 @@ const Calendar = (props: CalendarProps) => {
         fallback={
           <div class="my-0.5">
             <div
-              class="grid grid-cols-7 border-b border-gray-300 py-2 dark:border-neutral-800"
+              class="grid grid-cols-7 border-b border-neutral-300 py-2 dark:border-neutral-800"
               role="row"
             >
               <For each={dayHeaders()}>
                 {(day) => (
                   <div
-                    class="text-center capitalize tracking-wide text-gray-500 dark:text-neutral-400"
+                    class="text-center capitalize tracking-wide text-neutral-500 dark:text-neutral-400"
                     role="columnheader"
-                    aria-label={day}
+                    aria-label={day.long}
                   >
-                    {day}
+                    {day.short}
                   </div>
                 )}
               </For>
@@ -534,6 +546,9 @@ const Calendar = (props: CalendarProps) => {
                             type="button"
                             data-date={dateISO}
                             onClick={() => handleDateClick(date)}
+                            onMouseEnter={() => props.onDateHover?.(date)}
+                            onMouseMove={() => props.onDateMouseMove?.()}
+                            onMouseLeave={() => props.onDateHover?.(null)}
                             disabled={isDisabled(date)}
                             role="gridcell"
                             aria-label={getDateAriaLabel(date)}
@@ -546,32 +561,30 @@ const Calendar = (props: CalendarProps) => {
                             tabIndex={focusedDateISO() === dateISO ? 0 : -1}
                             class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                             classList={{
-                              'text-gray-400': !isInCurrentMonth(date),
+                              'text-neutral-400': !isInCurrentMonth(date),
                               'text-blue-500':
                                 isToday(date) &&
                                 !isSelected(date) &&
+                                !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),
                               'bg-blue-500 text-white font-medium rounded-lg':
-                                isSelected(date) && isInCurrentMonth(date),
+                                (isSelected(date) || isPreviewEnd(date)) &&
+                                isInCurrentMonth(date),
                               'bg-blue-500 text-white font-medium rounded-l-lg rounded-r-none':
                                 rangeSelection(date).start &&
                                 isInCurrentMonth(date) &&
-                                !isSelected(date),
+                                !isSelected(date) &&
+                                !isPreviewEnd(date),
                               'bg-blue-500 text-white font-medium rounded-r-lg rounded-l-none':
                                 rangeSelection(date).end &&
                                 isInCurrentMonth(date) &&
                                 !isSelected(date),
                               'bg-blue-100 dark:bg-blue-900/40':
-                                isInDateRange(date) &&
+                                (isInDateRange(date) || isInPreviewRange(date)) &&
                                 !isSelected(date) &&
+                                !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),
                               'cursor-not-allowed! opacity-50': isDisabled(date),
-                              'transition-[scale] hover:scale-[1.5]':
-                                !isSelected(date) &&
-                                !isInDateRange(date) &&
-                                !rangeSelection(date).start &&
-                                !rangeSelection(date).end &&
-                                !isDisabled(date),
                             }}
                           >
                             {date.getDate()}
@@ -604,9 +617,9 @@ const Calendar = (props: CalendarProps) => {
                     aria-selected={index() === props.currentDate().getMonth()}
                     tabIndex={focusedMonthIndex() === index() ? 0 : -1}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
                       index() === props.currentDate().getMonth()
-                        ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
+                        ? 'bg-neutral-50 font-semibold dark:bg-neutral-700'
                         : '',
                     )}
                   >
@@ -635,9 +648,9 @@ const Calendar = (props: CalendarProps) => {
                     aria-selected={year === props.currentDate().getFullYear()}
                     tabIndex={focusedYearIndex() === index() ? 0 : -1}
                     class={twMerge(
-                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
+                      'w-full cursor-pointer rounded-md p-3 uppercase tracking-wide transition-all duration-100 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700',
                       year === props.currentDate().getFullYear()
-                        ? 'bg-gray-50 font-semibold dark:bg-neutral-700'
+                        ? 'bg-neutral-50 font-semibold dark:bg-neutral-700'
                         : '',
                     )}
                   >

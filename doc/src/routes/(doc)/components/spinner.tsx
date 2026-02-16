@@ -31,7 +31,7 @@ export default function SpinnerPage() {
       props={[
         {
           name: 'color',
-          type: '"gray" | "dark" | "failure" | "info" | "light" | "success" | "warning" | "blue"',
+          type: '"info" | "danger" | "black" | "white" | "transparent',
           default: '"info"',
           description: 'Color variant of the spinner',
         },
@@ -80,11 +80,10 @@ export default function SpinnerPage() {
                 <h3 class="mb-2 font-semibold">Color Variants</h3>
                 <div class="flex items-center gap-4">
                   <Spinner color="info" />
-                  <Spinner color="success" />
-                  <Spinner color="warning" />
-                  <Spinner color="failure" />
-                  <Spinner color="gray" />
-                  <Spinner color="dark" />
+                  <Spinner color="danger" />
+                  <Spinner color="black" />
+                  <Spinner color="white" />
+                  <Spinner color="transparent" />
                 </div>
               </div>
 
@@ -94,23 +93,6 @@ export default function SpinnerPage() {
                 <div class="flex items-center gap-4">
                   <Spinner size="xs" />
                   <Spinner size="sm" />
-                  <Spinner size="md" />
-                </div>
-              </div>
-
-              {/* Button loading state */}
-              <div>
-                <h3 class="mb-2 font-semibold">Button Loading State</h3>
-                <button class="flex cursor-pointer items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white">
-                  <Spinner size="xs" color="light" />
-                  Loading...
-                </button>
-              </div>
-
-              {/* Full page loading */}
-              <div>
-                <h3 class="mb-2 font-semibold">Page Loading</h3>
-                <div class="flex h-32 items-center justify-center rounded border border-gray-200 dark:border-neutral-600">
                   <Spinner size="md" />
                 </div>
               </div>

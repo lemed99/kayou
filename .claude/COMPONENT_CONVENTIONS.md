@@ -47,7 +47,7 @@ export interface ComponentProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const theme = {
   base: 'flex items-center justify-center',
   color: {
-    gray: 'text-gray-900 bg-white border-gray-300',
+    gray: 'text-neutral-900 bg-white border-neutral-300',
     info: 'text-blue-900 bg-blue-50 border-blue-500',
     failure: 'text-red-900 bg-red-50 border-red-500',
     success: 'text-green-900 bg-green-50 border-green-500',
@@ -249,9 +249,9 @@ const styles = twMerge(
   // Typography
   'text-sm font-medium',
   // Visual
-  'bg-white border border-gray-300 rounded-lg',
+  'bg-white border border-neutral-300 rounded-lg',
   // Interactive
-  'cursor-pointer hover:bg-gray-50',
+  'cursor-pointer hover:bg-neutral-50',
   // Transitions
   'transition-all duration-200',
 );
@@ -263,9 +263,9 @@ Always include dark mode variants:
 
 ```typescript
 const theme = {
-  base: 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white',
-  border: 'border-gray-300 dark:border-gray-600',
-  hover: 'hover:bg-gray-100 dark:hover:bg-gray-700',
+  base: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white',
+  border: 'border-neutral-300 dark:border-neutral-600',
+  hover: 'hover:bg-neutral-100 dark:hover:bg-neutral-700',
 };
 ```
 

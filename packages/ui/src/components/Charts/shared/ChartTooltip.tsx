@@ -151,7 +151,7 @@ export function ChartTooltipOverlay(): JSX.Element {
         <Show
           when={chart.customTooltip()}
           fallback={
-            <div class="border border-gray-200 bg-white px-2 py-1.5 text-xs shadow dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+            <div class="border border-neutral-200 bg-white px-2 py-1.5 text-xs shadow dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
               <strong class="block whitespace-nowrap">
                 {String(chart.activePoint()!.item[chart.xKey()])}
               </strong>

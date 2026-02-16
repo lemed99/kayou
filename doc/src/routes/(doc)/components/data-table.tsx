@@ -735,7 +735,7 @@ export default function Example() {
       label: 'Notes',
       width: 30,
       render: (value) => (
-        <span class="block w-64 text-sm text-gray-600 dark:text-neutral-400">
+        <span class="block w-64 text-sm text-neutral-600 dark:text-neutral-400">
           {String(value)}
         </span>
       ),
@@ -813,20 +813,20 @@ export default function Example() {
         columnResizing
         rowLocking
         expandRow={(row) => (
-          <div class="px-6 py-4 text-sm text-gray-600 dark:text-neutral-400">
+          <div class="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400">
             <p><strong>Notes:</strong> {String(row.notes)}</p>
             <p class="mt-1"><strong>Department:</strong> {String(row.department)}</p>
           </div>
         )}
         rowContextMenu={(row, _index, closeMenu) => (
           <div class="py-1">
-            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => { console.log('View', row.name); closeMenu(); }}>
+            <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('View', row.name); closeMenu(); }}>
               View profile
             </button>
-            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => { console.log('Edit', row.name); closeMenu(); }}>
+            <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('Edit', row.name); closeMenu(); }}>
               Edit
             </button>
-            <button class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-neutral-800" onClick={() => { console.log('Delete', row.name); closeMenu(); }}>
+            <button class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-neutral-100 dark:text-red-400 dark:hover:bg-neutral-800" onClick={() => { console.log('Delete', row.name); closeMenu(); }}>
               Delete
             </button>
           </div>

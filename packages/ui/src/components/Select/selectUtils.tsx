@@ -12,7 +12,8 @@ export const optionsContainerClass =
 export const optionClass = (option: Option, highlightedOption: Option | null) => {
   return twMerge(
     'flex cursor-pointer items-center justify-between px-2 py-1.5 text-sm whitespace-nowrap',
-    highlightedOption?.value === option.value
+    option.disabled ? 'cursor-not-allowed opacity-50' : '',
+    highlightedOption?.value === option.value && !option.disabled
       ? 'rounded bg-blue-50 dark:bg-neutral-800'
       : '',
   );
@@ -21,7 +22,7 @@ export const optionClass = (option: Option, highlightedOption: Option | null) =>
 export const InfiniteScrollLoader = (props: { isLoadingMore?: boolean }) => (
   <Show when={props.isLoadingMore}>
     <div class="p-1 text-center">
-      <Spinner color="gray" size="xs" />
+      <Spinner size="xs" />
     </div>
   </Show>
 );

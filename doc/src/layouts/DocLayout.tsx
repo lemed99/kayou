@@ -69,7 +69,7 @@ const routes: Route[] = [
 // Chevron icon for collapsible sections
 const ChevronIcon = (props: { expanded: boolean; class?: string }) => (
   <ChevronRightIcon
-    class={`size-4 text-gray-400 transition-transform duration-200 ${props.expanded ? 'rotate-90' : ''} ${props.class ?? ''}`}
+    class={`size-4 text-neutral-400 transition-transform duration-200 ${props.expanded ? 'rotate-90' : ''} ${props.class ?? ''}`}
   />
 );
 
@@ -242,8 +242,8 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
           onClick={() => setIsMobileMenuOpen(false)}
           class={`block py-1.5 text-sm transition-colors ${
             active()
-              ? 'font-medium text-gray-900 dark:text-white'
-              : 'text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+              ? 'font-medium text-neutral-900 dark:text-white'
+              : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
         >
           {label}
@@ -266,7 +266,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
           type="button"
           onClick={() => toggleSection(sectionKey)}
           aria-expanded={isExpanded()}
-          class="flex w-full cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-neutral-300"
+          class="flex w-full cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-300"
         >
           <ChevronIcon expanded={isExpanded()} />
           {title}
@@ -297,8 +297,8 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
                   aria-expanded={isCatExpanded()}
                   class={`flex w-full cursor-pointer items-center gap-1 py-1 text-xs font-semibold tracking-wider uppercase ${
                     isCatExpanded()
-                      ? 'text-gray-900 dark:text-white'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-300'
+                      ? 'text-neutral-900 dark:text-white'
+                      : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
                   }`}
                 >
                   <ChevronIcon expanded={isCatExpanded()} class="size-3" />
@@ -358,13 +358,13 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   return (
     <div class="mx-auto max-w-[90rem]">
       {/* Mobile menu button */}
-      <div class="sticky top-16 z-20 flex h-12 items-center border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-neutral-800 dark:bg-neutral-900/95">
+      <div class="sticky top-16 z-20 flex h-12 items-center border-b border-neutral-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-neutral-800 dark:bg-neutral-900/95">
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
           aria-label="Toggle navigation menu"
           aria-expanded={isMobileMenuOpen()}
-          class="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700 dark:text-neutral-300"
+          class="flex cursor-pointer items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
         >
           <Menu01Icon class="size-5" />
           Menu

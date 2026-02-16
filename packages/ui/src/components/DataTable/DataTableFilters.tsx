@@ -122,13 +122,14 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
   });
 
   const isDateType = createMemo(
-    () => props.config.fieldType === 'datepicker' || props.config.fieldType === 'dateRange',
+    () =>
+      props.config.fieldType === 'datepicker' || props.config.fieldType === 'dateRange',
   );
 
   return (
     <Switch
       fallback={
-        <span class="text-sm text-gray-500 dark:text-neutral-400">
+        <span class="text-sm text-neutral-500 dark:text-neutral-400">
           {props.labels.unsupportedFieldType(props.config.fieldType)}
         </span>
       }
@@ -155,7 +156,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
             type={props.config.numberConfig?.type || 'integer'}
             class="w-[80px]"
           />
-          <span class="text-gray-500 dark:text-neutral-400">-</span>
+          <span class="text-neutral-500 dark:text-neutral-400">-</span>
           <NumberInput
             value={betweenValues()[1] != null ? String(betweenValues()[1]) : ''}
             onValueChange={(v) => props.onChange([betweenValues()[0], v ?? null])}
@@ -343,7 +344,7 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
       <button
         type="button"
         onClick={() => props.onRemove()}
-        class="shrink-0 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+        class="shrink-0 rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
         aria-label={props.ariaLabels.removeFilter}
       >
         <XCloseIcon class="size-5" aria-hidden="true" />
@@ -401,7 +402,8 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   }));
   // Merge default operator labels with i18n overrides
   const opLabels = createMemo(
-    () => ({ ...OPERATOR_LABELS, ...l().operatorLabels }) as Record<FilterOperator, string>,
+    () =>
+      ({ ...OPERATOR_LABELS, ...l().operatorLabels }) as Record<FilterOperator, string>,
   );
 
   // Draft filters - local state for editing before submit
@@ -430,7 +432,9 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const handleAddFilter = () => {
     // Pick the first unused column
     const currentUsedKeys = usedKeys();
-    const availableConfig = props.filterConfigs.find((fc) => !currentUsedKeys.has(fc.key));
+    const availableConfig = props.filterConfigs.find(
+      (fc) => !currentUsedKeys.has(fc.key),
+    );
     if (!availableConfig) return;
 
     const operators = props.getOperators(availableConfig.key);
@@ -590,7 +594,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     <div
       ref={setPopoverRef}
       data-filter-popover
-      class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-gray-200 dark:bg-neutral-900 dark:ring-neutral-700"
+      class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700"
     >
       {/* Filter rows */}
       <div class="mb-4 space-y-3">
@@ -599,10 +603,10 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           fallback={
             <div class="flex items-center gap-2 py-2">
               <InfoCircleIcon
-                class="size-5 text-gray-400 dark:text-neutral-500"
+                class="size-5 text-neutral-400 dark:text-neutral-500"
                 aria-hidden="true"
               />
-              <span class="text-sm text-gray-500 dark:text-neutral-400">
+              <span class="text-sm text-neutral-500 dark:text-neutral-400">
                 {props.noFiltersText || l().noFiltersApplied}
               </span>
             </div>
@@ -638,7 +642,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
       </div>
 
       {/* Footer with actions */}
-      <div class="flex items-center justify-between border-t border-gray-200 pt-4 dark:border-neutral-800">
+      <div class="flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-800">
         <button
           type="button"
           onClick={handleAddFilter}
@@ -649,10 +653,10 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
         </button>
 
         <div class="flex items-center gap-2">
-          <Button size="sm" color="gray" onClick={handleReset}>
+          <Button size="sm" color="transparent" onClick={handleReset}>
             {props.resetText || l().reset}
           </Button>
-          <Button size="sm" color="blue" onClick={handleApply}>
+          <Button size="sm" onClick={handleApply}>
             {props.applyText || l().filter}
           </Button>
         </div>
@@ -663,9 +667,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const maxChips = () => props.maxVisibleChips ?? 4;
   const [showAllChips, setShowAllChips] = createSignal(false);
 
-  const activeFiltersList = createMemo(() =>
-    Array.from(props.activeFilters().values()),
-  );
+  const activeFiltersList = createMemo(() => Array.from(props.activeFilters().values()));
 
   const visibleChips = createMemo(() => {
     const all = activeFiltersList();
@@ -702,7 +704,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
         <div data-filter-trigger>
           <Button
             size="sm"
-            color="gray"
+            color="transparent"
             icon={FilterFunnel01Icon}
             onClick={handleToggle}
             aria-expanded={isOpen()}
@@ -732,12 +734,12 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             const chipConfig = () =>
               props.filterConfigs.find((fc) => fc.key === filter.key);
             return (
-              <span class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+              <span class="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                 {getChipLabel(filter)}
                 <button
                   type="button"
                   onClick={() => props.removeFilter(filter.key)}
-                  class="ml-0.5 rounded-sm text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:text-neutral-300"
+                  class="ml-0.5 rounded-sm text-neutral-400 hover:text-neutral-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:text-neutral-300"
                   aria-label={`Remove ${chipConfig()?.label || filter.key} filter`}
                 >
                   <XCloseIcon class="size-3" aria-hidden="true" />
@@ -752,7 +754,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           <button
             type="button"
             onClick={() => setShowAllChips((v) => !v)}
-            class="inline-flex items-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+            class="inline-flex items-center gap-0.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
           >
             {showAllChips()
               ? (props.seeLessChipsText ?? 'See less')
@@ -774,7 +776,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             handlePopoverOpen();
             handleAddFilter();
           }}
-          class="inline-flex items-center gap-0.5 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+          class="inline-flex items-center gap-0.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
         >
           {props.addFilterText || l().addFilter}
           <PlusIcon class="size-3" aria-hidden="true" />

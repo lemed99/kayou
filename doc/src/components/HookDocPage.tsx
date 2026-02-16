@@ -1,25 +1,25 @@
 import {
-  For,
-  type JSX,
-  type ParentProps,
-  Show,
-  Suspense,
-  createMemo,
-  createSignal,
-  lazy,
+    For,
+    type JSX,
+    type ParentProps,
+    Show,
+    Suspense,
+    createMemo,
+    createSignal,
+    lazy,
 } from 'solid-js';
 
 import {
-  AlertTriangleIcon,
-  CheckIcon,
-  Copy01Icon,
-  Database01Icon,
-  Link01Icon,
+    AlertTriangleIcon,
+    CheckIcon,
+    Copy01Icon,
+    Database01Icon,
+    Link01Icon,
 } from '@kayou/icons';
 
 import { dedent } from '../helpers/dedent';
 import BaseDocPage, {
-  type RelatedItemDefinition,
+    type RelatedItemDefinition,
 } from './BaseDocPage';
 const ReadonlyCode = lazy(() => import('./ReadonlyCode'));
 
@@ -99,14 +99,14 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
               {(hook) => (
                 <a
                   href={hook.path}
-                  class="flex items-start gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50 dark:border-neutral-800 dark:hover:border-blue-600 dark:hover:bg-blue-900/20"
+                  class="flex items-start gap-3 rounded-lg border border-neutral-200 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50 dark:border-neutral-800 dark:hover:border-blue-600 dark:hover:bg-blue-900/20"
                 >
                   <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                     <Link01Icon class="size-5" />
                   </div>
                   <div>
-                    <h3 class="font-medium text-gray-900 dark:text-white">{hook.name}</h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">
+                    <h3 class="font-medium text-neutral-900 dark:text-white">{hook.name}</h3>
+                    <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
                       {hook.description}
                     </p>
                   </div>
@@ -125,16 +125,16 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
               {(context) => (
                 <a
                   href={context.path}
-                  class="flex items-start gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50/50 dark:border-neutral-800 dark:hover:border-purple-600 dark:hover:bg-purple-900/20"
+                  class="flex items-start gap-3 rounded-lg border border-neutral-200 p-4 transition-colors hover:border-purple-300 hover:bg-purple-50/50 dark:border-neutral-800 dark:hover:border-purple-600 dark:hover:bg-purple-900/20"
                 >
                   <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                     <Database01Icon class="size-5" />
                   </div>
                   <div>
-                    <h3 class="font-medium text-gray-900 dark:text-white">
+                    <h3 class="font-medium text-neutral-900 dark:text-white">
                       {context.name}
                     </h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">
+                    <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
                       {context.description}
                     </p>
                   </div>
@@ -148,7 +148,7 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
       <Show when={props.usage}>
         <section id="usage" class="mb-8 scroll-mt-20">
           <h2 class="mb-4 text-2xl font-medium">Usage</h2>
-          <p class="mb-4 text-gray-700 dark:text-neutral-300">
+          <p class="mb-4 text-neutral-700 dark:text-neutral-300">
             Import the hook from the library:
           </p>
           <CodeBlock code={dedent`${props.usage!}`} />
@@ -158,29 +158,29 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
       <Show when={parametersArray().length > 0}>
         <section id="props" class="mb-8 scroll-mt-20">
           <h2 class="mb-4 text-2xl font-medium">Props</h2>
-          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
-              <thead class="bg-gray-50 dark:bg-neutral-900">
+          <div class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+              <thead class="bg-neutral-50 dark:bg-neutral-900">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Prop
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Type
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Description
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Default
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+              <tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
                 <For each={parametersArray()}>
                   {(param) => (
-                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
-                      <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                    <tr class="transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                      <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-neutral-900 dark:text-white">
                         <span class="flex items-center gap-2">
                           {param.name}
                           <Show when={param.required}>
@@ -189,15 +189,15 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
                         </span>
                       </td>
                       <td class="whitespace-nowrap px-6 py-4 text-xs">
-                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                        <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
                           {param.type}
                         </code>
                       </td>
-                      <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                      <td class="min-w-[400px] px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
                         {param.description}
                       </td>
                       <td class="whitespace-nowrap px-6 py-4 text-xs">
-                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
+                        <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
                           {param.default ?? '-'}
                         </code>
                       </td>
@@ -213,42 +213,42 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
       <section id="returns" class="mb-8 scroll-mt-20">
         <h2 class="mb-4 text-2xl font-medium">Returns</h2>
         <Show when={props.returnType}>
-          <p class="mb-4 text-gray-700 dark:text-neutral-300">
+          <p class="mb-4 text-neutral-700 dark:text-neutral-300">
             Type:{' '}
-            <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-sm text-purple-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-purple-400">
+            <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-sm text-purple-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-purple-400">
               {props.returnType}
             </code>
           </p>
         </Show>
         <Show when={returnsArray().length > 0}>
-          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
-              <thead class="bg-gray-50 dark:bg-neutral-900">
+          <div class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+              <thead class="bg-neutral-50 dark:bg-neutral-900">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Property
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Type
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                     Description
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+              <tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
                 <For each={returnsArray()}>
                   {(prop) => (
-                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
-                      <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                    <tr class="transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                      <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-neutral-900 dark:text-white">
                         {prop.name}
                       </td>
                       <td class="whitespace-nowrap px-6 py-4 text-xs">
-                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                        <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
                           {prop.type}
                         </code>
                       </td>
-                      <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                      <td class="min-w-[400px] px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
                         {prop.description}
                       </td>
                     </tr>
@@ -291,29 +291,29 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
           </Show>
           <Show when={props.provider!.props.length > 0}>
             <h3 class="mb-3 text-lg font-medium">Provider Props</h3>
-            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
-                <thead class="bg-gray-50 dark:bg-neutral-900">
+            <div class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+              <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+                <thead class="bg-neutral-50 dark:bg-neutral-900">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                       Prop
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                       Type
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                       Description
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-neutral-400">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                       Default
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+                <tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
                   <For each={props.provider!.props}>
                     {(prop) => (
-                      <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
-                        <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                      <tr class="transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                        <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-neutral-900 dark:text-white">
                           <span class="flex items-center gap-2">
                             {prop.name}
                             <Show when={prop.required}>
@@ -322,15 +322,15 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
                           </span>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-xs">
-                          <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                          <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
                             {prop.type}
                           </code>
                         </td>
-                        <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                        <td class="min-w-[400px] px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
                           {prop.description}
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-xs">
-                          <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
+                          <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
                             {prop.default}
                           </code>
                         </td>
@@ -356,45 +356,45 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
                     fallback={
                       <>
                         <h3 class="mb-2 text-xl font-medium">{typeDef.name}</h3>
-                        <p class="mb-4 text-gray-600 dark:text-neutral-400">
+                        <p class="mb-4 text-neutral-600 dark:text-neutral-400">
                           {typeDef.description}
                         </p>
                         <Show when={typeDef.props && typeDef.props.length > 0}>
-                          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-800">
-                              <thead class="bg-gray-50 dark:bg-neutral-900">
+                          <div class="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+                            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+                              <thead class="bg-neutral-50 dark:bg-neutral-900">
                                 <tr>
-                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
                                     Property
                                   </th>
-                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
                                     Type
                                   </th>
-                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
                                     Description
                                   </th>
-                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-neutral-400">
+                                  <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
                                     Default
                                   </th>
                                 </tr>
                               </thead>
-                              <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+                              <tbody class="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
                                 <For each={typeDef.props}>
                                   {(prop) => (
-                                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800">
-                                      <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                    <tr class="transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                                      <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-neutral-900 dark:text-white">
                                         {prop.name}
                                       </td>
                                       <td class="px-6 py-4 text-xs whitespace-nowrap">
-                                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
+                                        <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-blue-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-blue-400">
                                           {prop.type}
                                         </code>
                                       </td>
-                                      <td class="min-w-[400px] px-6 py-4 text-sm text-gray-500 dark:text-neutral-400">
+                                      <td class="min-w-[400px] px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
                                         {prop.description}
                                       </td>
                                       <td class="px-6 py-4 text-xs whitespace-nowrap">
-                                        <code class="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
+                                        <code class="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 font-mono text-xs text-green-600 dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-green-400">
                                           {prop.default ?? '-'}
                                         </code>
                                       </td>
@@ -408,18 +408,18 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
                       </>
                     }
                   >
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+                    <div class="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
                       <div class="mb-2 flex items-center gap-2">
-                        <code class="font-mono text-sm font-medium text-gray-900 dark:text-white">
+                        <code class="font-mono text-sm font-medium text-neutral-900 dark:text-white">
                           {typeDef.name}
                         </code>
-                        <span class="text-gray-400">=</span>
+                        <span class="text-neutral-400">=</span>
                       </div>
                       <code class="font-mono text-sm text-blue-600 dark:text-blue-400">
                         {typeDef.values!.map((v) => `"${v}"`).join(' | ')}
                       </code>
                       <Show when={typeDef.description}>
-                        <p class="mt-3 text-sm text-gray-600 dark:text-neutral-400">
+                        <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
                           {typeDef.description}
                         </p>
                       </Show>
@@ -464,7 +464,7 @@ function CodeBlock(props: { code: string }): JSX.Element {
       <button
         type="button"
         onClick={() => void handleCopy()}
-        class="absolute right-3 top-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-gray-200/80 px-2 py-1 text-xs text-gray-700 opacity-0 transition-opacity hover:bg-gray-300 group-hover:opacity-100 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
+        class="absolute right-3 top-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-1 text-xs text-neutral-700 opacity-0 transition-opacity hover:bg-neutral-300 group-hover:opacity-100 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
         aria-label={copied() ? 'Copied!' : 'Copy code'}
       >
         <Show when={copied()} fallback={<Copy01Icon class="size-4" />}>

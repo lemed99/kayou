@@ -2,29 +2,17 @@ import { JSX, createEffect, createSignal, splitProps } from 'solid-js';
 
 import { type BackgroundScrollBehavior } from '@kayou/hooks';
 
-import { ChevronDownButton } from '../../shared';
+import { ChevronDownButton, type Option } from '../../shared';
 import TextInput, { TextInputProps } from '../TextInput';
 import { OptionLabel, optionClass } from './selectUtils';
 import useSelect from './useSelect';
-
-/**
- * Option item for the Select component.
- */
-export interface SelectOption {
-  /** Unique value for the option. */
-  value: string;
-  /** Display label for the option. */
-  label: string;
-  /** Optional custom label renderer. */
-  labelWrapper?: (label: string) => JSX.Element;
-}
 
 /**
  * Props passed to a custom trigger element for the Select component.
  */
 export interface SelectTriggerProps {
   /** The currently selected option, or null if none selected. */
-  selectedOption: () => SelectOption | null;
+  selectedOption: () => Option | null;
   /** Whether the dropdown is currently open. */
   isOpen: () => boolean;
   /** Keyboard event handler for arrow keys, Enter, Escape, etc. Attach to your trigger element. */
@@ -42,9 +30,9 @@ export interface SelectTriggerProps {
  */
 export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   /** Array of options to display in the dropdown. */
-  options: SelectOption[];
+  options: Option[];
   /** Callback fired when an option is selected. */
-  onSelect: (option?: SelectOption) => void;
+  onSelect: (option?: Option) => void;
   /** Currently selected value. */
   value?: string;
   /** Height of each option row in pixels. */
@@ -85,7 +73,7 @@ export default function Select(props: SelectProps): JSX.Element {
     listboxId,
   } = useSelect(local, 'select');
 
-  const getOptionId = (option: SelectOption | null) =>
+  const getOptionId = (option: Option | null) =>
     option ? `${listboxId}-option-${option.value}` : undefined;
 
   // Manually sync aria-expanded to the DOM since prop drilling through
@@ -149,9 +137,10 @@ export default function Select(props: SelectProps): JSX.Element {
           id={getOptionId(option)}
           role="option"
           aria-selected={selectedOption()?.value === option.value}
+          aria-disabled={option.disabled || undefined}
           class={optionClass(option, highlightedOption())}
           onClick={() => handleOptionClick(option)}
-          onMouseEnter={() => setHighlightedOption(option)}
+          onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >
           <OptionLabel option={option} selectedOption={selectedOption()} />
         </div>

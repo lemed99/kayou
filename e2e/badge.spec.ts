@@ -27,11 +27,11 @@ test.describe('Badge', () => {
 
       const expected = [
         { text: /^Default$/, bg: 'bg-blue-100' },
-        { text: /^Gray$/, bg: 'bg-gray-100' },
+        { text: /^Gray$/, bg: 'bg-neutral-100' },
         { text: /^Success$/, bg: 'bg-green-100' },
         { text: /^Warning$/, bg: 'bg-yellow-100' },
         { text: /^Failure$/, bg: 'bg-red-100' },
-        { text: /^Dark$/, bg: 'bg-gray-700' },
+        { text: /^Dark$/, bg: 'bg-neutral-700' },
       ];
 
       for (const { text, bg } of expected) {
@@ -55,7 +55,9 @@ test.describe('Badge', () => {
       const section = page.locator('#sizes');
       const badges = section.locator('div.flex.h-fit');
 
-      const xsClasses = await badges.filter({ hasText: /^Extra Small$/ }).getAttribute('class');
+      const xsClasses = await badges
+        .filter({ hasText: /^Extra Small$/ })
+        .getAttribute('class');
       const smClasses = await badges.filter({ hasText: /^Small$/ }).getAttribute('class');
 
       expect(xsClasses).toContain('text-xs');
@@ -80,9 +82,15 @@ test.describe('Badge', () => {
       const section = page.locator('#status-indicators');
       const badges = section.locator('div.flex.h-fit');
 
-      const activeClasses = await badges.filter({ hasText: /^Active$/ }).getAttribute('class');
-      const pendingClasses = await badges.filter({ hasText: /^Pending$/ }).getAttribute('class');
-      const inactiveClasses = await badges.filter({ hasText: /^Inactive$/ }).getAttribute('class');
+      const activeClasses = await badges
+        .filter({ hasText: /^Active$/ })
+        .getAttribute('class');
+      const pendingClasses = await badges
+        .filter({ hasText: /^Pending$/ })
+        .getAttribute('class');
+      const inactiveClasses = await badges
+        .filter({ hasText: /^Inactive$/ })
+        .getAttribute('class');
 
       expect(activeClasses).toContain('bg-green-100');
       expect(pendingClasses).toContain('bg-yellow-100');

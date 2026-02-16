@@ -9,7 +9,7 @@ export function DataTableFooter(): JSX.Element {
 
   return (
     <Show when={ctx.footer ?? true}>
-      <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-5 sm:flex-row dark:border-neutral-800">
+      <div class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-neutral-200 px-6 py-5 sm:flex-row dark:border-neutral-800">
         <div class="flex items-center gap-4">
           <Show when={ctx.perPageControl}>
             <div class="flex items-center gap-2">
@@ -26,7 +26,7 @@ export function DataTableFooter(): JSX.Element {
                 fitContent={true}
                 aria-label={ctx.labels().elementsPerPage}
               />
-              <span class="whitespace-nowrap text-sm text-gray-700 dark:text-neutral-300">
+              <span class="whitespace-nowrap text-sm text-neutral-700 dark:text-neutral-300">
                 {ctx.labels().elementsPerPage}
               </span>
             </div>

@@ -27,6 +27,11 @@ export default function MultiSelectPage() {
           explanation: 'values prop accepts array of selected option values.',
         },
         {
+          term: 'Disabled Options',
+          explanation:
+            'Individual options can be disabled to prevent selection while remaining visible.',
+        },
+        {
           term: 'Clear All',
           explanation: 'clearValues=true clears all selections programmatically.',
         },
@@ -34,9 +39,9 @@ export default function MultiSelectPage() {
       props={[
         {
           name: 'options',
-          type: 'Array<{ value: string; label: string }>',
+          type: 'Option[]',
           default: '-',
-          description: 'Array of options to display in the dropdown',
+          description: 'Array of options to display in the dropdown. Set disabled on individual options to prevent selection.',
           required: true,
         },
         {
@@ -134,6 +139,17 @@ export default function MultiSelectPage() {
       ]}
       subComponents={[
         {
+          name: 'Option',
+          kind: 'type',
+          description: 'Option item shared by Select, SelectWithSearch, and MultiSelect',
+          props: [
+            { name: 'value', type: 'string', default: '-', description: 'Unique value identifying this option' },
+            { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
+            { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
+            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+          ],
+        },
+        {
           name: 'SelectLabels',
           kind: 'type',
           description: 'Visible text labels for the dropdown',
@@ -192,6 +208,21 @@ export default function MultiSelectPage() {
                 labels={{ searchPlaceholder: "Search countries..." }}
                 placeholder="Select countries"
               />
+
+              {/* Disabled options */}
+              <MultiSelect
+                options={[
+                  { value: 'react', label: 'React' },
+                  { value: 'solid', label: 'SolidJS' },
+                  { value: 'vue', label: 'Vue', disabled: true },
+                  { value: 'angular', label: 'Angular', disabled: true },
+                  { value: 'svelte', label: 'Svelte' },
+                ]}
+                onMultiSelect={() => {}}
+                label="With Disabled Options"
+                helperText="Vue and Angular are disabled"
+                placeholder="Select frameworks"
+              />
             </div>
           );
         }
@@ -202,6 +233,16 @@ export default function MultiSelectPage() {
         <MultiSelect options={options} onMultiSelect={handleSelect} placeholder="Select..." />
         <MultiSelect options={options} onMultiSelect={handleSelect} withSearch />
         <MultiSelect options={options} values={['opt1', 'opt2']} label="Categories" onMultiSelect={handleSelect} />
+
+        {/* Disabled options */}
+        <MultiSelect
+          options={[
+            { value: '1', label: 'Available' },
+            { value: '2', label: 'Unavailable', disabled: true },
+            { value: '3', label: 'Also available' },
+          ]}
+          onMultiSelect={handleSelect}
+        />
       `}
       relatedHooks={[
         {

@@ -8,9 +8,9 @@ export function DataTableSearch(): JSX.Element {
   const ctx = useDataTableInternal();
 
   return (
-    <div class="flex w-full shrink-0 border-b border-gray-200 px-6 dark:border-neutral-800">
+    <div class="flex w-full shrink-0 border-b border-neutral-200 px-6 dark:border-neutral-800">
       <div class="relative flex w-full max-w-md items-center">
-        <SearchRefractionIcon class="size-5 text-gray-400 dark:text-neutral-500" />
+        <SearchRefractionIcon class="size-5 text-neutral-400 dark:text-neutral-500" />
         <input
           ref={ctx.setSearchRef}
           value={ctx.searchKey()}
@@ -28,7 +28,7 @@ export function DataTableSearch(): JSX.Element {
               ctx.handleSearchChange('');
               ctx.searchRef()?.focus();
             }}
-            class="absolute right-0 top-0 h-full cursor-pointer px-3 text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
+            class="absolute right-0 top-0 h-full cursor-pointer px-3 text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
           >
             <XCloseIcon class="size-4" aria-hidden="true" />
           </button>

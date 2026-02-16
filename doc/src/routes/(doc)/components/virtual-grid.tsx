@@ -113,7 +113,7 @@ export default function Example() {
 
   return (
     <div class="space-y-4">
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-neutral-600">
         {selectedId() !== null
           ? \`Selected: Product \${selectedId() + 1}\`
           : 'Click a product to select it. Use arrow keys, Home, End, PageUp, PageDown to navigate.'}
@@ -134,7 +134,7 @@ export default function Example() {
               class={\`flex h-full cursor-pointer flex-col justify-between rounded p-3 shadow transition-colors \${
                 selectedId() === product.id
                   ? 'border-2 border-blue-500 bg-blue-50'
-                  : 'border-2 border-transparent bg-white hover:border-gray-300'
+                  : 'border-2 border-transparent bg-white hover:border-neutral-300'
               }\`}
               onClick={() => setSelectedId(product.id)}
             >

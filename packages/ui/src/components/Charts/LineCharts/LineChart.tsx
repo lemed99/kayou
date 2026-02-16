@@ -283,10 +283,10 @@ export function LineChart(allProps: LineChartProps): JSX.Element {
           tooltipEnabled,
           setTooltipEnabled,
           get axisClass() {
-            return props.axisClass ?? 'text-gray-500 dark:text-neutral-500';
+            return props.axisClass ?? 'text-neutral-500 dark:text-neutral-500';
           },
           get gridClass() {
-            return props.gridClass ?? 'text-gray-300 dark:text-neutral-800';
+            return props.gridClass ?? 'text-neutral-300 dark:text-neutral-800';
           },
         }}
       >

@@ -38,14 +38,14 @@ export interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement>
 }
 
 const theme = {
-  base: 'size-4 cursor-pointer disabled:cursor-not-allowed rounded border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-white shrink-0 appearance-none bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-500',
+  base: 'size-4 cursor-pointer disabled:cursor-not-allowed rounded border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 text-white shrink-0 appearance-none bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-blue-500',
 };
 
 const checked = (color: CheckboxProps['color']) => `
   checked:border-transparent
-  ${color === 'blue' ? 'checked:bg-blue-600' : 'checked:bg-gray-800'}
-  ${color === 'blue' ? 'dark:checked:bg-blue-500' : 'dark:checked:bg-gray-500'}
-  ${color === 'blue' ? 'dark:checked:border-blue-500' : 'dark:checked:border-gray-500'}
+  ${color === 'blue' ? 'checked:bg-blue-600' : 'checked:bg-neutral-800'}
+  ${color === 'blue' ? 'dark:checked:bg-blue-500' : 'dark:checked:bg-neutral-500'}
+  ${color === 'blue' ? 'dark:checked:border-blue-500' : 'dark:checked:border-neutral-500'}
   checked:bg-[url('data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0ndHJ1ZScgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyBmaWxsPSdub25lJyB2aWV3Qm94PScwIDAgMTYgMTInPiA8cGF0aCBzdHJva2U9J3doaXRlJyBzdHJva2UtbGluZWNhcD0ncm91bmQnIHN0cm9rZS1saW5lam9pbj0ncm91bmQnIHN0cm9rZS13aWR0aD0nMycgZD0nTTEgNS45MTcgNS43MjQgMTAuNSAxNSAxLjUnLz4gPC9zdmc+')]
   checked:bg-[length:0.55em_0.55em]
   checked:bg-center
@@ -83,7 +83,7 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
       <Show when={local.label && labelPosition() === 'left'}>
         <span
           class={twMerge(
-            'pr-2 text-gray-700 dark:text-neutral-300',
+            'pr-2 text-neutral-700 dark:text-neutral-300',
             local.labelSpanClass,
           )}
         >
@@ -93,11 +93,7 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
       <input
         {...inputProps}
         id={id()}
-        class={twMerge(
-          theme.base,
-          checked(local.color || 'blue'),
-          local.class,
-        )}
+        class={twMerge(theme.base, checked(local.color || 'blue'), local.class)}
         type="checkbox"
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
@@ -111,7 +107,7 @@ const Checkbox = (props: CheckboxProps): JSX.Element => {
       <Show when={local.label && labelPosition() === 'right'}>
         <span
           class={twMerge(
-            'pl-2 text-gray-700 dark:text-neutral-300',
+            'pl-2 text-neutral-700 dark:text-neutral-300',
             local.labelSpanClass,
           )}
         >

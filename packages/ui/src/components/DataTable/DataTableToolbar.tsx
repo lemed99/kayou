@@ -38,7 +38,7 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
     <Show when={hasToolbar()}>
       <div
         class={twMerge(
-          'flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-6 py-2 dark:border-neutral-800',
+          'flex shrink-0 items-center justify-between gap-2 border-b border-neutral-200 px-6 py-2 dark:border-neutral-800',
           !ctx.searchBar ? 'rounded-t-lg' : '',
         )}
       >
@@ -61,7 +61,6 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
               showChips
             />
           </Show>
-
         </div>
 
         {/* Right: Configs + Columns */}
@@ -73,6 +72,7 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
               options={ctx.allColumns.map((c) => ({
                 label: c.label,
                 value: c.key,
+                disabled: ctx.columns().length === 1 && ctx.columns()[0].key === c.key,
               }))}
               onMultiSelect={(options) => {
                 ctx.setColumns(

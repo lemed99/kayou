@@ -18,7 +18,9 @@ test.describe('Skeleton', () => {
       expect(classes).toContain('animate-pulse');
     });
 
-    test('should render multiple skeleton instances across examples', async ({ page }) => {
+    test('should render multiple skeleton instances across examples', async ({
+      page,
+    }) => {
       const skeletons = page.locator('[role="status"]');
       const count = await skeletons.count();
       // Doc page has 5 examples with multiple skeletons
@@ -75,18 +77,20 @@ test.describe('Skeleton', () => {
       const inners = section.locator('[role="status"] div');
 
       const first = await inners.nth(0).getAttribute('class');
-      expect(first).toContain('bg-gray-100');
+      expect(first).toContain('bg-neutral-100');
 
       const second = await inners.nth(1).getAttribute('class');
-      expect(second).toContain('bg-gray-200');
+      expect(second).toContain('bg-neutral-200');
 
       const third = await inners.nth(2).getAttribute('class');
-      expect(third).toContain('bg-gray-300');
+      expect(third).toContain('bg-neutral-300');
     });
   });
 
   test.describe('Composite layouts', () => {
-    test('should render card loading skeleton with correct structure', async ({ page }) => {
+    test('should render card loading skeleton with correct structure', async ({
+      page,
+    }) => {
       // "Card Loading State" has: 64x64 avatar + 3 text lines (200x20, 150x14, 180x14)
       const section = page.locator('text=Card Loading State').locator('..').locator('..');
       const skeletons = section.locator('[role="status"]');
@@ -101,7 +105,9 @@ test.describe('Skeleton', () => {
       expect(avatar!.height).toBe(64);
     });
 
-    test('should render list loading skeleton with equal-width items', async ({ page }) => {
+    test('should render list loading skeleton with equal-width items', async ({
+      page,
+    }) => {
       // "List Loading State" has 3 skeletons, each width="100%" height=40
       const section = page.locator('text=List Loading State').locator('..').locator('..');
       const skeletons = section.locator('[role="status"]');

@@ -1,13 +1,13 @@
 import { type Component, For } from 'solid-js';
 
 import {
-  ArrowNarrowRightIcon,
-  Brush01Icon,
-  Code01Icon,
-  Lightning01Icon,
-  ListIcon,
-  Moon01Icon,
-  Users01Icon,
+    ArrowNarrowRightIcon,
+    Brush01Icon,
+    Code01Icon,
+    Lightning01Icon,
+    ListIcon,
+    Moon01Icon,
+    Users01Icon,
 } from '@kayou/icons';
 import { A } from '@solidjs/router';
 
@@ -56,12 +56,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <div class="mx-auto max-w-4xl text-center">
 
-        <h1 class="text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl dark:text-white">
+        <h1 class="text-4xl font-bold tracking-tight text-neutral-950 sm:text-5xl lg:text-6xl dark:text-white">
           Enterprise grade UI
           <span class="text-blue-600 dark:text-blue-500"> for SolidJS</span>
         </h1>
 
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600 dark:text-neutral-300">
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-600 dark:text-neutral-300">
           35+ fully accessible UI components styled with Tailwind CSS, and high level hooks
           built for production. SSR ready but CSR was the main target here!
         </p>
@@ -69,7 +69,7 @@ export default function HomePage() {
         <div class="mt-10 flex items-center justify-center">
           <A
             href="/overview/quickstart"
-            class="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-gray-950 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100"
+            class="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100"
           >
             Explore Kayou
             <ArrowNarrowRightIcon class="size-4" />
@@ -79,14 +79,14 @@ export default function HomePage() {
         <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <For each={features}>
             {(feature) => (
-              <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+              <div class="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
                 <div class="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
                   <feature.icon class="size-6" />
                 </div>
-                <h3 class="font-semibold text-gray-950 dark:text-white">
+                <h3 class="font-semibold text-neutral-950 dark:text-white">
                   {feature.title}
                 </h3>
-                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                   {feature.description}
                 </p>
               </div>

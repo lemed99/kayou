@@ -259,7 +259,7 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
   const descId = createUniqueId();
 
   return (
-    <div class="relative h-full w-full text-gray-500 dark:text-neutral-400">
+    <div class="relative h-full w-full text-neutral-500 dark:text-neutral-400">
       <BaseChartContext.Provider
         value={{
           innerWidth,
@@ -283,10 +283,10 @@ export function AreaChart(allProps: AreaChartProps): JSX.Element {
           tooltipEnabled,
           setTooltipEnabled,
           get axisClass() {
-            return props.axisClass ?? 'text-gray-500 dark:text-neutral-500';
+            return props.axisClass ?? 'text-neutral-500 dark:text-neutral-500';
           },
           get gridClass() {
-            return props.gridClass ?? 'text-gray-300 dark:text-neutral-800';
+            return props.gridClass ?? 'text-neutral-300 dark:text-neutral-800';
           },
         }}
       >

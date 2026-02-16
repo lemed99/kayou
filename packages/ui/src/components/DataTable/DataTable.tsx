@@ -434,16 +434,22 @@ export function DataTable<T extends Record<string, unknown>>(
     }
   });
 
-  // --- State persistence ---
+  // --- State persistence (debounced to avoid excessive sessionStorage writes) ---
+  let statePersistTimer: ReturnType<typeof setTimeout> | undefined;
   createEffect(() => {
     if (!isRestored()) return;
-    saveState({
+    const state = {
       searchKey: searchKey(),
       expanded: expanded(),
       currentPage: currentPage(),
       perPage: perPage(),
       selectedColumns: columns().map((c) => c.key),
-    });
+    };
+    if (statePersistTimer) clearTimeout(statePersistTimer);
+    statePersistTimer = setTimeout(() => saveState(state), 200);
+  });
+  onCleanup(() => {
+    if (statePersistTimer) clearTimeout(statePersistTimer);
   });
 
   // --- Data ---
@@ -458,7 +464,9 @@ export function DataTable<T extends Record<string, unknown>>(
     return filtered;
   });
 
-  // --- Selection ---
+  // --- Selection: prune stale keys when data changes ---
+  // Uses untrack on selectedRows so the effect only re-runs when data or rowKey
+  // changes — not when the selection it just wrote triggers a new cycle.
   createEffect(() => {
     const data = baseData();
     const rk = props.rowKey; // track rowKey changes
@@ -469,7 +477,7 @@ export function DataTable<T extends Record<string, unknown>>(
     }
     // Key-based mode: prune stale keys
     const validKeys = new Set(data.map((row, idx) => getRowKey(row, idx)));
-    const current = selectedRows();
+    const current = untrack(selectedRows);
     const pruned = new Set([...current].filter((k) => validKeys.has(k)));
     if (pruned.size !== current.size) {
       setSelectedRows(pruned);
@@ -569,7 +577,11 @@ export function DataTable<T extends Record<string, unknown>>(
 
           widths.set(
             col.key,
-            Math.max(bodyMeasured, headerMeasured + controlsWidth + 48, col.minWidth ?? 0),
+            Math.max(
+              bodyMeasured,
+              headerMeasured + controlsWidth + 48,
+              col.minWidth ?? 0,
+            ),
           );
         }
         setMeasuredMinWidths(widths);
@@ -818,7 +830,7 @@ export function DataTable<T extends Record<string, unknown>>(
         ref={setTableRef}
         role="table"
         aria-label={a().table}
-        class="flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+        class="flex w-full flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
       >
         <DataTableInternalContext.Provider
           value={{
@@ -972,8 +984,8 @@ export function DataTable<T extends Record<string, unknown>>(
 
           {/* Bulk Actions Bar */}
           <Show when={props.rowSelection && selectedRows().size > 0}>
-            <div class="flex shrink-0 items-center gap-3 border-b border-gray-200 px-6 py-3 dark:border-neutral-800">
-              <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">
+            <div class="flex shrink-0 items-center gap-3 border-b border-neutral-200 px-6 py-3 dark:border-neutral-800">
+              <span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 {l().selectedElements(selectedRows().size, baseData().length)}
               </span>
               <Show when={props.bulkActions}>
@@ -999,7 +1011,7 @@ export function DataTable<T extends Record<string, unknown>>(
               aria-expanded={expanded()}
               aria-label={expanded() ? l().collapse : l().seeMore}
               onClick={() => setExpanded((v) => !v)}
-              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
+              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
             >
               <Show
                 when={expanded()}

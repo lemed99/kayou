@@ -482,13 +482,13 @@ function createReturnFocus() {
 
 ```
 // May fail on white background:
-text-gray-400  // ~2.7:1 ratio
-text-gray-500  // ~4.5:1 ratio (borderline)
+text-neutral-400  // ~2.7:1 ratio
+text-neutral-500  // ~4.5:1 ratio (borderline)
 
 // Safe alternatives:
-text-gray-600  // ~5.7:1 ratio
-text-gray-700  // ~8.6:1 ratio
+text-neutral-600  // ~5.7:1 ratio
+text-neutral-700  // ~8.6:1 ratio
 
 // For disabled states (3:1 minimum):
-text-gray-500 with bg-gray-100  // Usually passes
+text-neutral-500 with bg-neutral-100  // Usually passes
 ```

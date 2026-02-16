@@ -124,9 +124,10 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
           id={getOptionId(option)}
           role="option"
           aria-selected={selectedOption()?.value === option.value}
+          aria-disabled={option.disabled || undefined}
           class={optionClass(option, highlightedOption())}
           onClick={() => handleOptionClick(option)}
-          onMouseEnter={() => setHighlightedOption(option)}
+          onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >
           <OptionLabel option={option} selectedOption={selectedOption()} />
         </div>

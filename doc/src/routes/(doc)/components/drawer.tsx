@@ -127,7 +127,7 @@ export default function DrawerPage() {
               <Button onClick={() => setShow(true)}>Open Drawer</Button>
               <Drawer show={show()} onClose={() => setShow(false)} title="Settings" width="w-80">
                 <div class="space-y-4">
-                  <p class="text-gray-600 dark:text-neutral-300">
+                  <p class="text-neutral-600 dark:text-neutral-300">
                     Adjust your preferences below.
                   </p>
                   <div class="flex justify-end gap-2">

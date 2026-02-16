@@ -289,17 +289,17 @@ export default function SidebarPage() {
           ];
 
           const PromoCard = () => (
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-neutral-800 dark:bg-neutral-800">
+            <div class="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-800">
               <div class="mb-2 flex items-center justify-between">
-                <span class="font-semibold text-gray-900 dark:text-white">5 Days left!</span>
-                <button type="button" class="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-neutral-300">
+                <span class="font-semibold text-neutral-900 dark:text-white">5 Days left!</span>
+                <button type="button" class="cursor-pointer text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
                   <XCloseIcon class="size-4" />
                 </button>
               </div>
-              <div class="mb-2 h-1.5 w-full rounded-full bg-gray-200 dark:bg-neutral-700">
+              <div class="mb-2 h-1.5 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">
                 <div class="h-1.5 w-3/4 rounded-full bg-amber-400" />
               </div>
-              <p class="text-xs text-wrap text-gray-500 dark:text-neutral-400">Trial ending soon. Upgrade to stay active.</p>
+              <p class="text-xs text-wrap text-neutral-500 dark:text-neutral-400">Trial ending soon. Upgrade to stay active.</p>
             </div>
           );
 

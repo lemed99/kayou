@@ -36,7 +36,7 @@ const theme = {
       'text-green-700 bg-green-100 border-green-500 dark:bg-green-200 dark:text-green-800',
     warning:
       'text-yellow-700 bg-yellow-100 border-yellow-500 dark:bg-yellow-200 dark:text-yellow-800',
-    dark: 'text-gray-200 bg-gray-800 border-gray-600 dark:bg-neutral-900 dark:text-neutral-300',
+    dark: 'text-neutral-200 bg-neutral-800 border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300',
   },
   icon: 'size-4',
   iconWrapper: 'absolute -top-1.5 -left-1.5 rounded-full p-0.5',

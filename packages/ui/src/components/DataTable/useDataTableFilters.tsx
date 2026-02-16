@@ -57,8 +57,10 @@ export function useDataTableFilters<T extends Record<string, unknown>>(
     return map;
   });
 
+  const isControlled = () => config.filters?.() !== undefined;
+
   const updateFilters = (newFilters: FilterState) => {
-    setInternalFilters(newFilters);
+    if (!isControlled()) setInternalFilters(newFilters);
     config.onFiltersChange?.(newFilters);
   };
 

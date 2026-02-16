@@ -1540,9 +1540,9 @@
       "props": [
         {
           "name": "options",
-          "type": "Array<{ value: string; label: string }>",
+          "type": "Option[]",
           "default": "-",
-          "description": "Array of options to display in the dropdown"
+          "description": "Array of options to display in the dropdown. Set disabled on individual options to prevent selection."
         },
         {
           "name": "onMultiSelect",
@@ -1639,6 +1639,10 @@
         {
           "title": "Pre-selected Values",
           "description": "MultiSelect with initial selected values."
+        },
+        {
+          "title": "Disabled Options",
+          "description": "Individual options can be disabled to prevent selection while remaining visible."
         }
       ],
       "usage": "import { MultiSelect } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal([]);\n\n        <MultiSelect\n          options={[\n            { value: 'opt1', label: 'Option 1' },\n            { value: 'opt2', label: 'Option 2' },\n          ]}\n          onMultiSelect={(opts) => setSelected(opts || [])}\n          placeholder=\"Select options\"\n        />\n\n        // With search functionality\n        <MultiSelect\n          options={options}\n          onMultiSelect={handleSelect}\n          withSearch\n          labels={{ searchPlaceholder: \"Search...\" }}\n        />\n\n        // With label and controlled values\n        <MultiSelect\n          options={options}\n          values={selected().map(o => o.value)}\n          onMultiSelect={setSelected}\n          label=\"Categories\"\n          helperText=\"Select multiple categories\"\n        />\n\n        // Custom display value\n        <MultiSelect\n          options={options}\n          values={selectedValues}\n          displayValue={\\`\\${selectedValues.length} selected\\"
@@ -2360,9 +2364,9 @@
       "props": [
         {
           "name": "options",
-          "type": "Array<{ value: string; label: string }>",
+          "type": "Option[]",
           "default": "-",
-          "description": "Array of options to display in the dropdown"
+          "description": "Array of options to display in the dropdown. Set disabled on individual options to prevent selection."
         },
         {
           "name": "onSelect",
@@ -2485,6 +2489,10 @@
         {
           "title": "Loading State",
           "description": "Shows loading spinner while fetching options."
+        },
+        {
+          "title": "Disabled Options",
+          "description": "Individual options can be disabled to prevent selection while remaining visible."
         }
       ],
       "usage": "import { SelectWithSearch } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal(null);\n\n        <SelectWithSearch\n          options={[\n            { value: 'opt1', label: 'Option 1' },\n            { value: 'opt2', label: 'Option 2' },\n          ]}\n          onSelect={(opt) => setSelected(opt)}\n          placeholder=\"Search options...\"\n        />\n\n        // With auto-fill (recommended for most use cases)\n        <SelectWithSearch\n          options={options}\n          onSelect={handleSelect}\n          autoFillSearchKey\n          placeholder=\"Search...\"\n        />\n\n        // With label and pre-selected value\n        <SelectWithSearch\n          options={options}\n          idValue=\"preselected-id\"\n          autoFillSearchKey\n          onSelect={handleSelect}\n          label=\"Category\"\n          helperText=\"Select a category\"\n        />\n\n        // With lazy loading for large datasets\n        <SelectWithSearch\n          options={options}\n          onSelect={handleSelect}\n          optionRowHeight={32}\n          isLazyLoading={isLoading}\n          onLazyLoad={(progress) => {\n            if (progress > 0.8) loadMoreOptions();\n          }}\n        />\n\n        // With custom CTA\n        <SelectWithSearch\n          options={options}\n          onSelect={handleSelect}\n          cta={<button>+ Add new item</button>}\n        />"
@@ -2497,13 +2505,13 @@
       "props": [
         {
           "name": "options",
-          "type": "SelectOption[]",
+          "type": "Option[]",
           "default": "-",
-          "description": "Array of options to display. Each option has value, label, and optional labelWrapper"
+          "description": "Array of options to display. Each option has value, label, optional labelWrapper, and optional disabled"
         },
         {
           "name": "onSelect",
-          "type": "(option?: SelectOption) => void",
+          "type": "(option?: Option) => void",
           "default": "-",
           "description": "Callback fired when an option is selected (required)"
         },
@@ -2602,9 +2610,13 @@
         {
           "title": "Loading State",
           "description": "Select in loading state."
+        },
+        {
+          "title": "Disabled Options",
+          "description": "Individual options can be disabled to prevent selection while remaining visible."
         }
       ],
-      "usage": "import { Select } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal();\n\n        <Select\n          options={[\n            { value: '1', label: 'Option 1' },\n            { value: '2', label: 'Option 2' },\n            { value: '3', label: 'Option 3' },\n          ]}\n          placeholder=\"Select an option\"\n          onSelect={(opt) => setSelected(opt?.value)}\n        />\n\n        // With label and validation\n        <Select\n          label=\"Category\"\n          required\n          color={hasError() ? 'failure' : 'gray'}\n          helperText={hasError() ? 'Required field' : undefined}\n          options={categories}\n          value={selectedCategory()}\n          onSelect={(opt) => setSelectedCategory(opt?.value)}\n        />\n\n        // Virtual scrolling for large lists\n        <Select\n          options={largeOptionsList}\n          optionRowHeight={32}\n          onSelect={handleSelect}\n        />\n\n        // Custom label rendering\n        <Select\n          options={[\n            {\n              value: 'premium',\n              label: 'Premium Plan',\n              labelWrapper: (label) => (\n                <div class=\"flex items-center gap-2\">\n                  <span class=\"text-yellow-500\">★</span>\n                  {label}\n                </div>\n              ),\n            },\n          ]}\n          onSelect={handleSelect}\n        />"
+      "usage": "import { Select } from '@kayou/ui';\n\n        // Basic usage\n        const [selected, setSelected] = createSignal();\n\n        <Select\n          options={[\n            { value: '1', label: 'Option 1' },\n            { value: '2', label: 'Option 2' },\n            { value: '3', label: 'Option 3' },\n          ]}\n          placeholder=\"Select an option\"\n          onSelect={(opt) => setSelected(opt?.value)}\n        />\n\n        // Disabled options\n        <Select\n          options={[\n            { value: '1', label: 'Available' },\n            { value: '2', label: 'Unavailable', disabled: true },\n            { value: '3', label: 'Also available' },\n          ]}\n          onSelect={handleSelect}\n        />\n\n        // With label and validation\n        <Select\n          label=\"Category\"\n          required\n          color={hasError() ? 'failure' : 'gray'}\n          helperText={hasError() ? 'Required field' : undefined}\n          options={categories}\n          value={selectedCategory()}\n          onSelect={(opt) => setSelectedCategory(opt?.value)}\n        />\n\n        // Virtual scrolling for large lists\n        <Select\n          options={largeOptionsList}\n          optionRowHeight={32}\n          onSelect={handleSelect}\n        />\n\n        // Custom label rendering\n        <Select\n          options={[\n            {\n              value: 'premium',\n              label: 'Premium Plan',\n              labelWrapper: (label) => (\n                <div class=\"flex items-center gap-2\">\n                  <span class=\"text-yellow-500\">★</span>\n                  {label}\n                </div>\n              ),\n            },\n          ]}\n          onSelect={handleSelect}\n        />"
     },
     {
       "name": "Sidebar",
@@ -4163,12 +4175,12 @@
         {
           "title": "Toast with Progress Bar",
           "description": "Visual countdown indicator.",
-          "code": "import type { ToastMethodProps } from '@kayou/hooks';\n            import { createSignal, createEffect, onCleanup } from 'solid-js';\n\n            const ProgressToast = (props: ToastMethodProps) => {\n              const [progress, setProgress] = createSignal(100);\n\n              createEffect(() => {\n                if (props.paused()) return;\n\n                const interval = setInterval(() => {\n                  setProgress((p) => Math.max(0, p - 100 / (props.duration / 100)));\n                }, 100);\n\n                onCleanup(() => clearInterval(interval));\n              });\n\n              return (\n                <div class=\"w-80 overflow-hidden rounded-lg bg-white shadow-lg\">\n                  <div class=\"flex items-center gap-3 px-4 py-3\">\n                    <CheckIcon class=\"size-5 text-green-500\" />\n                    <p class=\"text-sm\">{props.message}</p>\n                    <button onClick={props.dismiss} class=\"ml-auto\">\n                      <XIcon class=\"size-4\" />\n                    </button>\n                  </div>\n                  <div class=\"h-1 bg-gray-100\">\n                    <div\n                      class=\"h-full bg-green-500 transition-all duration-100\"\n                      style={{ width: \\"
+          "code": "import type { ToastMethodProps } from '@kayou/hooks';\n            import { createSignal, createEffect, onCleanup } from 'solid-js';\n\n            const ProgressToast = (props: ToastMethodProps) => {\n              const [progress, setProgress] = createSignal(100);\n\n              createEffect(() => {\n                if (props.paused()) return;\n\n                const interval = setInterval(() => {\n                  setProgress((p) => Math.max(0, p - 100 / (props.duration / 100)));\n                }, 100);\n\n                onCleanup(() => clearInterval(interval));\n              });\n\n              return (\n                <div class=\"w-80 overflow-hidden rounded-lg bg-white shadow-lg\">\n                  <div class=\"flex items-center gap-3 px-4 py-3\">\n                    <CheckIcon class=\"size-5 text-green-500\" />\n                    <p class=\"text-sm\">{props.message}</p>\n                    <button onClick={props.dismiss} class=\"ml-auto\">\n                      <XIcon class=\"size-4\" />\n                    </button>\n                  </div>\n                  <div class=\"h-1 bg-neutral-100\">\n                    <div\n                      class=\"h-full bg-green-500 transition-all duration-100\"\n                      style={{ width: \\"
         },
         {
           "title": "Toast with Action Button",
           "description": "Add clickable actions.",
-          "code": "const UndoToast = (props: ToastMethodProps & { onUndo: () => void }) => (\n              <div class=\"flex items-center gap-3 rounded-lg bg-gray-900 px-4 py-3 text-white shadow-lg\">\n                <p class=\"text-sm\">{props.message}</p>\n                <button\n                  onClick={() => {\n                    props.onUndo();\n                    props.dismiss();\n                  }}\n                  class=\"rounded bg-white px-2 py-1 text-xs font-medium text-gray-900\"\n                >\n                  Undo\n                </button>\n              </div>\n            );\n\n            // In ToastProvider, you can pass additional props through the message\n            // or use a wrapper pattern:\n\n            function useUndoToast() {\n              const toast = useToast();\n\n              return (message: string, onUndo: () => void) => {\n                // Store undo callback in a ref/signal that the toast component can access\n                return toast.undo(message);\n              };\n            }"
+          "code": "const UndoToast = (props: ToastMethodProps & { onUndo: () => void }) => (\n              <div class=\"flex items-center gap-3 rounded-lg bg-neutral-900 px-4 py-3 text-white shadow-lg\">\n                <p class=\"text-sm\">{props.message}</p>\n                <button\n                  onClick={() => {\n                    props.onUndo();\n                    props.dismiss();\n                  }}\n                  class=\"rounded bg-white px-2 py-1 text-xs font-medium text-neutral-900\"\n                >\n                  Undo\n                </button>\n              </div>\n            );\n\n            // In ToastProvider, you can pass additional props through the message\n            // or use a wrapper pattern:\n\n            function useUndoToast() {\n              const toast = useToast();\n\n              return (message: string, onUndo: () => void) => {\n                // Store undo callback in a ref/signal that the toast component can access\n                return toast.undo(message);\n              };\n            }"
         },
         {
           "title": "Disable Pause on Hover",

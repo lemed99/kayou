@@ -122,7 +122,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
     <Show
       when={ctx.emptyState}
       fallback={
-        <div class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white">
+        <div class="px-6 py-4 text-center font-medium text-neutral-900 dark:text-white">
           {ctx.labels().noData}
         </div>
       }
@@ -134,7 +134,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
   const LoadingMoreSpinner = () => (
     <Show when={ctx.isLoadingMore}>
       <div class="flex items-center justify-center py-3">
-        <Spinner color="gray" size="sm" />
+        <Spinner color="info" size="sm" />
       </div>
     </Show>
   );
@@ -153,7 +153,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
       fallback={<NoItemsComponent />}
       setContainerRef={ctx.setVirtualContainerRef}
       loading={<LoadingMoreSpinner />}
-      rowClass="border-b border-gray-200 last:border-b-0 dark:border-neutral-800"
+      rowClass="border-b border-neutral-200 last:border-b-0 dark:border-neutral-800"
     >
       {(item: unknown, index: Accessor<number>) => (
         <DataTableRow row={item as T} index={index} />

@@ -315,7 +315,7 @@ export default function Example() {
 
   return (
     <div class="space-y-4">
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-neutral-600">
         {selectedSegment()
           ? \`Selected: \${String(selectedSegment()?.name)} (\${selectedSegment()?.value}%)\`
           : 'Click or press Enter on a segment to select it. Use arrow keys to navigate.'}

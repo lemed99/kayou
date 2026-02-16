@@ -297,7 +297,7 @@ export default function Password(props: PasswordProps): JSX.Element {
   });
 
   const toggleIconColors: Record<string, string> = {
-    gray: 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-neutral-500 tansition-all',
+    gray: 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-500 tansition-all',
     info: 'text-blue-500 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-600 tansition-all',
     failure:
       'text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600 tansition-all',
@@ -360,7 +360,7 @@ export default function Password(props: PasswordProps): JSX.Element {
       <Show when={local.showStrength && passwordValue()}>
         <div id={strengthId()} class={twMerge('mt-2', local.strengthClass)}>
           <div class="mb-1 flex items-center justify-between">
-            <span class="text-xs text-gray-600 dark:text-neutral-400">
+            <span class="text-xs text-neutral-600 dark:text-neutral-400">
               {l().passwordStrength}
             </span>
             <span
@@ -375,7 +375,7 @@ export default function Password(props: PasswordProps): JSX.Element {
               {l()[strength()]}
             </span>
           </div>
-          <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-700">
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
             <div
               class={twMerge(
                 'h-full rounded-full transition-all duration-300',
@@ -402,7 +402,7 @@ export default function Password(props: PasswordProps): JSX.Element {
 
       <Show when={local.showRequirements}>
         <div id={requirementsId()} class={twMerge('mt-3', local.requirementsClass)}>
-          <p class="mb-2 text-xs font-medium text-gray-700 dark:text-neutral-300">
+          <p class="mb-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
             {l().passwordRequirements}
           </p>
           <ul class="space-y-1">
@@ -415,7 +415,7 @@ export default function Password(props: PasswordProps): JSX.Element {
                       'flex items-center gap-2 text-xs transition-colors',
                       isMet()
                         ? 'text-green-600 dark:text-green-400'
-                        : 'text-gray-500 dark:text-neutral-400',
+                        : 'text-neutral-500 dark:text-neutral-400',
                     )}
                   >
                     <Show when={isMet()} fallback={<CircleIcon />}>

@@ -119,7 +119,7 @@ This interactive element is a `<div>` with only an `onClick` handler. It cannot 
     setPageScroll((ancestor() as Element).scrollTop);
     setFullView(true);
   }}
-  class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-200 py-3 text-gray-600 hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:border-gray-700"
+  class="group flex w-full cursor-pointer items-center justify-center gap-2 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:border-neutral-700"
   aria-expanded={fullView()}
 >
   <span>{props.seeMoreText}</span>
@@ -279,7 +279,7 @@ Selection checkboxes have no visible or accessible labels. Screen reader users c
 
 ```tsx
 <Show when={props.loading}>
-  <div class="grid bg-white dark:bg-gray-800" ...>
+  <div class="grid bg-white dark:bg-neutral-800" ...>
     {/* Skeleton loaders */}
   </div>
 </Show>
@@ -301,7 +301,7 @@ Loading and error states are not announced to screen reader users. They won't kn
     role="status"
     aria-live="polite"
     aria-label="Loading table data"
-    class="grid bg-white dark:bg-gray-800"
+    class="grid bg-white dark:bg-neutral-800"
     ...
   >
     {/* Skeleton loaders */}
@@ -392,7 +392,7 @@ export function DataTable<T extends Record<string, unknown>>(
 **Current Code:**
 
 ```tsx
-<span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 p-2.5 text-xs font-medium text-white">
+<span class="ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-neutral-900 p-2.5 text-xs font-medium text-white">
   {2}
 </span>
 ```
@@ -471,7 +471,7 @@ export interface DataTableProps<T> {
 <div
   ref={setTableRef}
   class={twMerge(
-    'flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white',
+    'flex w-full flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white',
     fullView() ? 'mt-2 h-[calc(100%-8px)]' : 'h-auto',
     props.class
   )}

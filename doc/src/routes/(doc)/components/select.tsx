@@ -23,6 +23,11 @@ export default function SelectPage() {
           explanation: 'Arrow keys, Enter, Escape, and Home/End supported.',
         },
         {
+          term: 'Disabled Options',
+          explanation:
+            'Individual options can be disabled to prevent selection while remaining visible.',
+        },
+        {
           term: 'Custom Trigger',
           explanation:
             'Pass inputComponent to replace the default TextInput with any element (e.g. a button).',
@@ -31,14 +36,14 @@ export default function SelectPage() {
       props={[
         {
           name: 'options',
-          type: 'SelectOption[]',
+          type: 'Option[]',
           default: '-',
           description:
-            'Array of options to display. Each option has value, label, and optional labelWrapper',
+            'Array of options to display. Each option has value, label, optional labelWrapper, and optional disabled',
         },
         {
           name: 'onSelect',
-          type: '(option?: SelectOption) => void',
+          type: '(option?: Option) => void',
           default: '-',
           description: 'Callback fired when an option is selected (required)',
         },
@@ -132,11 +137,22 @@ export default function SelectPage() {
       ]}
       subComponents={[
         {
+          name: 'Option',
+          kind: 'type',
+          description: 'Option item shared by Select, SelectWithSearch, and MultiSelect',
+          props: [
+            { name: 'value', type: 'string', default: '-', description: 'Unique value identifying this option' },
+            { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
+            { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
+            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+          ],
+        },
+        {
           name: 'SelectTriggerProps',
           kind: 'type',
           description: 'Props passed to a custom trigger element via the inputComponent render function',
           props: [
-            { name: 'selectedOption', type: '() => SelectOption | null', default: '-', description: 'Accessor for the currently selected option' },
+            { name: 'selectedOption', type: '() => Option | null', default: '-', description: 'Accessor for the currently selected option' },
             { name: 'isOpen', type: '() => boolean', default: '-', description: 'Accessor for whether the dropdown is open' },
             { name: 'onKeyDown', type: '(e: KeyboardEvent) => void', default: '-', description: 'Keyboard handler for arrow keys, Enter, Escape, etc.' },
             { name: 'listboxId', type: 'string', default: '-', description: 'ID of the listbox element, for aria-controls' },
@@ -196,6 +212,21 @@ export default function SelectPage() {
                 onSelect={(opt) => setSelected(opt?.value)}
               />
 
+              {/* Disabled options */}
+              <Select
+                label="With Disabled Options"
+                helperText="Cherry and Date are disabled"
+                options={[
+                  { value: 'apple', label: 'Apple' },
+                  { value: 'banana', label: 'Banana' },
+                  { value: 'cherry', label: 'Cherry', disabled: true },
+                  { value: 'date', label: 'Date', disabled: true },
+                  { value: 'elderberry', label: 'Elderberry' },
+                ]}
+                placeholder="Select a fruit"
+                onSelect={(opt) => {}}
+              />
+
               {/* Custom trigger (button) */}
               <Select
                 options={fruitOptions}
@@ -203,7 +234,7 @@ export default function SelectPage() {
                 inputComponent={(triggerProps) => (
                   <button
                     type="button"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-200 dark:hover:bg-neutral-700"
+                    class="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                     onKeyDown={triggerProps.onKeyDown}
                     role="combobox"
                     aria-expanded={triggerProps.isOpen()}
@@ -227,6 +258,16 @@ export default function SelectPage() {
         <Select options={options} label="Category" required onSelect={handleSelect} />
         <Select options={options} color="failure" helperText="Required" onSelect={handleSelect} />
         <Select options={largeList} optionRowHeight={32} onSelect={handleSelect} />
+
+        {/* Disabled options */}
+        <Select
+          options={[
+            { value: '1', label: 'Available' },
+            { value: '2', label: 'Unavailable', disabled: true },
+            { value: '3', label: 'Also available' },
+          ]}
+          onSelect={handleSelect}
+        />
 
         {/* Custom trigger element */}
         <Select

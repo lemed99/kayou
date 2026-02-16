@@ -105,7 +105,7 @@ export interface DrawerProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const theme = {
   backdrop: {
     base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
-    show: 'bg-gray-800/50 dark:bg-neutral-900/80',
+    show: 'bg-neutral-800/50 dark:bg-neutral-900/80',
   },
   content: {
     positions: {
@@ -130,9 +130,9 @@ const theme = {
   },
   header: {
     base: 'flex items-center justify-between p-4',
-    title: 'grow text-lg font-semibold text-gray-900 dark:text-white p-2',
+    title: 'grow text-lg font-semibold text-neutral-900 dark:text-white p-2',
     close: {
-      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-2 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
+      base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-2 text-sm text-neutral-400 dark:text-neutral-400 hover:bg-neutral-200 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
     },
   },

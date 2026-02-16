@@ -299,7 +299,7 @@ const theme: Theme = {
   base: 'flex items-center justify-center',
   color: {
     primary: 'bg-blue-500 text-white',
-    secondary: 'bg-gray-200 text-gray-800',
+    secondary: 'bg-neutral-200 text-neutral-800',
   },
   size: {
     sm: 'text-sm px-2 py-1',

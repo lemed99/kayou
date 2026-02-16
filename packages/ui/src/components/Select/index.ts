@@ -7,3 +7,4 @@ export {
   type SelectAriaLabels,
   DEFAULT_SELECT_ARIA_LABELS,
 } from './useSelect';
+export { type Option } from '../../shared';

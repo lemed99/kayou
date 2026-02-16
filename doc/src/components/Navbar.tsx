@@ -1,19 +1,19 @@
 import {
-  type Component,
-  For,
-  Show,
-  createEffect,
-  createSignal,
-  onCleanup,
-  onMount,
+    type Component,
+    For,
+    Show,
+    createEffect,
+    createSignal,
+    onCleanup,
+    onMount,
 } from 'solid-js';
 
 import {
-  Menu01Icon,
-  Moon01Icon,
-  SearchRefractionIcon,
-  SunIcon,
-  XCloseIcon,
+    Menu01Icon,
+    Moon01Icon,
+    SearchRefractionIcon,
+    SunIcon,
+    XCloseIcon,
 } from '@kayou/icons';
 import { A, useLocation, useNavigate } from '@solidjs/router';
 
@@ -150,7 +150,7 @@ const Navbar: Component = () => {
   return (
     <>
       {/* Main navbar */}
-      <header class="sticky top-0 z-50 h-16 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900">
+      <header class="sticky top-0 z-50 h-16 border-b border-neutral-200/60 bg-white/80 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900">
         <nav class="mx-auto flex h-full max-w-[90rem] items-center justify-between px-4">
           {/* Left: Logo + Version */}
           <div class="flex items-center gap-3">
@@ -160,7 +160,7 @@ const Navbar: Component = () => {
                   <path d="M22.993 15.533q-.382.367-.895.467a975 975 0 0 1-9.94-.073 1.24 1.24 0 0 1-.606-.607l-1.711-4.054q-.217-.676.345-1.117a74 74 0 0 1 3.139-2.784 1.3 1.3 0 0 1 .505.014 437 437 0 0 1 9.002 6.038q.283.243.38.603a23 23 0 0 1-.219 1.513M16.636 4.225q.875-.78 1.767-1.543.483-.18.925.092a199 199 0 0 1 4.61 5.936l.062.31q-.133 1.243-.366 2.479-.447.997-1.434.525a432 432 0 0 1-7.26-5.01q-.42-.497-.117-1.075.904-.862 1.813-1.714M10.39 15.501q-.272.232-.584.406-3.622.072-7.245.041-.746.014-1.027-.685A314 314 0 0 0 .05 7.45a1.18 1.18 0 0 1 .12-.944 114 114 0 0 1 4.493-3.47 1.1 1.1 0 0 1 .69.138q.387.383.597.884a641 641 0 0 0 4.47 10.614q.111.426-.03.83M6.256 1.85A26 26 0 0 1 8.29.189.9.9 0 0 1 8.593 0q4.447.245 8.895.521.861.48.483 1.374a1120 1120 0 0 1-7.57 6.968q-.732.676-1.506.087a376 376 0 0 1-2.774-6.638.77.77 0 0 1 .135-.462" />
                 </svg>
               </div>
-              <span class="text-xl font-bold text-gray-900 dark:text-white">Kayou</span>
+              <span class="text-xl font-bold text-neutral-900 dark:text-white">Kayou</span>
             </A>
           </div>
 
@@ -174,7 +174,7 @@ const Navbar: Component = () => {
                     class={`text-sm font-medium transition-colors ${
                       isActive(link.href, link.activePaths)
                         ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-white'
+                        : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'
                     }`}
                   >
                     {link.label}
@@ -182,7 +182,7 @@ const Navbar: Component = () => {
                 )}
               </For>
             </div>
-            <div class="hidden lg:block mx-4 h-8 w-1 border-r border-gray-200 dark:border-neutral-700" />
+            <div class="hidden lg:block mx-4 h-8 w-1 border-r border-neutral-200 dark:border-neutral-700" />
             {/* Right: Search + GitHub + Dark Mode */}
             <div class="flex items-center gap-2">
               {/* Search Button */}
@@ -190,11 +190,11 @@ const Navbar: Component = () => {
                 type="button"
                 onClick={openSearch}
                 aria-label="Search documentation"
-                class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/50 px-3 text-sm text-gray-500 transition-colors dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400"
+                class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50/50 px-3 text-sm text-neutral-500 transition-colors dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400"
               >
                 <SearchRefractionIcon class="size-4" />
                 <span class="hidden sm:inline">Search</span>
-                <kbd class="ml-2 hidden rounded border border-gray-300 bg-white px-1.5 py-0.5 text-xs font-medium text-neutral-500 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
+                <kbd class="ml-2 hidden rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-xs font-medium text-neutral-500 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
                   ⌘K
                 </kbd>
               </button>
@@ -205,7 +205,7 @@ const Navbar: Component = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub repository"
-                class="flex items-center rounded-lg p-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                class="flex items-center rounded-lg p-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 <GitHubIcon />
               </a>
@@ -214,7 +214,7 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
                 aria-label={isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 <Show when={isDarkMode()} fallback={<Moon01Icon class="size-5" />}>
@@ -226,7 +226,7 @@ const Navbar: Component = () => {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen())}
-                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 lg:hidden dark:text-neutral-400 dark:hover:bg-neutral-800"
+                class="inline-grid size-9 cursor-pointer place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:text-neutral-400 dark:hover:bg-neutral-800"
                 aria-label={isMobileMenuOpen() ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen()}
               >
@@ -243,7 +243,7 @@ const Navbar: Component = () => {
 
         {/* Mobile Menu */}
         <Show when={isMobileMenuOpen()}>
-          <div class="border-y border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-neutral-800 dark:bg-neutral-900">
+          <div class="border-y border-neutral-200 bg-white px-4 py-3 lg:hidden dark:border-neutral-800 dark:bg-neutral-900">
             <div class="flex flex-col gap-4">
               <For each={navLinks}>
                 {(link) => (
@@ -253,7 +253,7 @@ const Navbar: Component = () => {
                     class={`flex items-center rounded-lg text-base transition-colors ${
                       isActive(link.href, link.activePaths)
                         ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-gray-600 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                        : 'text-neutral-600 hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
                     }`}
                   >
                     {link.label}
@@ -269,14 +269,14 @@ const Navbar: Component = () => {
       <Show when={isSearchOpen()}>
         <div class="fixed inset-0 z-[100]">
           <div
-            class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
+            class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm"
             onClick={() => {
               setIsSearchOpen(false);
               setSearchQuery('');
             }}
           />
           <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900 dark:border dark:border-neutral-700">
-            <div class="relative border-b border-gray-200 p-4 dark:border-neutral-800">
+            <div class="relative border-b border-neutral-200 p-4 dark:border-neutral-800">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-7">
                 <SearchRefractionIcon class="size-4" />
               </div>
@@ -287,7 +287,7 @@ const Navbar: Component = () => {
                 placeholder="Search documentation..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                class="h-12 w-full rounded-lg border border-gray-200 bg-gray-50 pr-4 pl-11 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400"
+                class="h-12 w-full rounded-lg border border-neutral-200 bg-neutral-50 pr-4 pl-11 text-base text-neutral-900 placeholder-neutral-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-neutral-400 dark:focus:border-blue-400"
               />
             </div>
 
@@ -296,7 +296,7 @@ const Navbar: Component = () => {
               <Show
                 when={searchQuery().trim()}
                 fallback={
-                  <div class="p-4 text-center text-sm text-gray-500 dark:text-neutral-400">
+                  <div class="p-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
                     Type to search components, hooks, and docs...
                   </div>
                 }
@@ -304,7 +304,7 @@ const Navbar: Component = () => {
                 <Show
                   when={searchResults().length > 0}
                   fallback={
-                    <div class="p-4 text-center text-sm text-gray-500 dark:text-neutral-400">
+                    <div class="p-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
                       No results found for "{searchQuery()}"
                     </div>
                   }
@@ -318,7 +318,7 @@ const Navbar: Component = () => {
                             searchResults()[index() - 1].category !== item.category
                           }
                         >
-                          <div class="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
+                          <div class="sticky top-0 bg-neutral-50 px-4 py-2 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
                             {item.category}
                           </div>
                         </Show>
@@ -329,7 +329,7 @@ const Navbar: Component = () => {
                           class={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors ${
                             selectedIndex() === index()
                               ? 'bg-blue-50 dark:bg-blue-900/30'
-                              : 'hover:bg-gray-50 dark:hover:bg-neutral-800'
+                              : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
                           }`}
                         >
                           <span
@@ -340,23 +340,23 @@ const Navbar: Component = () => {
                                   ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                                   : item.category === 'Contexts'
                                     ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-neutral-900 dark:text-neutral-400'
+                                    : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400'
                             }`}
                           >
                             {item.label.charAt(0)}
                           </span>
                           <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
-                              <span class="font-medium text-gray-900 dark:text-white">
+                              <span class="font-medium text-neutral-900 dark:text-white">
                                 {item.label}
                               </span>
                             </div>
-                            <div class="truncate text-xs text-gray-500 dark:text-neutral-400">
+                            <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">
                               {item.path}
                             </div>
                           </div>
                           <Show when={selectedIndex() === index()}>
-                            <kbd class="shrink-0 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-400 dark:border-neutral-700 dark:bg-neutral-800">
+                            <kbd class="shrink-0 rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-400 dark:border-neutral-700 dark:bg-neutral-800">
                               ↵
                             </kbd>
                           </Show>
@@ -369,19 +369,19 @@ const Navbar: Component = () => {
             </div>
 
             {/* Footer */}
-            <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-neutral-800">
-              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
-                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
+            <div class="flex items-center justify-between border-t border-neutral-200 px-4 py-3 dark:border-neutral-800">
+              <div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                <kbd class="rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   ↑↓
                 </kbd>
                 <span>Navigate</span>
-                <kbd class="ml-2 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
+                <kbd class="ml-2 rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   ↵
                 </kbd>
                 <span>Select</span>
               </div>
-              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
-                <kbd class="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
+              <div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                <kbd class="rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 font-medium dark:border-neutral-700 dark:bg-neutral-800">
                   Esc
                 </kbd>
                 <span>Close</span>

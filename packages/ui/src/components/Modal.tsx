@@ -92,7 +92,7 @@ export interface ModalProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const theme = {
   backdrop: {
     base: 'fixed z-[90] overflow-hidden inset-0 w-full h-dvh',
-    show: 'bg-gray-900/50 dark:bg-neutral-900/80',
+    show: 'bg-neutral-900/50 dark:bg-neutral-900/80',
   },
   content: {
     base: 'fixed inset-0 flex w-full h-dvh z-[91] p-4',
@@ -113,9 +113,9 @@ const theme = {
   body: 'p-6 grow overflow-y-auto overflow-x-hidden',
   header: {
     base: 'flex items-start justify-between rounded-t p-2 pb-0 shrink-0',
-    title: 'grow px-4 pt-1 text-lg font-semibold text-gray-900 dark:text-white',
+    title: 'grow px-4 pt-1 text-lg font-semibold text-neutral-900 dark:text-white',
     close: {
-      base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-gray-400 dark:text-neutral-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-neutral-700 dark:hover:text-white',
+      base: 'ml-auto inline-flex items-center cursor-pointer transition-all rounded-lg bg-transparent p-1.5 text-sm text-neutral-400 dark:text-neutral-400 hover:bg-neutral-200 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
       icon: 'size-5',
     },
   },

@@ -69,7 +69,7 @@ export default function LabelPage() {
                 id="username-input"
                 type="text"
                 placeholder="Enter username"
-                class="w-64 rounded-lg border border-gray-300 p-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                class="w-64 rounded-lg border border-neutral-300 p-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
               />
             </div>
           );

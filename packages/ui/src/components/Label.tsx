@@ -27,7 +27,7 @@ export interface LabelProps
 const theme = {
   base: 'text-sm font-medium',
   colors: {
-    gray: 'text-gray-900 dark:text-neutral-300',
+    gray: 'text-neutral-900 dark:text-neutral-300',
     info: 'text-blue-500 dark:text-blue-600',
     failure: 'text-red-700 dark:text-red-500',
     warning: 'text-yellow-500 dark:text-yellow-600',

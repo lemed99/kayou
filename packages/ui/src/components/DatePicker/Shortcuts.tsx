@@ -74,7 +74,7 @@ const Shortcuts = (props: ShortcutsProps) => {
 
   return (
     <div
-      class="flex min-w-[120px] flex-col gap-1 border-r border-gray-300 pr-3 dark:border-neutral-800"
+      class="flex min-w-[120px] flex-col gap-1 border-r border-neutral-300 pr-3 dark:border-neutral-800"
       role="listbox"
       aria-label={props.ariaLabel}
     >
@@ -91,7 +91,7 @@ const Shortcuts = (props: ShortcutsProps) => {
             role="option"
             aria-selected={selectedId() === shortcut.id}
             tabIndex={focusedIndex() === index() ? 0 : -1}
-            class="rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+            class="rounded-md px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
           >
             {shortcut.label}
           </button>

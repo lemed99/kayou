@@ -316,7 +316,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
           >
             <div
               class={twMerge(
-                'w-fit rounded-md border border-gray-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none',
+                'w-fit rounded-md border border-neutral-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none',
                 props.class,
               )}
             >

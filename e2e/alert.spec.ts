@@ -46,13 +46,21 @@ test.describe('Alert', () => {
   });
 
   test('should render dark variant with gray background', async ({ page }) => {
-    const darkAlert = page.locator('[role="alert"].bg-gray-800').first();
+    const darkAlert = page.locator('[role="alert"].bg-neutral-800').first();
     await expect(darkAlert).toBeVisible();
     await expect(darkAlert).toContainText('Dark alert message');
   });
 
-  test('all five color variants should have distinct background classes', async ({ page }) => {
-    const bgClasses = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100', 'bg-red-100', 'bg-gray-800'];
+  test('all five color variants should have distinct background classes', async ({
+    page,
+  }) => {
+    const bgClasses = [
+      'bg-blue-100',
+      'bg-green-100',
+      'bg-yellow-100',
+      'bg-red-100',
+      'bg-neutral-800',
+    ];
     for (const bg of bgClasses) {
       const alert = page.locator(`[role="alert"].${bg}`);
       await expect(alert.first()).toBeVisible();
@@ -96,17 +104,15 @@ test.describe('Alert', () => {
   // ==================== Additional Content ====================
 
   test('should render additional content below main message', async ({ page }) => {
-    const alert = page
-      .locator('[role="alert"]')
-      .filter({ hasText: 'Action required' });
+    const alert = page.locator('[role="alert"]').filter({ hasText: 'Action required' });
     await expect(alert).toBeVisible();
     await expect(alert).toContainText('Please review the details and take action.');
   });
 
-  test('additional content should be in a separate div from main message', async ({ page }) => {
-    const alert = page
-      .locator('[role="alert"]')
-      .filter({ hasText: 'Action required' });
+  test('additional content should be in a separate div from main message', async ({
+    page,
+  }) => {
+    const alert = page.locator('[role="alert"]').filter({ hasText: 'Action required' });
 
     // The alert should have at least 2 child divs: one for message, one for additional content
     const childDivs = alert.locator(':scope > div');

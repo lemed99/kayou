@@ -5,15 +5,15 @@ import { twMerge } from 'tailwind-merge';
 
 // Static class maps to ensure Tailwind JIT compiles these classes
 const GRAY_CLASSES: Record<number, string> = {
-  100: 'bg-gray-100',
-  200: 'bg-gray-200',
-  300: 'bg-gray-300',
-  400: 'bg-gray-400',
-  500: 'bg-gray-500',
-  600: 'bg-gray-600',
-  700: 'bg-gray-700',
-  800: 'bg-gray-800',
-  900: 'bg-gray-900',
+  100: 'bg-neutral-100',
+  200: 'bg-neutral-200',
+  300: 'bg-neutral-300',
+  400: 'bg-neutral-400',
+  500: 'bg-neutral-500',
+  600: 'bg-neutral-600',
+  700: 'bg-neutral-700',
+  800: 'bg-neutral-800',
+  900: 'bg-neutral-900',
 };
 
 const DARK_GRAY_CLASSES: Record<number, string> = {
@@ -103,7 +103,7 @@ const Skeleton = (props: SkeletonProps): JSX.Element => {
         }}
         class={twMerge(
           'rounded-lg',
-          GRAY_CLASSES[gray()] || 'bg-gray-100',
+          GRAY_CLASSES[gray()] || 'bg-neutral-100',
           DARK_GRAY_CLASSES[darkGray()] || 'dark:bg-neutral-700',
         )}
       />

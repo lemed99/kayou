@@ -50,7 +50,7 @@ export default createHandler(() => (
           />
           {assets}
         </head>
-        <body class="bg-white text-sm text-gray-900 dark:bg-neutral-950/[98%] dark:text-white">
+        <body class="bg-white text-sm text-neutral-900 dark:bg-neutral-950/[98%] dark:text-white">
           <noscript>You need to enable JavaScript to run this app.</noscript>
           <div id="app">{children}</div>
           {scripts}

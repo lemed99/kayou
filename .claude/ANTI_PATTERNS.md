@@ -238,13 +238,13 @@ interface Props {
 // BAD - No dark mode support
 const theme = {
   bg: 'bg-white',
-  text: 'text-gray-900',
+  text: 'text-neutral-900',
 };
 
 // GOOD - Include dark variants
 const theme = {
-  bg: 'bg-white dark:bg-gray-800',
-  text: 'text-gray-900 dark:text-white',
+  bg: 'bg-white dark:bg-neutral-800',
+  text: 'text-neutral-900 dark:text-white',
 };
 ```
 

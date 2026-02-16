@@ -62,7 +62,7 @@ export default function HelperTextPage() {
               <input
                 type="email"
                 placeholder="Email"
-                class="w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                class="w-full rounded-lg border border-neutral-300 p-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
               />
               <HelperText content="We'll never share your email" />
             </div>

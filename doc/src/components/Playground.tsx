@@ -1,21 +1,21 @@
 import {
-  Show,
-  ErrorBoundary as SolidErrorBoundary,
-  createEffect,
-  createSignal,
-  on,
-  onCleanup,
-  onMount,
-  type JSX,
+    Show,
+    ErrorBoundary as SolidErrorBoundary,
+    createEffect,
+    createSignal,
+    on,
+    onCleanup,
+    onMount,
+    type JSX,
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
 import {
-  CheckIcon,
-  Copy01Icon,
-  Moon01Icon,
-  RefreshCw01Icon,
-  SunIcon,
+    CheckIcon,
+    Copy01Icon,
+    Moon01Icon,
+    RefreshCw01Icon,
+    SunIcon,
 } from '@kayou/icons';
 
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
@@ -171,16 +171,16 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
   };
 
   return (
-    <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-neutral-800">
+    <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
       {/* Toolbar */}
-      <div class="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
-        <h3 class="text-sm font-medium text-gray-700 dark:text-neutral-300">Playground</h3>
+      <div class="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
+        <h3 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Playground</h3>
         <div class="flex items-center gap-2">
           <Show when={previewOverride() !== null}>
             <button
               type="button"
               onClick={() => setPreviewOverride(null)}
-              class="cursor-pointer rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+              class="cursor-pointer rounded-md px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
             >
               Reset theme
             </button>
@@ -188,7 +188,7 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
           <button
             type="button"
             onClick={togglePreview}
-            class="flex cursor-pointer items-center rounded-md border border-gray-200 p-1.5 text-gray-700 transition-colors hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            class="flex cursor-pointer items-center rounded-md border border-neutral-200 p-1.5 text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
             aria-label={isPreviewDark() ? 'Preview in light mode' : 'Preview in dark mode'}
             title={isPreviewDark() ? 'Preview in light mode' : 'Preview in dark mode'}
           >
@@ -199,7 +199,7 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
           <button
             type="button"
             onClick={handleReset}
-            class="flex cursor-pointer items-center rounded-md border border-gray-200 p-1.5 text-gray-700 transition-colors hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            class="flex cursor-pointer items-center rounded-md border border-neutral-200 p-1.5 text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
             aria-label="Reset code"
             title="Reset to initial code"
           >
@@ -208,7 +208,7 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
           <button
             type="button"
             onClick={() => void handleCopy()}
-            class="flex cursor-pointer items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            class="flex cursor-pointer items-center gap-1 rounded-md border border-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
             aria-label={copied() ? 'Copied!' : 'Copy code'}
           >
             <Show when={copied()} fallback={<Copy01Icon class="size-3.5" />}>
@@ -222,7 +222,7 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
       {/* Editor + Preview */}
       <div class="grid grid-cols-1">
         {/* Code Editor */}
-        <div class="relative min-h-[300px] max-h-[500px] border-b border-gray-200 dark:border-neutral-800">
+        <div class="relative min-h-[300px] max-h-[500px] border-b border-neutral-200 dark:border-neutral-800">
           <div
             ref={editorContainerRef}
             class="absolute inset-0 overflow-auto"
@@ -236,7 +236,7 @@ export default function Playground(props: PlaygroundProps): JSX.Element {
               <Show
                 when={!compiling()}
                 fallback={
-                  <div class="flex h-full items-center justify-center text-sm text-gray-400">
+                  <div class="flex h-full items-center justify-center text-sm text-neutral-400">
                     Compiling...
                   </div>
                 }

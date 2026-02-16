@@ -15,8 +15,10 @@ export function DataTableContextMenu<T extends Record<string, unknown>>(): JSX.E
 
   const [menuRef, setMenuRef] = createSignal<HTMLDivElement | undefined>();
 
-  // Cache the last position so the menu stays placed during exit animation
-  let lastPosition: JSX.CSSProperties = { display: 'none' };
+  // Cached position — only updates when context menu opens, retained during exit animation
+  const [cachedPosition, setCachedPosition] = createSignal<JSX.CSSProperties>({
+    display: 'none',
+  });
   // Cache menu content so it renders during exit animation
   const [lastContent, setLastContent] = createSignal<{
     row: T;
@@ -25,7 +27,28 @@ export function DataTableContextMenu<T extends Record<string, unknown>>(): JSX.E
 
   createEffect(() => {
     const state = ctx.contextMenuState();
-    if (state) setLastContent({ row: state.row, index: state.index });
+    if (!state) return; // keep last position/content during exit animation
+
+    setLastContent({ row: state.row, index: state.index });
+
+    let { x, y } = state;
+    const el = menuRef();
+    const menuWidth = el?.offsetWidth ?? 180;
+    const menuHeight = el?.offsetHeight ?? 200;
+
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 8;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 8;
+    }
+
+    setCachedPosition({
+      position: 'fixed',
+      left: `${x}px`,
+      top: `${y}px`,
+      'z-index': 50,
+    });
   });
 
   // Close on pointerdown outside, Escape, scroll
@@ -61,32 +84,6 @@ export function DataTableContextMenu<T extends Record<string, unknown>>(): JSX.E
     });
   });
 
-  // Compute position avoiding viewport overflow; return cached position during exit
-  const menuStyle = (): JSX.CSSProperties => {
-    const state = ctx.contextMenuState();
-    if (!state) return lastPosition;
-
-    let { x, y } = state;
-    const el = menuRef();
-    const menuWidth = el?.offsetWidth ?? 180;
-    const menuHeight = el?.offsetHeight ?? 200;
-
-    if (x + menuWidth > window.innerWidth) {
-      x = window.innerWidth - menuWidth - 8;
-    }
-    if (y + menuHeight > window.innerHeight) {
-      y = window.innerHeight - menuHeight - 8;
-    }
-
-    lastPosition = {
-      position: 'fixed',
-      left: `${x}px`,
-      top: `${y}px`,
-      'z-index': 50,
-    };
-    return lastPosition;
-  };
-
   return (
     <Show when={isMounted()}>
       <Portal>
@@ -94,14 +91,14 @@ export function DataTableContextMenu<T extends Record<string, unknown>>(): JSX.E
           ref={setMenuRef}
           role="menu"
           style={{
-            ...menuStyle(),
+            ...cachedPosition(),
             opacity: isVisible() ? '1' : '0',
             transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
             'transition-property': 'opacity, transform',
             'transition-duration': '.2s',
             'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
           }}
-          class="rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          class="rounded-md border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
         >
           <Show when={lastContent()}>
             {(content) =>

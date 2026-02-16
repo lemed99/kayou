@@ -66,17 +66,17 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
 const theme = {
   base: 'flex',
   addon:
-    'inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 bg-gray-200 px-3 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-700 dark:text-neutral-400',
+    'inline-flex items-center rounded-l-lg border border-r-0 border-neutral-300 bg-neutral-200 px-3 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-700 dark:text-neutral-400',
   field: {
     base: 'relative w-full',
     icon: {
       base: 'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5',
-      svg: 'size-4 text-gray-500 dark:text-neutral-400',
+      svg: 'size-4 text-neutral-500 dark:text-neutral-400',
     },
     arrows: {
       base: 'absolute inset-y-0 right-0 flex items-center flex-col gap-0.5 justify-center pr-3',
       button:
-        'border border-gray-300 px-1 text-gray-500 dark:text-neutral-400 cursor-pointer dark:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 active:bg-gray-200 dark:active:bg-neutral-700 data-[active]:bg-gray-200 dark:data-[active]:bg-neutral-700',
+        'border border-neutral-300 px-1 text-neutral-500 dark:text-neutral-400 cursor-pointer dark:border-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 active:bg-neutral-200 dark:active:bg-neutral-700 data-[active]:bg-neutral-200 dark:data-[active]:bg-neutral-700',
     },
     input: {
       base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50 focus:outline focus:outline-2 focus:outline-offset-[-1px]',
@@ -86,7 +86,7 @@ const theme = {
         md: 'p-2.5 text-sm',
       },
       colors: {
-        gray: 'bg-gray-50 border-gray-300 text-gray-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500',
+        gray: 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500',
         info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-500 dark:bg-blue-100 dark:focus:outline-blue-500',
         failure:
           'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-500 dark:bg-red-100 dark:focus:outline-red-500',
@@ -215,7 +215,9 @@ const TextInput = (props: TextInputProps): JSX.Element => {
         <div class="mb-1 block">
           <Label for={inputId()} value={local.label} color={color()} />
           <Show when={props.required}>
-            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">*</span>
+            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">
+              *
+            </span>
           </Show>
         </div>
       </Show>
@@ -231,7 +233,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
           </Show>
           <Show when={local.isLoading}>
             <div class={theme.field.icon.base}>
-              <Spinner size="sm" color={color()} />
+              <Spinner size="sm" color="transparent" />
             </div>
           </Show>
 

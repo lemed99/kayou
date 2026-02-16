@@ -1,13 +1,13 @@
 import {
-  For,
-  type JSX,
-  type ParentProps,
-  Show,
-  createEffect,
-  createSignal,
-  onCleanup,
-  onMount,
-  untrack,
+    For,
+    type JSX,
+    type ParentProps,
+    Show,
+    createEffect,
+    createSignal,
+    onCleanup,
+    onMount,
+    untrack,
 } from 'solid-js';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
@@ -131,19 +131,19 @@ function PrevNextFooter(): JSX.Element {
 
   return (
     <Show when={navigation().prev || navigation().next}>
-      <footer class="mt-12 border-t border-gray-200 pt-6 dark:border-neutral-800">
+      <footer class="mt-12 border-t border-neutral-200 pt-6 dark:border-neutral-800">
         <nav class="flex items-center justify-between gap-4">
           <Show when={navigation().prev} fallback={<div />}>
             {(prev) => (
               <A
                 href={prev().path}
-                class="group flex flex-col items-start gap-1 rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+                class="group flex flex-col items-start gap-1 rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
               >
-                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400">
+                <span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
                   <ChevronLeftIcon class="size-3" />
                   Previous
                 </span>
-                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                <span class="text-sm font-medium text-neutral-900 dark:text-white">
                   {prev().label}
                 </span>
               </A>
@@ -153,13 +153,13 @@ function PrevNextFooter(): JSX.Element {
             {(next) => (
               <A
                 href={next().path}
-                class="group flex flex-col items-end gap-1 rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+                class="group flex flex-col items-end gap-1 rounded-lg border border-neutral-200 px-4 py-3 transition-colors hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
               >
-                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-neutral-400">
+                <span class="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
                   Next
                   <ChevronRightIcon class="size-3" />
                 </span>
-                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                <span class="text-sm font-medium text-neutral-900 dark:text-white">
                   {next().label}
                 </span>
               </A>
@@ -267,7 +267,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
           <h1 class="text-4xl font-medium">{props.title}</h1>
         </div>
 
-        <p class="mb-10 text-base leading-relaxed text-gray-600 dark:text-neutral-400">
+        <p class="mb-10 text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
           {props.description}
         </p>
 
@@ -282,7 +282,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
       <div class="max-xl:hidden">
         <div class="sticky top-16 max-h-[calc(100svh-4rem)] overflow-y-auto px-4 pt-10 pb-8">
           <div class="flex flex-col gap-3">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 class="text-sm font-medium text-neutral-900 dark:text-white">
               On this page
             </h3>
             <ul class="flex flex-col gap-2 text-xs">
@@ -299,7 +299,7 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
                         document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
                         history.replaceState(null, '', `#${item.id}`);
                       }}
-                      class="text-gray-500 transition-colors hover:text-gray-900 aria-[current]:font-medium aria-[current]:text-gray-900 dark:text-neutral-400 dark:hover:text-white dark:aria-[current]:text-white"
+                      class="text-neutral-500 transition-colors hover:text-neutral-900 aria-[current]:font-medium aria-[current]:text-neutral-900 dark:text-neutral-400 dark:hover:text-white dark:aria-[current]:text-white"
                     >
                       {item.text}
                     </a>

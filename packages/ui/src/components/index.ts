@@ -58,6 +58,7 @@ export { VirtualList, type VirtualListHandle } from './VirtualList';
 export {
   DEFAULT_SELECT_LABELS,
   MultiSelect,
+  type Option,
   default as Select,
   SelectWithSearch,
   type SelectLabels,

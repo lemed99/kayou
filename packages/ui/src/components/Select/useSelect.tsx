@@ -190,7 +190,18 @@ const useSelect = <T extends MergedSelectProps>(
     }
   };
 
+  const findNextEnabledIndex = (fromIndex: number, direction: 1 | -1): number => {
+    const options = filteredOptions();
+    let index = fromIndex + direction;
+    while (index >= 0 && index < options.length) {
+      if (!options[index].disabled) return index;
+      index += direction;
+    }
+    return -1;
+  };
+
   const handleOptionClick = (option: Option) => {
+    if (option.disabled) return;
     if (type === 'selectWithSearch' || type === 'select') {
       if (props.autoFillSearchKey && type === 'selectWithSearch')
         setSearchKey(option.label);
@@ -325,23 +336,25 @@ const useSelect = <T extends MergedSelectProps>(
     if (key === 'ArrowUp') {
       e.preventDefault();
       setHighlightedOption((prev) => {
-        if (filteredOptions().length === 0) return null;
-        const lastOptionIndex = filteredOptions().length - 1;
+        const options = filteredOptions();
+        if (options.length === 0) return null;
         if (!prev) {
-          scrollToHighlightedOption(lastOptionIndex);
-          return filteredOptions()[lastOptionIndex];
+          const lastEnabled = findNextEnabledIndex(options.length, -1);
+          if (lastEnabled === -1) return null;
+          scrollToHighlightedOption(lastEnabled);
+          return options[lastEnabled];
         }
-        const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
-        if (currentIndex === 0) {
-          return prev;
-        }
+        const currentIndex = options.findIndex((o) => o.value === prev.value);
         if (currentIndex === -1) {
-          scrollToHighlightedOption(lastOptionIndex);
-          return filteredOptions()[lastOptionIndex];
+          const lastEnabled = findNextEnabledIndex(options.length, -1);
+          if (lastEnabled === -1) return null;
+          scrollToHighlightedOption(lastEnabled);
+          return options[lastEnabled];
         }
-        const newIndex = currentIndex - 1;
+        const newIndex = findNextEnabledIndex(currentIndex, -1);
+        if (newIndex === -1) return prev;
         scrollToHighlightedOption(newIndex);
-        return filteredOptions()[newIndex];
+        return options[newIndex];
       });
       return;
     }
@@ -349,35 +362,42 @@ const useSelect = <T extends MergedSelectProps>(
     if (key === 'ArrowDown') {
       e.preventDefault();
       setHighlightedOption((prev) => {
-        if (filteredOptions().length === 0) return null;
+        const options = filteredOptions();
+        if (options.length === 0) return null;
         if (!prev) {
-          scrollToHighlightedOption(0);
-          return filteredOptions()[0];
+          const firstEnabled = findNextEnabledIndex(-1, 1);
+          if (firstEnabled === -1) return null;
+          scrollToHighlightedOption(firstEnabled);
+          return options[firstEnabled];
         }
-        const currentIndex = filteredOptions().findIndex((o) => o.value === prev.value);
-        if (currentIndex === filteredOptions().length - 1) {
-          return prev;
-        }
+        const currentIndex = options.findIndex((o) => o.value === prev.value);
         if (currentIndex === -1) {
-          scrollToHighlightedOption(0);
-          return filteredOptions()[0];
+          const firstEnabled = findNextEnabledIndex(-1, 1);
+          if (firstEnabled === -1) return null;
+          scrollToHighlightedOption(firstEnabled);
+          return options[firstEnabled];
         }
-        const newIndex = currentIndex + 1;
+        const newIndex = findNextEnabledIndex(currentIndex, 1);
+        if (newIndex === -1) return prev;
         scrollToHighlightedOption(newIndex);
-        return filteredOptions()[newIndex];
+        return options[newIndex];
       });
       return;
     }
 
     if (key === 'Enter') {
       e.preventDefault();
-      const currentIndex = highlightedOption()
-        ? filteredOptions().findIndex((o) => o.value === highlightedOption()?.value)
-        : -1;
-      if (highlightedOption() && currentIndex !== -1) {
-        handleOptionClick(highlightedOption()!);
-      } else if (filteredOptions().length === 1) {
-        handleOptionClick(filteredOptions()[0]);
+      const highlighted = highlightedOption();
+      if (highlighted && !highlighted.disabled) {
+        const currentIndex = filteredOptions().findIndex((o) => o.value === highlighted.value);
+        if (currentIndex !== -1) {
+          handleOptionClick(highlighted);
+          return;
+        }
+      }
+      const firstEnabled = filteredOptions().find((o) => !o.disabled);
+      if (filteredOptions().filter((o) => !o.disabled).length === 1 && firstEnabled) {
+        handleOptionClick(firstEnabled);
       }
       return;
     }
@@ -396,19 +416,20 @@ const useSelect = <T extends MergedSelectProps>(
 
     if (key === 'Home') {
       e.preventDefault();
-      if (filteredOptions().length > 0) {
-        setHighlightedOption(filteredOptions()[0]);
-        scrollToHighlightedOption(0);
+      const firstEnabled = findNextEnabledIndex(-1, 1);
+      if (firstEnabled !== -1) {
+        setHighlightedOption(filteredOptions()[firstEnabled]);
+        scrollToHighlightedOption(firstEnabled);
       }
       return;
     }
 
     if (key === 'End') {
       e.preventDefault();
-      const lastIndex = filteredOptions().length - 1;
-      if (lastIndex >= 0) {
-        setHighlightedOption(filteredOptions()[lastIndex]);
-        scrollToHighlightedOption(lastIndex);
+      const lastEnabled = findNextEnabledIndex(filteredOptions().length, -1);
+      if (lastEnabled !== -1) {
+        setHighlightedOption(filteredOptions()[lastEnabled]);
+        scrollToHighlightedOption(lastEnabled);
       }
       return;
     }
@@ -421,13 +442,17 @@ const useSelect = <T extends MergedSelectProps>(
     // Space selects the highlighted option in non-searchable selects
     if (key === ' ' && (type === 'select' || (type === 'multiSelect' && !copy))) {
       e.preventDefault();
-      const currentIndex = highlightedOption()
-        ? filteredOptions().findIndex((o) => o.value === highlightedOption()?.value)
-        : -1;
-      if (highlightedOption() && currentIndex !== -1) {
-        handleOptionClick(highlightedOption()!);
-      } else if (filteredOptions().length === 1) {
-        handleOptionClick(filteredOptions()[0]);
+      const highlighted = highlightedOption();
+      if (highlighted && !highlighted.disabled) {
+        const currentIndex = filteredOptions().findIndex((o) => o.value === highlighted.value);
+        if (currentIndex !== -1) {
+          handleOptionClick(highlighted);
+          return;
+        }
+      }
+      const firstEnabled = filteredOptions().find((o) => !o.disabled);
+      if (filteredOptions().filter((o) => !o.disabled).length === 1 && firstEnabled) {
+        handleOptionClick(firstEnabled);
       }
       return;
     }
@@ -445,8 +470,8 @@ const useSelect = <T extends MergedSelectProps>(
       setTypeaheadBuffer(buffer);
       typeaheadTimeout = setTimeout(() => setTypeaheadBuffer(''), 500);
 
-      const match = filteredOptions().find((o) =>
-        o.label.toLowerCase().startsWith(buffer),
+      const match = filteredOptions().find(
+        (o) => !o.disabled && o.label.toLowerCase().startsWith(buffer),
       );
       if (match) {
         setHighlightedOption(match);
@@ -482,7 +507,7 @@ const useSelect = <T extends MergedSelectProps>(
               <div
                 ref={refs.setFloating}
                 class={twMerge(
-                  'z-100 w-fit rounded-lg border border-gray-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900',
+                  'z-100 w-fit rounded-lg border border-neutral-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900',
                 )}
                 style={
                   {

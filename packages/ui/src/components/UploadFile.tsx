@@ -538,7 +538,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
           </button>
         </Match>
         <Match when={tf().state === 'queued'}>
-          <span class="text-xs text-gray-400 dark:text-neutral-500">{l().queued}</span>
+          <span class="text-xs text-neutral-400 dark:text-neutral-500">{l().queued}</span>
         </Match>
       </Switch>
     );
@@ -551,7 +551,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         class={`relative w-full overflow-hidden rounded-xl border border-dashed transition-all duration-200 ${
           dragActive()
             ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
-            : 'border-gray-200 bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900'
+            : 'border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900'
         } ${props.dropZoneClass ?? ''}`}
         onDragEnter={handleDrag}
         onDragOver={handleDrag}
@@ -559,22 +559,22 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         <div class="px-8 py-8 text-center">
           {/* Upload Icon */}
           <div
-            class={`mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-all duration-200 dark:bg-neutral-800 dark:text-neutral-500`}
+            class={`mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-400 transition-all duration-200 dark:bg-neutral-800 dark:text-neutral-500`}
           >
             <Upload01Icon class="size-5" />
           </div>
 
           {/* Text */}
           <div class="mb-2">
-            <span class="text-gray-600 dark:text-neutral-300">
+            <span class="text-neutral-600 dark:text-neutral-300">
               {props.dragDropText ?? l().dragAndDrop}
             </span>
           </div>
 
           <div class="mb-4 flex items-center justify-center gap-3">
-            <div class="h-px w-12 bg-gray-200 dark:bg-neutral-700" />
-            <span class="text-sm text-gray-400 dark:text-neutral-500">{l().or}</span>
-            <div class="h-px w-12 bg-gray-200 dark:bg-neutral-700" />
+            <div class="h-px w-12 bg-neutral-200 dark:bg-neutral-700" />
+            <span class="text-sm text-neutral-400 dark:text-neutral-500">{l().or}</span>
+            <div class="h-px w-12 bg-neutral-200 dark:bg-neutral-700" />
           </div>
 
           {/* Browse Button */}
@@ -585,7 +585,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
           </div>
 
           <Show when={props.helperText}>
-            <p class="mt-4 text-xs text-gray-500 dark:text-neutral-400">
+            <p class="mt-4 text-xs text-neutral-500 dark:text-neutral-400">
               {props.helperText}
             </p>
           </Show>
@@ -643,7 +643,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
         <div class="mt-4 space-y-3">
           <Index each={trackedFiles()}>
             {(trackedFile) => (
-              <div class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-800/50">
+              <div class="group relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-800/50">
                 <div class="flex items-center gap-3 p-3">
                   {/* Preview or Icon */}
                   <div class="shrink-0">
@@ -653,7 +653,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                         getFileCategory(trackedFile().file) === 'image'
                       }
                       fallback={
-                        <div class="flex size-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-neutral-700">
+                        <div class="flex size-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700">
                           <FileIcon file={trackedFile().file} class="size-5" />
                         </div>
                       }
@@ -670,17 +670,17 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center justify-between gap-2">
                       <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                        <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
                           {trackedFile().file.name}
                         </p>
-                        <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400">
+                        <div class="mt-0.5 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
                           <span>{formatFileSize(trackedFile().file.size)}</span>
                           <Show
                             when={
                               trackedFile().state === 'uploading' && trackedFile().speed
                             }
                           >
-                            <span class="text-gray-300 dark:text-neutral-600">•</span>
+                            <span class="text-neutral-300 dark:text-neutral-600">•</span>
                             <span class="text-blue-600 dark:text-blue-400">
                               {formatSpeed(trackedFile().speed!)}
                             </span>
@@ -691,7 +691,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                               trackedFile().timeRemaining
                             }
                           >
-                            <span class="text-gray-300 dark:text-neutral-600">•</span>
+                            <span class="text-neutral-300 dark:text-neutral-600">•</span>
                             <span>
                               {formatTimeRemaining(trackedFile().timeRemaining!)}
                             </span>
@@ -715,7 +715,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                           type="button"
                           onClick={() => removeFile(trackedFile().id)}
                           aria-label={al().removeFile(trackedFile().file.name)}
-                          class="rounded-md p-1.5 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                          class="rounded-md p-1.5 text-neutral-400 transition-all hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                         >
                           <XIcon />
                         </button>
@@ -725,7 +725,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
                     {/* Progress Bar */}
                     <Show when={trackedFile().state === 'uploading'}>
                       <div class="mt-3">
-                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-700">
+                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
                           <div
                             class="h-full rounded-full bg-blue-600 transition-all duration-300 ease-out"
                             style={{ width: `${trackedFile().progress}%` }}

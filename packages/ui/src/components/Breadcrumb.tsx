@@ -52,10 +52,10 @@ export interface BreadcrumbProps {
 
 const theme = {
   base: 'group flex items-center',
-  chevron: 'mx-1 size-4 text-gray-400 group-first:hidden md:mx-2',
+  chevron: 'mx-1 size-4 text-neutral-400 group-first:hidden md:mx-2',
   href: {
-    off: 'flex items-center text-sm font-medium text-gray-500 dark:text-neutral-400',
-    on: 'flex items-center text-sm text-gray-800 hover:text-blue-600 dark:text-neutral-200 dark:hover:text-blue-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded',
+    off: 'flex items-center text-sm font-medium text-neutral-500 dark:text-neutral-400',
+    on: 'flex items-center text-sm text-neutral-800 hover:text-blue-600 dark:text-neutral-200 dark:hover:text-blue-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded',
   },
 };
 

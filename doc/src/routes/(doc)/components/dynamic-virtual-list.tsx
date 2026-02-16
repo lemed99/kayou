@@ -204,7 +204,7 @@ export default function Example() {
           max={99}
           value={targetIndex()}
           onInput={(e) => setTargetIndex(Number(e.target.value))}
-          class="w-20 rounded border border-gray-300 px-2 py-1"
+          class="w-20 rounded border border-neutral-300 px-2 py-1"
         />
         <button
           onClick={() => listHandle?.scrollToIndex(targetIndex(), 'smooth')}
@@ -214,7 +214,7 @@ export default function Example() {
         </button>
       </div>
 
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-neutral-600">
         Average row height: {avgHeight().toFixed(1)}px
         {selectedId() !== null ? \` | Selected: Item \${selectedId() + 1}\` : ''}
       </p>
@@ -234,17 +234,17 @@ export default function Example() {
         }
         setAverageRowHeight={setAvgHeight}
         fallback={
-          <div class="p-8 text-center text-gray-500">No items to display</div>
+          <div class="p-8 text-center text-neutral-500">No items to display</div>
         }
       >
         {(item) => (
           <div
             id={\`item-\${item.id}\`}
             aria-selected={selectedId() === item.id}
-            class={\`cursor-pointer border-b border-gray-100 p-3 transition-colors \${
+            class={\`cursor-pointer border-b border-neutral-100 p-3 transition-colors \${
               selectedId() === item.id
                 ? 'bg-blue-50'
-                : 'bg-white hover:bg-gray-50'
+                : 'bg-white hover:bg-neutral-50'
             }\`}
             onClick={() => {
               setSelectedId(item.id);
@@ -253,11 +253,11 @@ export default function Example() {
           >
             <div class="flex items-center justify-between font-medium">
               {item.title}
-              <span class="text-gray-400">
+              <span class="text-neutral-400">
                 {expandedId() === item.id ? '\\u25BC' : '\\u25B6'}
               </span>
             </div>
-            <p class="mt-1 text-sm text-gray-600">{item.description}</p>
+            <p class="mt-1 text-sm text-neutral-600">{item.description}</p>
             {expandedId() === item.id && (
               <p class="mt-2 text-sm text-blue-700">{item.details}</p>
             )}

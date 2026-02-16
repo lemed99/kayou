@@ -8,15 +8,7 @@ import Spinner from './Spinner';
 /**
  * Color variants for the Button component.
  */
-export type ButtonColor =
-  | 'gray'
-  | 'dark'
-  | 'failure'
-  | 'info'
-  | 'light'
-  | 'success'
-  | 'warning'
-  | 'blue';
+export type ButtonColor = 'info' | 'danger' | 'black' | 'white' | 'transparent';
 
 /**
  * Size variants for the Button component.
@@ -51,19 +43,16 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const theme = {
-  base: 'group flex h-min items-center disabled:cursor-not-allowed disabled:pointer-events-none justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 rounded-lg cursor-pointer transition-all duration-200',
+  base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 rounded-lg cursor-pointer transition-all duration-200',
   color: {
-    gray: 'text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:text-blue-700 dark:bg-transparent dark:text-neutral-400 dark:border-neutral-600 dark:hover:text-white dark:hover:bg-neutral-700',
-    dark: 'text-white bg-gray-800 border border-transparent hover:bg-gray-900 dark:bg-neutral-900 dark:hover:bg-neutral-700 dark:border-neutral-800',
-    failure:
-      'text-white bg-red-700 border border-transparent hover:bg-red-800 dark:bg-red-500 dark:hover:bg-red-600',
-    info: 'text-white dark:text-neutral-800 bg-blue-600 border border-transparent hover:bg-blue-700 dark:bg-neutral-50 dark:hover:bg-neutral-200',
-    light:
-      'text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-neutral-600 dark:text-white dark:border-neutral-600 dark:hover:bg-neutral-700 dark:hover:border-neutral-700',
-    success:
-      'text-white bg-green-700 border border-transparent hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700',
-    warning: 'text-white bg-yellow-400 border border-transparent hover:bg-yellow-500',
-    blue: 'text-blue-900 bg-white border border-blue-300 hover:bg-blue-100 dark:bg-blue-600 dark:text-white dark:border-blue-600 dark:hover:bg-blue-700 dark:hover:border-blue-700',
+    info: 'text-white bg-blue-600 border border-transparent hover:bg-blue-700',
+    danger: 'text-white bg-red-700 border border-transparent hover:bg-red-800',
+    black:
+      'text-white bg-black border border-transparent hover:bg-neutral-900 dark:border-neutral-800',
+    white:
+      'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:border-transparent',
+    transparent:
+      'text-neutral-900 dark:text-neutral-100 bg-transparent border border-neutral-300 dark:border-neutral-700',
   },
   size: {
     xs: 'text-xs px-2 py-1.5',
@@ -99,7 +88,7 @@ const Button = (props: ButtonProps): JSX.Element => {
         theme.color[color()],
         theme.size[size()],
         local.class,
-        local.disabled ? 'opacity-50' : '',
+        local.disabled ? 'opacity-60' : '',
       )}
       disabled={disabled()}
       aria-busy={local.isLoading}
@@ -117,7 +106,7 @@ const Button = (props: ButtonProps): JSX.Element => {
           </Show>
         </div>
         <Show when={local.isLoading}>
-          <div class="z-10 absolute inset-0 flex h-full w-full items-center justify-center">
+          <div class="absolute inset-0 z-10 flex h-full w-full items-center justify-center">
             <Spinner size="sm" color={color()} />
           </div>
         </Show>

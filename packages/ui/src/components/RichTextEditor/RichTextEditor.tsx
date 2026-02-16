@@ -252,7 +252,7 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
       <Show when={props.label}>
         <label
           id={labelId}
-          class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-neutral-300"
+          class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
         >
           {props.label}
           <Show when={props.required}>
@@ -268,8 +268,8 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
             ? 'border-red-500 dark:border-red-400'
             : isFocused()
               ? 'border-blue-500 ring-1 ring-blue-500 dark:border-blue-400 dark:ring-blue-400'
-              : 'border-gray-300 dark:border-neutral-700'
-        } ${isDisabled() ? 'cursor-not-allowed bg-gray-100 opacity-60 dark:bg-neutral-800' : 'bg-white dark:bg-neutral-900'}`}
+              : 'border-neutral-300 dark:border-neutral-700'
+        } ${isDisabled() ? 'cursor-not-allowed bg-neutral-100 opacity-60 dark:bg-neutral-800' : 'bg-white dark:bg-neutral-900'}`}
       >
         {/* Toolbar */}
         <Show when={editor() && !props.readOnly}>
@@ -304,7 +304,7 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
               <p class="text-sm text-red-500 dark:text-red-400">{props.error}</p>
             </Show>
             <Show when={!hasError() && props.helperText}>
-              <p class="text-sm text-gray-500 dark:text-neutral-400">
+              <p class="text-sm text-neutral-500 dark:text-neutral-400">
                 {props.helperText}
               </p>
             </Show>
@@ -314,7 +314,7 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
               class={`text-sm ${
                 props.maxLength && characterCount() >= props.maxLength
                   ? 'text-red-500 dark:text-red-400'
-                  : 'text-gray-500 dark:text-neutral-400'
+                  : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
               {characterCount()}

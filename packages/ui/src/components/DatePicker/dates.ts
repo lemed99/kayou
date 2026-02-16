@@ -13,6 +13,15 @@ export const getDaysShort = (locale: string): string[] => {
   return days;
 };
 
+export const getDaysLong = (locale: string): string[] => {
+  const days: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(2024, 0, i + 1);
+    days.push(date.toLocaleDateString(locale, { weekday: 'long' }));
+  }
+  return days;
+};
+
 export const getMonthsShort = (locale: string): string[] => {
   const months: string[] = [];
   for (let i = 0; i < 12; i++) {
