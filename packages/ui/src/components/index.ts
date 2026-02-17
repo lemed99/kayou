@@ -17,6 +17,7 @@ export {
   type DrawerAriaLabels,
 } from './Drawer';
 export { DynamicVirtualList, type DynamicVirtualListHandle } from './DynamicVirtualList';
+export { default as Form, type FormProps } from './Form';
 export { default as HelperText } from './HelperText';
 export { default as Label, type LabelColor, type LabelProps } from './Label';
 export {
@@ -131,6 +132,7 @@ export {
   DEFAULT_UPLOAD_FILE_ARIA_LABELS,
   DEFAULT_UPLOAD_FILE_LABELS,
   UploadFile,
+  type ExistingFile,
   type UploadFileAriaLabels,
   type UploadFileLabels,
 } from './UploadFile';

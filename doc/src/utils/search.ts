@@ -168,9 +168,11 @@ function generateKeywords(label: string, filename: string): string {
     contributing: ['contribute', 'help', 'pr'],
     license: ['mit', 'open source'],
     floating: ['position', 'anchor', 'tooltip'],
+    form: ['validation', 'submit', 'field', 'input', 'error'],
     mutation: ['api', 'post', 'fetch', 'request'],
     intl: ['i18n', 'translate', 'locale', 'internationalization'],
     resource: ['fetch', 'api', 'cache', 'swr', 'revalidate'],
+    toast: ['notification', 'alert', 'snackbar', 'message'],
   };
 
   // Add synonyms for matching keywords

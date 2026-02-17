@@ -65,6 +65,10 @@ interface MergedSelectProps
   onLoadMore?: (scrollProgress: number) => void;
   /** How to handle background scroll when dropdown is open. @default 'close' */
   backgroundScrollBehavior?: BackgroundScrollBehavior;
+  /** Custom class for the reference (trigger wrapper) element. */
+  referenceClass?: string;
+  /** Custom class for the floating (dropdown) element. */
+  floatingClass?: string;
   labels?: Partial<SelectLabels>;
   ariaLabels?: Partial<SelectAriaLabels>;
 }
@@ -498,7 +502,7 @@ const useSelect = <T extends MergedSelectProps>(
               </Show>
             </div>
           </Show>
-          <div ref={refs.setReference} onClick={handleInputClick} class="relative w-full">
+          <div ref={refs.setReference} onClick={handleInputClick} class={twMerge('relative w-full', props.referenceClass)}>
             {layoutProps.inputComponent}
           </div>
 
@@ -508,6 +512,7 @@ const useSelect = <T extends MergedSelectProps>(
                 ref={refs.setFloating}
                 class={twMerge(
                   'z-100 w-fit rounded-lg border border-neutral-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900',
+                  props.floatingClass,
                 )}
                 style={
                   {

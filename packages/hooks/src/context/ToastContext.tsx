@@ -30,6 +30,7 @@ interface Toast {
   method: string;
   options: Required<ToastOptions>;
   createdAt: number;
+  startedAt: number;
   pausedAt?: number;
   dismissedAt?: number;
   remainingTime: number;
@@ -291,11 +292,12 @@ export const ToastProvider = (props: ToastProviderProps) => {
     const toastIndex = toasts.findIndex((t) => t.id === id);
     if (toast && !toast.pausedAt) {
       stopTimer(id);
+      const now = Date.now();
       setToasts(
         toastIndex,
         produce((t) => {
-          t.pausedAt = Date.now();
-          t.remainingTime = t.remainingTime - (Date.now() - toast.createdAt);
+          t.pausedAt = now;
+          t.remainingTime = t.remainingTime - (now - toast.startedAt);
         }),
       );
     }
@@ -309,6 +311,7 @@ export const ToastProvider = (props: ToastProviderProps) => {
         toastIndex,
         produce((t) => {
           t.pausedAt = undefined;
+          t.startedAt = Date.now();
         }),
       );
       startTimer(toast);
@@ -348,6 +351,7 @@ export const ToastProvider = (props: ToastProviderProps) => {
       method,
       options: mergedOptions,
       createdAt: Date.now(),
+      startedAt: Date.now(),
       remainingTime: mergedOptions.duration,
       top: isTop() ? 0 : '',
       bottom: isTop() ? '' : 0,

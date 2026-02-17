@@ -30,6 +30,10 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' |
   labels?: Partial<SelectLabels>;
   /** i18n aria labels for screen-reader-only texts */
   ariaLabels?: Partial<SelectAriaLabels>;
+  /** Custom class for the reference (trigger wrapper) element. */
+  referenceClass?: string;
+  /** Custom class for the floating (dropdown) element. */
+  floatingClass?: string;
 }
 
 export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Element {

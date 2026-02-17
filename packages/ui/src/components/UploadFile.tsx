@@ -53,6 +53,22 @@ export interface TrackedFile {
 }
 
 /**
+ * A file that already exists on the server (e.g. a previously uploaded document).
+ */
+export interface ExistingFile {
+  /** Unique identifier from the server */
+  id: string;
+  /** File display name */
+  name: string;
+  /** File size in bytes */
+  size: number;
+  /** MIME type (used for icon selection) */
+  type?: string;
+  /** Preview URL for images/videos */
+  url?: string;
+}
+
+/**
  * Visible text labels for the UploadFile component, enabling i18n support.
  */
 export interface UploadFileLabels {
@@ -108,6 +124,10 @@ export const DEFAULT_UPLOAD_FILE_ARIA_LABELS: UploadFileAriaLabels = {
  * Props for the UploadFile component.
  */
 export interface UploadFileProps {
+  /** Pre-existing files to display (e.g. previously uploaded documents from the server). */
+  value?: ExistingFile[];
+  /** Callback fired when the user removes a pre-existing file. */
+  onRemove?: (file: ExistingFile) => void;
   /** Callback fired when files are selected or dropped. */
   onChange: (file: File | FileList) => void;
   /**
@@ -150,10 +170,12 @@ export interface UploadFileProps {
 /**
  * Get file type category for icon selection
  */
+type FileCategory = 'image' | 'video' | 'audio' | 'pdf' | 'archive' | 'code' | 'document';
+
 const getFileCategory = (
-  file: File,
-): 'image' | 'video' | 'audio' | 'pdf' | 'archive' | 'code' | 'document' => {
-  const type = file.type.toLowerCase();
+  file: File | { name: string; type?: string },
+): FileCategory => {
+  const type = (file instanceof File ? file.type : file.type ?? '').toLowerCase();
   const name = file.name.toLowerCase();
 
   if (type.startsWith('image/')) return 'image';
@@ -408,7 +430,8 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     const fileArray = [...files];
 
     const currentFiles = props.multiple ? trackedFiles() : [];
-    const totalFiles = currentFiles.length + fileArray.length;
+    const existingCount = props.value?.length ?? 0;
+    const totalFiles = currentFiles.length + existingCount + fileArray.length;
 
     if (props.maxLength && totalFiles > props.maxLength) {
       setError([props.maxLengthError ?? l().maxLengthError(props.maxLength)]);
@@ -483,7 +506,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
   };
 
   // File icon component based on file type
-  const FileIcon = (iconProps: { file: File; class?: string }) => {
+  const FileIcon = (iconProps: { file: File | { name: string; type?: string }; class?: string }) => {
     const category = () => getFileCategory(iconProps.file);
 
     return (
@@ -639,8 +662,62 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
       </Show>
 
       {/* File List */}
-      <Show when={trackedFiles().length > 0}>
+      <Show when={(props.value?.length ?? 0) > 0 || trackedFiles().length > 0}>
         <div class="mt-4 space-y-3">
+          {/* Existing files from server */}
+          <For each={props.value}>
+            {(existing) => (
+              <div class="group relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-800/50">
+                <div class="flex items-center gap-3 p-3">
+                  <div class="shrink-0">
+                    <Show
+                      when={existing.url && getFileCategory(existing) === 'image'}
+                      fallback={
+                        <div class="flex size-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-700">
+                          <FileIcon file={existing} class="size-5" />
+                        </div>
+                      }
+                    >
+                      <img
+                        src={existing.url}
+                        alt={existing.name}
+                        class="size-10 rounded-lg object-cover"
+                      />
+                    </Show>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
+                          {existing.name}
+                        </p>
+                        <div class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                          {formatFileSize(existing.size)}
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="flex size-6 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                          <CheckIcon />
+                        </div>
+                        <Show when={props.onRemove}>
+                          <button
+                            type="button"
+                            onClick={() => props.onRemove?.(existing)}
+                            aria-label={al().removeFile(existing.name)}
+                            class="rounded-md p-1.5 text-neutral-400 transition-all hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                          >
+                            <XIcon />
+                          </button>
+                        </Show>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </For>
+
+          {/* Newly added files */}
           <Index each={trackedFiles()}>
             {(trackedFile) => (
               <div class="group relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-800/50">

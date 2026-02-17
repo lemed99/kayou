@@ -161,6 +161,18 @@ export default function SelectWithSearchPage() {
           default: 'DEFAULT_SELECT_ARIA_LABELS',
           description: 'Accessibility labels for screen readers',
         },
+        {
+          name: 'referenceClass',
+          type: 'string',
+          default: '-',
+          description: 'Custom class for the reference (trigger wrapper) element',
+        },
+        {
+          name: 'floatingClass',
+          type: 'string',
+          default: '-',
+          description: 'Custom class for the floating (dropdown) element',
+        },
       ]}
       subComponents={[
         {

@@ -10,6 +10,9 @@ export {
   useFloating,
   useVirtualList,
   useDynamicVirtualList,
+  useForm,
+  type UseFormOptions,
+  type UseFormReturn,
   type Mutation,
   type MutationOptions,
   type MutationProps,
@@ -54,6 +57,11 @@ export {
   type ThemeType,
   type ToastAPI,
   type ToastMethodProps,
+  FormContext,
+  FormProvider,
+  useFormContext,
+  type FormContextType,
+  type FormProviderProps,
 } from './context';
 
 // Helpers (for advanced use cases)

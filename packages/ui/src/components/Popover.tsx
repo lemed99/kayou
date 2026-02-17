@@ -55,6 +55,10 @@ export interface PopoverProps {
    */
   offset?: number;
   /**
+   * Additional CSS classes for the reference container.
+   */
+  referenceClass?: string;
+  /**
    * Additional CSS classes for the floating container.
    */
   floatingClass?: string;
@@ -192,12 +196,28 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
       const floatingEl = refs.floating();
       const referenceEl = refs.reference();
 
-      // Click inside trigger or popover - do nothing
-      if (floatingEl?.contains(target) || referenceEl?.contains(target)) {
+      // Hover mode: close if click is outside both floating and reference
+      if (merged.onHover && !floatingEl?.contains(target) && !referenceEl?.contains(target)) {
+        setOpen(false);
         return;
       }
 
-      // Click outside - close popover
+      // Click inside trigger or popover, or not mounted - do nothing
+      if (
+        !floatingEl ||
+        !referenceEl ||
+        floatingEl.contains(target) ||
+        referenceEl.contains(target)
+      ) {
+        return;
+      }
+
+      // If the target follows the floating element in document order, it's inside
+      // a nested child popover rendered via Portal - do nothing
+      if (floatingEl.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        return;
+      }
+
       setOpen(false);
     };
 
@@ -277,7 +297,7 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
           triggerRef = el;
           refs.setReference(el);
         }}
-        class="w-full"
+        class={twMerge('w-fit', merged.referenceClass)}
         tabindex={merged.onHover ? undefined : 0}
         role={merged.onHover ? undefined : 'button'}
         aria-haspopup="dialog"

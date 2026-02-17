@@ -30,6 +30,74 @@ export default function UseToastPage() {
             'Dynamic methods based on the methods prop passed to ToastProvider. Each method shows a toast and returns its ID.',
         },
       ]}
+      types={[
+        {
+          name: 'ToastMethodProps',
+          description:
+            'Props passed to each custom toast method component defined in the methods record.',
+          props: [
+            {
+              name: 'message',
+              type: 'string',
+              description: 'The message passed when creating the toast.',
+            },
+            {
+              name: 'paused',
+              type: '() => boolean',
+              description: 'Accessor returning whether the toast is currently paused.',
+            },
+            {
+              name: 'duration',
+              type: 'number',
+              description: 'The configured duration for this toast in milliseconds.',
+            },
+            {
+              name: 'dismiss',
+              type: '() => void',
+              description: 'Dismiss this toast.',
+            },
+            {
+              name: 'pause',
+              type: '() => void',
+              description: 'Pause the auto-dismiss timer for this toast.',
+            },
+            {
+              name: 'play',
+              type: '() => void',
+              description: 'Resume the auto-dismiss timer for this toast.',
+            },
+          ],
+        },
+        {
+          name: 'ToastOptions',
+          description: 'Options that can be passed when creating a toast to override provider defaults.',
+          props: [
+            {
+              name: 'position',
+              type: "ToastPosition",
+              default: "'top-right'",
+              description: 'Override the position for this specific toast.',
+            },
+            {
+              name: 'duration',
+              type: 'number',
+              default: '3000',
+              description: 'Override the auto-dismiss duration in milliseconds for this toast.',
+            },
+            {
+              name: 'pauseOnHover',
+              type: 'boolean',
+              default: 'true',
+              description: 'Override whether hovering pauses the auto-dismiss timer for this toast.',
+            },
+          ],
+        },
+        {
+          name: 'ToastPosition',
+          description: 'Available positions for toast notifications.',
+          values: ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'],
+        },
+      ]}
       usage={`
         import { useToast, ToastProvider } from '@kayou/hooks';
       `}

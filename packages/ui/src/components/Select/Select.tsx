@@ -41,6 +41,10 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   backgroundScrollBehavior?: BackgroundScrollBehavior;
   /** Custom trigger element. When provided, replaces the default TextInput. */
   inputComponent?: (triggerProps: SelectTriggerProps) => JSX.Element;
+  /** Custom class for the reference (trigger wrapper) element. */
+  referenceClass?: string;
+  /** Custom class for the floating (dropdown) element. */
+  floatingClass?: string;
 }
 
 /**

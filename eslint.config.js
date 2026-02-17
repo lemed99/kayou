@@ -14,7 +14,6 @@ export default [
       'dev',
       'generate-icons.ts',
       'playwright.config.ts',
-      'packages/mcp/scripts/**',
     ],
   },
   js.configs.recommended,
@@ -28,7 +27,6 @@ export default [
         project: [
           './packages/hooks/tsconfig.json',
           './packages/icons/tsconfig.json',
-          './packages/mcp/tsconfig.json',
           './packages/ui/tsconfig.json',
           './doc/tsconfig.json',
           './e2e/tsconfig.json',

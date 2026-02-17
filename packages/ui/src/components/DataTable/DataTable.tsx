@@ -4,7 +4,6 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  createUniqueId,
   onCleanup,
   untrack,
 } from 'solid-js';
@@ -249,6 +248,13 @@ export interface DataTableProps<T> {
   // Right-click context menu
   /** Render prop for a right-click context menu on rows. */
   rowContextMenu?: (row: T, index: number, closeMenu: () => void) => JSX.Element;
+
+  /**
+   * Stable identifier for this table instance. Required for state persistence
+   * via DataTableProvider. Must be unique among tables within the same provider scope.
+   * When omitted, table state is not persisted.
+   */
+  id?: string;
 }
 
 export function DataTable<T extends Record<string, unknown>>(
@@ -260,7 +266,6 @@ export function DataTable<T extends Record<string, unknown>>(
     ...props.ariaLabels,
   }));
 
-  const tableId = createUniqueId();
   const {
     restoredState,
     isRestored,
@@ -269,7 +274,7 @@ export function DataTable<T extends Record<string, unknown>>(
     configEnabled,
     readConfigs,
     writeConfigs,
-  } = useDataTableState(tableId);
+  } = useDataTableState(props.id);
 
   // --- Signals ---
   const [searchKey, setSearchKey] = createSignal('');

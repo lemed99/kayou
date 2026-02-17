@@ -17,6 +17,7 @@ export { useToast } from './useToast';
 export { useFloating } from './useFloating';
 export { useVirtualList } from './useVirtualList';
 export { useDynamicVirtualList } from './useDynamicVirtualList';
+export { useForm, type UseFormOptions, type UseFormReturn } from './useForm';
 
 // useFloating types
 export type {

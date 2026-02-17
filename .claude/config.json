@@ -52,12 +52,6 @@
       "framework": "solidjs",
       "styling": "tailwind",
       "includeLiveDemo": true
-    },
-    "mcp-server-builder": {
-      "enabled": true,
-      "outputDir": "mcp-server",
-      "serverName": "your-library-mcp",
-      "includeTools": ["list", "get", "generate", "validate", "search"]
     }
   },
   "paths": {

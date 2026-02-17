@@ -22,8 +22,26 @@ export default function UploadFilePage() {
           term: 'Upload Progress',
           explanation: 'Track upload progress with speed and time remaining estimates.',
         },
+        {
+          term: 'Pre-existing Files',
+          explanation: 'Pass server-side files via value prop. Users can view and remove them alongside new uploads.',
+        },
       ]}
       props={[
+        {
+          name: 'value',
+          type: 'ExistingFile[]',
+          default: '-',
+          description:
+            'Pre-existing files from the server. Displayed with a success indicator alongside newly uploaded files. Counted towards maxLength.',
+        },
+        {
+          name: 'onRemove',
+          type: '(file: ExistingFile) => void',
+          default: '-',
+          description:
+            'Callback fired when the user removes a pre-existing file. The remove button is only shown when this prop is provided.',
+        },
         {
           name: 'onChange',
           type: '(file: File | FileList) => void',
@@ -111,6 +129,43 @@ export default function UploadFilePage() {
         },
       ]}
       subComponents={[
+        {
+          name: 'ExistingFile',
+          kind: 'type',
+          description: 'Represents a file already on the server (e.g. a previously uploaded document).',
+          props: [
+            {
+              name: 'id',
+              type: 'string',
+              default: '-',
+              description: 'Unique identifier from the server.',
+            },
+            {
+              name: 'name',
+              type: 'string',
+              default: '-',
+              description: 'File display name.',
+            },
+            {
+              name: 'size',
+              type: 'number',
+              default: '-',
+              description: 'File size in bytes.',
+            },
+            {
+              name: 'type',
+              type: 'string',
+              default: '-',
+              description: 'MIME type (used for icon selection).',
+            },
+            {
+              name: 'url',
+              type: 'string',
+              default: '-',
+              description: 'Preview URL for images/videos.',
+            },
+          ],
+        },
         {
           name: 'UploadFileLabels',
           kind: 'type',
@@ -230,11 +285,30 @@ export default function UploadFilePage() {
         }
       `}
       usage={`
-        import { UploadFile } from '@kayou/ui';
+        import { UploadFile, type ExistingFile } from '@kayou/ui';
 
+        // Basic
         <UploadFile dragDropText="Drag and drop" chooseFileText="Browse" onChange={handleFile} />
+
+        // With validation
         <UploadFile dragDropText="Drop image" chooseFileText="Browse" accept="image/*" maxSize={5 * 1024 * 1024} onChange={handleFile} />
+
+        // Multiple files
         <UploadFile dragDropText="Drop files" chooseFileText="Browse" multiple maxLength={10} onChange={handleFiles} />
+
+        // Pre-existing files (e.g. user profile documents)
+        const [docs, setDocs] = createSignal<ExistingFile[]>([
+          { id: '1', name: 'passport.pdf', size: 245000, type: 'application/pdf' },
+          { id: '2', name: 'photo.jpg', size: 120000, type: 'image/jpeg', url: '/uploads/photo.jpg' },
+        ]);
+
+        <UploadFile
+          value={docs()}
+          onRemove={(file) => setDocs((d) => d.filter((f) => f.id !== file.id))}
+          onChange={(files) => handleNewUploads(files)}
+          multiple
+          maxLength={5}
+        />
       `}
     />
   );

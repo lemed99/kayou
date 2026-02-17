@@ -104,10 +104,16 @@ export default function PopoverPage() {
           description: 'Additional CSS classes for the popover content container',
         },
         {
+          name: 'referenceClass',
+          type: 'string',
+          default: '-',
+          description: 'Custom class for the reference (trigger wrapper) element',
+        },
+        {
           name: 'floatingClass',
           type: 'string',
           default: '-',
-          description: 'Additional CSS classes for the floating container',
+          description: 'Custom class for the floating (dropdown) element',
         },
         {
           name: 'wrapperClass',
