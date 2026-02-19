@@ -64,5 +64,8 @@ export {
   type FormProviderProps,
 } from './context';
 
+// Validators (access via `useForm.validators.required()`, etc.)
+export { type FieldValidator, type FormSchema } from './validators';
+
 // Helpers (for advanced use cases)
 export { cache, getCacheRow, insertOrUpdateCacheRow, isValidCacheData, preventBackgroundScroll } from './helpers';

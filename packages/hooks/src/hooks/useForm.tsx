@@ -1,6 +1,8 @@
 import { createEffect, createSignal, on } from 'solid-js';
 import { createStore, produce, reconcile } from 'solid-js/store';
 import { useFormContext } from '../context/FormContext';
+import type { FormSchema } from '../validators';
+import { required, email, minLength, maxLength, min, max, pattern } from '../validators';
 
 /**
  * Options for configuring the useForm hook.
@@ -17,6 +19,16 @@ export interface UseFormOptions<T extends Record<string, unknown>> {
 
   /** Initial field values. Defines the form shape and infers field types. */
   initialValues: T;
+
+  /**
+   * Per-field validation schema. Maps field names to arrays of validator
+   * functions that run in order, stopping at the first error per field.
+   *
+   * When both `schema` and `validate` are provided, schema validators run
+   * first, then `validate` errors merge on top (overriding schema errors
+   * for the same field).
+   */
+  schema?: FormSchema<T>;
 
   /**
    * Form-level validation function. Receives all current values and returns
@@ -235,24 +247,62 @@ export function useForm<T extends Record<string, unknown>>(
 
   // --- Validation ---
 
-  const validateForm = (): Partial<Record<keyof T, string>> => {
-    if (!options.validate) {
-      setErrors(reconcile({}));
-      return {};
+  /** Run schema validators for a single field. Returns the first error or undefined. */
+  const runSchemaField = <K extends keyof T>(name: K): string | undefined => {
+    const fieldValidators = options.schema?.[name];
+    if (!fieldValidators) return undefined;
+    const value = values[name];
+    for (const validator of fieldValidators) {
+      const error = validator(value);
+      if (error !== undefined) return error;
     }
-    const result = options.validate({ ...values });
+    return undefined;
+  };
+
+  const validateForm = (): Partial<Record<keyof T, string>> => {
+    const result: Partial<Record<keyof T, string>> = {};
+
+    // 1. Run schema validators for every field that has them
+    if (options.schema) {
+      for (const key of Object.keys(options.schema)) {
+        const error = runSchemaField(key as keyof T);
+        if (error !== undefined) {
+          result[key as keyof T] = error;
+        }
+      }
+    }
+
+    // 2. Run cross-field validate, merge on top (validate wins on conflict)
+    if (options.validate) {
+      const crossErrors = options.validate({ ...values });
+      for (const key of Object.keys(crossErrors)) {
+        const err = crossErrors[key as keyof T];
+        if (err !== undefined) {
+          result[key as keyof T] = err;
+        }
+      }
+    }
+
     setErrors(reconcile(result));
     return result;
   };
 
   const validateField = <K extends keyof T>(name: K): void => {
-    if (!options.validate) return;
-    const allErrors = options.validate({ ...values });
-    const fieldErr = allErrors[name];
+    // Schema: run only validators for this field
+    let fieldErr = runSchemaField(name);
+
+    // Cross-field validate: must run full validation, pick out this field's error
+    if (options.validate) {
+      const allErrors = options.validate({ ...values });
+      const crossErr = allErrors[name];
+      if (crossErr !== undefined) {
+        fieldErr = crossErr;
+      }
+    }
+
     setErrors(
       produce((draft) => {
-        (draft as Record<string, string | undefined>)[name as string] =
-          fieldErr;
+        (draft as Record<string, string | undefined>)[name as string] = fieldErr;
       }),
     );
   };
@@ -340,6 +390,8 @@ export function useForm<T extends Record<string, unknown>>(
   };
 
   const handleBlur = <K extends keyof T>(name: K) => {
+    // Returns a stable handler — not a reactive derivation, so the lint rule doesn't apply
+    // eslint-disable-next-line solid/reactivity
     return () => {
       setTouched(
         produce((draft) => {
@@ -445,12 +497,21 @@ export function useForm<T extends Record<string, unknown>>(
   };
 
   const isValid = (): boolean => {
+    // Check schema validators
+    if (options.schema) {
+      for (const key of Object.keys(options.schema)) {
+        if (runSchemaField(key as keyof T) !== undefined) return false;
+      }
+    }
+
+    // Check cross-field validate
     if (options.validate) {
       const result = options.validate({ ...values });
       if (Object.keys(result).some((k) => result[k as keyof T] !== undefined)) {
         return false;
       }
     }
+
     // Also check the errors store for server-side / manually set errors
     return !Object.keys(errors).some(
       (k) => errors[k as keyof T] !== undefined,
@@ -489,3 +550,6 @@ export function useForm<T extends Record<string, unknown>>(
     validateForm,
   };
 }
+
+/** Validators for use with the `schema` option. Access as `useForm.validators.required()`, etc. */
+useForm.validators = { required, email, minLength, maxLength, min, max, pattern } as const;
