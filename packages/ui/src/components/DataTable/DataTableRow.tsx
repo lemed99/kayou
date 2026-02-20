@@ -55,7 +55,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
     let cls = 'grid w-fit';
     cls += isSelected()
       ? ' bg-neutral-100 dark:bg-neutral-800'
-      : ' bg-white hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800/50';
+      : ' bg-white hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800';
     if (ctx.onRowClick || ctx.expandRow) cls += ' cursor-pointer';
     if (isLocked())
       cls += ' border-y border-dashed border-neutral-200 dark:border-neutral-700';
@@ -179,9 +179,8 @@ export function DataTableRow<T extends Record<string, unknown>>(
     <div
       class="group/row"
       classList={{
-        'box border-b border-neutral-200 last:border-b-0 dark:border-neutral-800': !(
-          ctx.rowHeight || ctx.estimatedRowHeight
-        ),
+        'box border-b border-neutral-200 bg-white dark:bg-neutral-900 last:border-b-0 dark:border-neutral-800':
+          !(ctx.rowHeight || ctx.estimatedRowHeight),
       }}
     >
       {/* Data row */}
@@ -270,7 +269,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
           {(column) => (
             <div
               role="cell"
-              class="flex shrink-0 items-center px-6 py-4 text-neutral-900 dark:text-white"
+              class="flex shrink-0 items-center bg-white px-6 py-4 text-neutral-900 dark:bg-neutral-900 dark:text-white"
               classList={{
                 'relative border-x border-dashed border-neutral-200 dark:border-neutral-700':
                   isSticky(column.key),

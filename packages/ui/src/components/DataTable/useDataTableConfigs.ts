@@ -2,7 +2,7 @@ import { Accessor, createMemo, createSignal } from 'solid-js';
 
 import { ActiveFilter, FilterState, SavedTableConfig, SortEntry } from './types';
 
-const MAX_CONFIGS = 3;
+export const MAX_CONFIGS = 3;
 
 interface UseDataTableConfigsOptions {
   readConfigs: () => SavedTableConfig[];
@@ -32,10 +32,7 @@ function serializeFilters(filters: FilterState): [string, ActiveFilter][] {
   return Array.from(filters.entries());
 }
 
-function filtersEqual(
-  a: [string, ActiveFilter][],
-  b: [string, ActiveFilter][],
-): boolean {
+function filtersEqual(a: [string, ActiveFilter][], b: [string, ActiveFilter][]): boolean {
   if (a.length !== b.length) return false;
   const sortedA = [...a].sort(([ka], [kb]) => ka.localeCompare(kb));
   const sortedB = [...b].sort(([ka], [kb]) => ka.localeCompare(kb));
@@ -101,8 +98,7 @@ export function useDataTableConfigs(
       currentSorts.length !== baselineSorts.length ||
       currentSorts.some(
         (s, i) =>
-          s.key !== baselineSorts[i].key ||
-          s.direction !== baselineSorts[i].direction,
+          s.key !== baselineSorts[i].key || s.direction !== baselineSorts[i].direction,
       )
     )
       return true;

@@ -11,6 +11,7 @@ import {
 import { Expand01Icon, Minimize01Icon } from '@kayou/icons';
 
 import { DataTableBody } from './DataTableBody';
+import { DataTableConfigs } from './DataTableConfigs';
 import { useDataTableState } from './DataTableContext';
 import { DataTableFooter } from './DataTableFooter';
 import { DataTableHeader } from './DataTableHeader';
@@ -40,6 +41,7 @@ export interface DataTableLabels {
   elementsPerPage: string;
   selectedElements: (count: number, total: number) => string;
   saveConfiguration: string;
+  configPopoverContentTitle: string;
   configurations: string;
   defaultConfiguration: string;
   saveConfigTitle: string;
@@ -47,10 +49,13 @@ export interface DataTableLabels {
   configNameLabel: string;
   configNamePlaceholder: string;
   save: string;
+  saveAsNew: string;
   deleteConfiguration: string;
   confirmDelete: string;
   cancel: string;
   maxConfigsReached: string;
+  configLimitReached: string;
+  configLimitReachedAdditionnal: string;
   createNewConfiguration: string;
   createNewConfigurationDescription: string;
   updateCurrentConfiguration: string;
@@ -88,14 +93,18 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   configurations: 'Configurations',
   defaultConfiguration: 'Default',
   saveConfigTitle: 'Save configuration',
+  configPopoverContentTitle: 'Saved configurations',
   editConfigTitle: 'Edit configuration',
   configNameLabel: 'Configuration name',
   configNamePlaceholder: 'Enter a name...',
   save: 'Save',
+  saveAsNew: 'Save as new',
   deleteConfiguration: 'Delete',
   confirmDelete: 'Confirm deletion?',
   cancel: 'Cancel',
   maxConfigsReached: 'Maximum of 3 configurations reached',
+  configLimitReached: 'Config limit of 3 reached',
+  configLimitReachedAdditionnal: 'Delete a config to save a new one.',
   createNewConfiguration: 'Create new configuration',
   createNewConfigurationDescription: 'Save current settings as a new configuration',
   updateCurrentConfiguration: 'Update current configuration',
@@ -120,6 +129,7 @@ export interface DataTableAriaLabels {
   refreshingData: string;
   selectAllRows: string;
   expand: string;
+  saveAsNewConfigTitle: string;
 }
 
 export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
@@ -130,6 +140,7 @@ export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
   refreshingData: 'Refreshing data',
   selectAllRows: 'Select all rows',
   expand: 'Expand',
+  saveAsNewConfigTitle: 'Delete a config to save a new one',
 };
 
 export interface DataTableColumnProps<T> {
@@ -830,149 +841,154 @@ export function DataTable<T extends Record<string, unknown>>(
 
   // --- Render ---
   return (
-    <div class="w-full min-w-0">
-      <div
-        ref={setTableRef}
-        role="table"
-        aria-label={a().table}
-        class="flex w-full flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-      >
-        <DataTableInternalContext.Provider
-          value={{
-            columns,
-            get allColumns() {
-              return props.columns;
-            },
-            setColumns,
-            visibleData,
-            baseData,
-            rowGridStyle,
-            rowWidth,
-            setHeaderRef,
-            get rowSelection() {
-              return props.rowSelection ?? false;
-            },
-            selectedRows,
-            allSelected,
-            toggleSelectAll,
-            toggleSelectRow,
-            getRowKey,
-            searchKey,
-            handleSearchChange,
-            searchRef,
-            setSearchRef,
-            currentPage,
-            handlePageChange,
-            perPage,
-            handlePerPageChange,
-            perPageOptions,
-            expanded,
-            toggleExpanded: () => setExpanded((v) => !v),
-            sorts,
-            onSortSelect: handleSortSelect,
-            sortableColumns: sortableColumnsSet,
-            useVirtualization,
-            setVirtualContainerRef,
-            expandedHeight,
-            labels: l,
-            ariaLabels: a,
-            get loading() {
-              return props.loading;
-            },
-            get validating() {
-              return props.validating;
-            },
-            get error() {
-              return props.error;
-            },
-            get rowHeight() {
-              return props.rowHeight;
-            },
-            get estimatedRowHeight() {
-              return props.estimatedRowHeight;
-            },
-            get isLoadingMore() {
-              return props.isLoadingMore;
-            },
-            get pageTotal() {
-              return props.pageTotal;
-            },
-            get perPageControl() {
-              return props.perPageControl;
-            },
-            get footer() {
-              return props.footer;
-            },
-            get searchBar() {
-              return props.searchBar;
-            },
-            get configureColumns() {
-              return props.configureColumns;
-            },
-            get onRowClick() {
-              return props.onRowClick;
-            },
-            get emptyState() {
-              return props.emptyState;
-            },
-            get rowClass() {
-              return props.rowClass;
-            },
-            get columnLocking() {
-              return props.columnLocking ?? false;
-            },
-            stickyColumnKey,
-            toggleStickyColumn,
-            get rowLocking() {
-              return (props.rowLocking ?? false) && useVirtualization();
-            },
-            lockedRowKey,
-            toggleLockedRow,
-            virtualContainerRef,
-            get columnResizing() {
-              return props.columnResizing ?? false;
-            },
-            resizedWidths,
-            onColumnResize: (key: string, width: number) => {
-              setResizedWidths((prev) => {
-                const m = new Map(prev);
-                m.set(key, width);
-                return m;
-              });
-            },
-            resetColumnResize: (key: string) => {
-              setResizedWidths((prev) => {
-                const m = new Map(prev);
-                m.delete(key);
-                return m;
-              });
-            },
-            get expandRow() {
-              return props.expandRow;
-            },
-            expandedRows,
-            toggleRowExpansion,
-            focusedRowIndex,
-            setFocusedRowIndex,
-            get rowContextMenu() {
-              return props.rowContextMenu;
-            },
-            contextMenuState,
-            openContextMenu,
-            closeContextMenu,
-            get configEnabled() {
-              return !!configHook;
-            },
-            configs: configHook?.configs ?? (() => []),
-            activeConfigId: configHook?.activeConfigId ?? (() => null),
-            isDirty: configHook?.isDirty ?? (() => false),
-            isAtLimit: configHook?.isAtLimit ?? (() => false),
-            hasConfigs: configHook?.hasConfigs ?? (() => false),
-            onSaveConfig: configHook?.saveConfig ?? (() => false),
-            onUpdateConfig: configHook?.updateConfig ?? (() => {}),
-            onDeleteConfig: configHook?.deleteConfig ?? (() => {}),
-            onActivateConfig: handleActivateConfig,
-            getConfig: configHook?.getConfig ?? (() => undefined),
+    <DataTableInternalContext.Provider
+      value={{
+        columns,
+        get allColumns() {
+          return props.columns;
+        },
+        setColumns,
+        visibleData,
+        baseData,
+        rowGridStyle,
+        rowWidth,
+        setHeaderRef,
+        get rowSelection() {
+          return props.rowSelection ?? false;
+        },
+        selectedRows,
+        allSelected,
+        toggleSelectAll,
+        toggleSelectRow,
+        getRowKey,
+        searchKey,
+        handleSearchChange,
+        searchRef,
+        setSearchRef,
+        currentPage,
+        handlePageChange,
+        perPage,
+        handlePerPageChange,
+        perPageOptions,
+        expanded,
+        toggleExpanded: () => setExpanded((v) => !v),
+        sorts,
+        onSortSelect: handleSortSelect,
+        sortableColumns: sortableColumnsSet,
+        useVirtualization,
+        setVirtualContainerRef,
+        expandedHeight,
+        labels: l,
+        ariaLabels: a,
+        get loading() {
+          return props.loading;
+        },
+        get validating() {
+          return props.validating;
+        },
+        get error() {
+          return props.error;
+        },
+        get rowHeight() {
+          return props.rowHeight;
+        },
+        get estimatedRowHeight() {
+          return props.estimatedRowHeight;
+        },
+        get isLoadingMore() {
+          return props.isLoadingMore;
+        },
+        get pageTotal() {
+          return props.pageTotal;
+        },
+        get perPageControl() {
+          return props.perPageControl;
+        },
+        get footer() {
+          return props.footer;
+        },
+        get searchBar() {
+          return props.searchBar;
+        },
+        get configureColumns() {
+          return props.configureColumns;
+        },
+        get onRowClick() {
+          return props.onRowClick;
+        },
+        get emptyState() {
+          return props.emptyState;
+        },
+        get rowClass() {
+          return props.rowClass;
+        },
+        get columnLocking() {
+          return props.columnLocking ?? false;
+        },
+        stickyColumnKey,
+        toggleStickyColumn,
+        get rowLocking() {
+          return (props.rowLocking ?? false) && useVirtualization();
+        },
+        lockedRowKey,
+        toggleLockedRow,
+        virtualContainerRef,
+        get columnResizing() {
+          return props.columnResizing ?? false;
+        },
+        resizedWidths,
+        onColumnResize: (key: string, width: number) => {
+          setResizedWidths((prev) => {
+            const m = new Map(prev);
+            m.set(key, width);
+            return m;
+          });
+        },
+        resetColumnResize: (key: string) => {
+          setResizedWidths((prev) => {
+            const m = new Map(prev);
+            m.delete(key);
+            return m;
+          });
+        },
+        get expandRow() {
+          return props.expandRow;
+        },
+        expandedRows,
+        toggleRowExpansion,
+        focusedRowIndex,
+        setFocusedRowIndex,
+        get rowContextMenu() {
+          return props.rowContextMenu;
+        },
+        contextMenuState,
+        openContextMenu,
+        closeContextMenu,
+        get configEnabled() {
+          return !!configHook;
+        },
+        configs: configHook?.configs ?? (() => []),
+        activeConfigId: configHook?.activeConfigId ?? (() => null),
+        isDirty: configHook?.isDirty ?? (() => false),
+        isAtLimit: configHook?.isAtLimit ?? (() => false),
+        hasConfigs: configHook?.hasConfigs ?? (() => false),
+        onSaveConfig: configHook?.saveConfig ?? (() => false),
+        onUpdateConfig: configHook?.updateConfig ?? (() => {}),
+        onDeleteConfig: configHook?.deleteConfig ?? (() => {}),
+        onActivateConfig: handleActivateConfig,
+        getConfig: configHook?.getConfig ?? (() => undefined),
+      }}
+    >
+      {/* Configs */}
+      <DataTableConfigs />
+      <div class="relative isolate w-full min-w-0">
+        <div
+          ref={setTableRef}
+          role="table"
+          aria-label={a().table}
+          classList={{
+            'flex w-full flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900': true,
+            'rounded-tr-none': configEnabled,
           }}
         >
           {/* Search */}
@@ -1041,8 +1057,8 @@ export function DataTable<T extends Record<string, unknown>>(
 
           {/* Footer */}
           <DataTableFooter />
-        </DataTableInternalContext.Provider>
-      </div>
-    </div>
+        </div>
+      </div>{' '}
+    </DataTableInternalContext.Provider>
   );
 }

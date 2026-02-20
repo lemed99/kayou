@@ -13,8 +13,9 @@ export type FilterOperator =
   | 'gte'
   | 'lte'
   | 'between'
-  | 'isEmpty'
-  | 'isNotEmpty';
+  | 'isNull'
+  | 'isNotNull'
+  | ''; // to be able have new filter with no defaults
 
 /**
  * Field types for filter inputs.
@@ -123,7 +124,7 @@ export type FilterState = Map<string, ActiveFilter>;
  * Default operators by data type.
  */
 export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
-  string: ['contains', 'equal', 'notEqual', 'isEmpty', 'isNotEmpty'],
+  string: ['contains', 'equal', 'notEqual', 'isNull', 'isNotNull'],
   number: [
     'equal',
     'notEqual',
@@ -132,11 +133,19 @@ export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
     'gte',
     'lte',
     'between',
-    'isEmpty',
-    'isNotEmpty',
+    'isNull',
+    'isNotNull',
   ],
-  date: ['equal', 'notEqual', 'greaterThan', 'lessThan', 'between', 'isEmpty', 'isNotEmpty'],
-  array: ['include', 'isEmpty', 'isNotEmpty'],
+  date: [
+    'equal',
+    'notEqual',
+    'greaterThan',
+    'lessThan',
+    'between',
+    'isNull',
+    'isNotNull',
+  ],
+  array: ['include', 'isNull', 'isNotNull'],
   boolean: ['equal', 'notEqual'],
 };
 
@@ -153,8 +162,9 @@ export const OPERATOR_LABELS: Record<FilterOperator, string> = {
   gte: 'greater or equal',
   lte: 'less or equal',
   between: 'between',
-  isEmpty: 'is empty',
-  isNotEmpty: 'is not empty',
+  isNull: 'is null',
+  isNotNull: 'is not null',
+  '': '', // to be able have new filter with no defaults
 };
 
 /**

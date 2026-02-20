@@ -624,7 +624,7 @@ export default function DataTablePage() {
         },
       ]}
       playground={`
-import { Button, DataTable, DataTableProvider, Select } from '@kayou/ui';
+import { Button, DataTable, DataTableProvider, Select, DatePickerProvider } from '@kayou/ui';
 import { createSignal } from 'solid-js';
 
 export default function Example() {
@@ -760,7 +760,7 @@ export default function Example() {
       label: 'Role',
       fieldType: 'multiSelect',
       dataType: 'string',
-      operators: ['include', 'isEmpty', 'isNotEmpty'],
+      operators: ['include', 'isNull', 'isNotNull'],
       options: [
         { value: 'Admin', label: 'Admin' },
         { value: 'Editor', label: 'Editor' },
@@ -771,76 +771,78 @@ export default function Example() {
   ];
 
   return (
-    <DataTableProvider storageKey="users" perPageOptions={[5, 10, 25, 50]}>
-      <DataTable
-        data={users}
-        columns={columns}
-        rowKey="id"
-        searchBar
-        rowSelection
-        bulkActions={(selectedKeys, clearSelection) => (
-          <>
-            <Button size="xs" color="failure" onClick={() => { console.log('Delete:', [...selectedKeys]); clearSelection(); }}>
-              Delete
-            </Button>
-            <Button size="xs" color="light" onClick={() => console.log('Export:', [...selectedKeys])}>
-              Export
-            </Button>
-          </>
-        )}
-        configureColumns
-        defaultColumns={['name', 'email', 'status', 'role', 'age', 'department', 'notes']}
-        expandable
-        defaultRowsCount={4}
-        estimatedRowHeight={56}
-        sorts={sorts()}
-        onSortsChange={setSorts}
-        sortableColumns={['name', 'age', 'status']}
-        filterConfigs={filterConfigs}
-        onFiltersChange={(filters) => {
-          console.log('Active filters:', [...filters.entries()].map(([k, f]) => \`\${k}: \${f.operator} \${f.value}\`));
-        }}
-        pageTotal={3}
-        onPageChange={setPage}
-        onSearchChange={(search) => console.log('search:', search)}
-        onPerPageChange={(pp) => console.log('perPage:', pp)}
-        onSelectionChange={(sel) => console.log('selection:', [...sel])}
-        perPageControl
-        footer
-        loading={false}
-        onRowClick={(row, index) => console.log('Row clicked:', row.name, index)}
-        columnLocking
-        columnResizing
-        rowLocking
-        expandRow={(row) => (
-          <div class="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400">
-            <p><strong>Notes:</strong> {String(row.notes)}</p>
-            <p class="mt-1"><strong>Department:</strong> {String(row.department)}</p>
-          </div>
-        )}
-        rowContextMenu={(row, _index, closeMenu) => (
-          <div class="py-1">
-            <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('View', row.name); closeMenu(); }}>
-              View profile
-            </button>
-            <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('Edit', row.name); closeMenu(); }}>
-              Edit
-            </button>
-            <button class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-neutral-100 dark:text-red-400 dark:hover:bg-neutral-800" onClick={() => { console.log('Delete', row.name); closeMenu(); }}>
-              Delete
-            </button>
-          </div>
-        )}
-        labels={{
-          error: 'Failed to load data',
-          noData: 'No users found',
-          seeMore: 'See more',
-          collapse: 'See less',
-          elementsPerPage: 'per page',
-          selectedElements: (count, total) => \`\${count} of \${total} selected\`,
-        }}
-      />
-    </DataTableProvider>
+  <DatePickerProvider locale="en-US">
+      <DataTableProvider storageKey="users" perPageOptions={[5, 10, 25, 50]}>
+        <DataTable
+          data={users}
+          columns={columns}
+          rowKey="id"
+          searchBar
+          rowSelection
+          bulkActions={(selectedKeys, clearSelection) => (
+            <>
+              <Button size="xs" color="failure" onClick={() => { console.log('Delete:', [...selectedKeys]); clearSelection(); }}>
+                Delete
+              </Button>
+              <Button size="xs" color="light" onClick={() => console.log('Export:', [...selectedKeys])}>
+                Export
+              </Button>
+            </>
+          )}
+          configureColumns
+          defaultColumns={['name', 'email', 'status', 'role', 'age', 'department', 'notes']}
+          expandable
+          defaultRowsCount={4}
+          estimatedRowHeight={56}
+          sorts={sorts()}
+          onSortsChange={setSorts}
+          sortableColumns={['name', 'age', 'status']}
+          filterConfigs={filterConfigs}
+          onFiltersChange={(filters) => {
+            console.log('Active filters:', [...filters.entries()].map(([k, f]) => \`\${k}: \${f.operator} \${f.value}\`));
+          }}
+          pageTotal={3}
+          onPageChange={setPage}
+          onSearchChange={(search) => console.log('search:', search)}
+          onPerPageChange={(pp) => console.log('perPage:', pp)}
+          onSelectionChange={(sel) => console.log('selection:', [...sel])}
+          perPageControl
+          footer
+          loading={false}
+          onRowClick={(row, index) => console.log('Row clicked:', row.name, index)}
+          columnLocking
+          columnResizing
+          rowLocking
+          expandRow={(row) => (
+            <div class="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+              <p><strong>Notes:</strong> {String(row.notes)}</p>
+              <p class="mt-1"><strong>Department:</strong> {String(row.department)}</p>
+            </div>
+          )}
+          rowContextMenu={(row, _index, closeMenu) => (
+            <div class="py-1">
+              <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('View', row.name); closeMenu(); }}>
+                View profile
+              </button>
+              <button class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800" onClick={() => { console.log('Edit', row.name); closeMenu(); }}>
+                Edit
+              </button>
+              <button class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-neutral-100 dark:text-red-400 dark:hover:bg-neutral-800" onClick={() => { console.log('Delete', row.name); closeMenu(); }}>
+                Delete
+              </button>
+            </div>
+          )}
+          labels={{
+            error: 'Failed to load data',
+            noData: 'No users found',
+            seeMore: 'See more',
+            collapse: 'See less',
+            elementsPerPage: 'per page',
+            selectedElements: (count, total) => \`\${count} of \${total} selected\`,
+          }}
+        />
+      </DataTableProvider>
+    </DatePickerProvider>
   );
 }
 `}

@@ -48,9 +48,7 @@ export function DataTableProvider(props: {
     if (!sk || typeof sessionStorage === 'undefined') return {};
     try {
       const stored = sessionStorage.getItem(sk);
-      return stored
-        ? (JSON.parse(stored) as Record<string, DataTableState>)
-        : {};
+      return stored ? (JSON.parse(stored) as Record<string, DataTableState>) : {};
     } catch {
       return {};
     }
@@ -95,9 +93,7 @@ export function DataTableProvider(props: {
     if (!sk || typeof localStorage === 'undefined') return {};
     try {
       const stored = localStorage.getItem(sk);
-      return stored
-        ? (JSON.parse(stored) as Record<string, SavedTableConfig[]>)
-        : {};
+      return stored ? (JSON.parse(stored) as Record<string, SavedTableConfig[]>) : {};
     } catch {
       return {};
     }

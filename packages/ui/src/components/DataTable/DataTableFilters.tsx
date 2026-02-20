@@ -22,6 +22,7 @@ import {
 import { twMerge } from 'tailwind-merge';
 
 import { type Option } from '../../shared';
+import Alert from '../Alert';
 import Button from '../Button';
 import DatePicker from '../DatePicker';
 import NumberInput from '../NumberInput';
@@ -126,6 +127,10 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
       props.config.fieldType === 'datepicker' || props.config.fieldType === 'dateRange',
   );
 
+  const isEmptyOrNotEmptyOperators = createMemo(
+    () => props.filter.operator === 'isNull' || props.filter.operator === 'isNotNull',
+  );
+
   return (
     <Switch
       fallback={
@@ -134,20 +139,35 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         </span>
       }
     >
-      <Match when={props.config.fieldType === 'text'}>
+      <Match when={props.config.fieldType === 'text' && !isEmptyOrNotEmptyOperators()}>
         <TextInput
           value={(props.filter.value as string) || ''}
           onInput={(e) => props.onChange(e.currentTarget.value)}
           placeholder={props.config.placeholder || props.labels.enterValue}
           sizing="sm"
-          class="min-w-[150px] flex-1"
+          class="flex-1"
+          disabled={props.filter.value === 'true'}
+        />
+      </Match>
+
+      <Match when={isEmptyOrNotEmptyOperators()}>
+        <TextInput
+          value={'true'}
+          placeholder={props.config.placeholder || props.labels.enterValue}
+          sizing="sm"
+          class="flex-1"
+          disabled
         />
       </Match>
 
       <Match
-        when={props.config.fieldType === 'number' && props.filter.operator === 'between'}
+        when={
+          props.config.fieldType === 'number' &&
+          props.filter.operator === 'between' &&
+          !isEmptyOrNotEmptyOperators()
+        }
       >
-        <div class="flex flex-1 items-center gap-1">
+        <div class="flex flex-1 items-center gap-1 rounded-lg border border-neutral-300 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
           <NumberInput
             value={betweenValues()[0] != null ? String(betweenValues()[0]) : ''}
             onValueChange={(v) => props.onChange([v ?? null, betweenValues()[1]])}
@@ -155,8 +175,9 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
             sizing="sm"
             type={props.config.numberConfig?.type || 'integer'}
             class="w-[80px]"
+            inputClass="border-0 bg-transparent dark:border-transparent dark:bg-transparent py-1 focus:outline-0 dark:outline-0"
           />
-          <span class="text-neutral-500 dark:text-neutral-400">-</span>
+          <span class="text-neutral-500 dark:text-neutral-400">|</span>
           <NumberInput
             value={betweenValues()[1] != null ? String(betweenValues()[1]) : ''}
             onValueChange={(v) => props.onChange([betweenValues()[0], v ?? null])}
@@ -164,12 +185,17 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
             sizing="sm"
             type={props.config.numberConfig?.type || 'integer'}
             class="w-[80px]"
+            inputClass="border-0 bg-transparent dark:border-transparent dark:bg-transparent py-1 focus:outline-0 dark:outline-0"
           />
         </div>
       </Match>
 
       <Match
-        when={props.config.fieldType === 'number' && props.filter.operator !== 'between'}
+        when={
+          props.config.fieldType === 'number' &&
+          props.filter.operator !== 'between' &&
+          !isEmptyOrNotEmptyOperators()
+        }
       >
         <NumberInput
           value={(props.filter.value as number)?.toString() || ''}
@@ -180,45 +206,55 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           min={props.config.numberConfig?.min}
           max={props.config.numberConfig?.max}
           step={props.config.numberConfig?.step}
-          class="min-w-[100px] flex-1"
+          class="flex-1"
         />
       </Match>
 
-      <Match when={props.config.fieldType === 'select'}>
+      <Match when={props.config.fieldType === 'select' && !isEmptyOrNotEmptyOperators()}>
         <Select
           options={props.config.options || []}
           value={(props.filter.value as string) || ''}
           onSelect={(option) => props.onChange(option?.value ?? null)}
           placeholder={props.config.placeholder || props.labels.select}
           sizing="sm"
-          class="min-w-[150px] flex-1"
+          class="flex-1"
         />
       </Match>
 
-      <Match when={props.config.fieldType === 'selectSearch'}>
+      <Match
+        when={props.config.fieldType === 'selectSearch' && !isEmptyOrNotEmptyOperators()}
+      >
         <SelectWithSearch
           options={props.config.options || []}
           value={(props.filter.value as string) || ''}
           onSelect={(option) => props.onChange(option?.value ?? null)}
           placeholder={props.config.placeholder || props.labels.search}
           sizing="sm"
-          class="min-w-[150px] flex-1"
+          class="flex-1"
         />
       </Match>
 
-      <Match when={props.config.fieldType === 'multiSelect'}>
+      <Match
+        when={props.config.fieldType === 'multiSelect' && !isEmptyOrNotEmptyOperators()}
+      >
         <MultiSelect
           options={props.config.options || []}
           values={(props.filter.value as string[]) || []}
           onMultiSelect={(options) => props.onChange(options?.map((o) => o.value) || [])}
           placeholder={props.config.placeholder || props.labels.select}
           sizing="sm"
-          class="min-w-[180px] flex-1"
+          class="flex-1"
         />
       </Match>
 
       {/* Date types: operator determines single vs range input */}
-      <Match when={isDateType() && props.filter.operator === 'between'}>
+      <Match
+        when={
+          isDateType() &&
+          props.filter.operator === 'between' &&
+          !isEmptyOrNotEmptyOperators()
+        }
+      >
         <DatePicker
           type="range"
           value={{
@@ -238,7 +274,13 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         />
       </Match>
 
-      <Match when={isDateType() && props.filter.operator !== 'between'}>
+      <Match
+        when={
+          isDateType() &&
+          props.filter.operator !== 'between' &&
+          !isEmptyOrNotEmptyOperators()
+        }
+      >
         <DatePicker
           type="single"
           value={{ date: singleDateValue() }}
@@ -263,7 +305,7 @@ interface FilterRowProps<T> {
   filterConfigs: FilterConfig<T>[];
   /** Keys already used by other draft filter rows. */
   usedKeys: Set<string>;
-  onColumnChange: (key: string) => void;
+  // onColumnChange: (key: string) => void;
   onOperatorChange: (operator: FilterOperator) => void;
   onValueChange: (value: FilterValue) => void;
   onRemove: () => void;
@@ -279,76 +321,67 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
   );
 
   // Show current column + columns not used by other rows
-  const columnOptions = createMemo<Option[]>(() =>
-    props.filterConfigs
-      .filter((fc) => fc.key === props.filter.key || !props.usedKeys.has(fc.key))
-      .map((fc) => ({
-        value: fc.key,
-        label: fc.label,
-      })),
-  );
+  // const columnOptions = createMemo<Option[]>(() =>
+  //   props.filterConfigs
+  //     .filter((fc) => fc.key === props.filter.key || !props.usedKeys.has(fc.key))
+  //     .map((fc) => ({
+  //       value: fc.key,
+  //       label: fc.label,
+  //     })),
+  // );
 
   const operatorOptions = createMemo<Option[]>(() => {
-    const operators = props.getOperators(props.filter.key);
+    const operators = props.getOperators(props.filter.key || '');
     return operators.map((op) => ({
       value: op,
       label: props.operatorLabels[op],
     }));
   });
 
-  const needsInput = createMemo(
-    () => props.filter.operator !== 'isEmpty' && props.filter.operator !== 'isNotEmpty',
-  );
+  // const needsInput = createMemo(
+  //   () => props.filter.operator !== 'isEmpty' && props.filter.operator !== 'isNotEmpty',
+  // );
 
   return (
-    <div class="flex items-center gap-2">
-      {/* Column selector */}
-      <Select
-        options={columnOptions()}
-        value={props.filter.key}
-        onSelect={(option) => {
-          if (option?.value) {
-            props.onColumnChange(option.value);
-          }
-        }}
-        placeholder={props.ariaLabels.column}
-        sizing="sm"
-        class="w-[140px]"
-      />
+    <div class="space-y-2">
+      <h5 class="text-sm font-semibold capitalize">{props.filter.key}</h5>
+      <div class="grid grid-cols-[1fr_1fr_28px] items-center gap-2">
+        {/* Column selector */}
 
-      {/* Operator selector */}
-      <Select
-        options={operatorOptions()}
-        value={props.filter.operator}
-        onSelect={(option) => {
-          if (option?.value) {
-            props.onOperatorChange(option.value as FilterOperator);
-          }
-        }}
-        placeholder={props.ariaLabels.operator}
-        sizing="sm"
-        class="w-[140px]"
-      />
-
-      {/* Value input */}
-      <Show when={needsInput() && config()}>
-        <FilterInput
-          config={config()!}
-          filter={props.filter as ActiveFilter}
-          onChange={props.onValueChange}
-          labels={props.labels}
+        {/* Operator selector */}
+        <Select
+          options={operatorOptions()}
+          value={props.filter.operator}
+          onSelect={(option) => {
+            if (option?.value) {
+              props.onOperatorChange(option.value as FilterOperator);
+            }
+          }}
+          placeholder={props.ariaLabels.operator}
+          sizing="sm"
+          class=""
         />
-      </Show>
 
-      {/* Remove button */}
-      <button
-        type="button"
-        onClick={() => props.onRemove()}
-        class="shrink-0 rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-        aria-label={props.ariaLabels.removeFilter}
-      >
-        <XCloseIcon class="size-5" aria-hidden="true" />
-      </button>
+        {/* Value input */}
+        <Show when={config()} fallback={<div class="h-full" />}>
+          <FilterInput
+            config={config()!}
+            filter={props.filter as ActiveFilter}
+            onChange={props.onValueChange}
+            labels={props.labels}
+          />
+        </Show>
+
+        {/* Remove button */}
+        <button
+          type="button"
+          onClick={() => props.onRemove()}
+          class="shrink-0 rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+          aria-label={props.ariaLabels.removeFilter}
+        >
+          <XCloseIcon class="size-5" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -414,6 +447,19 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   // Track which columns are already used by draft rows
   const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
 
+  // Track if all column have been used
+  const maxColumns = () => props.filterConfigs.length;
+  const allKeysAreUsed = () => draftFilters().length === maxColumns();
+
+  const columnOptions = createMemo<Option[]>(() =>
+    props.filterConfigs
+      .filter((fc) => !usedKeys().has(fc.key))
+      .map((fc) => ({
+        value: fc.key,
+        label: fc.label,
+      })),
+  );
+
   // Sync draft filters when popover opens
   const handlePopoverOpen = () => {
     const currentFilters = props.activeFilters();
@@ -429,28 +475,28 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     setIsOpen(true);
   };
 
-  const handleAddFilter = () => {
-    // Pick the first unused column
-    const currentUsedKeys = usedKeys();
-    const availableConfig = props.filterConfigs.find(
-      (fc) => !currentUsedKeys.has(fc.key),
-    );
-    if (!availableConfig) return;
+  // const handleAddFilter = () => {
+  //   // Pick the first unused column
+  //   const currentUsedKeys = usedKeys();
+  //   const availableConfig = props.filterConfigs.find(
+  //     (fc) => !currentUsedKeys.has(fc.key),
+  //   );
+  //   if (!availableConfig) return;
 
-    const operators = props.getOperators(availableConfig.key);
-    const defaultOperator = availableConfig.defaultOperator || operators[0] || 'equal';
+  //   // const operators = props.getOperators(availableConfig.key);
+  //   // const defaultOperator = availableConfig.defaultOperator || operators[0] || 'equal';
 
-    setDraftFilters((prev) => [
-      ...prev,
-      {
-        key: availableConfig.key,
-        operator: defaultOperator,
-        value: null,
-      },
-    ]);
-  };
+  //   setDraftFilters((prev) => [
+  //     ...prev,
+  //     {
+  //       key: '',
+  //       operator: '',
+  //       value: null,
+  //     },
+  //   ]);
+  // };
 
-  const handleColumnChange = (index: number, newKey: string) => {
+  const handleColumnChange = (newKey: string) => {
     const config = props.filterConfigs.find((fc) => fc.key === newKey);
     if (!config) return;
 
@@ -459,11 +505,11 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
     setDraftFilters((prev) => {
       const updated = [...prev];
-      updated[index] = {
+      updated.push({
         key: newKey,
         operator: defaultOperator,
         value: null,
-      };
+      });
       return updated;
     });
   };
@@ -472,7 +518,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     setDraftFilters((prev) => {
       const updated = [...prev];
       const current = updated[index];
-      const noValue = operator === 'isEmpty' || operator === 'isNotEmpty';
+      const noValue = operator === 'isNull' || operator === 'isNotNull';
       const wasBetween = current.operator === 'between';
       const isBetween = operator === 'between';
       // Reset value when switching to/from between (incompatible types) or to isEmpty/isNotEmpty
@@ -594,8 +640,12 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     <div
       ref={setPopoverRef}
       data-filter-popover
-      class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700"
+      class="max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700"
     >
+      <Alert color="info" class="mb-4">
+        Filters refine your results all selected criteria must apply.
+      </Alert>
+
       {/* Filter rows */}
       <div class="mb-4 space-y-3">
         <Show
@@ -615,18 +665,18 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           <Index each={draftFilters()}>
             {(filter, index) => (
               <>
-                <Show when={index > 0}>
+                {/* <Show when={index > 0}>
                   <div class="flex items-center py-1">
                     <span class="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                       {l().and.toUpperCase()}
                     </span>
                   </div>
-                </Show>
+                </Show> */}
                 <FilterRow
                   filter={filter()}
                   filterConfigs={props.filterConfigs}
                   usedKeys={usedKeys()}
-                  onColumnChange={(key) => handleColumnChange(index, key)}
+                  // onColumnChange={(key) => handleColumnChange(index, key)}
                   onOperatorChange={(op) => handleOperatorChange(index, op)}
                   onValueChange={(val) => handleValueChange(index, val)}
                   onRemove={() => handleRemoveFilter(index)}
@@ -643,16 +693,39 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
       {/* Footer with actions */}
       <div class="flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-800">
-        <button
-          type="button"
-          onClick={handleAddFilter}
-          class="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          <PlusIcon class="size-4" aria-hidden="true" />
-          {props.addFilterText || l().addFilter}
-        </button>
+        <Show when={!allKeysAreUsed()}>
+          <Select
+            options={columnOptions()}
+            onSelect={(option) => {
+              if (option?.value) {
+                handleColumnChange(option.value);
+              }
+            }}
+            placeholder={a().column}
+            sizing="sm"
+            class=""
+            inputComponent={() => (
+              <button
+                type="button"
+                // onClick={handleAddFilter}
+                class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                <PlusIcon class="size-4" aria-hidden="true" />
+                {props.addFilterText || l().addFilter}
+              </button>
+            )}
+          />
+          {/* <button
+            type="button"
+            onClick={handleAddFilter}
+            class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <PlusIcon class="size-4" aria-hidden="true" />
+            {props.addFilterText || l().addFilter}
+          </button> */}
+        </Show>
 
-        <div class="flex items-center gap-2">
+        <div class="ml-auto flex items-center gap-2 justify-self-end">
           <Button size="sm" color="transparent" onClick={handleReset}>
             {props.resetText || l().reset}
           </Button>
@@ -774,7 +847,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           type="button"
           onClick={() => {
             handlePopoverOpen();
-            handleAddFilter();
           }}
           class="inline-flex items-center gap-0.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
         >
