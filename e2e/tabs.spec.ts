@@ -37,6 +37,11 @@ test.describe('Tabs', () => {
       await expect(tablist).toBeVisible();
       await expect(tablist).toHaveAttribute('aria-label', 'Tabs');
     });
+
+    test('tablist has aria-orientation', async ({ page }) => {
+      const tablist = section(page, S).getByRole('tablist');
+      await expect(tablist).toHaveAttribute('aria-orientation', 'horizontal');
+    });
   });
 
   // ==================== ARIA Attributes ====================
@@ -56,16 +61,21 @@ test.describe('Tabs', () => {
       await expect(tab2).toHaveAttribute('aria-selected', 'true');
     });
 
-    test('tabs have aria-controls linked to panels', async ({ page }) => {
+    test('tab aria-controls links to corresponding panel', async ({ page }) => {
       const tab = section(page, S).getByRole('tab', { name: 'General' });
-      await expect(tab).toHaveAttribute('aria-controls', 'panel-tab1');
-      await expect(tab).toHaveAttribute('id', 'tab-tab1');
+      const panelId = await tab.getAttribute('aria-controls');
+      expect(panelId).toBeTruthy();
+      // Panel with that ID exists and has correct role
+      const panel = page.locator(`#${panelId}`);
+      await expect(panel).toHaveAttribute('role', 'tabpanel');
     });
 
-    test('panels have correct role and aria-labelledby', async ({ page }) => {
-      const panel = page.locator('#panel-tab1');
-      await expect(panel).toHaveAttribute('role', 'tabpanel');
-      await expect(panel).toHaveAttribute('aria-labelledby', 'tab-tab1');
+    test('panel aria-labelledby links back to tab', async ({ page }) => {
+      const tab = section(page, S).getByRole('tab', { name: 'General' });
+      const tabId = await tab.getAttribute('id');
+      const panelId = await tab.getAttribute('aria-controls');
+      const panel = page.locator(`#${panelId}`);
+      await expect(panel).toHaveAttribute('aria-labelledby', tabId!);
     });
 
     test('active tab has tabindex 0, others have -1', async ({ page }) => {
@@ -74,6 +84,17 @@ test.describe('Tabs', () => {
 
       await expect(tab1).toHaveAttribute('tabindex', '0');
       await expect(tab2).toHaveAttribute('tabindex', '-1');
+    });
+
+    test('active panel has tabindex 0, hidden panels do not', async ({ page }) => {
+      const tab1 = section(page, S).getByRole('tab', { name: 'General' });
+      const tab2 = section(page, S).getByRole('tab', { name: 'Settings' });
+
+      const panel1Id = await tab1.getAttribute('aria-controls');
+      const panel2Id = await tab2.getAttribute('aria-controls');
+
+      await expect(page.locator(`#${panel1Id}`)).toHaveAttribute('tabindex', '0');
+      await expect(page.locator(`#${panel2Id}`)).not.toHaveAttribute('tabindex');
     });
   });
 
@@ -145,6 +166,16 @@ test.describe('Tabs', () => {
       await expect(tab3).toHaveAttribute('aria-selected', 'true');
       await expect(tab3).toBeFocused();
     });
+
+    test('roving tabindex updates after arrow navigation', async ({ page }) => {
+      const tab1 = section(page, S).getByRole('tab', { name: 'General' });
+      const tab2 = section(page, S).getByRole('tab', { name: 'Settings' });
+      await tab1.focus();
+
+      await page.keyboard.press('ArrowRight');
+      await expect(tab2).toHaveAttribute('tabindex', '0');
+      await expect(tab1).toHaveAttribute('tabindex', '-1');
+    });
   });
 
   // ==================== Controlled Mode ====================
@@ -175,9 +206,13 @@ test.describe('Tabs', () => {
   test.describe('disabled', () => {
     const S = 'disabled';
 
+    test('disabled tab has aria-disabled', async ({ page }) => {
+      const disabledTab = section(page, S).getByRole('tab', { name: 'Disabled' });
+      await expect(disabledTab).toHaveAttribute('aria-disabled', 'true');
+    });
+
     test('disabled tab cannot be clicked', async ({ page }) => {
       const disabledTab = section(page, S).getByRole('tab', { name: 'Disabled' });
-      await expect(disabledTab).toBeDisabled();
 
       await disabledTab.click({ force: true });
       // First tab should still be active

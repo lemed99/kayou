@@ -50,7 +50,7 @@ export default function TabsPage() {
           name: 'onTabChange',
           type: '(key: string) => void',
           default: '-',
-          description: 'Controlled: callback when active tab changes',
+          description: 'Callback when active tab changes (works in both controlled and uncontrolled modes)',
         },
         {
           name: 'variant',
@@ -89,10 +89,10 @@ export default function TabsPage() {
           description: 'Custom CSS class applied to each tab panel',
         },
         {
-          name: 'labels',
-          type: 'Partial<TabsLabels>',
-          default: 'DEFAULT_TABS_LABELS',
-          description: 'Text labels for i18n (tabList aria-label)',
+          name: 'ariaLabels',
+          type: 'Partial<TabsAriaLabels>',
+          default: 'DEFAULT_TABS_ARIA_LABELS',
+          description: 'Accessibility labels for the component (tabList aria-label)',
         },
       ]}
       subComponents={[
@@ -113,9 +113,9 @@ export default function TabsPage() {
           ],
         },
         {
-          name: 'TabsLabels',
+          name: 'TabsAriaLabels',
           kind: 'type',
-          description: 'Text labels for i18n',
+          description: 'Accessibility labels for i18n',
           props: [
             { name: 'tabList', type: 'string', default: '"Tabs"', description: 'aria-label for the tablist element' },
           ],
