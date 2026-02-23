@@ -13,6 +13,9 @@ export {
   useForm,
   type UseFormOptions,
   type UseFormReturn,
+  useShortcut,
+  type UseShortcutOptions,
+  type UseShortcutReturn,
   type Mutation,
   type MutationOptions,
   type MutationProps,
@@ -62,6 +65,15 @@ export {
   useFormContext,
   type FormContextType,
   type FormProviderProps,
+  ShortcutContext,
+  ShortcutProvider,
+  useShortcutContext,
+  normalizeCombo,
+  comboFromEvent,
+  type RegisteredAction,
+  type ShortcutAction,
+  type ShortcutContextValue,
+  type ShortcutProviderProps,
 } from './context';
 
 // Validators (access via `useForm.validators.required()`, etc.)

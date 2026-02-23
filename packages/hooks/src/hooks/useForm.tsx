@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on } from 'solid-js';
+import { createEffect, createMemo, createSignal, on } from 'solid-js';
 import { createStore, produce, reconcile } from 'solid-js/store';
 import { useFormContext } from '../context/FormContext';
 import type { FormSchema } from '../validators';
@@ -240,7 +240,7 @@ export function useForm<T extends Record<string, unknown>>(
       on(
         () => ({ ...values }),
         (v) => formCtx.save(formId, v as Record<string, unknown>),
-        { defer: !restoredValues },
+        { defer: true },
       ),
     );
   }
@@ -361,10 +361,7 @@ export function useForm<T extends Record<string, unknown>>(
       let newValue: unknown;
       if (target.type === 'checkbox') {
         newValue = target.checked;
-      } else if (
-        (target.type === 'number' || target.type === 'range') &&
-        target.value !== ''
-      ) {
+      } else if (target.type === 'number' || target.type === 'range') {
         newValue = target.valueAsNumber;
       } else {
         newValue = target.value;
@@ -460,8 +457,14 @@ export function useForm<T extends Record<string, unknown>>(
       const result = await options.onSubmit({ ...values });
 
       // If onSubmit returns field errors (e.g. from server), apply them
-      if (result && typeof result === 'object') {
-        setFormErrors(result);
+      const fieldErrors =
+        result && typeof result === 'object' ? result : undefined;
+      const hasFieldErrors =
+        fieldErrors &&
+        Object.values(fieldErrors).some((v) => v !== undefined);
+
+      if (hasFieldErrors) {
+        setFormErrors(fieldErrors);
       } else if (formId) {
         formCtx?.clear(formId);
       }
@@ -474,7 +477,7 @@ export function useForm<T extends Record<string, unknown>>(
 
   // --- Computed ---
 
-  const isDirty = (): boolean => {
+  const isDirty = createMemo((): boolean => {
     const init = options.initialValues;
     for (const key of Object.keys(init)) {
       const current = values[key as keyof T];
@@ -494,9 +497,9 @@ export function useForm<T extends Record<string, unknown>>(
       }
     }
     return false;
-  };
+  });
 
-  const isValid = (): boolean => {
+  const isValid = createMemo((): boolean => {
     // Check schema validators
     if (options.schema) {
       for (const key of Object.keys(options.schema)) {
@@ -516,7 +519,7 @@ export function useForm<T extends Record<string, unknown>>(
     return !Object.keys(errors).some(
       (k) => errors[k as keyof T] !== undefined,
     );
-  };
+  });
 
   // --- Reset ---
 

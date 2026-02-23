@@ -23,6 +23,7 @@ const hooksPackageHooks = [
   'use-form',
   'use-intl',
   'use-mutation',
+  'use-shortcut',
   'use-toast',
   'use-virtual-list',
 ];
@@ -47,7 +48,7 @@ const componentCategories: Record<string, string[]> = {
     'toggle-switch',
     'upload-file',
   ],
-  Layout: ['accordion', 'drawer', 'modal', 'popover', 'sidebar'],
+  Layout: ['accordion', 'drawer', 'modal', 'popover', 'shortcut-panel', 'sidebar', 'tabs'],
   Feedback: ['alert', 'badge', 'skeleton', 'spinner', 'tooltip'],
   Navigation: ['breadcrumb', 'pagination'],
   'Data Display': ['data-table', 'dynamic-virtual-list', 'virtual-grid', 'virtual-list'],
