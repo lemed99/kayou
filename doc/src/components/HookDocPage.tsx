@@ -50,6 +50,8 @@ interface ProviderDefinition {
   description: string;
   props: ProviderPropDefinition[];
   example?: string;
+  /** When false, the provider is optional (e.g. opt-in persistence). Defaults to true. */
+  required?: boolean;
 }
 
 interface TypePropertyDefinition {
@@ -263,21 +265,56 @@ export default function HookDocPage(props: ParentProps<HookDocPageProps>): JSX.E
       <Show when={props.provider}>
         <section id="provider" class="mb-10 scroll-mt-20">
           <h2 class="mb-4 flex items-center gap-2 text-2xl font-medium">
-            Required Provider
-            <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-normal text-red-700 dark:bg-red-900/30 dark:text-red-400">
-              Required
+            {props.provider!.required === false ? 'Optional Provider' : 'Required Provider'}
+            <span
+              class={
+                props.provider!.required === false
+                  ? 'rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-normal text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-normal text-red-700 dark:bg-red-900/30 dark:text-red-400'
+              }
+            >
+              {props.provider!.required === false ? 'Optional' : 'Required'}
             </span>
           </h2>
-          <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+          <div
+            class={
+              props.provider!.required === false
+                ? 'mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20'
+                : 'mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20'
+            }
+          >
             <div class="flex gap-3">
-              <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
-                <AlertTriangleIcon class="size-5" />
+              <div
+                class={
+                  props.provider!.required === false
+                    ? 'flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+                }
+              >
+                <Show
+                  when={props.provider!.required !== false}
+                  fallback={<Database01Icon class="size-5" />}
+                >
+                  <AlertTriangleIcon class="size-5" />
+                </Show>
               </div>
               <div>
-                <h3 class="font-medium text-amber-900 dark:text-amber-200">
+                <h3
+                  class={
+                    props.provider!.required === false
+                      ? 'font-medium text-blue-900 dark:text-blue-200'
+                      : 'font-medium text-amber-900 dark:text-amber-200'
+                  }
+                >
                   {props.provider!.name}
                 </h3>
-                <p class="mt-1 text-sm text-amber-800 dark:text-amber-300">
+                <p
+                  class={
+                    props.provider!.required === false
+                      ? 'mt-1 text-sm text-blue-800 dark:text-blue-300'
+                      : 'mt-1 text-sm text-amber-800 dark:text-amber-300'
+                  }
+                >
                   {props.provider!.description}
                 </p>
               </div>

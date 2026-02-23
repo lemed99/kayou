@@ -18,6 +18,7 @@ export { useFloating } from './useFloating';
 export { useVirtualList } from './useVirtualList';
 export { useDynamicVirtualList } from './useDynamicVirtualList';
 export { useForm, type UseFormOptions, type UseFormReturn } from './useForm';
+export { useShortcut, type UseShortcutOptions, type UseShortcutReturn } from './useShortcut';
 
 // useFloating types
 export type {

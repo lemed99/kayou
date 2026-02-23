@@ -197,8 +197,8 @@ test.describe('DataTable', () => {
     await filterButton.click();
     await page.waitForTimeout(300);
 
-    const popover = page.locator('[data-filter-popover]').first();
-    await expect(popover).toBeVisible();
+    const addFilter = page.locator('text=Add filter').first();
+    await expect(addFilter).toBeVisible();
   });
 
   test('should have add filter option', async ({ page }) => {
@@ -212,6 +212,44 @@ test.describe('DataTable', () => {
 
     const addFilter = page.locator('text=Add filter').first();
     await expect(addFilter).toBeVisible();
+  });
+
+  test('should keep filter popover open when clicking datepicker input', async ({ page }) => {
+    const pg = await waitForPlayground(page);
+    // Open the filter popover
+    const filterButton = pg
+      .locator('button')
+      .filter({ hasText: /Filter/i })
+      .first();
+    await filterButton.click();
+
+    // The filter popover is a Portal-rendered dialog containing "Add filter"
+    const filterPopover = page.locator('[role="dialog"]').filter({ hasText: /Add filter/ }).first();
+    await expect(filterPopover).toBeVisible();
+
+    // Click "Add filter" inside the popover
+    await filterPopover.getByText('Add filter').click();
+
+    // Change column to "Joined" — the column selector is a Select (role="combobox")
+    const columnSelect = filterPopover.locator('[role="combobox"]').first();
+    await expect(columnSelect).toBeVisible();
+    await columnSelect.click();
+    await page.locator('[role="option"]').filter({ hasText: 'Joined' }).click();
+
+    // The datepicker input should now be visible in the filter row
+    const datepickerInput = filterPopover.getByPlaceholder('Select a date');
+    await expect(datepickerInput).toBeVisible();
+
+    // Click the datepicker input — use force to bypass any overlapping dropdown
+    await datepickerInput.click({ force: true });
+    await page.waitForTimeout(300);
+
+    // The filter popover should still be visible (not closed by the click)
+    await expect(filterPopover).toBeVisible();
+
+    // The calendar should be visible (it contains a grid for the month days)
+    const calendar = page.locator('[role="grid"]');
+    await expect(calendar.first()).toBeVisible();
   });
 
   // ==================== Pagination ====================

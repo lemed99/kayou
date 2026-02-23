@@ -52,6 +52,23 @@ export {
   type TextInputProps,
 } from './TextInput';
 export { default as ToggleSwitch } from './ToggleSwitch';
+export {
+  DEFAULT_SHORTCUT_PANEL_LABELS,
+  DEFAULT_SHORTCUT_PANEL_ARIA_LABELS,
+  default as ShortcutPanel,
+  type ShortcutPanelAriaLabels,
+  type ShortcutPanelLabels,
+  type ShortcutPanelProps,
+} from './ShortcutPanel';
+export {
+  DEFAULT_TABS_LABELS,
+  default as Tabs,
+  type TabData,
+  type TabsLabels,
+  type TabsProps,
+  type TabSize,
+  type TabVariant,
+} from './Tabs';
 export { default as Tooltip } from './Tooltip';
 export { VirtualList, type VirtualListHandle } from './VirtualList';
 

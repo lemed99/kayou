@@ -27,10 +27,16 @@ export default function UseFormPage() {
           required: true,
         },
         {
+          name: 'schema',
+          type: 'Partial<{ [K in keyof T]: FieldValidator[] }>',
+          description:
+            'Per-field validation schema. Maps field names to arrays of composable validator functions (e.g. required(), email(), minLength()). Validators run in order, stopping at the first error per field. Access built-in validators via useForm.validators.',
+        },
+        {
           name: 'validate',
           type: '(values: T) => Partial<Record<keyof T, string>>',
           description:
-            'Validation function. Returns an object mapping field names to error strings. Return an empty object if all fields are valid.',
+            'Form-level validation function for cross-field rules. Returns an object mapping field names to error strings. When both schema and validate are provided, schema runs first, then validate errors merge on top.',
         },
         {
           name: 'validateOn',
@@ -152,6 +158,71 @@ export default function UseFormPage() {
             'Run full form validation and update the errors store. Returns the errors object.',
         },
       ]}
+      provider={{
+        name: 'FormProvider',
+        required: false,
+        description:
+          'Wrap your app or page in FormProvider to opt into sessionStorage-based persistence. Forms with an id prop will auto-save values and restore them when remounted. Without FormProvider, useForm works normally but does not persist.',
+        props: [
+          {
+            name: 'storageKey',
+            type: 'string',
+            default: '-',
+            description:
+              'Namespace for sessionStorage. All forms within this provider store under the key "forms:{storageKey}". Use different keys for different pages or scopes.',
+            required: true,
+          },
+        ],
+        example: `
+          import { FormProvider } from '@kayou/hooks';
+          import { useForm } from '@kayou/hooks';
+          import { Form, TextInput, Button } from '@kayou/ui';
+
+          // Wrap your page/app once
+          function App() {
+            return (
+              <FormProvider storageKey="my-app">
+                <ContactForm />
+              </FormProvider>
+            );
+          }
+
+          // Forms with an id will auto-persist
+          function ContactForm() {
+            const form = useForm({
+              id: 'contact',  // enables persistence
+              initialValues: { name: '', message: '' },
+              schema: {
+                name: [useForm.validators.required()],
+              },
+              onSubmit: async (values) => {
+                await api.sendMessage(values);
+                // On success, persisted data is automatically cleared
+              },
+            });
+
+            return (
+              <Form onSubmit={form.handleSubmit}>
+                <TextInput
+                  label="Name"
+                  value={form.values.name}
+                  onInput={form.handleChange('name')}
+                  onBlur={form.handleBlur('name')}
+                  color={form.fieldColor('name')}
+                  helperText={form.fieldError('name')}
+                />
+                <TextInput
+                  label="Message"
+                  value={form.values.message}
+                  onInput={form.handleChange('message')}
+                  onBlur={form.handleBlur('message')}
+                />
+                <Button type="submit">Send</Button>
+              </Form>
+            );
+          }
+        `,
+      }}
       usage={`
         import { useForm } from '@kayou/hooks';
         import { Form, TextInput, Select, UploadFile, Button } from '@kayou/ui';

@@ -4,7 +4,13 @@ import type { FieldValidator } from './types';
 
 export function required(msg = 'This field is required'): FieldValidator {
   return (value: unknown) => {
-    if (value === null || value === undefined || value === '') return msg;
+    if (
+      value === null ||
+      value === undefined ||
+      value === '' ||
+      (typeof value === 'number' && Number.isNaN(value))
+    )
+      return msg;
     return undefined;
   };
 }

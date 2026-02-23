@@ -27,3 +27,14 @@ export {
   type FormContextType,
   type FormProviderProps,
 } from './FormContext';
+export {
+  ShortcutContext,
+  ShortcutProvider,
+  useShortcutContext,
+  normalizeCombo,
+  comboFromEvent,
+  type RegisteredAction,
+  type ShortcutAction,
+  type ShortcutContextValue,
+  type ShortcutProviderProps,
+} from './ShortcutContext';

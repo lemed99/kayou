@@ -6,10 +6,8 @@ import {
   Match,
   Show,
   Switch,
-  createEffect,
   createMemo,
   createSignal,
-  onCleanup,
 } from 'solid-js';
 
 import {
@@ -409,7 +407,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   // Draft filters - local state for editing before submit
   const [draftFilters, setDraftFilters] = createSignal<DraftFilter[]>([]);
   const [isOpen, setIsOpen] = createSignal(false);
-  const [popoverRef, setPopoverRef] = createSignal<HTMLDivElement | undefined>();
 
   // Track which columns are already used by draft rows
   const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
@@ -522,80 +519,8 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
   const activeFilterCount = createMemo(() => props.activeFilters().size);
 
-  const handleToggle = () => {
-    if (isOpen()) {
-      setIsOpen(false);
-    } else {
-      handlePopoverOpen();
-    }
-  };
-
-  // Handle click outside to close popover
-  // We need custom handling because Select dropdowns render in Portals
-  createEffect(() => {
-    if (!isOpen()) return;
-
-    const handleClickOutside = (event: PointerEvent) => {
-      const target = event.target as HTMLElement;
-
-      // Don't close if clicking inside a dropdown/listbox (Select options)
-      if (target.closest('[role="listbox"]') || target.closest('[role="option"]')) {
-        return;
-      }
-
-      // Don't close if clicking inside the popover content
-      const popoverEl = popoverRef();
-      if (popoverEl && popoverEl.contains(target)) {
-        return;
-      }
-
-      // Don't close if clicking the trigger button
-      if (target.closest('[data-filter-trigger]')) {
-        return;
-      }
-
-      setIsOpen(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-
-    // Use setTimeout to avoid closing immediately on the same click that opened it
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('pointerdown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    }, 0);
-
-    onCleanup(() => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('pointerdown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    });
-  });
-
-  // Move focus into popover when it opens
-  createEffect(() => {
-    if (!isOpen()) return;
-    const rafId = requestAnimationFrame(() => {
-      const el = popoverRef();
-      if (!el) return;
-      const focusable = el.querySelector<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      );
-      focusable?.focus();
-    });
-    onCleanup(() => cancelAnimationFrame(rafId));
-  });
-
   const popoverContentWithAttr = () => (
-    <div
-      ref={setPopoverRef}
-      data-filter-popover
-      class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700"
-    >
+    <div class="w-[520px] max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700">
       {/* Filter rows */}
       <div class="mb-4 space-y-3">
         <Show
@@ -700,13 +625,23 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           : 'No filters applied'}
       </div>
 
-      <Popover position="bottom-start" content={popoverContentWithAttr} isOpen={isOpen()}>
-        <div data-filter-trigger>
+      <Popover
+        position="bottom-start"
+        content={popoverContentWithAttr}
+        isOpen={isOpen()}
+        onOpenChange={(open) => {
+          if (open) {
+            handlePopoverOpen();
+          } else {
+            setIsOpen(false);
+          }
+        }}
+      >
+        <div>
           <Button
             size="sm"
             color="transparent"
             icon={FilterFunnel01Icon}
-            onClick={handleToggle}
             aria-expanded={isOpen()}
             aria-label={
               activeFilterCount() > 0
