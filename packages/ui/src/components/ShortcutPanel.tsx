@@ -8,10 +8,6 @@ import {
   type ShortcutContextValue,
 } from '@kayou/hooks';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface ShortcutPanelLabels {
   search: string;
   resetAll: string;
@@ -49,10 +45,6 @@ export interface ShortcutPanelProps extends JSX.HTMLAttributes<HTMLDivElement> {
   ariaLabels?: Partial<ShortcutPanelAriaLabels>;
 }
 
-// ---------------------------------------------------------------------------
-// Theme
-// ---------------------------------------------------------------------------
-
 const panelTheme = {
   root: 'w-full rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800',
   header:
@@ -81,10 +73,6 @@ const panelTheme = {
   empty: 'px-3 py-8 text-center text-sm text-neutral-400 dark:text-neutral-500',
 };
 
-// ---------------------------------------------------------------------------
-// Platform helpers
-// ---------------------------------------------------------------------------
-
 const isMac = (): boolean => {
   if (typeof navigator === 'undefined') return false;
   return /Mac|iPhone|iPad/.test(navigator.platform);
@@ -105,10 +93,6 @@ function comboToParts(combo: string): string[] {
   return combo.split('+').map(formatKeyForDisplay);
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
   const context = useContext(ShortcutContext) as ShortcutContextValue;
   if (!context) {
@@ -126,7 +110,6 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
   const [search, setSearch] = createSignal('');
   const [editingId, setEditingId] = createSignal<string | null>(null);
 
-  // Filtered and grouped actions
   const filteredActions = createMemo(() => {
     const query = search().toLowerCase();
     const actions = context.getActions();
@@ -156,8 +139,6 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
     return conflicts().has(combo);
   };
 
-  // ---- Recording mode ----
-
   createEffect(() => {
     const id = editingId();
     if (!id) return;
@@ -182,8 +163,6 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
     document.addEventListener('keydown', handleKeyDown, true);
     onCleanup(() => document.removeEventListener('keydown', handleKeyDown, true));
   });
-
-  // ---- Render helpers ----
 
   const renderCombo = (combo: string) => {
     const parts = comboToParts(combo);
@@ -268,7 +247,6 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
       role="region"
       aria-label={ariaLabels().shortcutList}
     >
-      {/* Header: search + reset all */}
       <div class={panelTheme.header}>
         <input
           type="text"
@@ -283,7 +261,6 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
         </button>
       </div>
 
-      {/* Actions list */}
       <Show
         when={filteredActions().length > 0}
         fallback={<div class={panelTheme.empty}>{labels().noShortcuts}</div>}

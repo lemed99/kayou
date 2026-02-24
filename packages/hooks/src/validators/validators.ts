@@ -1,7 +1,5 @@
 import type { FieldValidator } from './types';
 
-// --- String validators ---
-
 export function required(msg = 'This field is required'): FieldValidator {
   return (value: unknown) => {
     if (
@@ -50,8 +48,6 @@ export function pattern(regex: RegExp, msg = 'Invalid format'): FieldValidator {
     return undefined;
   };
 }
-
-// --- Number validators ---
 
 export function min(n: number, msg?: string): FieldValidator {
   const message = msg ?? `Must be at least ${n}`;

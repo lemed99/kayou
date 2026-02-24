@@ -1,45 +1,77 @@
-import { For, type JSX, Show, createMemo, createSignal, splitProps } from 'solid-js';
+import {
+  For,
+  type JSX,
+  Show,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  splitProps,
+} from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
+/**
+ * Data structure for a single tab.
+ */
 export interface TabData {
+  /** Unique identifier for the tab. */
   key: string;
+  /** Content displayed in the tab button. */
   label: JSX.Element;
+  /** Panel content. Use a function for lazy evaluation. */
   content: JSX.Element | (() => JSX.Element);
+  /** Whether the tab is disabled. */
   disabled?: boolean;
 }
 
 export type TabVariant = 'underline' | 'pills' | 'bordered';
 export type TabSize = 'sm' | 'md' | 'lg';
 
-export interface TabsLabels {
+/**
+ * Accessibility labels for the Tabs component.
+ */
+export interface TabsAriaLabels {
+  /** aria-label for the tablist element. */
   tabList: string;
 }
 
-export const DEFAULT_TABS_LABELS: TabsLabels = {
+/** @deprecated Use `TabsAriaLabels` instead. */
+export type TabsLabels = TabsAriaLabels;
+
+export const DEFAULT_TABS_ARIA_LABELS: TabsAriaLabels = {
   tabList: 'Tabs',
 };
 
-export interface TabsProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  tabs: TabData[];
-  activeTab?: string;
-  onTabChange?: (key: string) => void;
-  variant?: TabVariant;
-  size?: TabSize;
-  lazy?: boolean;
-  tabListClass?: string;
-  tabClass?: string;
-  panelClass?: string;
-  labels?: Partial<TabsLabels>;
-}
+/** @deprecated Use `DEFAULT_TABS_ARIA_LABELS` instead. */
+export const DEFAULT_TABS_LABELS = DEFAULT_TABS_ARIA_LABELS;
 
-// ---------------------------------------------------------------------------
-// Theme
-// ---------------------------------------------------------------------------
+/**
+ * Props for the Tabs component.
+ */
+export interface TabsProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  /** Array of tab objects with key, label, content, and optional disabled flag. */
+  tabs: TabData[];
+  /** Controlled: currently active tab key. */
+  activeTab?: string;
+  /** Callback when active tab changes. Works in both controlled and uncontrolled modes. */
+  onTabChange?: (key: string) => void;
+  /** Visual style variant. @default 'underline' */
+  variant?: TabVariant;
+  /** Size of tab buttons. @default 'md' */
+  size?: TabSize;
+  /** When true, only the active panel is rendered in the DOM. @default false */
+  lazy?: boolean;
+  /** Custom CSS class for the tab list container. */
+  tabListClass?: string;
+  /** Custom CSS class applied to each tab button. */
+  tabClass?: string;
+  /** Custom CSS class applied to each tab panel. */
+  panelClass?: string;
+  /** Accessibility labels for the component. */
+  ariaLabels?: Partial<TabsAriaLabels>;
+  /** @deprecated Use `ariaLabels` instead. */
+  labels?: Partial<TabsAriaLabels>;
+}
 
 const theme = {
   root: 'w-full',
@@ -52,7 +84,7 @@ const theme = {
     },
   },
   tab: {
-    base: 'inline-flex items-center justify-center font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 whitespace-nowrap',
+    base: 'inline-flex items-center justify-center font-medium transition-colors cursor-pointer aria-disabled:opacity-50 aria-disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 whitespace-nowrap',
     variant: {
       underline: {
         base: 'border-b-2 border-transparent -mb-px',
@@ -81,18 +113,23 @@ const theme = {
   },
   panel: {
     base: 'py-4 focus-visible:outline-none',
-    variant: {
-      underline: '',
-      pills: '',
-      bordered: '',
-    },
   },
 };
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
+/**
+ * Accessible tabbed interface with WAI-ARIA compliance, keyboard navigation,
+ * and multiple visual variants.
+ *
+ * @example
+ * ```tsx
+ * <Tabs
+ *   tabs={[
+ *     { key: 'general', label: 'General', content: <p>General content</p> },
+ *     { key: 'settings', label: 'Settings', content: <p>Settings content</p> },
+ *   ]}
+ * />
+ * ```
+ */
 const Tabs = (props: TabsProps): JSX.Element => {
   const [local, divProps] = splitProps(props, [
     'tabs',
@@ -105,21 +142,20 @@ const Tabs = (props: TabsProps): JSX.Element => {
     'tabListClass',
     'tabClass',
     'panelClass',
+    'ariaLabels',
     'labels',
   ]);
 
-  const variant = () => local.variant ?? 'underline';
-  const size = () => local.size ?? 'md';
-  const mergedLabels = createMemo(() => ({
-    ...DEFAULT_TABS_LABELS,
+  const instanceId = createUniqueId();
+  const variant = createMemo(() => local.variant ?? 'underline');
+  const size = createMemo(() => local.size ?? 'md');
+  const mergedAriaLabels = createMemo(() => ({
+    ...DEFAULT_TABS_ARIA_LABELS,
     ...local.labels,
+    ...local.ariaLabels,
   }));
 
-  // ---- Controlled / uncontrolled ----
-
-  const isControlled = createMemo(
-    () => local.activeTab !== undefined && local.onTabChange !== undefined,
-  );
+  const isControlled = createMemo(() => local.activeTab !== undefined);
 
   const firstEnabledKey = createMemo(() => {
     const tab = local.tabs.find((t) => !t.disabled);
@@ -130,7 +166,6 @@ const Tabs = (props: TabsProps): JSX.Element => {
     undefined,
   );
 
-  // Ensure internal default is set once
   const activeKey = createMemo(() => {
     if (isControlled()) {
       const key = local.activeTab!;
@@ -147,18 +182,21 @@ const Tabs = (props: TabsProps): JSX.Element => {
   const selectTab = (key: string) => {
     const tab = local.tabs.find((t) => t.key === key);
     if (!tab || tab.disabled) return;
-    if (isControlled()) {
-      local.onTabChange!(key);
-    } else {
+    if (!isControlled()) {
       setInternalActiveTab(key);
     }
+    local.onTabChange?.(key);
   };
-
-  // ---- Focus management ----
 
   const tabRefs = new Map<string, HTMLButtonElement>();
 
   const enabledTabs = createMemo(() => local.tabs.filter((t) => !t.disabled));
+
+  const focusedKey = createMemo(() => {
+    const current = activeKey();
+    if (current && enabledTabs().some((t) => t.key === current)) return current;
+    return firstEnabledKey();
+  });
 
   const findNextEnabled = (currentKey: string, direction: 1 | -1): string | undefined => {
     const enabled = enabledTabs();
@@ -170,28 +208,34 @@ const Tabs = (props: TabsProps): JSX.Element => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    const current = activeKey();
+    const current = focusedKey();
     if (!current) return;
 
     let targetKey: string | undefined;
 
     switch (e.key) {
-      case 'ArrowRight':
+      case 'ArrowRight': {
         e.preventDefault();
         targetKey = findNextEnabled(current, 1);
         break;
-      case 'ArrowLeft':
+      }
+      case 'ArrowLeft': {
         e.preventDefault();
         targetKey = findNextEnabled(current, -1);
         break;
-      case 'Home':
+      }
+      case 'Home': {
         e.preventDefault();
-        targetKey = enabledTabs()[0]?.key;
+        const enabled = enabledTabs();
+        targetKey = enabled[0]?.key;
         break;
-      case 'End':
+      }
+      case 'End': {
         e.preventDefault();
-        targetKey = enabledTabs()[enabledTabs().length - 1]?.key;
+        const enabled = enabledTabs();
+        targetKey = enabled[enabled.length - 1]?.key;
         break;
+      }
     }
 
     if (targetKey) {
@@ -200,25 +244,19 @@ const Tabs = (props: TabsProps): JSX.Element => {
     }
   };
 
-  // ---- Content resolver ----
-
   const resolveContent = (content: JSX.Element | (() => JSX.Element)): JSX.Element => {
     return typeof content === 'function' ? (content as () => JSX.Element)() : content;
   };
 
-  // ---- ARIA IDs ----
-
-  const tabId = (key: string) => `tab-${key}`;
-  const panelId = (key: string) => `panel-${key}`;
-
-  // ---- Render ----
+  const tabId = (key: string) => `${instanceId}-tab-${key}`;
+  const panelId = (key: string) => `${instanceId}-panel-${key}`;
 
   return (
     <div {...divProps} class={twMerge(theme.root, local.class)}>
-      {/* Tab list */}
       <div
         role="tablist"
-        aria-label={mergedLabels().tabList}
+        aria-label={mergedAriaLabels().tabList}
+        aria-orientation="horizontal"
         class={twMerge(
           theme.tabList.base,
           theme.tabList.variant[variant()],
@@ -238,8 +276,8 @@ const Tabs = (props: TabsProps): JSX.Element => {
                 type="button"
                 aria-selected={isActive()}
                 aria-controls={panelId(tab.key)}
+                aria-disabled={tab.disabled || undefined}
                 tabindex={isActive() ? 0 : -1}
-                disabled={tab.disabled}
                 class={twMerge(
                   theme.tab.base,
                   variantTheme().base,
@@ -262,27 +300,27 @@ const Tabs = (props: TabsProps): JSX.Element => {
         </Show>
       </div>
 
-      {/* Tab panels */}
       <Show
         when={local.lazy}
         fallback={
           <For each={local.tabs}>
-            {(tab) => (
-              <div
-                id={panelId(tab.key)}
-                role="tabpanel"
-                aria-labelledby={tabId(tab.key)}
-                tabindex="0"
-                class={twMerge(
-                  theme.panel.base,
-                  theme.panel.variant[variant()],
-                  local.panelClass,
-                )}
-                hidden={tab.key !== activeKey()}
-              >
-                {resolveContent(tab.content)}
-              </div>
-            )}
+            {(tab) => {
+              const isActive = () => tab.key === activeKey();
+              return (
+                <div
+                  id={panelId(tab.key)}
+                  role="tabpanel"
+                  aria-labelledby={tabId(tab.key)}
+                  tabindex={isActive() ? 0 : undefined}
+                  class={twMerge(theme.panel.base, local.panelClass)}
+                  hidden={!isActive()}
+                >
+                  <Show when={isActive()} fallback={null}>
+                    {resolveContent(tab.content)}
+                  </Show>
+                </div>
+              );
+            }}
           </For>
         }
       >
@@ -295,12 +333,8 @@ const Tabs = (props: TabsProps): JSX.Element => {
                   id={panelId(activeTab().key)}
                   role="tabpanel"
                   aria-labelledby={tabId(activeTab().key)}
-                  tabindex="0"
-                  class={twMerge(
-                    theme.panel.base,
-                    theme.panel.variant[variant()],
-                    local.panelClass,
-                  )}
+                  tabindex={0}
+                  class={twMerge(theme.panel.base, local.panelClass)}
                 >
                   {resolveContent(activeTab().content)}
                 </div>

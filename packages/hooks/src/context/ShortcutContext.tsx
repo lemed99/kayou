@@ -1,10 +1,6 @@
 import { type JSX, type ParentComponent, createContext, createEffect, createMemo, on, onCleanup, useContext } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface ShortcutAction {
   id: string;
   label: string;
@@ -41,10 +37,6 @@ export interface ShortcutProviderProps {
   children: JSX.Element;
 }
 
-// ---------------------------------------------------------------------------
-// Combo utilities
-// ---------------------------------------------------------------------------
-
 const MODIFIER_ORDER = ['Ctrl', 'Alt', 'Shift', 'Meta'] as const;
 const MODIFIER_SET = new Set<string>(MODIFIER_ORDER);
 const RAW_MODIFIER_KEYS = new Set(['Control', 'Alt', 'Shift', 'Meta']);
@@ -58,8 +50,7 @@ export function normalizeCombo(combo: string): string {
 
   for (const part of parts) {
     const capitalized = part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-    // Map "Control" → "Ctrl"
-    const normalized = capitalized === 'Control' ? 'Ctrl' : capitalized;
+      const normalized = capitalized === 'Control' ? 'Ctrl' : capitalized;
     if (MODIFIER_SET.has(normalized)) {
       modifiers.push(normalized);
     } else {
@@ -67,7 +58,6 @@ export function normalizeCombo(combo: string): string {
     }
   }
 
-  // Sort modifiers in canonical order
   modifiers.sort(
     (a, b) => MODIFIER_ORDER.indexOf(a as (typeof MODIFIER_ORDER)[number]) - MODIFIER_ORDER.indexOf(b as (typeof MODIFIER_ORDER)[number]),
   );
@@ -76,7 +66,6 @@ export function normalizeCombo(combo: string): string {
 }
 
 export function comboFromEvent(e: KeyboardEvent): string | null {
-  // Ignore lone modifier presses
   if (RAW_MODIFIER_KEYS.has(e.key)) return null;
 
   const parts: string[] = [];
@@ -84,16 +73,11 @@ export function comboFromEvent(e: KeyboardEvent): string | null {
   if (e.altKey) parts.push('Alt');
   if (e.shiftKey) parts.push('Shift');
 
-  // Normalize key
   const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
   parts.push(key);
 
   return parts.join('+');
 }
-
-// ---------------------------------------------------------------------------
-// Persistence helpers
-// ---------------------------------------------------------------------------
 
 function loadBindings(namespace: string): Record<string, string> {
   try {
@@ -111,13 +95,9 @@ function saveBindings(namespace: string, bindings: Record<string, string>): void
     if (typeof localStorage === 'undefined') return;
     localStorage.setItem(`shortcuts:${namespace}`, JSON.stringify(bindings));
   } catch {
-    // Storage full or unavailable — silently ignore
+    // ignore
   }
 }
-
-// ---------------------------------------------------------------------------
-// Input detection
-// ---------------------------------------------------------------------------
 
 function isInputFocused(): boolean {
   if (typeof document === 'undefined') return false;
@@ -129,10 +109,6 @@ function isInputFocused(): boolean {
   return false;
 }
 
-// ---------------------------------------------------------------------------
-// Context
-// ---------------------------------------------------------------------------
-
 export const ShortcutContext = createContext<ShortcutContextValue>();
 
 export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) => {
@@ -142,19 +118,16 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
     props.namespace ? loadBindings(props.namespace) : {},
   );
 
-  // Build a reverse lookup: combo → action ID (for fast dispatch)
   const comboToActionId = createMemo(() => {
     const map = new Map<string, string>();
     for (const action of Object.values(registry)) {
       if (action.currentShortcut) {
-        // Last registration wins for duplicate combos
         map.set(action.currentShortcut, action.id);
       }
     }
     return map;
   });
 
-  // Conflict detection: combos mapped to 2+ action IDs
   const getConflicts = createMemo(() => {
     const comboActions = new Map<string, string[]>();
     for (const action of Object.values(registry)) {
@@ -163,7 +136,6 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
       existing.push(action.id);
       comboActions.set(action.currentShortcut, existing);
     }
-    // Only keep conflicts (2+ actions)
     const conflicts = new Map<string, string[]>();
     for (const [combo, ids] of comboActions) {
       if (ids.length > 1) conflicts.set(combo, ids);
@@ -171,10 +143,8 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
     return conflicts;
   });
 
-  // Reactive list of all actions
   const getActions = createMemo(() => Object.values(registry));
 
-  // Persist custom bindings when they change
   createEffect(
     on(
       () => ({ ...customBindings }),
@@ -187,7 +157,6 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
     ),
   );
 
-  // Global keydown listener
   createEffect(() => {
     if (typeof document === 'undefined') return;
 
@@ -211,7 +180,6 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
     onCleanup(() => document.removeEventListener('keydown', handleKeyDown));
   });
 
-  // API
   const register = (action: ShortcutAction): void => {
     const existing = registry[action.id];
     if (existing) {

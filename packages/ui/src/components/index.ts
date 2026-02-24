@@ -61,9 +61,13 @@ export {
   type ShortcutPanelProps,
 } from './ShortcutPanel';
 export {
+  DEFAULT_TABS_ARIA_LABELS,
+  /** @deprecated Use `DEFAULT_TABS_ARIA_LABELS` instead. */
   DEFAULT_TABS_LABELS,
   default as Tabs,
   type TabData,
+  type TabsAriaLabels,
+  /** @deprecated Use `TabsAriaLabels` instead. */
   type TabsLabels,
   type TabsProps,
   type TabSize,
