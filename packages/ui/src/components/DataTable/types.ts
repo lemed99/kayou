@@ -13,6 +13,7 @@ export type FilterOperator =
   | 'gte'
   | 'lte'
   | 'between'
+  | 'in'
   | 'isNull'
   | 'isNotNull'
   | ''; // to be able have new filter with no defaults
@@ -27,6 +28,7 @@ export type FilterFieldType =
   | 'selectSearch'
   | 'multiSelect'
   | 'datepicker'
+  | 'multidate'
   | 'dateRange';
 
 /**
@@ -99,6 +101,10 @@ export interface FilterConfig<T> {
   numberConfig?: NumberFilterConfig;
   /** Configuration for date inputs. */
   dateConfig?: DateFilterConfig;
+  /** Min values for multidate and dateRange */
+  min?: number;
+  /** Max vlaues for multidate and dateRange */
+  max?: number;
   /** Custom function to extract the value from a record. Uses key by default. */
   getValue?: (record: T) => unknown;
 }
@@ -124,7 +130,7 @@ export type FilterState = Map<string, ActiveFilter>;
  * Default operators by data type.
  */
 export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
-  string: ['contains', 'equal', 'notEqual', 'isNull', 'isNotNull'],
+  string: ['contains', 'equal', 'notEqual', 'isNull', 'isNotNull', 'in'],
   number: [
     'equal',
     'notEqual',
@@ -144,6 +150,7 @@ export const DEFAULT_OPERATORS: Record<FilterDataType, FilterOperator[]> = {
     'between',
     'isNull',
     'isNotNull',
+    'in',
   ],
   array: ['include', 'isNull', 'isNotNull'],
   boolean: ['equal', 'notEqual'],
@@ -164,6 +171,7 @@ export const OPERATOR_LABELS: Record<FilterOperator, string> = {
   between: 'between',
   isNull: 'is null',
   isNotNull: 'is not null',
+  in: 'in',
   '': '', // to be able have new filter with no defaults
 };
 

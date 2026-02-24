@@ -256,12 +256,12 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         <DatePicker
           type="range"
           value={{
-            startDate: dateRangeValues()[0],
-            endDate: dateRangeValues()[1],
+            startDate: { date: dateRangeValues()[0] },
+            endDate: { date: dateRangeValues()[1] },
           }}
           onChange={(v) => {
             if (v.startDate && v.endDate) {
-              props.onChange([v.startDate, v.endDate]);
+              props.onChange([v.startDate.date, v.endDate.date]);
             } else {
               props.onChange(null);
             }
@@ -302,7 +302,7 @@ interface FilterRowProps<T> {
   filter: DraftFilter;
   filterConfigs: FilterConfig<T>[];
   /** Keys already used by other draft filter rows. */
-  usedKeys: Set<string>;
+
   // onColumnChange: (key: string) => void;
   onOperatorChange: (operator: FilterOperator) => void;
   onValueChange: (value: FilterValue) => void;
@@ -442,19 +442,17 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const [isOpen, setIsOpen] = createSignal(false);
 
   // Track which columns are already used by draft rows
-  const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
+  // const usedKeys = createMemo(() => new Set(draftFilters().map((f) => f.key)));
 
   // Track if all column have been used
-  const maxColumns = () => props.filterConfigs.length;
-  const allKeysAreUsed = () => draftFilters().length === maxColumns();
+  // const maxColumns = () => props.filterConfigs.length;
+  // const allKeysAreUsed = () => draftFilters().length === maxColumns();
 
   const columnOptions = createMemo<Option[]>(() =>
-    props.filterConfigs
-      .filter((fc) => !usedKeys().has(fc.key))
-      .map((fc) => ({
-        value: fc.key,
-        label: fc.label,
-      })),
+    props.filterConfigs.map((fc) => ({
+      value: fc.key,
+      label: fc.label,
+    })),
   );
 
   // Sync draft filters when popover opens
@@ -600,7 +598,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
                 <FilterRow
                   filter={filter()}
                   filterConfigs={props.filterConfigs}
-                  usedKeys={usedKeys()}
+                  // usedKeys={usedKeys()}
                   // onColumnChange={(key) => handleColumnChange(index, key)}
                   onOperatorChange={(op) => handleOperatorChange(index, op)}
                   onValueChange={(val) => handleValueChange(index, val)}
@@ -618,29 +616,28 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
 
       {/* Footer with actions */}
       <div class="flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-neutral-800">
-        <Show when={!allKeysAreUsed()}>
-          <Select
-            options={columnOptions()}
-            onSelect={(option) => {
-              if (option?.value) {
-                handleColumnChange(option.value);
-              }
-            }}
-            placeholder={a().column}
-            sizing="sm"
-            class=""
-            inputComponent={() => (
-              <button
-                type="button"
-                // onClick={handleAddFilter}
-                class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                <PlusIcon class="size-4" aria-hidden="true" />
-                {props.addFilterText || l().addFilter}
-              </button>
-            )}
-          />
-          {/* <button
+        <Select
+          options={columnOptions()}
+          onSelect={(option) => {
+            if (option?.value) {
+              handleColumnChange(option.value);
+            }
+          }}
+          placeholder={a().column}
+          sizing="sm"
+          class=""
+          inputComponent={() => (
+            <button
+              type="button"
+              // onClick={handleAddFilter}
+              class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              <PlusIcon class="size-4" aria-hidden="true" />
+              {props.addFilterText || l().addFilter}
+            </button>
+          )}
+        />
+        {/* <button
             type="button"
             onClick={handleAddFilter}
             class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
@@ -648,7 +645,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             <PlusIcon class="size-4" aria-hidden="true" />
             {props.addFilterText || l().addFilter}
           </button> */}
-        </Show>
 
         <div class="ml-auto flex items-center gap-2 justify-self-end">
           <Button size="sm" color="transparent" onClick={handleReset}>

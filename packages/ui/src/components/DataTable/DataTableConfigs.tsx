@@ -9,7 +9,6 @@ import {
   Trash01Icon,
   XIcon,
 } from '@kayou/icons';
-import { twMerge } from 'tailwind-merge';
 
 import Alert from '../Alert';
 import Button from '../Button';
@@ -44,15 +43,6 @@ export function DataTableConfigs(): JSX.Element {
     setEditingConfigId(id);
     setConfigNameEdit(config.name);
   };
-
-  // const handleChooseUpdate = () => {
-  //   const config = activeConfig();
-  //   const id = ctx.activeConfigId();
-  //   if (id && config) {
-  //     ctx.onUpdateConfig(id, config.name);
-  //   }
-  //   setDrawerOpen(false);
-  // };
 
   const handleSubmit = () => {
     const name = configName().trim();
@@ -215,7 +205,7 @@ export function DataTableConfigs(): JSX.Element {
             </div>
           </Show>
 
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-col gap-2">
             <Show
               when={ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null}
             >
@@ -227,16 +217,7 @@ export function DataTableConfigs(): JSX.Element {
               <Button
                 onClick={() => handleSaveNew()}
                 disabled={ctx.isAtLimit()}
-                class={twMerge(
-                  ctx.isDirty() &&
-                    !ctx.isAtLimit() &&
-                    ctx.activeConfigId() !== null &&
-                    'w-auto',
-                  ctx.isDirty() &&
-                    !ctx.isAtLimit() &&
-                    ctx.activeConfigId() === null &&
-                    'w-full',
-                )}
+                class="w-auto"
                 color={
                   ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null
                     ? 'transparent'
@@ -280,22 +261,15 @@ export function DataTableConfigs(): JSX.Element {
   return (
     <Show when={ctx.configEnabled}>
       <div class="flex items-center justify-end gap-2">
-        {/* <Show when={ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)}>
-          <Button
-            size="sm"
-            icon={Save01Icon}
-            onClick={openSaveDrawer}
-            class="whitespace-nowrap"
-            data-config-save-trigger
-          >
-            {ctx.labels().saveConfiguration}
-          </Button>
-        </Show> */}
         <Popover
           content={configListContent}
           position="bottom-end"
           isOpen={listOpen()}
-          onOpenChange={setListOpen}
+          onOpenChange={(value) => {
+            setSaveMode('idle');
+            setConfigName('');
+            setListOpen(value);
+          }}
           aria-label={ctx.labels().configurations}
         >
           <Button

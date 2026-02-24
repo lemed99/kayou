@@ -453,6 +453,7 @@ function App() {
         export default function Example() {
           const [singleDate, setSingleDate] = createSignal({});
           const [rangeDate, setRangeDate] = createSignal({});
+          const [mutipleRangeDate, setMutipleRangeDate] = createSignal({});
           const [dateTime, setDateTime] = createSignal({});
 
           return (
@@ -486,6 +487,15 @@ function App() {
                   value={dateTime()}
                   onChange={setDateTime}
                   helperText="Select date and time"
+                />
+
+                {/* Multiple date ranges */}
+                <DatePicker
+                  type="multipleRange"
+                  locale="en-US"
+                  label="Date Ranges"
+                  value={mutipleRangeDate()}
+                  onChange={setMutipleRangeDate}
                 />
               </div>
             </DatePickerProvider>
