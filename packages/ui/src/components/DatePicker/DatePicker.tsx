@@ -73,6 +73,8 @@ export interface DatePickerAriaLabels {
   monthSelectorOpened: string;
   yearSelectorOpened: string;
   rangeSelectedForEdit: string;
+  startTime: string;
+  endTime: string;
 }
 
 export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
@@ -98,6 +100,8 @@ export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
   monthSelectorOpened: 'Month selector opened. Use arrow keys to navigate.',
   yearSelectorOpened: 'Year selector opened. Use arrow keys to navigate.',
   rangeSelectedForEdit: 'Range selected for edition',
+  startTime: 'Start time',
+  endTime: 'End time',
 };
 
 function generateId(): string {
@@ -1632,10 +1636,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 />
                 {/* Multi range list for multiple range */}
                 <Show when={datesObjectValue.multipleRanges}>
-                  <div class="space-y-2">
+                  <div class="space-y-2 border-t border-neutral-300 dark:border-neutral-800">
                     <For each={datesObjectValue.multipleRanges}>
                       {(range) => (
-                        <div class="flex items-center justify-between rounded-lg border border-neutral-400 p-1 pl-3 text-xs dark:border-neutral-700">
+                        <div class="flex items-center justify-between rounded-lg border border-neutral-300 p-1 pl-3 text-xs dark:border-neutral-800">
                           <span>{`${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}</span>
                           <button
                             class="inline-flex cursor-pointer items-center justify-center rounded-sm bg-red-200 p-1 text-red-800 dark:bg-red-700 dark:text-red-200"
@@ -1650,26 +1654,28 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 </Show>
                 {/* Time picker for single date */}
                 <Show when={showTime() && props.type === 'single'}>
-                  <TimePicker
-                    hour={hour}
-                    minute={minute}
-                    second={second}
-                    onHourChange={setHour}
-                    onMinuteChange={setMinute}
-                    onSecondChange={setSecond}
-                    onEscape={closeCalendar}
-                    format={timeFormat()}
-                    minuteStep={minuteStep()}
-                    secondStep={secondStep()}
-                    showSeconds={showSeconds()}
-                    ariaLabels={a()}
-                  />
+                  <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
+                    <TimePicker
+                      hour={hour}
+                      minute={minute}
+                      second={second}
+                      onHourChange={setHour}
+                      onMinuteChange={setMinute}
+                      onSecondChange={setSecond}
+                      onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                    />
+                  </div>
                 </Show>
                 {/* Time picker for range dates */}
                 <Show when={showTime() && props.type === 'range'}>
-                  <div class="flex justify-between">
+                  <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
                     <div class="flex flex-col gap-1">
-                      <span class="text-xs font-semibold">Start time</span>
+                      <span class="text-xs font-semibold">{a().startTime}</span>
                       <TimePicker
                         hour={() => startTime.hour}
                         minute={() => startTime.minute}
@@ -1685,8 +1691,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                         ariaLabels={a()}
                       />
                     </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-xs font-semibold">End time</span>
+                    <div class="flex flex-col gap-1 [&>div]:border-t-0 [&>div]:py-0">
+                      <span class="text-xs font-semibold">{a().endTime}</span>
                       <TimePicker
                         hour={() => endTime.hour}
                         minute={() => endTime.minute}

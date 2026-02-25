@@ -51,7 +51,8 @@ export interface DataTableLabels {
   save: string;
   saveAsNew: string;
   deleteConfiguration: string;
-  confirmDelete: string;
+  configDeleted: string;
+  undo: string;
   cancel: string;
   maxConfigsReached: string;
   configLimitReached: string;
@@ -100,7 +101,8 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   save: 'Save',
   saveAsNew: 'Save as new',
   deleteConfiguration: 'Delete',
-  confirmDelete: 'Confirm deletion?',
+  configDeleted: 'Configuration deleted',
+  undo: 'Undo',
   cancel: 'Cancel',
   maxConfigsReached: 'Maximum of 3 configurations reached',
   configLimitReached: 'Config limit of 3 reached',
@@ -973,6 +975,7 @@ export function DataTable<T extends Record<string, unknown>>(
         isAtLimit: configHook?.isAtLimit ?? (() => false),
         hasConfigs: configHook?.hasConfigs ?? (() => false),
         onSaveConfig: configHook?.saveConfig ?? (() => false),
+        restoreConfig: configHook?.restoreConfig ?? (() => false),
         onUpdateConfig: configHook?.updateConfig ?? (() => {}),
         onDeleteConfig: configHook?.deleteConfig ?? (() => {}),
         onActivateConfig: handleActivateConfig,

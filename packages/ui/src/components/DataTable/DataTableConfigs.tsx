@@ -1,8 +1,7 @@
-import { For, JSX, Show, createSignal } from 'solid-js';
+import { For, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
 
 import {
   AlertCircleIcon,
-  CheckCircleIcon,
   CheckIcon,
   Edit01Icon,
   Settings01Icon,
@@ -15,6 +14,7 @@ import Button from '../Button';
 import Popover from '../Popover';
 import TextInput from '../TextInput';
 import { useDataTableInternal } from './DataTableInternalContext';
+import { SavedTableConfig } from './types';
 import { MAX_CONFIGS } from './useDataTableConfigs';
 
 export function DataTableConfigs(): JSX.Element {
@@ -25,7 +25,14 @@ export function DataTableConfigs(): JSX.Element {
   const [configName, setConfigName] = createSignal('');
   const [configNameEdit, setConfigNameEdit] = createSignal('');
   const [listOpen, setListOpen] = createSignal(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = createSignal(false);
+  const [deleteAlertVisible, setDeleteAlertVisible] = createSignal(false);
+  const [configToRestore, setConfigToRestore] = createSignal<SavedTableConfig | null>(
+    null,
+  );
+  const [deleteAlertTimer, setDeleteTimer] = createSignal(0);
+
+  let undoInterval: NodeJS.Timeout;
+  let undoTimeout: NodeJS.Timeout;
 
   const activeConfig = () => {
     const id = ctx.activeConfigId();
@@ -76,12 +83,50 @@ export function DataTableConfigs(): JSX.Element {
     ctx.onUpdateConfig(currentConfig.id, currentConfig.name);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDeleteConfig = (id: string) => {
     if (id) {
+      setDeleteTimer(5);
+      setDeleteAlertVisible(true);
+      const config = ctx.getConfig(id);
+      if (config) {
+        setConfigToRestore(config);
+      }
       ctx.onDeleteConfig(id);
-      setDeleteConfirmOpen(false);
+
+      undoTimeout = setTimeout(() => {
+        setConfigToRestore(null);
+        setDeleteAlertVisible(false);
+        setDeleteTimer(0);
+      }, 5500);
     }
   };
+
+  const restoreConfig = () => {
+    if (configToRestore()) {
+      ctx.restoreConfig(configToRestore()!);
+      setConfigToRestore(null);
+      setDeleteAlertVisible(false);
+      setDeleteTimer(0);
+      return;
+    }
+  };
+
+  createEffect(() => {
+    undoInterval = setInterval(() => {
+      if (deleteAlertTimer() > 0) {
+        setDeleteTimer(deleteAlertTimer() - 1);
+      }
+    }, 1000);
+  });
+
+  onCleanup(() => {
+    if (undoInterval) {
+      clearInterval(undoInterval);
+    }
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+  });
 
   const handleActivate = (id: string | null) => {
     ctx.onActivateConfig(id);
@@ -100,6 +145,18 @@ export function DataTableConfigs(): JSX.Element {
           {ctx.labels().configLimitReached}
         </Alert>
       </Show>
+      <Show when={deleteAlertVisible()}>
+        <Alert color="warning" icon={AlertCircleIcon}>
+          <div>
+            <h5 class="mb-2 font-semibold">{ctx.labels().configDeleted}</h5>
+            <div class="flex justify-end">
+              <Button class="" size="sm" color="white" onClick={restoreConfig}>
+                {ctx.labels().undo} ({deleteAlertTimer()})s
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      </Show>
       <div class="min-w-[220px] space-y-2" data-config-list>
         <button
           type="button"
@@ -111,7 +168,7 @@ export function DataTableConfigs(): JSX.Element {
           }`}
         >
           <Show when={ctx.activeConfigId() === null}>
-            <CheckCircleIcon class="size-4 shrink-0" aria-hidden="true" />
+            <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
           </Show>
           <span class="flex-1">{ctx.labels().defaultConfiguration}</span>
         </button>
@@ -135,34 +192,27 @@ export function DataTableConfigs(): JSX.Element {
                       class={`flex flex-1 items-center gap-2 px-3 py-2 text-left text-sm`}
                     >
                       <Show when={ctx.activeConfigId() === config.id}>
-                        <CheckCircleIcon class="size-4 shrink-0" aria-hidden="true" />
+                        <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
                       </Show>
                       <span class="flex-1 truncate">{config.name}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleEditConfig(config.id)}
-                      class="shrink-0 cursor-pointer p-2 text-white hover:text-yellow-600"
+                      class="shrink-0 cursor-pointer p-2 text-neutral-950 hover:text-yellow-600 dark:text-neutral-100"
                       aria-label={`Edit ${config.name}`}
                     >
                       <Edit01Icon class="size-4" aria-hidden="true" />
                     </button>
-                    <Popover
-                      content={deleteConfirmContent({ configId: config.id })}
-                      position="top-start"
-                      isOpen={deleteConfirmOpen()}
-                      onOpenChange={setDeleteConfirmOpen}
-                      aria-label={ctx.labels().confirmDelete}
-                      floatingClass="z-[100]"
-                    >
-                      <Button
-                        size="sm"
-                        color="transparent"
-                        class="border-0 hover:text-red-500"
-                        icon={Trash01Icon}
-                        aria-label={ctx.labels().deleteConfiguration}
-                      />
-                    </Popover>
+
+                    <Button
+                      size="sm"
+                      color="transparent"
+                      class="border-0 hover:text-red-500"
+                      icon={Trash01Icon}
+                      aria-label={ctx.labels().deleteConfiguration}
+                      onClick={() => handleDeleteConfig(config.id)}
+                    />
                   </>
                 }
               >
@@ -239,22 +289,6 @@ export function DataTableConfigs(): JSX.Element {
             </Button> */}
         </div>
       </Show>
-    </div>
-  );
-
-  const deleteConfirmContent = (props: { configId: string }) => (
-    <div class="p-3" data-config-delete-confirm>
-      <p class="mb-3 text-sm text-neutral-700 dark:text-neutral-300">
-        {ctx.labels().confirmDelete}
-      </p>
-      <div class="flex items-center justify-end gap-2">
-        <Button size="xs" color="transparent" onClick={() => setDeleteConfirmOpen(false)}>
-          {ctx.labels().cancel}
-        </Button>
-        <Button size="xs" color="danger" onClick={() => handleDelete(props.configId)}>
-          {ctx.labels().deleteConfiguration}
-        </Button>
-      </div>
     </div>
   );
 

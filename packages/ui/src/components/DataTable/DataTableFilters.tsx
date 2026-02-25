@@ -45,6 +45,8 @@ export interface DataTableFiltersLabels {
   search: string;
   selectDate: string;
   selectRange: string;
+  selectDates: string;
+  selectRanges: string;
   noResultsFound: string;
   noFiltersApplied: string;
   and: string;
@@ -65,6 +67,8 @@ export const DEFAULT_DATA_TABLE_FILTERS_LABELS: DataTableFiltersLabels = {
   search: 'Search',
   selectDate: 'Select a date',
   selectRange: 'Select a range',
+  selectDates: 'Select dates',
+  selectRanges: 'Select ranges',
   noResultsFound: 'No results found',
   noFiltersApplied: 'No filters applied',
   and: 'And',
@@ -120,13 +124,57 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
     return '';
   });
 
-  const isDateType = createMemo(
-    () =>
-      props.config.fieldType === 'datepicker' || props.config.fieldType === 'dateRange',
-  );
+  const multipleDatesValue = createMemo((): string[] => {
+    const value = props.filter.value;
+    if (Array.isArray(value)) {
+      const finalValue: string[] = [];
+      const toStr = (d: unknown): string => {
+        if (d instanceof Date) return d.toISOString().split('T')[0];
+        if (typeof d === 'string') return d;
+        return '';
+      };
+
+      for (const item of value) {
+        finalValue.push(toStr(item));
+      }
+
+      return finalValue;
+    }
+
+    return [''];
+  });
 
   const isEmptyOrNotEmptyOperators = createMemo(
     () => props.filter.operator === 'isNull' || props.filter.operator === 'isNotNull',
+  );
+
+  const isSingleDate = createMemo(
+    () =>
+      props.config.fieldType === 'datepicker' &&
+      props.filter.operator !== 'between' &&
+      props.filter.operator !== 'include' &&
+      !isEmptyOrNotEmptyOperators(),
+  );
+
+  const isSingleDateForArray = createMemo(
+    () =>
+      props.config.fieldType === 'datepicker' &&
+      props.filter.operator === 'include' &&
+      props.config.dataType === 'array' &&
+      !isEmptyOrNotEmptyOperators(),
+  );
+  const isDateRange = createMemo(
+    () =>
+      props.config.fieldType === 'datepicker' &&
+      props.filter.operator === 'between' &&
+      !isEmptyOrNotEmptyOperators(),
+  );
+  const isMultiDate = createMemo(
+    () =>
+      props.config.fieldType === 'datepicker' &&
+      props.filter.operator !== 'between' &&
+      props.filter.operator === 'in' &&
+      !isEmptyOrNotEmptyOperators(),
   );
 
   return (
@@ -137,6 +185,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         </span>
       }
     >
+      {/* Text input */}
       <Match when={props.config.fieldType === 'text' && !isEmptyOrNotEmptyOperators()}>
         <TextInput
           value={(props.filter.value as string) || ''}
@@ -144,10 +193,10 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.enterValue}
           sizing="sm"
           class="flex-1"
-          disabled={props.filter.value === 'true'}
         />
       </Match>
 
+      {/* Empty and notEmpty field */}
       <Match when={isEmptyOrNotEmptyOperators()}>
         <TextInput
           value={'true'}
@@ -245,14 +294,21 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         />
       </Match>
 
-      {/* Date types: operator determines single vs range input */}
       <Match
-        when={
-          isDateType() &&
-          props.filter.operator === 'between' &&
-          !isEmptyOrNotEmptyOperators()
-        }
+        when={props.config.fieldType === 'multiSelect' && !isEmptyOrNotEmptyOperators()}
       >
+        <MultiSelect
+          options={props.config.options || []}
+          values={(props.filter.value as string[]) || []}
+          onMultiSelect={(options) => props.onChange(options?.map((o) => o.value) || [])}
+          placeholder={props.config.placeholder || props.labels.select}
+          sizing="sm"
+          class="flex-1"
+        />
+      </Match>
+
+      {/* Date types: operator determines single vs range input */}
+      <Match when={isDateRange()}>
         <DatePicker
           type="range"
           value={{
@@ -272,13 +328,36 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         />
       </Match>
 
-      <Match
-        when={
-          isDateType() &&
-          props.filter.operator !== 'between' &&
-          !isEmptyOrNotEmptyOperators()
-        }
-      >
+      <Match when={isMultiDate()}>
+        <DatePicker
+          type="multiple"
+          value={{
+            multipleDates: multipleDatesValue(),
+          }}
+          onChange={(v) => {
+            if (v.multipleDates) {
+              props.onChange(v.multipleDates);
+            } else {
+              props.onChange(null);
+            }
+          }}
+          placeholder={props.config.placeholder || props.labels.selectDates}
+          locale={props.config.dateConfig?.locale || 'en'}
+          inputClass="min-w-[200px] flex-1"
+        />
+      </Match>
+
+      <Match when={isSingleDate()}>
+        <DatePicker
+          type="single"
+          value={{ date: singleDateValue() }}
+          onChange={(v) => props.onChange(v.date || null)}
+          placeholder={props.config.placeholder || props.labels.selectDate}
+          locale={props.config.dateConfig?.locale || 'en'}
+          inputClass="min-w-[150px] flex-1"
+        />
+      </Match>
+      <Match when={isSingleDateForArray()}>
         <DatePicker
           type="single"
           value={{ date: singleDateValue() }}
@@ -470,27 +549,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     setIsOpen(true);
   };
 
-  // const handleAddFilter = () => {
-  //   // Pick the first unused column
-  //   const currentUsedKeys = usedKeys();
-  //   const availableConfig = props.filterConfigs.find(
-  //     (fc) => !currentUsedKeys.has(fc.key),
-  //   );
-  //   if (!availableConfig) return;
-
-  //   // const operators = props.getOperators(availableConfig.key);
-  //   // const defaultOperator = availableConfig.defaultOperator || operators[0] || 'equal';
-
-  //   setDraftFilters((prev) => [
-  //     ...prev,
-  //     {
-  //       key: '',
-  //       operator: '',
-  //       value: null,
-  //     },
-  //   ]);
-  // };
-
   const handleColumnChange = (newKey: string) => {
     const config = props.filterConfigs.find((fc) => fc.key === newKey);
     if (!config) return;
@@ -588,18 +646,9 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           <Index each={draftFilters()}>
             {(filter, index) => (
               <>
-                {/* <Show when={index > 0}>
-                  <div class="flex items-center py-1">
-                    <span class="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                      {l().and.toUpperCase()}
-                    </span>
-                  </div>
-                </Show> */}
                 <FilterRow
                   filter={filter()}
                   filterConfigs={props.filterConfigs}
-                  // usedKeys={usedKeys()}
-                  // onColumnChange={(key) => handleColumnChange(index, key)}
                   onOperatorChange={(op) => handleOperatorChange(index, op)}
                   onValueChange={(val) => handleValueChange(index, val)}
                   onRemove={() => handleRemoveFilter(index)}
@@ -637,14 +686,6 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             </button>
           )}
         />
-        {/* <button
-            type="button"
-            onClick={handleAddFilter}
-            class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            <PlusIcon class="size-4" aria-hidden="true" />
-            {props.addFilterText || l().addFilter}
-          </button> */}
 
         <div class="ml-auto flex items-center gap-2 justify-self-end">
           <Button size="sm" color="transparent" onClick={handleReset}>

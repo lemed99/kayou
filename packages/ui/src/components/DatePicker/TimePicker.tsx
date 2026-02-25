@@ -109,7 +109,7 @@ const TimePicker = (props: TimePickerProps) => {
   return (
     <div
       ref={setTimePickerRef}
-      class="flex items-center justify-center gap-2 border-t border-neutral-300 py-3 dark:border-neutral-800"
+      class="flex items-center justify-center gap-2"
       role="group"
       aria-label={props.ariaLabels.timePicker}
     >
