@@ -1,6 +1,7 @@
 import {
   Accessor,
   For,
+  Index,
   JSX,
   Show,
   createEffect,
@@ -19,11 +20,18 @@ import { type Option } from '../../shared';
 import HelperText from '../HelperText';
 import Label from '../Label';
 import { TextInputProps } from '../TextInput';
+import { DynamicVirtualList, type DynamicVirtualListHandle } from '../DynamicVirtualList';
 import { VirtualList } from '../VirtualList';
 import {
   CTA,
   InfiniteScrollLoader,
+  type VirtualGroupItem,
+  buildVirtualGroupItems,
   getScrollProgress,
+  groupHeaderClass,
+  groupOptions,
+  groupSpacerClass,
+  hasGroups,
   optionsContainerClass,
 } from './selectUtils';
 
@@ -146,20 +154,51 @@ const useSelect = <T extends MergedSelectProps>(
     }
   });
 
+  let dynamicVirtualHandle: DynamicVirtualListHandle | undefined;
+  // Reverse lookup map: flatIndex (option index) → virtual item index.
+  // Maintained by Layout's virtualItems memo so scrollToHighlightedOption
+  // doesn't need to rebuild the list on every arrow key press.
+  let flatToVirtualIndex: Map<number, number> | undefined;
+
   const scrollToHighlightedOption = (index: number) => {
     const container = optionsContainerRef();
     if (!container) return;
 
-    const rowHeight = props.optionRowHeight || 32; // 32 because it is the rowHeight we currently use
+    // For non-virtual mode, use DOM-based scrolling so group headers are
+    // accounted for automatically.
+    if (!props.optionRowHeight) {
+      const options = filteredOptions();
+      const option = options[index];
+      if (!option) return;
+      const optionId = `${listboxId}-option-${option.value}`;
+      const el = container.querySelector(`[id="${CSS.escape(optionId)}"]`);
+      if (el) {
+        el.scrollIntoView({ block: 'nearest' });
+        return;
+      }
+    }
+
+    // Grouped virtual scroll: use DynamicVirtualList handle which knows
+    // actual measured row heights (headers, spacers, options differ).
+    if (dynamicVirtualHandle && flatToVirtualIndex) {
+      const virtualIdx = flatToVirtualIndex.get(index);
+      if (virtualIdx !== undefined) {
+        dynamicVirtualHandle.scrollToIndex(virtualIdx);
+      }
+      return;
+    }
+
+    // Non-grouped virtual scroll: fixed row height calculation.
+    const rowHeight = props.optionRowHeight || 32;
     const containerHeight = container.clientHeight;
-    const scrollTop = container.scrollTop;
+    const currentScrollTop = container.scrollTop;
 
     const optionTop = index * rowHeight;
     const optionBottom = optionTop + rowHeight;
 
-    if (optionTop < scrollTop) {
+    if (optionTop < currentScrollTop) {
       container.scrollTop = index * rowHeight;
-    } else if (optionBottom > scrollTop + containerHeight) {
+    } else if (optionBottom > currentScrollTop + containerHeight) {
       const rowsVisible = Math.floor(containerHeight / rowHeight);
       const targetIndex = index - rowsVisible + 1;
       container.scrollTop = Math.max(0, targetIndex * rowHeight);
@@ -258,6 +297,8 @@ const useSelect = <T extends MergedSelectProps>(
   });
 
   createEffect(() => {
+    if (!isOpen()) return;
+
     const handleClickOutside = (event: PointerEvent) => {
       if (
         refs.floating() &&
@@ -270,12 +311,10 @@ const useSelect = <T extends MergedSelectProps>(
     };
 
     document.addEventListener('pointerdown', handleClickOutside);
-
-    onCleanup(() => {
-      document.removeEventListener('pointerdown', handleClickOutside);
-      clearTimeout(typeaheadTimeout);
-    });
+    onCleanup(() => document.removeEventListener('pointerdown', handleClickOutside));
   });
+
+  onCleanup(() => clearTimeout(typeaheadTimeout));
 
   createEffect(() => {
     if (type === 'selectWithSearch' || type === 'multiSelect') {
@@ -486,11 +525,85 @@ const useSelect = <T extends MergedSelectProps>(
     }
   };
 
+  const handleGroupToggle = (groupOpts: Option[]) => {
+    if (type !== 'multiSelect') return;
+    const current = selectedOptions();
+    const enabled = groupOpts.filter((o) => !o.disabled);
+    const allSelected = enabled.every((o) => current.some((s) => s.value === o.value));
+
+    let newSelected: Option[];
+    if (allSelected) {
+      const groupValues = new Set(enabled.map((o) => o.value));
+      newSelected = current.filter((o) => !groupValues.has(o.value));
+    } else {
+      const currentValues = new Set(current.map((o) => o.value));
+      const toAdd = enabled.filter((o) => !currentValues.has(o.value));
+      newSelected = [...current, ...toAdd];
+    }
+
+    setSelectedOptions(newSelected);
+    props.onMultiSelect?.(newSelected);
+  };
+
   const Layout = (layoutProps: {
     inputComponent: JSX.Element;
     optionsComponent: (option: Option, index: Accessor<number>) => JSX.Element;
     preOptionsComponent?: JSX.Element;
+    groupHeaderComponent?: (group: string, options: Option[], headerId: string) => JSX.Element;
+    groupSpacerClass?: string;
   }) => {
+    const grouped = createMemo(() => hasGroups(filteredOptions()));
+
+    const virtualItems = createMemo<VirtualGroupItem[]>(() => {
+      const opts = filteredOptions();
+      if (!grouped()) {
+        flatToVirtualIndex = undefined;
+        return opts.map((o, i) => ({ _type: 'option' as const, option: o, flatIndex: i }));
+      }
+      const items = buildVirtualGroupItems(opts, listboxId);
+      // Build reverse lookup for scrollToHighlightedOption
+      const lookup = new Map<number, number>();
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item._type === 'option') {
+          lookup.set(item.flatIndex, i);
+        }
+      }
+      flatToVirtualIndex = lookup;
+      return items;
+    });
+
+    const renderVirtualItem = (item: VirtualGroupItem) => {
+      if (item._type === 'spacer') {
+        return (
+          <div role="separator" class={layoutProps.groupSpacerClass ?? groupSpacerClass} />
+        );
+      }
+      if (item._type === 'header') {
+        return (
+          <Show
+            when={layoutProps.groupHeaderComponent}
+            fallback={
+              <div
+                id={item.headerId}
+                role="presentation"
+                class={groupHeaderClass}
+              >
+                {item.group}
+              </div>
+            }
+          >
+            {layoutProps.groupHeaderComponent!(
+              item.group,
+              item.options,
+              item.headerId,
+            )}
+          </Show>
+        );
+      }
+      return layoutProps.optionsComponent(item.option, () => item.flatIndex);
+    };
+
     return (
       <div class="w-full">
         <div class="relative w-full">
@@ -544,41 +657,132 @@ const useSelect = <T extends MergedSelectProps>(
                         }
                       }}
                     >
-                      <For
-                        each={filteredOptions()}
+                      <Show
+                        when={grouped()}
+                        fallback={
+                          <For
+                            each={filteredOptions()}
+                            fallback={
+                              <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                                {selectLabels().noResults}
+                              </div>
+                            }
+                          >
+                            {layoutProps.optionsComponent}
+                          </For>
+                        }
+                      >
+                        {(() => {
+                          const groups = createMemo(() => groupOptions(filteredOptions()));
+                          return (
+                            <Show
+                              when={filteredOptions().length > 0}
+                              fallback={
+                                <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                                  {selectLabels().noResults}
+                                </div>
+                              }
+                            >
+                              <Index each={groups()}>
+                                {(entry, groupIdx) => (
+                                  <>
+                                    <Show when={groupIdx > 0}>
+                                      <div role="separator" class={layoutProps.groupSpacerClass ?? groupSpacerClass} />
+                                    </Show>
+                                    <Show
+                                      when={entry().group !== null}
+                                      fallback={
+                                        <For each={entry().options}>
+                                          {layoutProps.optionsComponent}
+                                        </For>
+                                      }
+                                    >
+                                      <div
+                                        role="group"
+                                        aria-labelledby={`${listboxId}-group-${groupIdx}`}
+                                      >
+                                        <Show
+                                          when={layoutProps.groupHeaderComponent}
+                                          fallback={
+                                            <div
+                                              id={`${listboxId}-group-${groupIdx}`}
+                                              role="presentation"
+                                              class={groupHeaderClass}
+                                            >
+                                              {entry().group}
+                                            </div>
+                                          }
+                                        >
+                                          {layoutProps.groupHeaderComponent!(
+                                            entry().group!,
+                                            entry().options,
+                                            `${listboxId}-group-${groupIdx}`,
+                                          )}
+                                        </Show>
+                                        <For each={entry().options}>
+                                          {layoutProps.optionsComponent}
+                                        </For>
+                                      </div>
+                                    </Show>
+                                  </>
+                                )}
+                              </Index>
+                            </Show>
+                          );
+                        })()}
+                      </Show>
+                      <InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />
+                    </div>
+                  }
+                >
+                  <Show
+                    when={grouped()}
+                    fallback={
+                      <VirtualList
+                        items={virtualItems}
+                        rootHeight={200}
+                        rowHeight={props.optionRowHeight!}
+                        overscanCount={3}
+                        setContainerRef={setOptionsContainerRef}
+                        minWidth={props.withSearch ? 210 : undefined}
+                        id={listboxId}
+                        role="listbox"
+                        aria-multiselectable={type === 'multiSelect' ? true : undefined}
+                        aria-label={props.label || selectAriaLabels().selectOptions}
+                        loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
+                        setScrollPosition={setScrollTop}
                         fallback={
                           <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                             {selectLabels().noResults}
                           </div>
                         }
                       >
-                        {layoutProps.optionsComponent}
-                      </For>
-                      <InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />
-                    </div>
-                  }
-                >
-                  <VirtualList
-                    items={filteredOptions}
-                    rootHeight={200}
-                    rowHeight={props.optionRowHeight!}
-                    overscanCount={3}
-                    setContainerRef={setOptionsContainerRef}
-                    minWidth={props.withSearch ? 210 : undefined}
-                    id={listboxId}
-                    role="listbox"
-                    aria-multiselectable={type === 'multiSelect' ? true : undefined}
-                    aria-label={props.label || selectAriaLabels().selectOptions}
-                    loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
-                    setScrollPosition={setScrollTop}
-                    fallback={
-                      <div class="whitespace-nowrap px-2 py-1.5 text-sm">
-                        {selectLabels().noResults}
-                      </div>
+                        {(item) => renderVirtualItem(item)}
+                      </VirtualList>
                     }
                   >
-                    {layoutProps.optionsComponent}
-                  </VirtualList>
+                    <DynamicVirtualList
+                      items={virtualItems}
+                      rootHeight={200}
+                      estimatedRowHeight={props.optionRowHeight!}
+                      overscanCount={3}
+                      setContainerRef={setOptionsContainerRef}
+                      id={listboxId}
+                      role="listbox"
+                      aria-multiselectable={type === 'multiSelect' ? true : undefined}
+                      aria-label={props.label || selectAriaLabels().selectOptions}
+                      loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
+                      setScrollPosition={setScrollTop}
+                      fallback={
+                        <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                          {selectLabels().noResults}
+                        </div>
+                      }
+                      ref={(handle) => { dynamicVirtualHandle = handle; }}
+                    >
+                      {(item) => renderVirtualItem(item)}
+                    </DynamicVirtualList>
+                  </Show>
                 </Show>
                 <CTA cta={props.cta} />
               </div>
@@ -608,6 +812,7 @@ const useSelect = <T extends MergedSelectProps>(
     searchInputId,
     handleKeyDown,
     handleOptionClick,
+    handleGroupToggle,
     handleSearchChange,
     handleInputClick,
     searchRef,

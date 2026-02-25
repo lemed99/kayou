@@ -1,8 +1,10 @@
 import { JSX, Show, splitProps } from 'solid-js';
 
+import { twMerge } from 'tailwind-merge';
+
 import { ClearContentButton, type Option } from '../../shared';
 import TextInput, { type TextInputProps } from '../TextInput';
-import { OptionLabel, optionClass } from './selectUtils';
+import { OptionLabel, groupedOptionIndent, optionClass } from './selectUtils';
 import useSelect, { type SelectAriaLabels, type SelectLabels } from './useSelect';
 
 export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
@@ -129,7 +131,10 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
           role="option"
           aria-selected={selectedOption()?.value === option.value}
           aria-disabled={option.disabled || undefined}
-          class={optionClass(option, highlightedOption())}
+          class={twMerge(
+            optionClass(option, highlightedOption()),
+            option.group != null && groupedOptionIndent,
+          )}
           onClick={() => handleOptionClick(option)}
           onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >

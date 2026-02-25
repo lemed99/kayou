@@ -86,15 +86,12 @@ export function DynamicVirtualList<
       resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (entry) {
-          const newWidth = entry.target.clientWidth;
-          const newHeight = entry.target.clientHeight;
-
-          if (newWidth !== contentWidth()) {
-            setContentWidth(newWidth);
-          }
-          if (newHeight !== contentHeight()) {
-            setContentHeight(newHeight);
-          }
+          // Defer to break the synchronous ResizeObserver → layout → ResizeObserver loop.
+          // SolidJS signals skip notification if the value hasn't changed.
+          requestAnimationFrame(() => {
+            setContentWidth(entry.target.clientWidth);
+            setContentHeight(entry.target.clientHeight);
+          });
         }
       });
       resizeObserver.observe(el);

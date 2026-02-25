@@ -1,10 +1,11 @@
 import { JSX, createEffect, createSignal, splitProps } from 'solid-js';
 
 import { type BackgroundScrollBehavior } from '@kayou/hooks';
+import { twMerge } from 'tailwind-merge';
 
 import { ChevronDownButton, type Option } from '../../shared';
 import TextInput, { TextInputProps } from '../TextInput';
-import { OptionLabel, optionClass } from './selectUtils';
+import { OptionLabel, groupedOptionIndent, optionClass } from './selectUtils';
 import useSelect from './useSelect';
 
 /**
@@ -142,7 +143,10 @@ export default function Select(props: SelectProps): JSX.Element {
           role="option"
           aria-selected={selectedOption()?.value === option.value}
           aria-disabled={option.disabled || undefined}
-          class={optionClass(option, highlightedOption())}
+          class={twMerge(
+            optionClass(option, highlightedOption()),
+            option.group != null && groupedOptionIndent,
+          )}
           onClick={() => handleOptionClick(option)}
           onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >

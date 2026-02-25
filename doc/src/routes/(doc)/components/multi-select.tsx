@@ -159,6 +159,7 @@ export default function MultiSelectPage() {
             { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
             { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
             { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+            { name: 'group', type: 'string', default: '-', description: 'Optional group name. Options with the same group render under a shared header.' },
           ],
         },
         {
@@ -219,6 +220,36 @@ export default function MultiSelectPage() {
                 label="Countries"
                 labels={{ searchPlaceholder: "Search countries..." }}
                 placeholder="Select countries"
+              />
+
+              {/* Grouped options */}
+              <MultiSelect
+                options={[
+                  { value: 'react', label: 'React', group: 'JavaScript' },
+                  { value: 'solid', label: 'SolidJS', group: 'JavaScript' },
+                  { value: 'vue', label: 'Vue', group: 'JavaScript' },
+                  { value: 'django', label: 'Django', group: 'Python' },
+                  { value: 'flask', label: 'Flask', group: 'Python' },
+                  { value: 'rails', label: 'Rails', group: 'Ruby' },
+                ]}
+                onMultiSelect={() => {}}
+                label="Grouped Frameworks"
+                helperText="Frameworks grouped by language"
+                placeholder="Select frameworks"
+              />
+
+              {/* Grouped options with virtual scroll */}
+              <MultiSelect
+                options={[
+                  ...['React', 'SolidJS', 'Vue', 'Angular', 'Svelte', 'Preact', 'Lit', 'Qwik'].map(f => ({ value: f.toLowerCase(), label: f, group: 'JavaScript' })),
+                  ...['Django', 'Flask', 'FastAPI', 'Tornado', 'Pyramid', 'Bottle', 'Sanic', 'Starlette'].map(f => ({ value: f.toLowerCase(), label: f, group: 'Python' })),
+                  ...['Rails', 'Sinatra', 'Hanami', 'Roda', 'Grape', 'Padrino'].map(f => ({ value: f.toLowerCase(), label: f, group: 'Ruby' })),
+                ]}
+                onMultiSelect={() => {}}
+                label="Virtualized Groups"
+                helperText="Grouped + virtual scroll"
+                placeholder="Select frameworks"
+                optionRowHeight={32}
               />
 
               {/* Disabled options */}

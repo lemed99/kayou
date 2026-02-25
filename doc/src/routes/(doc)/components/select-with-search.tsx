@@ -184,6 +184,7 @@ export default function SelectWithSearchPage() {
             { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
             { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
             { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+            { name: 'group', type: 'string', default: '-', description: 'Optional group name. Options with the same group render under a shared header.' },
           ],
         },
         {
@@ -226,6 +227,40 @@ export default function SelectWithSearchPage() {
                 onSelect={(opt) => {}}
                 placeholder="Search countries..."
                 label="Country"
+                autoFillSearchKey
+              />
+
+              {/* Grouped options */}
+              <SelectWithSearch
+                options={[
+                  { value: 'us', label: 'United States', group: 'Americas' },
+                  { value: 'ca', label: 'Canada', group: 'Americas' },
+                  { value: 'br', label: 'Brazil', group: 'Americas' },
+                  { value: 'uk', label: 'United Kingdom', group: 'Europe' },
+                  { value: 'de', label: 'Germany', group: 'Europe' },
+                  { value: 'fr', label: 'France', group: 'Europe' },
+                  { value: 'jp', label: 'Japan', group: 'Asia' },
+                  { value: 'au', label: 'Australia', group: 'Oceania' },
+                ]}
+                onSelect={(opt) => {}}
+                placeholder="Search countries..."
+                label="Grouped Countries"
+                helperText="Countries grouped by continent"
+                autoFillSearchKey
+              />
+
+              {/* Grouped options with virtual scroll */}
+              <SelectWithSearch
+                options={[
+                  ...['United States', 'Canada', 'Brazil', 'Mexico', 'Argentina', 'Chile', 'Colombia', 'Peru'].map(c => ({ value: c.toLowerCase().replace(/ /g, '-'), label: c, group: 'Americas' })),
+                  ...['United Kingdom', 'Germany', 'France', 'Italy', 'Spain', 'Netherlands', 'Sweden', 'Poland'].map(c => ({ value: c.toLowerCase().replace(/ /g, '-'), label: c, group: 'Europe' })),
+                  ...['Japan', 'China', 'India', 'South Korea', 'Thailand', 'Vietnam', 'Indonesia', 'Philippines'].map(c => ({ value: c.toLowerCase().replace(/ /g, '-'), label: c, group: 'Asia' })),
+                ]}
+                onSelect={(opt) => {}}
+                placeholder="Search countries..."
+                label="Virtualized Groups"
+                helperText="Grouped + virtual scroll"
+                optionRowHeight={32}
                 autoFillSearchKey
               />
 
