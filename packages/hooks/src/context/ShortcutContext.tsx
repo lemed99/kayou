@@ -50,7 +50,7 @@ export function normalizeCombo(combo: string): string {
 
   for (const part of parts) {
     const capitalized = part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-      const normalized = capitalized === 'Control' ? 'Ctrl' : capitalized;
+    const normalized = capitalized === 'Control' ? 'Ctrl' : capitalized;
     if (MODIFIER_SET.has(normalized)) {
       modifiers.push(normalized);
     } else {

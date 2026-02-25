@@ -2,6 +2,12 @@ import { Show, createEffect, createSignal, onCleanup } from 'solid-js';
 
 import NumberInput from '../NumberInput';
 import Select from '../Select';
+import {
+  displayHour as formatDisplayHour,
+  getPeriod,
+  to24Hour,
+  zeroPad,
+} from '../TimePicker/timeUtils';
 import type { DatePickerAriaLabels } from './DatePicker';
 
 /**
@@ -24,6 +30,11 @@ export interface TimePickerProps {
   ariaLabels: DatePickerAriaLabels;
 }
 
+const periodOptions = [
+  { value: 'AM', label: 'AM' },
+  { value: 'PM', label: 'PM' },
+];
+
 /**
  * Internal time picker component for DatePicker.
  * Uses NumberInput components for hour, minute, and second selection.
@@ -34,40 +45,13 @@ const TimePicker = (props: TimePickerProps) => {
 
   // Update period when hour changes
   createEffect(() => {
-    setPeriod(props.hour() >= 12 ? 'PM' : 'AM');
+    setPeriod(getPeriod(props.hour()));
   });
-
-  const periodOptions = [
-    { value: 'AM', label: 'AM' },
-    { value: 'PM', label: 'PM' },
-  ];
-
-  // Get display hour for 12h format (12 instead of 0), zero-padded
-  const displayHour = (): string => {
-    if (is12h()) {
-      const h = props.hour() % 12 || 12;
-      return h.toString().padStart(2, '0');
-    }
-    return props.hour().toString().padStart(2, '0');
-  };
-
-  const displayMinute = (): string => props.minute().toString().padStart(2, '0');
-  const displaySecond = (): string => props.second().toString().padStart(2, '0');
 
   const handleHourChange = (num: number | null) => {
     if (num === null) return;
     if (is12h()) {
-      // Clamp to valid 12h range (1-12)
-      const clamped = Math.max(1, Math.min(12, num));
-      // Convert 12h to 24h: 12 AM = 0, 12 PM = 12, 1-11 AM = 1-11, 1-11 PM = 13-23
-      const isPM = period() === 'PM';
-      let hour24: number;
-      if (clamped === 12) {
-        hour24 = isPM ? 12 : 0;
-      } else {
-        hour24 = isPM ? clamped + 12 : clamped;
-      }
-      props.onHourChange(hour24);
+      props.onHourChange(to24Hour(num, period()));
     } else {
       props.onHourChange(Math.max(0, Math.min(23, num)));
     }
@@ -115,7 +99,7 @@ const TimePicker = (props: TimePickerProps) => {
     >
       <div class="flex w-fit items-center justify-center gap-0.5 rounded-lg border border-neutral-200 dark:border-neutral-800">
         <NumberInput
-          value={displayHour()}
+          value={formatDisplayHour(props.hour(), props.format)}
           sizing="sm"
           onValueChange={handleHourChange}
           placeholder="00"
@@ -133,7 +117,7 @@ const TimePicker = (props: TimePickerProps) => {
         />
         <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
         <NumberInput
-          value={displayMinute()}
+          value={zeroPad(props.minute())}
           sizing="sm"
           onValueChange={(v) => {
             if (v !== null) props.onMinuteChange(v);
@@ -155,7 +139,7 @@ const TimePicker = (props: TimePickerProps) => {
         <Show when={props.showSeconds}>
           <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
           <NumberInput
-            value={displaySecond()}
+            value={zeroPad(props.second())}
             sizing="sm"
             onValueChange={(v) => {
               if (v !== null) props.onSecondChange(v);

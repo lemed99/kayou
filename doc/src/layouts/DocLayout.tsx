@@ -45,6 +45,7 @@ const componentCategories: Record<string, string[]> = {
     'select-with-search',
     'text-input',
     'textarea',
+    'time-picker',
     'toggle-switch',
     'upload-file',
   ],

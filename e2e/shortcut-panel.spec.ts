@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 const section = (page: Page, id: string) => page.locator(`#${id}`);
 
 /** Platform-aware Ctrl modifier. */
-const ctrlKey = (page: Page) =>
-  page.evaluate(() => navigator.platform.includes('Mac')) ? 'Meta' : 'Control';
+const ctrlKey = async (page: Page) =>
+  (await page.evaluate(() => navigator.platform.includes('Mac'))) ? 'Meta' : 'Control';
 
 test.describe('ShortcutPanel', () => {
   test.beforeEach(async ({ page }) => {
@@ -128,9 +128,7 @@ test.describe('ShortcutPanel', () => {
 
     test('clicking edit shows recording UI', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      // Click the edit button for Save action
-      const saveRow = panel.getByText('Save', { exact: true }).locator('..');
-      const editBtn = saveRow.locator('..').locator('button').first();
+      const editBtn = panel.getByRole('button', { name: 'Edit shortcut: Save' });
       await editBtn.click();
 
       await expect(panel.getByText('Press a key combination...')).toBeVisible();
@@ -138,8 +136,7 @@ test.describe('ShortcutPanel', () => {
 
     test('pressing Escape cancels editing', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      const saveRow = panel.getByText('Save', { exact: true }).locator('..');
-      const editBtn = saveRow.locator('..').locator('button').first();
+      const editBtn = panel.getByRole('button', { name: 'Edit shortcut: Save' });
       await editBtn.click();
 
       await expect(panel.getByText('Press a key combination...')).toBeVisible();
@@ -150,18 +147,55 @@ test.describe('ShortcutPanel', () => {
 
     test('clicking Cancel button stops editing', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      const saveRow = panel.getByText('Save', { exact: true }).locator('..');
-      const editBtn = saveRow.locator('..').locator('button').first();
+      const editBtn = panel.getByRole('button', { name: 'Edit shortcut: Save' });
       await editBtn.click();
 
       await panel.getByText('Cancel').click();
       await expect(panel.getByText('Press a key combination...')).not.toBeVisible();
     });
 
-    test('reset all button resets all bindings', async ({ page }) => {
+    test('recording a new key combo updates the binding', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      const resetAllBtn = panel.getByText('Reset all');
-      await expect(resetAllBtn).toBeVisible();
+      const editBtn = panel.getByRole('button', { name: 'Edit shortcut: Save' });
+      await editBtn.click();
+
+      await expect(panel.getByText('Press a key combination...')).toBeVisible();
+
+      // Record a new binding: Ctrl+Shift+S
+      const modifier = await ctrlKey(page);
+      await page.keyboard.press(`${modifier}+Shift+s`);
+
+      // Recording UI should disappear
+      await expect(panel.getByText('Press a key combination...')).not.toBeVisible();
+      // New binding should show a Reset button (since it differs from default)
+      await expect(panel.getByText('Reset').first()).toBeVisible();
+
+      // The new shortcut should trigger correctly
+      await page.keyboard.press(`${modifier}+Shift+s`);
+      await expect(page.getByTestId('triggered-action')).toContainText('save');
+    });
+
+    test('reset all button resets all bindings to defaults', async ({ page }) => {
+      const panel = section(page, S).locator('[role="region"]');
+
+      // First rebind Save to Ctrl+Shift+S
+      const editBtn = panel.getByRole('button', { name: 'Edit shortcut: Save' });
+      await editBtn.click();
+      const modifier = await ctrlKey(page);
+      await page.keyboard.press(`${modifier}+Shift+s`);
+
+      // Confirm the Reset button appeared (custom binding)
+      await expect(panel.getByText('Reset').first()).toBeVisible();
+
+      // Click Reset all
+      await panel.getByText('Reset all').click();
+
+      // Per-action Reset button should disappear (all bindings are defaults)
+      await expect(panel.getByText('Reset', { exact: true })).not.toBeVisible();
+
+      // Original Ctrl+S should work again
+      await page.keyboard.press(`${modifier}+s`);
+      await expect(page.getByTestId('triggered-action')).toContainText('save');
     });
   });
 
@@ -172,16 +206,14 @@ test.describe('ShortcutPanel', () => {
 
     test('shows conflict warning for duplicate bindings', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      // Conflict badges are red spans with exact text "Conflict"
-      const conflictBadges = panel.locator('.text-red-600, .dark\\:text-red-400').getByText('Conflict', { exact: true });
+      const conflictBadges = panel.getByText('Conflict', { exact: true });
       await expect(conflictBadges.first()).toBeVisible();
     });
 
-    test('non-conflicting shortcut has no warning', async ({ page }) => {
+    test('exactly two conflict badges for two conflicting actions', async ({ page }) => {
       const panel = section(page, S).locator('[role="region"]');
-      // Count conflict badges — Action A and B conflict on Ctrl+M, Action C does not
-      // So there should be exactly 2 conflict badges (one per conflicting action)
-      const conflictBadges = panel.locator('.text-red-600').filter({ hasText: /^Conflict$/ });
+      // Action A and B conflict on Ctrl+M, Action C does not
+      const conflictBadges = panel.getByText('Conflict', { exact: true });
       await expect(conflictBadges).toHaveCount(2);
     });
   });

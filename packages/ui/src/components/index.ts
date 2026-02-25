@@ -47,6 +47,14 @@ export {
 } from './Spinner';
 export { default as Textarea } from './Textarea';
 export {
+  DEFAULT_TIME_PICKER_ARIA_LABELS,
+  DEFAULT_TIME_VALUE,
+  default as TimePicker,
+  type TimePickerAriaLabels,
+  type TimePickerProps,
+  type TimeValue,
+} from './TimePicker';
+export {
   default as TextInput,
   type TextInputAriaLabels,
   type TextInputProps,
