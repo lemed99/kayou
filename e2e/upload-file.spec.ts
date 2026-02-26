@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('UploadFile', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/upload-file');
+    await page.goto('/components/upload-file');
     await page.waitForLoadState('networkidle');
   });
 

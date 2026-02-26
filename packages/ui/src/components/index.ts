@@ -48,7 +48,6 @@ export {
 export { default as Textarea } from './Textarea';
 export {
   DEFAULT_TIME_PICKER_ARIA_LABELS,
-  DEFAULT_TIME_VALUE,
   default as TimePicker,
   type TimePickerAriaLabels,
   type TimePickerProps,

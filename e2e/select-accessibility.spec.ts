@@ -31,7 +31,7 @@ const byId = (page: Page, id: string) => page.locator(`[id="${id}"]`);
 
 test.describe('Select - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/select');
+    await page.goto('/components/select');
   });
 
   const getSelect = (page: Page) =>
@@ -271,7 +271,7 @@ test.describe('Select - Accessibility', () => {
 
 test.describe('SelectWithSearch - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/select-with-search');
+    await page.goto('/components/select-with-search');
   });
 
   // Use .first() since "Search frameworks..." appears in multiple examples
@@ -467,7 +467,7 @@ test.describe('MultiSelect - Accessibility', () => {
         true,
       );
     });
-    await page.goto('/ui/multi-select');
+    await page.goto('/components/multi-select');
   });
 
   const getMultiSelect = (page: Page) =>
@@ -666,7 +666,7 @@ test.describe('MultiSelect with Search - Accessibility', () => {
         true,
       );
     });
-    await page.goto('/ui/multi-select');
+    await page.goto('/components/multi-select');
   });
 
   const getSearchMultiSelect = (page: Page) =>

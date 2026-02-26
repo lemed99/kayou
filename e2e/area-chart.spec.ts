@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('AreaChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/area-chart');
+    await page.goto('/components/area-chart');
   });
 
   // ==================== Basic Rendering ====================

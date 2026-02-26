@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('ToggleSwitch', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/toggle-switch');
+    await page.goto('/components/toggle-switch');
   });
 
   test('should render toggle switch', async ({ page }) => {

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('PieChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/pie-chart');
+    await page.goto('/components/pie-chart');
   });
 
   test('should render chart container', async ({ page }) => {

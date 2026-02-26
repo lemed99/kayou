@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('VirtualGrid', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/virtual-grid');
+    await page.goto('/components/virtual-grid');
   });
 
   test('should render grid with correct ARIA attributes', async ({ page }) => {

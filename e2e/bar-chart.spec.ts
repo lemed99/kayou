@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('BarChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/bar-chart');
+    await page.goto('/components/bar-chart');
   });
 
   // ==================== Basic Rendering ====================

@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo, createUniqueId, splitProps } from 'solid-js';
+import { JSX, Show, createMemo, createSignal, createUniqueId } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -8,7 +8,6 @@ import NumberInput from '../NumberInput';
 import Select from '../Select';
 import Spinner from '../Spinner';
 import {
-  DEFAULT_TIME_VALUE,
   type TimeValue,
   displayHour as formatDisplayHour,
   getPeriod,
@@ -70,7 +69,7 @@ export interface TimePickerProps {
   id?: string;
 }
 
-const colorClasses: Record<string, string> = {
+const colorClasses = {
   gray: 'border-neutral-300 bg-neutral-50 text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
   info: 'border-blue-500 bg-blue-50 text-blue-900 dark:border-blue-500 dark:bg-blue-100',
   failure: 'border-red-500 bg-red-50 text-red-900 dark:border-red-500 dark:bg-red-100',
@@ -78,12 +77,6 @@ const colorClasses: Record<string, string> = {
     'border-yellow-500 bg-yellow-50 text-yellow-900 dark:border-yellow-500 dark:bg-yellow-100',
   success:
     'border-green-500 bg-green-50 text-green-900 dark:border-green-500 dark:bg-green-100',
-};
-
-const sizingClasses: Record<string, string> = {
-  xs: 'text-xs',
-  sm: 'text-sm',
-  md: 'text-sm',
 };
 
 const numberInputStyle: JSX.CSSProperties = {
@@ -102,66 +95,47 @@ const periodOptions = [
  * Supports 12h/24h format, hour/minute/second input, and standard form field props.
  */
 const TimePicker = (props: TimePickerProps) => {
-  const [local] = splitProps(props, [
-    'value',
-    'onChange',
-    'format',
-    'minuteStep',
-    'secondStep',
-    'showSeconds',
-    'label',
-    'helperText',
-    'required',
-    'color',
-    'disabled',
-    'isLoading',
-    'sizing',
-    'class',
-    'containerClass',
-    'ariaLabels',
-    'id',
-  ]);
-
   const a = createMemo(() => ({
     ...DEFAULT_TIME_PICKER_ARIA_LABELS,
-    ...local.ariaLabels,
+    ...props.ariaLabels,
   }));
 
   const uniqueId = createUniqueId();
-  const groupId = createMemo(() => local.id || `timepicker-${uniqueId}`);
+  const groupId = createMemo(() => props.id || `timepicker-${uniqueId}`);
+  const labelId = createMemo(() => (props.label ? `${groupId()}-label` : undefined));
   const helperId = createMemo(() =>
-    local.helperText ? `${groupId()}-helper` : undefined,
+    props.helperText ? `${groupId()}-helper` : undefined,
   );
 
-  const color = createMemo(() => local.color || 'gray');
-  const sizing = createMemo(() => local.sizing || 'md');
-  const format = createMemo(() => local.format || '24h');
+  const color = createMemo(() => props.color || 'gray');
+  const sizing = createMemo(() => props.sizing || 'md');
+  const format = createMemo(() => props.format || '24h');
   const is12h = () => format() === '12h';
-  const minuteStep = createMemo(() => local.minuteStep ?? 1);
-  const secondStep = createMemo(() => local.secondStep ?? 1);
-  const showSeconds = createMemo(() => local.showSeconds ?? false);
-  const isDisabled = createMemo(() => local.disabled || local.isLoading);
+  const minuteStep = createMemo(() => props.minuteStep ?? 1);
+  const secondStep = createMemo(() => props.secondStep ?? 1);
+  const showSeconds = createMemo(() => props.showSeconds ?? false);
+  const isDisabled = createMemo(() => props.disabled || props.isLoading);
 
   const ariaInvalid = createMemo(() => (color() === 'failure' ? true : undefined));
 
-  // Derive time values from props
-  const currentHour = createMemo(() => local.value?.hour ?? DEFAULT_TIME_VALUE.hour);
-  const currentMinute = createMemo(
-    () => local.value?.minute ?? DEFAULT_TIME_VALUE.minute,
-  );
-  const currentSecond = createMemo(
-    () => local.value?.second ?? DEFAULT_TIME_VALUE.second,
-  );
+  const isControlled = createMemo(() => props.value !== undefined);
+  const [internal, setInternal] = createSignal<TimeValue | undefined>(undefined);
 
-  // Period is derived from hour, not stored separately
+  const value = createMemo(() => (isControlled() ? props.value : internal()));
+  const currentHour = createMemo(() => value()?.hour);
+  const currentMinute = createMemo(() => value()?.minute);
+  const currentSecond = createMemo(() => value()?.second);
+
   const period = createMemo(() => getPeriod(currentHour()));
 
   const emitChange = (partial: Partial<TimeValue>) => {
-    local.onChange?.({
-      hour: partial.hour ?? currentHour(),
-      minute: partial.minute ?? currentMinute(),
-      second: partial.second ?? currentSecond(),
-    });
+    const next: TimeValue = {
+      hour: partial.hour ?? currentHour() ?? 0,
+      minute: partial.minute ?? currentMinute() ?? 0,
+      second: partial.second ?? currentSecond() ?? 0,
+    };
+    if (!isControlled()) setInternal(next);
+    props.onChange?.(next);
   };
 
   const handleHourChange = (num: number | null) => {
@@ -185,6 +159,7 @@ const TimePicker = (props: TimePickerProps) => {
     if (!opt) return;
     const newPeriod = opt.value as 'AM' | 'PM';
     const h = currentHour();
+    if (h === undefined) return;
     if (newPeriod === 'PM' && h < 12) {
       emitChange({ hour: h + 12 });
     } else if (newPeriod === 'AM' && h >= 12) {
@@ -193,11 +168,11 @@ const TimePicker = (props: TimePickerProps) => {
   };
 
   return (
-    <div class={twMerge('w-full', local.containerClass)}>
-      <Show when={local.label}>
+    <div class={twMerge('w-full', props.containerClass)}>
+      <Show when={props.label}>
         <div class="mb-1 block">
-          <Label for={groupId()} value={local.label} color={color()} />
-          <Show when={local.required}>
+          <Label id={labelId()} value={props.label} color={color()} />
+          <Show when={props.required}>
             <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">
               *
             </span>
@@ -208,18 +183,19 @@ const TimePicker = (props: TimePickerProps) => {
       <div
         id={groupId()}
         role="group"
-        aria-label={a().timePicker}
+        aria-label={labelId() ? undefined : a().timePicker}
+        aria-labelledby={labelId()}
         aria-invalid={ariaInvalid()}
         aria-describedby={helperId()}
+        aria-required={props.required}
         class={twMerge(
           'flex w-fit items-center gap-0.5 rounded-lg border',
           colorClasses[color()],
-          sizingClasses[sizing()],
           isDisabled() && 'cursor-not-allowed opacity-50',
-          local.class,
+          props.class,
         )}
       >
-        <Show when={local.isLoading}>
+        <Show when={props.isLoading}>
           <div class="flex items-center pl-2">
             <Spinner size="sm" color="transparent" />
           </div>
@@ -239,6 +215,7 @@ const TimePicker = (props: TimePickerProps) => {
           aria-label={a().hour}
           onFocus={(e) => e.target.select()}
           disabled={isDisabled()}
+          required={props.required}
         />
         <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
         <NumberInput
@@ -256,6 +233,7 @@ const TimePicker = (props: TimePickerProps) => {
           aria-label={a().minute}
           onFocus={(e) => e.target.select()}
           disabled={isDisabled()}
+          required={props.required}
         />
         <Show when={showSeconds()}>
           <span class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
@@ -274,6 +252,7 @@ const TimePicker = (props: TimePickerProps) => {
             aria-label={a().second}
             onFocus={(e) => e.target.select()}
             disabled={isDisabled()}
+            required={props.required}
           />
         </Show>
         <Show when={is12h()}>
@@ -293,8 +272,8 @@ const TimePicker = (props: TimePickerProps) => {
         </Show>
       </div>
 
-      <Show when={local.helperText}>
-        <HelperText id={helperId()} content={local.helperText!} color={color()} />
+      <Show when={props.helperText}>
+        <HelperText id={helperId()} content={props.helperText!} color={color()} />
       </Show>
     </div>
   );

@@ -3,14 +3,14 @@ import { expect, test } from '@playwright/test';
 test.describe('Accordion', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate via client-side routing to avoid pre-existing SSR hydration mismatch
-    await page.goto('/ui/button');
+    await page.goto('/components/button');
     await page.waitForLoadState('networkidle');
     // Use JS-based navigation to trigger client-side routing
     await page.evaluate(() => {
       const link = document.querySelector('a[href="/ui/accordion"]') as HTMLAnchorElement;
       link?.click();
     });
-    await page.waitForURL('/ui/accordion');
+    await page.waitForURL('/components/accordion');
     await page.locator('#accordion-trigger-basic-1').waitFor({ state: 'visible' });
   });
 

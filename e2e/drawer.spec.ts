@@ -13,7 +13,7 @@ async function openDrawer(page: Page, triggerFilter: RegExp = /open|drawer|show/
 
 test.describe('Drawer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/drawer');
+    await page.goto('/components/drawer');
   });
 
   // ==================== Basic Rendering ====================

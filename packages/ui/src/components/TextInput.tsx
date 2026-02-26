@@ -86,14 +86,14 @@ const theme = {
         md: 'p-2.5 text-sm',
       },
       colors: {
-        gray: 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-500',
-        info: 'border-blue-500 bg-blue-50 text-blue-900 placeholder-blue-700 focus:outline-blue-500 dark:border-blue-500 dark:bg-blue-100 dark:focus:outline-blue-500',
+        gray: 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:outline-blue-600 dark:focus:outline-blue-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
+        info: 'border-blue-500 bg-blue-50 text-blue-900 focus:outline-blue-500 dark:border-blue-500 dark:bg-blue-100 dark:focus:outline-blue-500',
         failure:
-          'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:outline-red-500 dark:border-red-500 dark:bg-red-100 dark:focus:outline-red-500',
+          'border-red-500 bg-red-50 text-red-900 focus:outline-red-500 dark:border-red-500 dark:bg-red-100 dark:focus:outline-red-500',
         warning:
-          'border-yellow-500 bg-yellow-50 text-yellow-900 placeholder-yellow-700 focus:outline-yellow-500 dark:border-yellow-500 dark:bg-yellow-100 dark:focus:outline-yellow-500',
+          'border-yellow-500 bg-yellow-50 text-yellow-900 focus:outline-yellow-500 dark:border-yellow-500 dark:bg-yellow-100 dark:focus:outline-yellow-500',
         success:
-          'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:outline-green-500 dark:border-green-500 dark:bg-green-100 dark:focus:outline-green-500',
+          'border-green-500 bg-green-50 text-green-900 focus:outline-green-500 dark:border-green-500 dark:bg-green-100 dark:focus:outline-green-500',
       },
       withIcon: {
         on: 'pl-9',

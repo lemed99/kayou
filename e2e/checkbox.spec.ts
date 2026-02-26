@@ -6,7 +6,7 @@ const exampleSection = (page: import('@playwright/test').Page, title: string) =>
 
 test.describe('Checkbox', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/checkbox');
+    await page.goto('/components/checkbox');
   });
 
   // ── Basic Checkbox ───────────────────────────────────────────────

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('LineChart', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/line-chart');
+    await page.goto('/components/line-chart');
   });
 
   test('should render chart container', async ({ page }) => {

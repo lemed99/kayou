@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Select', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/select');
+    await page.goto('/components/select');
   });
 
   const getTrigger = (page: import('@playwright/test').Page) =>

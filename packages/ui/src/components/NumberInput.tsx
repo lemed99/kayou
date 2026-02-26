@@ -4,12 +4,7 @@ import TextInput, { TextInputProps } from './TextInput';
 
 type ExtendedTextInputProps = Omit<
   TextInputProps,
-  | 'type'
-  | 'onChange'
-  | 'onBlur'
-  | 'showArrows'
-  | 'onArrowUp'
-  | 'onArrowDown'
+  'type' | 'onChange' | 'onBlur' | 'showArrows' | 'onArrowUp' | 'onArrowDown'
 >;
 
 export interface NumberInputProps extends ExtendedTextInputProps {
@@ -470,6 +465,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       upBtnRef={(el) => (upBtnRef = el)}
       downBtnRef={(el) => (downBtnRef = el)}
       ariaLabels={local.ariaLabels}
+      autocomplete="off"
     />
   );
 };

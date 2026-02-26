@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('ResponsiveContainer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/responsive-container');
+    await page.goto('/components/responsive-container');
   });
 
   test('should render container', async ({ page }) => {

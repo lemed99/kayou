@@ -1,11 +1,17 @@
-import { For, type JSX, Show, createEffect, createMemo, createSignal, onCleanup, splitProps, useContext } from 'solid-js';
-import { twMerge } from 'tailwind-merge';
-
 import {
-  ShortcutContext,
-  comboFromEvent,
-  type RegisteredAction,
-} from '@kayou/hooks';
+  For,
+  type JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+  splitProps,
+  useContext,
+} from 'solid-js';
+
+import { type RegisteredAction, ShortcutContext, comboFromEvent } from '@kayou/hooks';
+import { twMerge } from 'tailwind-merge';
 
 export interface ShortcutPanelLabels {
   search: string;
@@ -49,7 +55,7 @@ const panelTheme = {
   header:
     'flex items-center justify-between gap-3 border-b border-neutral-200 p-3 dark:border-neutral-700',
   search:
-    'flex-1 rounded-md border border-neutral-300 bg-transparent px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:text-neutral-100 dark:placeholder-neutral-500',
+    'flex-1 rounded-md border border-neutral-300 bg-transparent px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:text-neutral-100',
   resetAll:
     'shrink-0 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer whitespace-nowrap',
   category:
@@ -74,8 +80,14 @@ const panelTheme = {
 
 const isMac = (): boolean => {
   if (typeof navigator === 'undefined') return false;
-  if ('userAgentData' in navigator && (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData) {
-    return (navigator as Navigator & { userAgentData: { platform: string } }).userAgentData.platform === 'macOS';
+  if (
+    'userAgentData' in navigator &&
+    (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData
+  ) {
+    return (
+      (navigator as Navigator & { userAgentData: { platform: string } }).userAgentData
+        .platform === 'macOS'
+    );
   }
   return /Mac|iPhone|iPad/.test(navigator.userAgent);
 };
@@ -103,7 +115,10 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
 
   const [local, divProps] = splitProps(props, ['labels', 'ariaLabels', 'class']);
 
-  const labels = createMemo(() => ({ ...DEFAULT_SHORTCUT_PANEL_LABELS, ...local.labels }));
+  const labels = createMemo(() => ({
+    ...DEFAULT_SHORTCUT_PANEL_LABELS,
+    ...local.labels,
+  }));
   const ariaLabels = createMemo(() => ({
     ...DEFAULT_SHORTCUT_PANEL_ARIA_LABELS,
     ...local.ariaLabels,
@@ -119,8 +134,8 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
     return actions.filter(
       (a) =>
         a.label.toLowerCase().includes(query) ||
-        (a.description?.toLowerCase().includes(query)) ||
-        (a.category?.toLowerCase().includes(query)),
+        a.description?.toLowerCase().includes(query) ||
+        a.category?.toLowerCase().includes(query),
     );
   });
 
@@ -143,7 +158,9 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
 
   const focusEditButton = (actionId: string) => {
     requestAnimationFrame(() => {
-      const btn = document.querySelector<HTMLButtonElement>(`[data-shortcut-edit="${actionId}"]`);
+      const btn = document.querySelector<HTMLButtonElement>(
+        `[data-shortcut-edit="${actionId}"]`,
+      );
       btn?.focus();
     });
   };
@@ -179,9 +196,7 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
     const parts = comboToParts(combo);
     return (
       <span class={panelTheme.row.shortcut}>
-        <For each={parts}>
-          {(part) => <kbd class={panelTheme.row.key}>{part}</kbd>}
-        </For>
+        <For each={parts}>{(part) => <kbd class={panelTheme.row.key}>{part}</kbd>}</For>
       </span>
     );
   };
@@ -271,7 +286,11 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
           value={search()}
           onInput={(e) => setSearch(e.currentTarget.value)}
         />
-        <button type="button" class={panelTheme.resetAll} onClick={() => context.resetAll()}>
+        <button
+          type="button"
+          class={panelTheme.resetAll}
+          onClick={() => context.resetAll()}
+        >
           {labels().resetAll}
         </button>
       </div>

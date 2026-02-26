@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('VirtualList', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/virtual-list');
+    await page.goto('/components/virtual-list');
   });
 
   test('should render listbox with correct ARIA attributes', async ({ page }) => {

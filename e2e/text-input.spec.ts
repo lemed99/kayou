@@ -6,7 +6,7 @@ const exampleSection = (page: import('@playwright/test').Page, title: string) =>
 
 test.describe('TextInput', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/text-input');
+    await page.goto('/components/text-input');
   });
 
   // ── Basic rendering ──────────────────────────────────────────────

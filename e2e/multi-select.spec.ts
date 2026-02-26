@@ -12,7 +12,7 @@ test.describe('MultiSelect', () => {
         true,
       );
     });
-    await page.goto('/ui/multi-select');
+    await page.goto('/components/multi-select');
   });
 
   const getTrigger = (page: import('@playwright/test').Page) =>

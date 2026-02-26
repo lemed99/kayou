@@ -16,7 +16,7 @@ async function openModal(page: Page) {
 
 test.describe('Modal', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/modal');
+    await page.goto('/components/modal');
   });
 
   // ==================== Basic Rendering ====================

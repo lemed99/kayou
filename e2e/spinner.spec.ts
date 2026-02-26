@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Spinner', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/spinner');
+    await page.goto('/components/spinner');
   });
 
   test('should render spinner component', async ({ page }) => {

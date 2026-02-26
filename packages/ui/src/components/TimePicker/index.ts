@@ -6,4 +6,4 @@ export {
   type TimePickerProps,
 } from './TimePicker';
 
-export { DEFAULT_TIME_VALUE, type TimeValue } from './timeUtils';
+export { type TimeValue } from './timeUtils';

@@ -3,25 +3,23 @@
  */
 export interface TimeValue {
   /** Hour in 24h format (0-23). */
-  hour: number;
+  hour: number | undefined;
   /** Minute (0-59). */
-  minute: number;
+  minute: number | undefined;
   /** Second (0-59). */
-  second: number;
+  second: number | undefined;
 }
 
-/** Default time value (midnight). */
-export const DEFAULT_TIME_VALUE: TimeValue = { hour: 0, minute: 0, second: 0 };
-
 /** Zero-pads a number to 2 digits. */
-export const zeroPad = (n: number): string => n.toString().padStart(2, '0');
+export const zeroPad = (n: number | undefined): string =>
+  n !== undefined ? n.toString().padStart(2, '0') : '';
 
 /** Converts a 24h hour to 12h display hour (1-12). */
 export const to12Hour = (hour24: number): number => hour24 % 12 || 12;
 
 /** Gets the period (AM/PM) for a 24h hour. */
-export const getPeriod = (hour24: number): 'AM' | 'PM' =>
-  hour24 >= 12 ? 'PM' : 'AM';
+export const getPeriod = (hour24: number | undefined): 'AM' | 'PM' =>
+  hour24 !== undefined ? (hour24 >= 12 ? 'PM' : 'AM') : 'AM';
 
 /** Converts a 12h display hour + period to 24h hour. */
 export const to24Hour = (hour12: number, period: 'AM' | 'PM'): number => {
@@ -31,8 +29,8 @@ export const to24Hour = (hour12: number, period: 'AM' | 'PM'): number => {
 };
 
 /** Returns display string for hour based on format. */
-export const displayHour = (hour24: number, format: '12h' | '24h'): string =>
-  zeroPad(format === '12h' ? to12Hour(hour24) : hour24);
+export const displayHour = (hour24: number | undefined, format: '12h' | '24h'): string =>
+  hour24 !== undefined ? zeroPad(format === '12h' ? to12Hour(hour24) : hour24) : '';
 
 /** Formats a complete time for display. */
 export const formatTime = (

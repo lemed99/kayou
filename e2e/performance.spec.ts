@@ -106,9 +106,9 @@ function reportFrameStats(frames: number[]) {
 
 test.describe('Performance: Charts', () => {
   for (const { name, route } of [
-    { name: 'AreaChart', route: '/ui/area-chart' },
-    { name: 'LineChart', route: '/ui/line-chart' },
-    { name: 'BarChart', route: '/ui/bar-chart' },
+    { name: 'AreaChart', route: '/components/area-chart' },
+    { name: 'LineChart', route: '/components/line-chart' },
+    { name: 'BarChart', route: '/components/bar-chart' },
   ]) {
     test(`${name} hover should not cause long frames`, async ({ page }) => {
       await page.goto(route);
@@ -130,7 +130,7 @@ test.describe('Performance: Charts', () => {
 
 test.describe('Performance: Virtual Lists', () => {
   test('VirtualList scroll should not cause long frames', async ({ page }) => {
-    await page.goto('/ui/virtual-list');
+    await page.goto('/components/virtual-list');
     const listbox = page.locator('role=listbox').first();
     await expect(listbox).toBeVisible();
 
@@ -147,7 +147,7 @@ test.describe('Performance: Virtual Lists', () => {
   });
 
   test('DynamicVirtualList scroll should not cause long frames', async ({ page }) => {
-    await page.goto('/ui/dynamic-virtual-list');
+    await page.goto('/components/dynamic-virtual-list');
     const listbox = page.locator('role=listbox').first();
     await expect(listbox).toBeVisible();
 
@@ -170,7 +170,7 @@ test.describe('Performance: Virtual Lists', () => {
 
 test.describe('Performance: Virtual Grid', () => {
   test('VirtualGrid scroll should not cause long frames', async ({ page }) => {
-    await page.goto('/ui/virtual-grid');
+    await page.goto('/components/virtual-grid');
     const grid = page.locator('role=grid').first();
     await expect(grid).toBeVisible();
 

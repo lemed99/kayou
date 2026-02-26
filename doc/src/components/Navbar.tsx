@@ -1,19 +1,19 @@
 import {
-    type Component,
-    For,
-    Show,
-    createEffect,
-    createSignal,
-    onCleanup,
-    onMount,
+  type Component,
+  For,
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
 } from 'solid-js';
 
 import {
-    Menu01Icon,
-    Moon01Icon,
-    SearchRefractionIcon,
-    SunIcon,
-    XCloseIcon,
+  Menu01Icon,
+  Moon01Icon,
+  SearchRefractionIcon,
+  SunIcon,
+  XCloseIcon,
 } from '@kayou/icons';
 import { A, useLocation, useNavigate } from '@solidjs/router';
 
@@ -287,7 +287,7 @@ const Navbar: Component = () => {
                 placeholder="Search documentation..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                class="h-12 w-full rounded-lg border border-neutral-200 bg-neutral-50 pr-4 pl-11 text-base text-neutral-900 placeholder-neutral-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder-neutral-400 dark:focus:border-blue-400"
+                class="h-12 w-full rounded-lg border border-neutral-200 bg-neutral-50 pr-4 pl-11 text-base text-neutral-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:focus:border-blue-400"
               />
             </div>
 

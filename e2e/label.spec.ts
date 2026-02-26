@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Label', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/label');
+    await page.goto('/components/label');
   });
 
   test.describe('Basic rendering', () => {

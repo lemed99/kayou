@@ -179,37 +179,78 @@ export default function TimePickerPage() {
         import { TimePicker, type TimeValue } from '@kayou/ui';
 
         export default function Example() {
-          const [time, setTime] = createSignal<TimeValue>({ hour: 14, minute: 30, second: 0 });
+          const [time24h, setTime24h] = createSignal<TimeValue>({ hour: 14, minute: 30, second: 0 });
+          const [time12h, setTime12h] = createSignal<TimeValue>({ hour: 9, minute: 0, second: 0 });
+          const [secTime, setSecTime] = createSignal<TimeValue>({ hour: 0, minute: 0, second: 0 });
+          const [stepTime, setStepTime] = createSignal<TimeValue>({ hour: 10, minute: 0, second: 0 });
+          const [midnight, setMidnight] = createSignal<TimeValue>({ hour: 0, minute: 0, second: 0 });
+          const [secStep, setSecStep] = createSignal<TimeValue>({ hour: 8, minute: 0, second: 0 });
 
           return (
-            <div class="flex flex-col gap-6 w-72">
-              <TimePicker
-                label="Start Time"
-                value={time()}
-                onChange={setTime}
-              />
+            <div class="flex flex-col gap-6 w-80">
+              <div data-section="basic-24h">
+                <TimePicker label="Start Time" value={time24h()} onChange={setTime24h} />
+                <p data-testid="basic-24h-value" class="mt-1 text-xs text-neutral-500">
+                  {time24h().hour + ':' + time24h().minute + ':' + time24h().second}
+                </p>
+              </div>
 
-              <TimePicker
-                label="Meeting Time"
-                format="12h"
-                value={time()}
-                onChange={setTime}
-                showSeconds
-              />
+              <div data-section="format-12h">
+                <TimePicker label="Meeting Time" format="12h" value={time12h()} onChange={setTime12h} />
+                <p data-testid="format-12h-value" class="mt-1 text-xs text-neutral-500">
+                  {time12h().hour + ':' + time12h().minute + ':' + time12h().second}
+                </p>
+              </div>
 
-              <TimePicker
-                label="Alarm"
-                helperText="Select when the alarm should ring"
-                minuteStep={15}
-                color="info"
-              />
+              <div data-section="with-seconds">
+                <TimePicker label="Precise Time" showSeconds value={secTime()} onChange={setSecTime} />
+                <p data-testid="with-seconds-value" class="mt-1 text-xs text-neutral-500">
+                  {secTime().hour + ':' + secTime().minute + ':' + secTime().second}
+                </p>
+              </div>
 
-              <TimePicker
-                label="Required Field"
-                required
-                color="failure"
-                helperText="Time is required"
-              />
+              <div data-section="step-control">
+                <TimePicker label="Appointment" minuteStep={15} value={stepTime()} onChange={setStepTime} />
+                <p data-testid="step-value" class="mt-1 text-xs text-neutral-500">
+                  {stepTime().hour + ':' + stepTime().minute}
+                </p>
+              </div>
+
+              <div data-section="midnight-12h">
+                <TimePicker label="Midnight" format="12h" value={midnight()} onChange={setMidnight} />
+                <p data-testid="midnight-12h-value" class="mt-1 text-xs text-neutral-500">
+                  {midnight().hour + ':' + midnight().minute + ':' + midnight().second}
+                </p>
+              </div>
+
+              <div data-section="second-step">
+                <TimePicker label="Seconds" showSeconds secondStep={15} value={secStep()} onChange={setSecStep} />
+                <p data-testid="second-step-value" class="mt-1 text-xs text-neutral-500">
+                  {secStep().hour + ':' + secStep().minute + ':' + secStep().second}
+                </p>
+              </div>
+
+              <div data-section="disabled">
+                <TimePicker label="Disabled" disabled value={{ hour: 10, minute: 0, second: 0 }} />
+              </div>
+
+              <div data-section="loading">
+                <TimePicker label="Loading" isLoading />
+              </div>
+
+              <div data-section="validation">
+                <TimePicker label="Error" color="failure" helperText="Time is required" required />
+                <TimePicker label="Warning" color="warning" helperText="Outside business hours" />
+                <TimePicker label="Success" color="success" helperText="Time is valid" />
+              </div>
+
+              <div data-section="sizing">
+                <div class="flex flex-col gap-2">
+                  <TimePicker sizing="xs" />
+                  <TimePicker label="Small" sizing="sm" />
+                  <TimePicker label="Medium" sizing="md" />
+                </div>
+              </div>
             </div>
           );
         }

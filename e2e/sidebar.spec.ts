@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Sidebar', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/sidebar');
+    await page.goto('/components/sidebar');
   });
 
   test('should render sidebar', async ({ page }) => {

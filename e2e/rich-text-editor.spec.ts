@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('RichTextEditor', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/rich-text-editor');
+    await page.goto('/components/rich-text-editor');
     await page.waitForLoadState('networkidle');
   });
 

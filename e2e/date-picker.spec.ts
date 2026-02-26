@@ -17,7 +17,7 @@ const openCalendar = async (page: Page) => {
 
 test.describe('DatePicker', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   // ==================== Basic Rendering ====================
@@ -200,7 +200,7 @@ test.describe('DatePicker', () => {
 
 test.describe('DatePicker - Range Mode', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should select date range', async ({ page }) => {
@@ -218,7 +218,7 @@ test.describe('DatePicker - Range Mode', () => {
 
 test.describe('DatePicker - Week Start', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should display correct day headers for Sunday start', async ({ page }) => {
@@ -270,7 +270,7 @@ test.describe('DatePicker - Week Start', () => {
 
 test.describe('DatePicker - Time Selection', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should show time picker when showTime is enabled', async ({ page }) => {
@@ -349,7 +349,7 @@ test.describe('DatePicker - Time Selection', () => {
 
 test.describe('DatePicker - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should have proper ARIA attributes on input', async ({ page }) => {
@@ -390,7 +390,7 @@ test.describe('DatePicker - Accessibility', () => {
 
 test.describe('DatePicker - Visual States', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test("should highlight today's date", async ({ page }) => {
@@ -441,7 +441,7 @@ test.describe('DatePicker - Visual States', () => {
 
 test.describe('DatePicker - Keyboard Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should focus date button when calendar opens', async ({ page }) => {
@@ -943,7 +943,7 @@ test.describe('DatePicker - Keyboard Navigation', () => {
 
 test.describe('DatePicker - Edge Cases', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ui/date-picker');
+    await page.goto('/components/date-picker');
   });
 
   test('should handle rapid calendar open/close', async ({ page }) => {
