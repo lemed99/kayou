@@ -1,98 +1,132 @@
-import { For, JSX, Show, createSignal } from 'solid-js';
+import { For, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
 
 import {
-  CheckCircleIcon,
-  Copy01Icon,
-  DeleteIcon,
+  AlertCircleIcon,
+  CheckIcon,
   Edit01Icon,
-  RefreshCcw01Icon,
-  Save01Icon,
   Settings01Icon,
+  Trash01Icon,
+  XIcon,
 } from '@kayou/icons';
 
+import Alert from '../Alert';
 import Button from '../Button';
-import Drawer from '../Drawer';
 import Popover from '../Popover';
 import TextInput from '../TextInput';
 import { useDataTableInternal } from './DataTableInternalContext';
+import { SavedTableConfig } from './types';
+import { MAX_CONFIGS } from './useDataTableConfigs';
 
 export function DataTableConfigs(): JSX.Element {
   const ctx = useDataTableInternal();
 
-  const [drawerOpen, setDrawerOpen] = createSignal(false);
-  const [drawerMode, setDrawerMode] = createSignal<'choose' | 'create' | 'edit'>(
-    'create',
-  );
+  const [saveMode, setSaveMode] = createSignal<'idle' | 'create' | 'edit'>('idle');
   const [editingConfigId, setEditingConfigId] = createSignal<string | null>(null);
   const [configName, setConfigName] = createSignal('');
+  const [configNameEdit, setConfigNameEdit] = createSignal('');
   const [listOpen, setListOpen] = createSignal(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = createSignal(false);
-  const [cameFromChoose, setCameFromChoose] = createSignal(false);
+  const [deleteAlertVisible, setDeleteAlertVisible] = createSignal(false);
+  const [configToRestore, setConfigToRestore] = createSignal<SavedTableConfig | null>(
+    null,
+  );
+  const [deleteAlertTimer, setDeleteTimer] = createSignal(0);
+
+  let undoInterval: NodeJS.Timeout;
+  let undoTimeout: NodeJS.Timeout;
 
   const activeConfig = () => {
     const id = ctx.activeConfigId();
     return id ? ctx.getConfig(id) : undefined;
   };
 
-  const openSaveDrawer = () => {
-    if (ctx.activeConfigId() !== null) {
-      setDrawerMode('choose');
-    } else {
-      setDrawerMode('create');
-      setCameFromChoose(false);
-    }
-    setEditingConfigId(null);
+  const handleSaveNew = () => {
+    setSaveMode('create');
     setConfigName('');
-    setDrawerOpen(true);
   };
 
-  const openEditDrawer = (id: string) => {
+  const handleEditConfig = (id: string) => {
     const config = ctx.getConfig(id);
     if (!config) return;
-    setDrawerMode('edit');
     setEditingConfigId(id);
-    setConfigName(config.name);
-    setCameFromChoose(false);
-    setListOpen(false);
-    setDrawerOpen(true);
-  };
-
-  const handleChooseCreate = () => {
-    setDrawerMode('create');
-    setCameFromChoose(true);
-    setConfigName('');
-  };
-
-  const handleChooseUpdate = () => {
-    const config = activeConfig();
-    const id = ctx.activeConfigId();
-    if (id && config) {
-      ctx.onUpdateConfig(id, config.name);
-    }
-    setDrawerOpen(false);
+    setConfigNameEdit(config.name);
   };
 
   const handleSubmit = () => {
     const name = configName().trim();
     if (!name) return;
 
-    if (drawerMode() === 'create') {
+    if (saveMode() === 'create') {
       ctx.onSaveConfig(name);
-    } else {
-      const id = editingConfigId();
-      if (id) ctx.onUpdateConfig(id, name);
     }
-    setDrawerOpen(false);
+    setConfigName('');
+    setSaveMode('idle');
   };
 
-  const handleDelete = () => {
+  const handleRename = () => {
+    const name = configNameEdit().trim();
+    if (!name) return;
     const id = editingConfigId();
+    if (id) ctx.onUpdateConfig(id, name);
+    setConfigNameEdit('');
+    setEditingConfigId(null);
+  };
+
+  const handleCancelRename = () => {
+    setConfigNameEdit('');
+    setEditingConfigId(null);
+  };
+
+  const handleDirectConfigUpdate = () => {
+    const currentConfig = activeConfig();
+    if (!currentConfig) return;
+
+    ctx.onUpdateConfig(currentConfig.id, currentConfig.name);
+  };
+
+  const handleDeleteConfig = (id: string) => {
     if (id) {
+      setDeleteTimer(5);
+      setDeleteAlertVisible(true);
+      const config = ctx.getConfig(id);
+      if (config) {
+        setConfigToRestore(config);
+      }
       ctx.onDeleteConfig(id);
-      setDeleteConfirmOpen(false);
-      setDrawerOpen(false);
+
+      undoTimeout = setTimeout(() => {
+        setConfigToRestore(null);
+        setDeleteAlertVisible(false);
+        setDeleteTimer(0);
+      }, 5500);
     }
   };
+
+  const restoreConfig = () => {
+    if (configToRestore()) {
+      ctx.restoreConfig(configToRestore()!);
+      setConfigToRestore(null);
+      setDeleteAlertVisible(false);
+      setDeleteTimer(0);
+      return;
+    }
+  };
+
+  createEffect(() => {
+    undoInterval = setInterval(() => {
+      if (deleteAlertTimer() > 0) {
+        setDeleteTimer(deleteAlertTimer() - 1);
+      }
+    }, 1000);
+  });
+
+  onCleanup(() => {
+    if (undoInterval) {
+      clearInterval(undoInterval);
+    }
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+  });
 
   const handleActivate = (id: string | null) => {
     ctx.onActivateConfig(id);
@@ -100,218 +134,117 @@ export function DataTableConfigs(): JSX.Element {
   };
 
   const configListContent = () => (
-    <div class="min-w-[220px] p-2" data-config-list>
-      <button
-        type="button"
-        onClick={() => handleActivate(null)}
-        class={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
-          ctx.activeConfigId() === null
-            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-            : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-        }`}
-      >
-        <Show when={ctx.activeConfigId() === null}>
-          <CheckCircleIcon class="size-4 shrink-0" aria-hidden="true" />
-        </Show>
-        <span class="flex-1">{ctx.labels().defaultConfiguration}</span>
-      </button>
+    <div class="space-y-4 p-4" data-config-popover>
+      <h3 class="font-medium">{ctx.labels().configPopoverContentTitle}</h3>
+      <Show when={ctx.isAtLimit()}>
+        <Alert
+          color="warning"
+          icon={AlertCircleIcon}
+          additionalContent={ctx.labels().configLimitReachedAdditionnal}
+        >
+          {ctx.labels().configLimitReached}
+        </Alert>
+      </Show>
+      <Show when={deleteAlertVisible()}>
+        <Alert color="warning" icon={AlertCircleIcon}>
+          <div>
+            <h5 class="mb-2 font-semibold">{ctx.labels().configDeleted}</h5>
+            <div class="flex justify-end">
+              <Button class="" size="sm" color="white" onClick={restoreConfig}>
+                {ctx.labels().undo} ({deleteAlertTimer()})s
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      </Show>
+      <div class="min-w-[220px] space-y-2" data-config-list>
+        <button
+          type="button"
+          onClick={() => handleActivate(null)}
+          class={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
+            ctx.activeConfigId() === null
+              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+              : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+          }`}
+        >
+          <Show when={ctx.activeConfigId() === null}>
+            <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
+          </Show>
+          <span class="flex-1">{ctx.labels().defaultConfiguration}</span>
+        </button>
 
-      <For each={ctx.configs()}>
-        {(config) => (
-          <div class="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => handleActivate(config.id)}
-              class={`flex flex-1 items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
+        <For each={ctx.configs()}>
+          {(config) => (
+            <div
+              class={`flex items-center gap-1 rounded-md ${
                 ctx.activeConfigId() === config.id
                   ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                   : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
               }`}
             >
-              <Show when={ctx.activeConfigId() === config.id}>
-                <CheckCircleIcon class="size-4 shrink-0" aria-hidden="true" />
-              </Show>
-              <span class="flex-1 truncate">{config.name}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => openEditDrawer(config.id)}
-              class="shrink-0 rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-              aria-label={`Edit ${config.name}`}
-            >
-              <Edit01Icon class="size-4" aria-hidden="true" />
-            </button>
-          </div>
-        )}
-      </For>
-    </div>
-  );
+              <Show
+                when={editingConfigId() === config.id}
+                fallback={
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleActivate(config.id)}
+                      class={`flex flex-1 items-center gap-2 px-3 py-2 text-left text-sm`}
+                    >
+                      <Show when={ctx.activeConfigId() === config.id}>
+                        <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
+                      </Show>
+                      <span class="flex-1 truncate">{config.name}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleEditConfig(config.id)}
+                      class="shrink-0 cursor-pointer p-2 text-neutral-950 hover:text-yellow-600 dark:text-neutral-100"
+                      aria-label={`Edit ${config.name}`}
+                    >
+                      <Edit01Icon class="size-4" aria-hidden="true" />
+                    </button>
 
-  const deleteConfirmContent = () => (
-    <div class="p-3" data-config-delete-confirm>
-      <p class="mb-3 text-sm text-neutral-700 dark:text-neutral-300">
-        {ctx.labels().confirmDelete}
-      </p>
-      <div class="flex items-center justify-end gap-2">
-        <Button size="xs" color="transparent" onClick={() => setDeleteConfirmOpen(false)}>
-          {ctx.labels().cancel}
-        </Button>
-        <Button size="xs" color="danger" onClick={handleDelete}>
-          {ctx.labels().deleteConfiguration}
-        </Button>
-      </div>
-    </div>
-  );
-
-  const drawerTitle = () =>
-    drawerMode() === 'edit' ? ctx.labels().editConfigTitle : ctx.labels().saveConfigTitle;
-
-  return (
-    <Show when={ctx.configEnabled}>
-      <div class="flex items-center gap-2">
-        <Show when={ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)}>
-          <Button
-            size="sm"
-            icon={Save01Icon}
-            onClick={openSaveDrawer}
-            class="whitespace-nowrap"
-            data-config-save-trigger
-          >
-            {ctx.labels().saveConfiguration}
-          </Button>
-        </Show>
-
-        <Show when={ctx.isDirty() && ctx.isAtLimit() && ctx.activeConfigId() === null}>
-          <span class="whitespace-nowrap text-xs text-neutral-500 dark:text-neutral-400">
-            {ctx.labels().maxConfigsReached}
-          </span>
-        </Show>
-
-        <Show when={ctx.hasConfigs()}>
-          <Popover
-            content={configListContent}
-            position="bottom-end"
-            isOpen={listOpen()}
-            onOpenChange={setListOpen}
-            aria-label={ctx.labels().configurations}
-          >
-            <Button size="sm" icon={Settings01Icon} data-config-list-trigger>
-              {activeConfig()?.name ?? ctx.labels().configurations}
-            </Button>
-          </Popover>
-        </Show>
-      </div>
-
-      <Drawer
-        show={drawerOpen()}
-        onClose={() => setDrawerOpen(false)}
-        title={drawerTitle()}
-        position="right"
-        width="w-full md:w-[400px]"
-      >
-        {/* Choose mode: two option cards */}
-        <Show when={drawerMode() === 'choose'}>
-          <div class="flex flex-col gap-3 p-6" data-config-choose>
-            <Show when={!ctx.isAtLimit()}>
-              <button
-                type="button"
-                onClick={handleChooseCreate}
-                class="flex items-start gap-3 rounded-lg border border-neutral-200 p-4 text-left transition hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                data-config-choose-create
+                    <Button
+                      size="sm"
+                      color="transparent"
+                      class="border-0 hover:text-red-500"
+                      icon={Trash01Icon}
+                      aria-label={ctx.labels().deleteConfiguration}
+                      onClick={() => handleDeleteConfig(config.id)}
+                    />
+                  </>
+                }
               >
-                <Copy01Icon
-                  class="mt-0.5 size-5 shrink-0 text-neutral-500 dark:text-neutral-400"
-                  aria-hidden="true"
+                <TextInput
+                  placeholder={ctx.labels().configNamePlaceholder}
+                  value={configNameEdit()}
+                  onInput={(e) => setConfigNameEdit(e.currentTarget.value)}
+                  autofocus
                 />
-                <div>
-                  <p class="text-sm font-medium text-neutral-900 dark:text-white">
-                    {ctx.labels().createNewConfiguration}
-                  </p>
-                  <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
-                    {ctx.labels().createNewConfigurationDescription}
-                  </p>
-                </div>
-              </button>
-            </Show>
+                <button onClick={() => handleRename()} class="p-1 text-emerald-500">
+                  <CheckIcon class="size-4" />
+                </button>
+                <button onClick={() => handleCancelRename()} class="p-1 text-red-500">
+                  <XIcon class="size-4" />
+                </button>
+              </Show>
+            </div>
+          )}
+        </For>
+      </div>
 
-            <button
-              type="button"
-              onClick={handleChooseUpdate}
-              class="flex items-start gap-3 rounded-lg border border-neutral-200 p-4 text-left transition hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-              data-config-choose-update
-            >
-              <RefreshCcw01Icon
-                class="mt-0.5 size-5 shrink-0 text-neutral-500 dark:text-neutral-400"
-                aria-hidden="true"
-              />
-              <div>
-                <p class="text-sm font-medium text-neutral-900 dark:text-white">
-                  {ctx.labels().updateCurrentConfiguration}
-                </p>
-                <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
-                  {ctx.labels().updateCurrentConfigurationDescription}
-                </p>
-              </div>
-            </button>
-          </div>
-        </Show>
-
-        {/* Create / Edit mode: name form + footer */}
-        <Show when={drawerMode() === 'create' || drawerMode() === 'edit'}>
-          <div class="flex h-full flex-col">
-            <div class="flex-1 p-6">
+      {/* Config saving section */}
+      <Show when={ctx.isDirty()}>
+        <div class="border-current/10 space-y-3 border-t pt-4">
+          <Show when={saveMode() === 'create'}>
+            <div class="flex flex-col gap-2">
               <TextInput
                 label={ctx.labels().configNameLabel}
                 placeholder={ctx.labels().configNamePlaceholder}
                 value={configName()}
                 onInput={(e) => setConfigName(e.currentTarget.value)}
               />
-            </div>
-
-            <div class="flex items-center gap-2 border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
-              <Show when={drawerMode() === 'edit'}>
-                <Popover
-                  content={deleteConfirmContent}
-                  position="top-start"
-                  isOpen={deleteConfirmOpen()}
-                  onOpenChange={setDeleteConfirmOpen}
-                  aria-label={ctx.labels().confirmDelete}
-                  floatingClass="z-[100]"
-                >
-                  <Button
-                    size="sm"
-                    color="danger"
-                    icon={DeleteIcon}
-                    aria-label={ctx.labels().deleteConfiguration}
-                  >
-                    {ctx.labels().deleteConfiguration}
-                  </Button>
-                </Popover>
-              </Show>
-
-              <div class="flex-1" />
-
-              <Show
-                when={cameFromChoose() && drawerMode() === 'create'}
-                fallback={
-                  <Button
-                    size="sm"
-                    color="transparent"
-                    onClick={() => setDrawerOpen(false)}
-                  >
-                    {ctx.labels().cancel}
-                  </Button>
-                }
-              >
-                <Button
-                  size="sm"
-                  color="transparent"
-                  onClick={() => setDrawerMode('choose')}
-                >
-                  {ctx.labels().back}
-                </Button>
-              </Show>
-
               <Button
                 size="sm"
                 onClick={handleSubmit}
@@ -320,9 +253,81 @@ export function DataTableConfigs(): JSX.Element {
                 {ctx.labels().save}
               </Button>
             </div>
+          </Show>
+
+          <div class="flex flex-col gap-2">
+            <Show
+              when={ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null}
+            >
+              <Button class="w-auto" onClick={handleDirectConfigUpdate}>
+                {ctx.labels().updateCurrentConfiguration}
+              </Button>
+            </Show>
+            <Show when={saveMode() === 'idle' && ctx.isDirty() && !ctx.isAtLimit()}>
+              <Button
+                onClick={() => handleSaveNew()}
+                disabled={ctx.isAtLimit()}
+                class="w-auto"
+                color={
+                  ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null
+                    ? 'transparent'
+                    : 'info'
+                }
+                title={ctx.isAtLimit() ? ctx.ariaLabels().saveAsNewConfigTitle : ''}
+              >
+                {ctx.labels().saveAsNew}
+              </Button>
+            </Show>
           </div>
-        </Show>
-      </Drawer>
+
+          {/* [TODO]: Implement context reset here and in DataTable context */}
+          {/* <Button
+              onClick={resetConfig}
+              color='transparent'
+            >
+              Reset to Default
+            </Button> */}
+        </div>
+      </Show>
+    </div>
+  );
+
+  return (
+    <Show when={ctx.configEnabled}>
+      <div class="flex items-center justify-end gap-2">
+        <Popover
+          content={configListContent}
+          position="bottom-end"
+          isOpen={listOpen()}
+          onOpenChange={(value) => {
+            setSaveMode('idle');
+            setConfigName('');
+            setListOpen(value);
+          }}
+          aria-label={ctx.labels().configurations}
+        >
+          <Button
+            size="sm"
+            color="transparent"
+            class="rounded-b-none border-b-0 border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+            icon={Settings01Icon}
+            data-config-list-trigger
+          >
+            {ctx.labels().configurations} ({ctx.configs().length}/{MAX_CONFIGS})
+            <Show
+              when={ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)}
+            >
+              <span class="h-2 w-2 rounded-full bg-amber-500" />
+            </Show>
+            <Show when={ctx.isDirty() && ctx.isAtLimit() && ctx.activeConfigId === null}>
+              <span
+                class="h-2 w-2 animate-pulse rounded-full bg-amber-500"
+                title={ctx.labels().maxConfigsReached}
+              />
+            </Show>
+          </Button>
+        </Popover>
+      </div>
     </Show>
   );
 }

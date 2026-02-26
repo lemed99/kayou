@@ -71,6 +71,7 @@ export interface DataTableInternalContextValue<T> {
   isAtLimit: Accessor<boolean>;
   hasConfigs: Accessor<boolean>;
   onSaveConfig: (name: string) => boolean;
+  restoreConfig: (config: SavedTableConfig) => void;
   onUpdateConfig: (id: string, name: string) => void;
   onDeleteConfig: (id: string) => void;
   onActivateConfig: (id: string | null) => void;

@@ -4,7 +4,6 @@ import { Columns03Icon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import { MultiSelect } from '../Select';
-import { DataTableConfigs } from './DataTableConfigs';
 import { DataTableFilters } from './DataTableFilters';
 import { useDataTableInternal } from './DataTableInternalContext';
 import { FilterConfig, FilterOperator, FilterState, FilterValue } from './types';
@@ -65,7 +64,6 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
 
         {/* Right: Configs + Columns */}
         <div class="flex shrink-0 items-center gap-2">
-          <DataTableConfigs />
           <Show when={ctx.configureColumns}>
             <MultiSelect
               sizing="sm"

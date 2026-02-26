@@ -2,7 +2,7 @@ import { Accessor, createMemo, createSignal } from 'solid-js';
 
 import { ActiveFilter, FilterState, SavedTableConfig, SortEntry } from './types';
 
-const MAX_CONFIGS = 3;
+export const MAX_CONFIGS = 3;
 
 interface UseDataTableConfigsOptions {
   readConfigs: () => SavedTableConfig[];
@@ -22,6 +22,7 @@ interface UseDataTableConfigsResult {
   isAtLimit: Accessor<boolean>;
   hasConfigs: Accessor<boolean>;
   saveConfig: (name: string) => boolean;
+  restoreConfig: (config: SavedTableConfig) => void;
   updateConfig: (id: string, name: string) => void;
   deleteConfig: (id: string) => void;
   activateConfig: (id: string | null) => void;
@@ -32,10 +33,7 @@ function serializeFilters(filters: FilterState): [string, ActiveFilter][] {
   return Array.from(filters.entries());
 }
 
-function filtersEqual(
-  a: [string, ActiveFilter][],
-  b: [string, ActiveFilter][],
-): boolean {
+function filtersEqual(a: [string, ActiveFilter][], b: [string, ActiveFilter][]): boolean {
   if (a.length !== b.length) return false;
   const sortedA = [...a].sort(([ka], [kb]) => ka.localeCompare(kb));
   const sortedB = [...b].sort(([ka], [kb]) => ka.localeCompare(kb));
@@ -101,8 +99,7 @@ export function useDataTableConfigs(
       currentSorts.length !== baselineSorts.length ||
       currentSorts.some(
         (s, i) =>
-          s.key !== baselineSorts[i].key ||
-          s.direction !== baselineSorts[i].direction,
+          s.key !== baselineSorts[i].key || s.direction !== baselineSorts[i].direction,
       )
     )
       return true;
@@ -126,6 +123,10 @@ export function useDataTableConfigs(
     persistAndSet([...configs(), newConfig]);
     setActiveConfigId(newConfig.id);
     return true;
+  };
+
+  const restoreConfig = (config: SavedTableConfig) => {
+    persistAndSet([...configs(), config]);
   };
 
   const updateConfig = (id: string, name: string) => {
@@ -163,6 +164,7 @@ export function useDataTableConfigs(
     isAtLimit,
     hasConfigs,
     saveConfig,
+    restoreConfig,
     updateConfig,
     deleteConfig,
     activateConfig,

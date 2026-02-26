@@ -1,4 +1,5 @@
 import {
+  For,
   JSX,
   Show,
   createEffect,
@@ -12,6 +13,7 @@ import { createStore, reconcile } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 
 import { type BackgroundScrollBehavior, type Placement, useFloating } from '@kayou/hooks';
+import { XIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
@@ -20,11 +22,11 @@ import Button from '../Button';
 import HelperText from '../HelperText';
 import Label from '../Label';
 import TextInput from '../TextInput';
+import TimePicker from '../TimePicker';
 import { formatTime as formatTimeUtil } from '../TimePicker/timeUtils';
 import Calendar from './Calendar';
 import type { DatePickerShortcut } from './DatePickerContext';
 import Shortcuts from './Shortcuts';
-import TimePicker from './TimePicker';
 import {
   addMonths,
   formatDate,
@@ -71,6 +73,9 @@ export interface DatePickerAriaLabels {
   rangeStartSelected: string;
   monthSelectorOpened: string;
   yearSelectorOpened: string;
+  rangeSelectedForEdit: string;
+  startTime: string;
+  endTime: string;
 }
 
 export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
@@ -95,6 +100,33 @@ export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
   rangeStartSelected: 'Start date selected. Now choose an end date.',
   monthSelectorOpened: 'Month selector opened. Use arrow keys to navigate.',
   yearSelectorOpened: 'Year selector opened. Use arrow keys to navigate.',
+  rangeSelectedForEdit: 'Range selected for edition',
+  startTime: 'Start time',
+  endTime: 'End time',
+};
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
+type DateStruct = {
+  /** Selected date for single mode (ISO format). */
+  date: string;
+  /** Selected hour (0-23). */
+  hour?: number;
+  /** Selected minute (0-59). */
+  minute?: number;
+  /** Selected second (0-59). */
+  second?: number;
+};
+
+type RangeValue = {
+  /** Range Id */
+  id: string;
+  /** Start date for range mode (ISO format). */
+  startDate: string;
+  /** End date for range mode (ISO format). */
+  endDate: string;
 };
 
 /**
@@ -104,11 +136,13 @@ export interface DateValue {
   /** Selected date for single mode (ISO format). */
   date?: string;
   /** Start date for range mode (ISO format). */
-  startDate?: string;
+  startDate?: DateStruct;
   /** End date for range mode (ISO format). */
-  endDate?: string;
+  endDate?: DateStruct;
   /** Array of selected dates for multiple mode (ISO format). */
   multipleDates?: string[];
+  /** Array of selacted dates ranges for multiples range mode (ISO format) */
+  multipleRanges?: RangeValue[];
   /** Selected hour (0-23). */
   hour?: number;
   /** Selected minute (0-59). */
@@ -120,7 +154,7 @@ export interface DateValue {
 /**
  * Selection mode for the DatePicker.
  */
-export type DatePickerType = 'single' | 'multiple' | 'range';
+export type DatePickerType = 'single' | 'multiple' | 'range' | 'multipleRange';
 
 /**
  * Props for the DatePicker component.
@@ -152,6 +186,10 @@ export interface DatePickerProps {
   minDate?: string;
   /** Maximum selectable date (ISO format). */
   maxDate?: string;
+  /** Minimum selectable multiples dates or ranges. */
+  minSelectable?: number;
+  /** Maximum selectable multiples dates or ranges. */
+  maxSelectable?: number;
   /** Label displayed above the input. */
   label?: string;
   /** Helper text displayed below the input. */
@@ -231,9 +269,23 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [focusedDate, setFocusedDate] = createSignal<Date | null>(null);
   const [datesObjectValue, setDatesObjectValue] = createStore<DateValue>({});
-  const [hour, setHour] = createSignal(0);
-  const [minute, setMinute] = createSignal(0);
-  const [second, setSecond] = createSignal(0);
+  const [time, setTime] = createStore({
+    hour: 0,
+    minute: 0,
+    second: 0,
+  });
+  const [startTime, setStartTime] = createStore({
+    hour: 0,
+    minute: 0,
+    second: 0,
+  });
+  const [endTime, setEndTime] = createStore({
+    hour: 0,
+    minute: 0,
+    second: 0,
+  });
+
+  const [newRangeId, setNewRangeId] = createSignal<string | null>(null);
 
   const [hoveredDate, setHoveredDate] = createSignal<Date | null>(null);
   const [usingKeyboard, setUsingKeyboard] = createSignal(false);
@@ -256,7 +308,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const minDate = () => (props.minDate ? parseDate(props.minDate) : undefined);
 
   // Time picker props
-  const showTime = () => props.showTime && props.type === 'single';
+  const showTime = () =>
+    props.showTime && (props.type === 'single' || props.type === 'range');
   const timeFormat = () => props.timeFormat ?? '24h';
   const minuteStep = () => props.minuteStep ?? 1;
   const secondStep = () => props.secondStep ?? 1;
@@ -276,9 +329,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     }
 
     // Sync time values from props
-    if (props.value.hour !== undefined) setHour(props.value.hour);
-    if (props.value.minute !== undefined) setMinute(props.value.minute);
-    if (props.value.second !== undefined) setSecond(props.value.second);
+    if (props.value.hour !== undefined) setTime('hour', props.value.hour);
+    if (props.value.minute !== undefined) setTime('minute', props.value.minute);
+    if (props.value.second !== undefined) setTime('second', props.value.second);
 
     switch (type()) {
       case 'single':
@@ -307,16 +360,55 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         if (
           props.value.startDate &&
           props.value.endDate &&
-          isDateValid(props.value.startDate) &&
-          isDateValid(props.value.endDate)
+          isDateValid(props.value.startDate.date) &&
+          isDateValid(props.value.endDate.date)
         ) {
           setDatesObjectValue({
-            startDate: toISO(parseDate(props.value.startDate)),
-            endDate: toISO(parseDate(props.value.endDate)),
+            startDate: {
+              date: toISO(parseDate(props.value.startDate.date)),
+              hour: props.value.startDate.hour,
+              minute: props.value.startDate.minute,
+              second: props.value.startDate.second,
+            },
+            endDate: {
+              date: toISO(parseDate(props.value.endDate.date)),
+              hour: props.value.endDate.hour,
+              minute: props.value.endDate.minute,
+              second: props.value.endDate.second,
+            },
           });
-          setCurrentDate(parseDate(props.value.startDate));
+          setCurrentDate(parseDate(props.value.startDate.date));
+          setStartTime({
+            hour: props.value.startDate.hour,
+            minute: props.value.startDate.minute,
+            second: props.value.startDate.second,
+          });
+          setEndTime({
+            hour: props.value.endDate.hour,
+            minute: props.value.endDate.minute,
+            second: props.value.endDate.second,
+          });
         }
         break;
+      case 'multipleRange':
+        if (
+          props.value.multipleRanges &&
+          props.value.multipleRanges.every(
+            (rangeValue) =>
+              !!rangeValue.startDate &&
+              !!rangeValue.endDate &&
+              isDateValid(rangeValue.startDate) &&
+              isDateValid(rangeValue.endDate),
+          )
+        ) {
+          setDatesObjectValue({
+            multipleRanges: props.value.multipleRanges.map((rangeValue) => ({
+              id: rangeValue.id,
+              startDate: rangeValue.startDate,
+              endDate: rangeValue.endDate,
+            })),
+          });
+        }
     }
   });
 
@@ -339,19 +431,39 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       case 'single': {
         const value: DateValue = { date: datesObjectValue.date };
         if (showTime()) {
-          value.hour = hour();
-          value.minute = minute();
-          value.second = second();
+          value.hour = time.hour;
+          value.minute = time.minute;
+          value.second = time.second;
         }
         return value;
       }
       case 'multiple':
         return { multipleDates: datesObjectValue.multipleDates };
       case 'range':
+        if (datesObjectValue.startDate && datesObjectValue.endDate) {
+          if (showTime()) {
+            return {
+              startDate: {
+                date: datesObjectValue.startDate.date,
+                hour: startTime.hour,
+                minute: startTime.minute,
+                second: startTime.second,
+              },
+              endDate: {
+                date: datesObjectValue.endDate.date,
+                hour: endTime.hour,
+                minute: endTime.minute,
+                second: endTime.second,
+              },
+            };
+          }
+        }
         return {
           startDate: datesObjectValue.startDate,
           endDate: datesObjectValue.endDate,
         };
+      case 'multipleRange':
+        return { multipleRanges: datesObjectValue.multipleRanges };
       default:
         return {};
     }
@@ -364,14 +476,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     // Reset store to the value from props (last committed value)
     if (props.value) {
       setDatesObjectValue(reconcile(props.value));
-      if (props.value.hour !== undefined) setHour(props.value.hour);
-      if (props.value.minute !== undefined) setMinute(props.value.minute);
-      if (props.value.second !== undefined) setSecond(props.value.second);
+      if (props.value.hour !== undefined) setTime('hour', props.value.hour);
+      if (props.value.minute !== undefined) setTime('minute', props.value.minute);
+      if (props.value.second !== undefined) setTime('second', props.value.second);
     } else {
       setDatesObjectValue(reconcile({}));
-      setHour(0);
-      setMinute(0);
-      setSecond(0);
+      setTime(reconcile({ hour: 0, minute: 0, second: 0 }));
     }
     closeCalendar();
   };
@@ -402,9 +512,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           // User will confirm with footer Apply button
           setDatesObjectValue({
             date: dateISO,
-            hour: hour(),
-            minute: minute(),
-            second: second(),
+            hour: time.hour,
+            minute: time.minute,
+            second: time.second,
           });
           announce(`Selected ${dateLabel}`);
           focusCurrentDateButton();
@@ -426,11 +536,29 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       case 'multiple': {
         let newDates: string[];
         if (datesObjectValue.multipleDates?.includes(dateISO)) {
-          newDates = datesObjectValue.multipleDates.filter((d) => d !== dateISO);
-          announce(`Deselected ${dateLabel}`);
+          const atMinLimit =
+            (datesObjectValue.multipleDates?.length ?? 0 - 1) === props.minSelectable;
+          if (atMinLimit) {
+            newDates = [...(datesObjectValue.multipleDates || [])];
+            announce(
+              `Limit of minimum ${props.maxSelectable} dates reached. Cannot deselect current date`,
+            );
+          } else {
+            newDates = datesObjectValue.multipleDates.filter((d) => d !== dateISO);
+            announce(`Deselected ${dateLabel}`);
+          }
         } else {
-          newDates = [...(datesObjectValue.multipleDates || []), dateISO];
-          announce(`Selected ${dateLabel}`);
+          const atMaxLimit =
+            (datesObjectValue.multipleDates?.length ?? 0 - 1) === props.maxSelectable;
+          if (atMaxLimit) {
+            newDates = [...(datesObjectValue.multipleDates || [])];
+            announce(
+              `Limit of maximum ${props.maxSelectable} dates reached. Cannot select a new one`,
+            );
+          } else {
+            newDates = [...(datesObjectValue.multipleDates || []), dateISO];
+            announce(`Selected ${dateLabel}`);
+          }
         }
         setDatesObjectValue('multipleDates', newDates);
         if (!hasFooter()) {
@@ -444,30 +572,50 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           !datesObjectValue.startDate ||
           (datesObjectValue.startDate && datesObjectValue.endDate)
         ) {
-          const newValue = { startDate: dateISO, endDate: undefined };
+          const newValue = { startDate: { date: dateISO }, endDate: undefined };
           setDatesObjectValue(newValue);
-          if (!hasFooter()) {
+          if (!hasFooter() || !showTime()) {
             props.onChange?.(newValue);
           }
           announce(`Range start: ${dateLabel}. ${a().rangeStartSelected}`);
           focusCurrentDateButton();
         } else if (datesObjectValue.startDate && !datesObjectValue.endDate) {
-          const startDateParsed = parseDate(datesObjectValue.startDate);
+          const startDateParsed = parseDate(datesObjectValue.startDate.date);
           let newValue: DateValue;
           if (date < startDateParsed) {
             newValue = {
-              startDate: dateISO,
+              startDate: { date: dateISO },
               endDate: datesObjectValue.startDate,
             };
           } else {
             newValue = {
               startDate: datesObjectValue.startDate,
-              endDate: dateISO,
+              endDate: { date: dateISO },
+            };
+          }
+          if (showTime()) {
+            newValue = {
+              startDate: newValue.startDate
+                ? {
+                    ...newValue.startDate,
+                    hour: startTime.hour,
+                    minute: startTime.minute,
+                    second: startTime.second,
+                  }
+                : newValue.startDate,
+              endDate: newValue.endDate
+                ? {
+                    ...newValue.endDate,
+                    hour: endTime.hour,
+                    minute: endTime.minute,
+                    second: endTime.second,
+                  }
+                : newValue.endDate,
             };
           }
           setDatesObjectValue(newValue);
           setHoveredDate(null);
-          if (hasFooter()) {
+          if (hasFooter() || showTime()) {
             announce(`Range end: ${dateLabel}. Range selected.`);
             focusCurrentDateButton();
           } else {
@@ -476,6 +624,163 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             closeCalendar();
           }
         }
+        break;
+      }
+      case 'multipleRange': {
+        const currentRanges = datesObjectValue.multipleRanges || [];
+        const currentCount = currentRanges.length;
+
+        // No active range selection in progress and no containing range → start new range
+        if (!datesObjectValue.startDate || datesObjectValue.endDate) {
+          if (props.maxSelectable) {
+            const atMaxLimit = currentCount >= props.maxSelectable;
+            if (atMaxLimit) {
+              announce(
+                `Maximum limit of ${props.maxSelectable} ranges reached. Cannot add a new range.`,
+              );
+              focusCurrentDateButton();
+              break;
+            }
+          }
+
+          const newRangeId = generateId();
+          const newValue = {
+            multipleRanges: [
+              ...(datesObjectValue.multipleRanges || []),
+              // Add placeholder range that will be completed
+            ],
+            startDate: { date: dateISO },
+            endDate: undefined,
+          };
+          setDatesObjectValue(newValue);
+          setNewRangeId(newRangeId);
+          if (!hasFooter()) {
+            props.onChange?.(newValue);
+          }
+          announce(`New range start: ${dateLabel}. ${a().rangeStartSelected}`);
+          focusCurrentDateButton();
+          break;
+        }
+
+        // Complete the in-progress range
+        if (datesObjectValue.startDate && !datesObjectValue.endDate) {
+          const startDateParsed = parseDate(datesObjectValue.startDate.date);
+
+          let startDate: { date: string };
+          let endDate: { date: string };
+
+          if (date < startDateParsed) {
+            startDate = { date: dateISO };
+            endDate = datesObjectValue.startDate;
+          } else {
+            startDate = datesObjectValue.startDate;
+            endDate = { date: dateISO };
+          }
+
+          // Remove placeholder if exists, add completed range
+          const otherRanges = (datesObjectValue.multipleRanges || []).filter(
+            (r) => r.id !== newRangeId(),
+          );
+
+          if (props.maxSelectable) {
+            const atMaxLimit = otherRanges.length + 1 > props.maxSelectable;
+            if (atMaxLimit) {
+              announce(
+                `Maximum limit of ${props.maxSelectable} ranges reached. Cannot add a new range.`,
+              );
+              setHoveredDate(null);
+              setNewRangeId(null);
+              focusCurrentDateButton();
+              break;
+            }
+          }
+
+          // check if new range contains existing ranges
+          const existingRangesIncludedInNewRange = otherRanges.filter(
+            (range) =>
+              parseDate(startDate.date) <= parseDate(range.startDate) &&
+              parseDate(endDate.date) >= parseDate(range.endDate),
+          );
+
+          //  if it contains existing ranges remove them
+          if (existingRangesIncludedInNewRange.length > 0) {
+            const newRange = {
+              id: newRangeId()!,
+              startDate: startDate.date,
+              endDate: endDate.date,
+            };
+
+            const existingRangesIds = existingRangesIncludedInNewRange.map(
+              (range) => range.id,
+            );
+
+            const rangesNotIncluded = otherRanges.filter(
+              (range) => !existingRangesIds.includes(range.id),
+            );
+
+            const newValue = {
+              multipleRanges: [...rangesNotIncluded, newRange],
+              startDate: undefined,
+              endDate: undefined,
+            };
+            setDatesObjectValue(newValue);
+            setHoveredDate(null);
+            setNewRangeId(null);
+            announce(`Range end: ${dateLabel}. Range completed.`);
+            focusCurrentDateButton();
+            break;
+          }
+
+          // If there are no strictly encompassed ranges, overlaps/contacts can still be merged.
+          let mergedStartStr = startDate.date;
+          let mergedEndStr = endDate.date;
+          let mergedStart = parseDate(mergedStartStr);
+          let mergedEnd = parseDate(mergedEndStr);
+
+          const rangesToKeep: RangeValue[] = [];
+          for (const range of otherRanges) {
+            const rStart = parseDate(range.startDate);
+            const rEnd = parseDate(range.endDate);
+
+            const overlapOrTouch = mergedStart <= rEnd && mergedEnd >= rStart;
+            if (overlapOrTouch) {
+              if (rStart < mergedStart) {
+                mergedStart = rStart;
+                mergedStartStr = range.startDate;
+              }
+              if (rEnd > mergedEnd) {
+                mergedEnd = rEnd;
+                mergedEndStr = range.endDate;
+              }
+            } else {
+              rangesToKeep.push(range);
+            }
+          }
+
+          const newRange = {
+            id: newRangeId()!,
+            startDate: mergedStartStr,
+            endDate: mergedEndStr,
+          };
+
+          const newValue = {
+            multipleRanges: [...rangesToKeep, newRange],
+            startDate: undefined,
+            endDate: undefined,
+          };
+
+          setDatesObjectValue(newValue);
+          setHoveredDate(null);
+          setNewRangeId(null);
+          announce(`Range end: ${dateLabel}. Range completed.`);
+          focusCurrentDateButton();
+
+          if (!hasFooter()) {
+            props.onChange?.(newValue);
+          }
+          break;
+        }
+
         break;
       }
     }
@@ -494,7 +799,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (value.date) {
       // Single date shortcut
       const newValue: DateValue = showTime()
-        ? { date: value.date, hour: hour(), minute: minute(), second: second() }
+        ? { date: value.date, hour: time.hour, minute: time.minute, second: time.second }
         : { date: value.date };
       setDatesObjectValue(newValue);
       setCurrentDate(parseDate(value.date));
@@ -505,8 +810,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     } else if (value.startDate && value.endDate) {
       // Range shortcut
       const newValue: DateValue = {
-        startDate: value.startDate,
-        endDate: value.endDate,
+        startDate: { date: value.startDate },
+        endDate: { date: value.endDate },
       };
       setDatesObjectValue(newValue);
       setCurrentDate(parseDate(value.startDate));
@@ -532,40 +837,101 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       case 'range':
         if (!datesObjectValue.startDate || !datesObjectValue.endDate) return false;
         return (
-          isSameDay(date, parseDate(datesObjectValue.startDate)) &&
-          isSameDay(date, parseDate(datesObjectValue.endDate))
+          isSameDay(date, parseDate(datesObjectValue.startDate.date)) &&
+          isSameDay(date, parseDate(datesObjectValue.endDate.date))
         );
+
       default:
         return false;
     }
   };
 
   const isRangeDateSelected = (date: Date): { start: boolean; end: boolean } => {
-    if (type() !== 'range' || datesObjectValue.startDate === datesObjectValue.endDate)
+    const isNotRangetype = type() !== 'range' && type() !== 'multipleRange';
+
+    if (
+      isNotRangetype &&
+      datesObjectValue.startDate?.date === datesObjectValue.endDate?.date
+    ) {
       return { start: false, end: false };
-    return {
-      start: datesObjectValue.startDate
-        ? isSameDay(date, parseDate(datesObjectValue.startDate))
-        : false,
-      end: datesObjectValue.endDate
-        ? isSameDay(date, parseDate(datesObjectValue.endDate))
-        : false,
-    };
+    }
+
+    if (type() === 'range') {
+      return {
+        start: datesObjectValue.startDate
+          ? isSameDay(date, parseDate(datesObjectValue.startDate.date))
+          : false,
+        end: datesObjectValue.endDate
+          ? isSameDay(date, parseDate(datesObjectValue.endDate.date))
+          : false,
+      };
+    }
+
+    if (type() === 'multipleRange') {
+      const currentStart =
+        datesObjectValue.startDate &&
+        isSameDay(date, parseDate(datesObjectValue.startDate.date));
+      const currentEnd =
+        datesObjectValue.endDate &&
+        isSameDay(date, parseDate(datesObjectValue.endDate.date));
+
+      const existingStart =
+        datesObjectValue.multipleRanges?.some((range) =>
+          isSameDay(date, parseDate(range.startDate)),
+        ) ?? false;
+
+      const existingEnd =
+        datesObjectValue.multipleRanges?.some((range) =>
+          isSameDay(date, parseDate(range.endDate)),
+        ) ?? false;
+
+      return {
+        start: !!currentStart || existingStart,
+        end: !!currentEnd || existingEnd,
+      };
+    }
+
+    return { start: false, end: false };
   };
 
   const isDateInRange = (date: Date): boolean => {
-    if (type() !== 'range') return false;
+    if (type() !== 'range' && type() !== 'multipleRange') return false;
+
+    if (type() === 'multipleRange') {
+      const inExisting =
+        datesObjectValue.multipleRanges?.some((range) =>
+          isInRange(date, range.startDate, range.endDate),
+        ) ?? false;
+
+      if (datesObjectValue.startDate && datesObjectValue.endDate) {
+        const inCurrent = isInRange(
+          date,
+          datesObjectValue.startDate.date,
+          datesObjectValue.endDate.date,
+        );
+        return inExisting || inCurrent;
+      }
+
+      return inExisting;
+    }
+
     if (!datesObjectValue.startDate || !datesObjectValue.endDate) return false;
-    return isInRange(date, datesObjectValue.startDate, datesObjectValue.endDate);
+
+    return isInRange(
+      date,
+      datesObjectValue.startDate.date,
+      datesObjectValue.endDate.date,
+    );
   };
 
   // Memoize preview range boundaries so each button only does a cheap Date comparison
   const previewRange = createMemo(() => {
-    if (type() !== 'range') return null;
+    if (type() !== 'range' && type() !== 'multipleRange') return null;
+
     if (!datesObjectValue.startDate || datesObjectValue.endDate) return null;
     const hovered = hoveredDate();
     if (!hovered) return null;
-    const start = parseDate(datesObjectValue.startDate);
+    const start = parseDate(datesObjectValue.startDate.date);
     return hovered >= start ? { start, end: hovered } : { start: hovered, end: start };
   });
 
@@ -632,9 +998,42 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           .join(' • ');
       case 'range':
         if (datesObjectValue.startDate && datesObjectValue.endDate) {
-          return `${formatDate(datesObjectValue.startDate, displayFormat())} - ${formatDate(datesObjectValue.endDate, displayFormat())}`;
+          let startDateStr = `${formatDate(datesObjectValue.startDate.date, displayFormat())}`;
+          let endDateStr = `${formatDate(datesObjectValue.endDate.date, displayFormat())}`;
+
+          if (
+            showTime() &&
+            datesObjectValue.startDate.hour !== undefined &&
+            datesObjectValue.startDate.minute !== undefined &&
+            datesObjectValue.startDate.second !== undefined
+          ) {
+            startDateStr = `${startDateStr} ${formatTime(datesObjectValue.startDate.hour, datesObjectValue.startDate.minute, datesObjectValue.startDate.second)}`;
+          }
+          if (
+            showTime() &&
+            datesObjectValue.endDate.hour !== undefined &&
+            datesObjectValue.endDate.minute !== undefined &&
+            datesObjectValue.endDate.second !== undefined
+          ) {
+            endDateStr = `${endDateStr} ${formatTime(datesObjectValue.endDate.hour, datesObjectValue.endDate.minute, datesObjectValue.endDate.second)}`;
+          }
+          return `${startDateStr} - ${endDateStr}`;
         }
         return '';
+      case 'multipleRange':
+        if (
+          !datesObjectValue.multipleRanges ||
+          datesObjectValue.multipleRanges.length === 0
+        ) {
+          return '';
+        }
+        return datesObjectValue.multipleRanges
+          .map(
+            (range) =>
+              `${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`,
+          )
+          .reverse()
+          .join(' • ');
     }
   });
 
@@ -645,9 +1044,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const getInitialFocusDate = (): Date => {
     return (
       (datesObjectValue.date && parseDate(datesObjectValue.date)) ||
-      (datesObjectValue.startDate && parseDate(datesObjectValue.startDate)) ||
+      (datesObjectValue.startDate && parseDate(datesObjectValue.startDate.date)) ||
       (datesObjectValue.multipleDates?.[0] &&
         parseDate(datesObjectValue.multipleDates[0])) ||
+      (datesObjectValue.multipleRanges?.[0] &&
+        parseDate(datesObjectValue.multipleRanges[0].startDate)) ||
       new Date()
     );
   };
@@ -950,6 +1351,24 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     }
   };
 
+  const removeCurrentRange = (rangeId: string) => {
+    if (props.minSelectable) {
+      const currentRanges = datesObjectValue.multipleRanges || [];
+      const currentCount = currentRanges.length;
+      if (currentCount <= props.minSelectable) {
+        announce(
+          `Minimum limit of ${props.minSelectable} ranges reached. Cannot remove range.`,
+        );
+        return;
+      }
+    }
+
+    setDatesObjectValue(
+      'multipleRanges',
+      datesObjectValue.multipleRanges?.filter((range) => range.id !== rangeId),
+    );
+  };
+
   return (
     <div class={twMerge('relative w-full text-neutral-700 dark:text-neutral-200')}>
       {/* Hidden input for form integration (ISO format for server-side parsing) */}
@@ -961,7 +1380,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             type() === 'single'
               ? (datesObjectValue.date ?? '')
               : type() === 'range'
-                ? `${datesObjectValue.startDate ?? ''}/${datesObjectValue.endDate ?? ''}`
+                ? `${datesObjectValue.startDate?.date ?? ''}/${datesObjectValue.endDate?.date ?? ''}`
                 : (datesObjectValue.multipleDates ?? []).join(',')
           }
         />
@@ -1208,21 +1627,69 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   ariaLabels={a()}
                   announce={announce}
                 />
-                <Show when={showTime()}>
-                  <TimePicker
-                    hour={hour}
-                    minute={minute}
-                    second={second}
-                    onHourChange={setHour}
-                    onMinuteChange={setMinute}
-                    onSecondChange={setSecond}
-                    onEscape={closeCalendar}
-                    format={timeFormat()}
-                    minuteStep={minuteStep()}
-                    secondStep={secondStep()}
-                    showSeconds={showSeconds()}
-                    ariaLabels={a()}
-                  />
+                {/* Multi range list for multiple range */}
+                <Show when={datesObjectValue.multipleRanges}>
+                  <div class="space-y-2 border-t border-neutral-300 dark:border-neutral-800">
+                    <For each={datesObjectValue.multipleRanges}>
+                      {(range) => (
+                        <div class="flex items-center justify-between rounded-lg border border-neutral-300 p-1 pl-3 text-xs dark:border-neutral-800">
+                          <span>{`${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}</span>
+                          <button
+                            class="inline-flex cursor-pointer items-center justify-center rounded-sm bg-red-200 p-1 text-red-800 dark:bg-red-700 dark:text-red-200"
+                            onClick={() => removeCurrentRange(range.id)}
+                          >
+                            <XIcon class="size-4" />
+                          </button>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+                {/* Time picker for single date */}
+                <Show when={showTime() && props.type === 'single'}>
+                  <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
+                    <TimePicker
+                      value={time}
+                      onChange={setTime}
+                      // onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                      containerClass="w-auto"
+                    />
+                  </div>
+                </Show>
+                {/* Time picker for range dates */}
+                <Show when={showTime() && props.type === 'range'}>
+                  <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
+                    <TimePicker
+                      value={startTime}
+                      onChange={setStartTime}
+                      label={a().startTime}
+                      // onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                      containerClass="w-auto"
+                    />
+
+                    <TimePicker
+                      value={endTime}
+                      onChange={setEndTime}
+                      label={a().endTime}
+                      // onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                      containerClass="w-auto"
+                    />
+                  </div>
                 </Show>
                 <Show when={hasFooter()}>
                   <div
