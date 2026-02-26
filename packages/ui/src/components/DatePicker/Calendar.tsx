@@ -53,6 +53,10 @@ export interface CalendarProps {
   isDateInPreviewRange?: (date: Date) => boolean;
   /** Function to check if a date is the hovered endpoint of the preview range. */
   isPreviewEndpoint?: (date: Date) => boolean;
+  /** Function to check if a date falls within the editing range. */
+  isDateInEditingRange?: (date: Date) => boolean;
+  /** Function to check if a date is the hovered endpoint of the editing range. */
+  isEditingRangeEndpoint?: (date: Date) => boolean;
   /** Callback when a date is hovered (for range preview). */
   onDateHover?: (date: Date | null) => void;
   /** Callback when mouse moves over a date (to detect mouse-to-keyboard switch). */
@@ -415,6 +419,8 @@ const Calendar = (props: CalendarProps) => {
   const isPreviewEnd = (date: Date) => props.isPreviewEndpoint?.(date) ?? false;
   const isDisabled = (date: Date) => props.isDateDisabled(date);
   const isToday = (date: Date) => isSameDay(date, new Date());
+  const isInEditingRange = (date: Date) => props.isDateInEditingRange?.(date) ?? false;
+  const isEditingEnd = (date: Date) => props.isEditingRangeEndpoint?.(date) ?? false;
 
   /**
    * Focuses the currently focused date button in the calendar grid.
@@ -564,6 +570,14 @@ const Calendar = (props: CalendarProps) => {
                               'text-neutral-400': !isInCurrentMonth(date),
                               'text-blue-500':
                                 isToday(date) &&
+                                !isSelected(date) &&
+                                !isPreviewEnd(date) &&
+                                isInCurrentMonth(date),
+                              'bg-amber-500 text-white font-medium rounded-lg':
+                                isEditingEnd(date) && isInCurrentMonth(date),
+                              'bg-amber-100 dark:bg-amber-900/40':
+                                isInEditingRange(date) &&
+                                !isEditingEnd(date) &&
                                 !isSelected(date) &&
                                 !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),

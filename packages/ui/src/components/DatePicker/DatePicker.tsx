@@ -13,7 +13,7 @@ import { createStore, reconcile } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 
 import { type BackgroundScrollBehavior, type Placement, useFloating } from '@kayou/hooks';
-import { XIcon } from '@kayou/icons';
+import { Edit02Icon, XIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
@@ -286,6 +286,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   });
 
   const [newRangeId, setNewRangeId] = createSignal<string | null>(null);
+  const [editingRangeId, setEditingRangeId] = createSignal<string | null>(null);
 
   const [hoveredDate, setHoveredDate] = createSignal<Date | null>(null);
   const [usingKeyboard, setUsingKeyboard] = createSignal(false);
@@ -299,6 +300,13 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     ...DEFAULT_DATE_PICKER_ARIA_LABELS,
     ...props.ariaLabels,
   }));
+
+  const editingRange = createMemo(() => {
+    const id = editingRangeId();
+    return id
+      ? (datesObjectValue.multipleRanges?.find((r) => r.id === id) ?? null)
+      : null;
+  });
 
   const helperId = createUniqueId();
   const dialogId = createUniqueId();
@@ -419,6 +427,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     setIsOpen(false);
     setFocusedDate(null);
     setHoveredDate(null);
+    setEditingRangeId(null);
+    setNewRangeId(null);
     inputRef()?.focus();
     props.onBlur?.();
   };
@@ -483,6 +493,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       setDatesObjectValue(reconcile({}));
       setTime(reconcile({ hour: 0, minute: 0, second: 0 }));
     }
+    setEditingRangeId(null);
+    setNewRangeId(null);
     closeCalendar();
   };
 
@@ -629,37 +641,50 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       case 'multipleRange': {
         const currentRanges = datesObjectValue.multipleRanges || [];
         const currentCount = currentRanges.length;
+        const editingId = editingRangeId();
+        const isEditing = !!editingId;
 
         // No active range selection in progress and no containing range → start new range
         if (!datesObjectValue.startDate || datesObjectValue.endDate) {
-          if (props.maxSelectable) {
-            const atMaxLimit = currentCount >= props.maxSelectable;
-            if (atMaxLimit) {
-              announce(
-                `Maximum limit of ${props.maxSelectable} ranges reached. Cannot add a new range.`,
-              );
-              focusCurrentDateButton();
-              break;
+          if (!isEditing) {
+            // Normal case : new range
+            if (props.maxSelectable) {
+              const atMaxLimit = currentCount >= props.maxSelectable;
+              if (atMaxLimit) {
+                announce(
+                  `Maximum limit of ${props.maxSelectable} ranges reached. Cannot add a new range.`,
+                );
+                focusCurrentDateButton();
+                break;
+              }
             }
-          }
 
-          const newRangeId = generateId();
-          const newValue = {
-            multipleRanges: [
-              ...(datesObjectValue.multipleRanges || []),
-              // Add placeholder range that will be completed
-            ],
-            startDate: { date: dateISO },
-            endDate: undefined,
-          };
-          setDatesObjectValue(newValue);
-          setNewRangeId(newRangeId);
-          if (!hasFooter()) {
-            props.onChange?.(newValue);
+            const newRangeId = generateId();
+            const newValue = {
+              multipleRanges: datesObjectValue.multipleRanges
+                ? [...(datesObjectValue.multipleRanges || [])]
+                : undefined,
+              startDate: { date: dateISO },
+              endDate: undefined,
+            };
+            setDatesObjectValue(newValue);
+            setNewRangeId(newRangeId);
+            announce(`New range start: ${dateLabel}. ${a().rangeStartSelected}`);
+            focusCurrentDateButton();
+            break;
+          } else {
+            // editing mode : we keep editingId as newRangeId
+            const newValue = {
+              ...datesObjectValue,
+              startDate: { date: dateISO },
+              endDate: undefined,
+            };
+            setDatesObjectValue(newValue);
+
+            announce(`New range start: ${dateLabel}. ${a().rangeStartSelected}`);
+            focusCurrentDateButton();
+            break;
           }
-          announce(`New range start: ${dateLabel}. ${a().rangeStartSelected}`);
-          focusCurrentDateButton();
-          break;
         }
 
         // Complete the in-progress range
@@ -726,6 +751,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             setDatesObjectValue(newValue);
             setHoveredDate(null);
             setNewRangeId(null);
+            setEditingRangeId(null); // get out of edit mode
             announce(`Range end: ${dateLabel}. Range completed.`);
             focusCurrentDateButton();
             break;
@@ -772,6 +798,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           setDatesObjectValue(newValue);
           setHoveredDate(null);
           setNewRangeId(null);
+          setEditingRangeId(null); // get out of edit mode
           announce(`Range end: ${dateLabel}. Range completed.`);
           focusCurrentDateButton();
 
@@ -875,15 +902,16 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         datesObjectValue.endDate &&
         isSameDay(date, parseDate(datesObjectValue.endDate.date));
 
-      const existingStart =
-        datesObjectValue.multipleRanges?.some((range) =>
-          isSameDay(date, parseDate(range.startDate)),
-        ) ?? false;
+      const rangesForBlue =
+        datesObjectValue.multipleRanges?.filter((r) => r.id !== editingRangeId()) ?? [];
 
-      const existingEnd =
-        datesObjectValue.multipleRanges?.some((range) =>
-          isSameDay(date, parseDate(range.endDate)),
-        ) ?? false;
+      const existingStart = rangesForBlue?.some((range) =>
+        isSameDay(date, parseDate(range.startDate)),
+      );
+
+      const existingEnd = rangesForBlue.some((range) =>
+        isSameDay(date, parseDate(range.endDate)),
+      );
 
       return {
         start: !!currentStart || existingStart,
@@ -898,10 +926,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (type() !== 'range' && type() !== 'multipleRange') return false;
 
     if (type() === 'multipleRange') {
+      const rangesForBlue =
+        datesObjectValue.multipleRanges?.filter((r) => r.id !== editingRangeId()) ?? [];
       const inExisting =
-        datesObjectValue.multipleRanges?.some((range) =>
-          isInRange(date, range.startDate, range.endDate),
-        ) ?? false;
+        rangesForBlue.some((range) => isInRange(date, range.startDate, range.endDate)) ??
+        false;
 
       if (datesObjectValue.startDate && datesObjectValue.endDate) {
         const inCurrent = isInRange(
@@ -946,6 +975,21 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     const hovered = hoveredDate();
     if (!hovered) return false;
     return isSameDay(date, hovered);
+  };
+
+  // check if date is in editing range
+  const isDateInEditingRange = (date: Date): boolean => {
+    const r = editingRange();
+    if (!r) return false;
+    return isInRange(date, r.startDate, r.endDate);
+  };
+
+  // check if date is editing range endpoint
+  const isEditingRangeEndpoint = (date: Date): boolean => {
+    const r = editingRange();
+    if (!r) return false;
+    const d = parseDate(toISO(date));
+    return isSameDay(d, parseDate(r.startDate)) || isSameDay(d, parseDate(r.endDate));
   };
 
   /**
@@ -1351,6 +1395,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     }
   };
 
+  // function to remove a range from multirange list
   const removeCurrentRange = (rangeId: string) => {
     if (props.minSelectable) {
       const currentRanges = datesObjectValue.multipleRanges || [];
@@ -1367,6 +1412,25 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       'multipleRanges',
       datesObjectValue.multipleRanges?.filter((range) => range.id !== rangeId),
     );
+  };
+
+  // edit an existing range in multirange
+  const startEditingRange = (range: RangeValue) => {
+    // on édite cette plage
+    setEditingRangeId(range.id);
+    setNewRangeId(range.id);
+
+    // on nettoie un éventuel range en cours de saisie
+    setDatesObjectValue({
+      ...datesObjectValue,
+      startDate: undefined,
+      endDate: undefined,
+    });
+
+    // on centre le calendrier sur le début de la plage
+    setCurrentDate(parseDate(range.startDate));
+
+    announce(a().rangeSelectedForEdit);
   };
 
   return (
@@ -1604,6 +1668,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   isDateInRange={isDateInRange}
                   isDateInPreviewRange={isDateInPreviewRange}
                   isPreviewEndpoint={isPreviewEndpoint}
+                  isDateInEditingRange={isDateInEditingRange}
+                  isEditingRangeEndpoint={isEditingRangeEndpoint}
                   onDateHover={(date) => {
                     if (date === null) {
                       setHoveredDate(null);
@@ -1629,13 +1695,23 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 />
                 {/* Multi range list for multiple range */}
                 <Show when={datesObjectValue.multipleRanges}>
-                  <div class="space-y-2 border-t border-neutral-300 dark:border-neutral-800">
+                  <div class="flex flex-col gap-2 border-t border-neutral-300 py-3 dark:border-neutral-800">
                     <For each={datesObjectValue.multipleRanges}>
                       {(range) => (
-                        <div class="flex items-center justify-between rounded-lg border border-neutral-300 p-1 pl-3 text-xs dark:border-neutral-800">
+                        <div
+                          data-multi-range-chip
+                          class="flex w-fit items-center gap-2 rounded-lg bg-neutral-50 p-1 pl-3 text-xs dark:bg-neutral-800"
+                        >
                           <span>{`${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}</span>
                           <button
-                            class="inline-flex cursor-pointer items-center justify-center rounded-sm bg-red-200 p-1 text-red-800 dark:bg-red-700 dark:text-red-200"
+                            class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
+                            type="button"
+                            onClick={() => startEditingRange(range)}
+                          >
+                            <Edit02Icon class="size-4" />
+                          </button>
+                          <button
+                            class="inline-flex cursor-pointer items-center justify-center p-1 text-neutral-900 dark:text-white"
                             onClick={() => removeCurrentRange(range.id)}
                           >
                             <XIcon class="size-4" />
