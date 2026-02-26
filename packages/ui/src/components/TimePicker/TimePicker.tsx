@@ -62,6 +62,8 @@ export interface TimePickerProps {
   sizing?: 'xs' | 'sm' | 'md';
   /** Additional CSS class for the outer wrapper. */
   class?: string;
+  /** Additional CSS class for the container. */
+  containerClass?: string;
   /** Aria labels for accessibility. */
   ariaLabels?: Partial<TimePickerAriaLabels>;
   /** Element id. */
@@ -115,6 +117,7 @@ const TimePicker = (props: TimePickerProps) => {
     'isLoading',
     'sizing',
     'class',
+    'containerClass',
     'ariaLabels',
     'id',
   ]);
@@ -190,7 +193,7 @@ const TimePicker = (props: TimePickerProps) => {
   };
 
   return (
-    <div class="w-full">
+    <div class={twMerge('w-full', local.containerClass)}>
       <Show when={local.label}>
         <div class="mb-1 block">
           <Label for={groupId()} value={local.label} color={color()} />

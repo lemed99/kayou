@@ -22,11 +22,11 @@ import Button from '../Button';
 import HelperText from '../HelperText';
 import Label from '../Label';
 import TextInput from '../TextInput';
+import TimePicker from '../TimePicker';
 import { formatTime as formatTimeUtil } from '../TimePicker/timeUtils';
 import Calendar from './Calendar';
 import type { DatePickerShortcut } from './DatePickerContext';
 import Shortcuts from './Shortcuts';
-import TimePicker from './TimePicker';
 import {
   addMonths,
   formatDate,
@@ -269,9 +269,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [focusedDate, setFocusedDate] = createSignal<Date | null>(null);
   const [datesObjectValue, setDatesObjectValue] = createStore<DateValue>({});
-  const [hour, setHour] = createSignal(0);
-  const [minute, setMinute] = createSignal(0);
-  const [second, setSecond] = createSignal(0);
+  const [time, setTime] = createStore({
+    hour: 0,
+    minute: 0,
+    second: 0,
+  });
   const [startTime, setStartTime] = createStore({
     hour: 0,
     minute: 0,
@@ -327,9 +329,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     }
 
     // Sync time values from props
-    if (props.value.hour !== undefined) setHour(props.value.hour);
-    if (props.value.minute !== undefined) setMinute(props.value.minute);
-    if (props.value.second !== undefined) setSecond(props.value.second);
+    if (props.value.hour !== undefined) setTime('hour', props.value.hour);
+    if (props.value.minute !== undefined) setTime('minute', props.value.minute);
+    if (props.value.second !== undefined) setTime('second', props.value.second);
 
     switch (type()) {
       case 'single':
@@ -429,9 +431,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
       case 'single': {
         const value: DateValue = { date: datesObjectValue.date };
         if (showTime()) {
-          value.hour = hour();
-          value.minute = minute();
-          value.second = second();
+          value.hour = time.hour;
+          value.minute = time.minute;
+          value.second = time.second;
         }
         return value;
       }
@@ -474,14 +476,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     // Reset store to the value from props (last committed value)
     if (props.value) {
       setDatesObjectValue(reconcile(props.value));
-      if (props.value.hour !== undefined) setHour(props.value.hour);
-      if (props.value.minute !== undefined) setMinute(props.value.minute);
-      if (props.value.second !== undefined) setSecond(props.value.second);
+      if (props.value.hour !== undefined) setTime('hour', props.value.hour);
+      if (props.value.minute !== undefined) setTime('minute', props.value.minute);
+      if (props.value.second !== undefined) setTime('second', props.value.second);
     } else {
       setDatesObjectValue(reconcile({}));
-      setHour(0);
-      setMinute(0);
-      setSecond(0);
+      setTime(reconcile({ hour: 0, minute: 0, second: 0 }));
     }
     closeCalendar();
   };
@@ -512,9 +512,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           // User will confirm with footer Apply button
           setDatesObjectValue({
             date: dateISO,
-            hour: hour(),
-            minute: minute(),
-            second: second(),
+            hour: time.hour,
+            minute: time.minute,
+            second: time.second,
           });
           announce(`Selected ${dateLabel}`);
           focusCurrentDateButton();
@@ -799,7 +799,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (value.date) {
       // Single date shortcut
       const newValue: DateValue = showTime()
-        ? { date: value.date, hour: hour(), minute: minute(), second: second() }
+        ? { date: value.date, hour: time.hour, minute: time.minute, second: time.second }
         : { date: value.date };
       setDatesObjectValue(newValue);
       setCurrentDate(parseDate(value.date));
@@ -1649,58 +1649,46 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 <Show when={showTime() && props.type === 'single'}>
                   <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
                     <TimePicker
-                      hour={hour}
-                      minute={minute}
-                      second={second}
-                      onHourChange={setHour}
-                      onMinuteChange={setMinute}
-                      onSecondChange={setSecond}
-                      onEscape={closeCalendar}
+                      value={time}
+                      onChange={setTime}
+                      // onEscape={closeCalendar}
                       format={timeFormat()}
                       minuteStep={minuteStep()}
                       secondStep={secondStep()}
                       showSeconds={showSeconds()}
                       ariaLabels={a()}
+                      containerClass="w-auto"
                     />
                   </div>
                 </Show>
                 {/* Time picker for range dates */}
                 <Show when={showTime() && props.type === 'range'}>
                   <div class="flex justify-center gap-4 border-t border-neutral-300 py-3 dark:border-neutral-800">
-                    <div class="flex flex-col gap-1">
-                      <span class="text-xs font-semibold">{a().startTime}</span>
-                      <TimePicker
-                        hour={() => startTime.hour}
-                        minute={() => startTime.minute}
-                        second={() => startTime.second}
-                        onHourChange={(hour) => setStartTime('hour', hour)}
-                        onMinuteChange={(minute) => setStartTime('minute', minute)}
-                        onSecondChange={(second) => setStartTime('second', second)}
-                        onEscape={closeCalendar}
-                        format={timeFormat()}
-                        minuteStep={minuteStep()}
-                        secondStep={secondStep()}
-                        showSeconds={showSeconds()}
-                        ariaLabels={a()}
-                      />
-                    </div>
-                    <div class="flex flex-col gap-1 [&>div]:border-t-0 [&>div]:py-0">
-                      <span class="text-xs font-semibold">{a().endTime}</span>
-                      <TimePicker
-                        hour={() => endTime.hour}
-                        minute={() => endTime.minute}
-                        second={() => endTime.second}
-                        onHourChange={(hour) => setEndTime('hour', hour)}
-                        onMinuteChange={(minute) => setEndTime('minute', minute)}
-                        onSecondChange={(second) => setEndTime('second', second)}
-                        onEscape={closeCalendar}
-                        format={timeFormat()}
-                        minuteStep={minuteStep()}
-                        secondStep={secondStep()}
-                        showSeconds={showSeconds()}
-                        ariaLabels={a()}
-                      />
-                    </div>
+                    <TimePicker
+                      value={startTime}
+                      onChange={setStartTime}
+                      label={a().startTime}
+                      // onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                      containerClass="w-auto"
+                    />
+
+                    <TimePicker
+                      value={endTime}
+                      onChange={setEndTime}
+                      label={a().endTime}
+                      // onEscape={closeCalendar}
+                      format={timeFormat()}
+                      minuteStep={minuteStep()}
+                      secondStep={secondStep()}
+                      showSeconds={showSeconds()}
+                      ariaLabels={a()}
+                      containerClass="w-auto"
+                    />
                   </div>
                 </Show>
                 <Show when={hasFooter()}>
