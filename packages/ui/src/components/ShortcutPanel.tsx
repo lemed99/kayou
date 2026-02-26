@@ -5,7 +5,6 @@ import {
   ShortcutContext,
   comboFromEvent,
   type RegisteredAction,
-  type ShortcutContextValue,
 } from '@kayou/hooks';
 
 export interface ShortcutPanelLabels {
@@ -75,7 +74,10 @@ const panelTheme = {
 
 const isMac = (): boolean => {
   if (typeof navigator === 'undefined') return false;
-  return /Mac|iPhone|iPad/.test(navigator.platform);
+  if ('userAgentData' in navigator && (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData) {
+    return (navigator as Navigator & { userAgentData: { platform: string } }).userAgentData.platform === 'macOS';
+  }
+  return /Mac|iPhone|iPad/.test(navigator.userAgent);
 };
 
 function formatKeyForDisplay(part: string): string {
@@ -94,7 +96,7 @@ function comboToParts(combo: string): string[] {
 }
 
 const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
-  const context = useContext(ShortcutContext) as ShortcutContextValue;
+  const context = useContext(ShortcutContext);
   if (!context) {
     throw new Error('ShortcutPanel must be used within a ShortcutProvider');
   }
@@ -139,6 +141,13 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
     return conflicts().has(combo);
   };
 
+  const focusEditButton = (actionId: string) => {
+    requestAnimationFrame(() => {
+      const btn = document.querySelector<HTMLButtonElement>(`[data-shortcut-edit="${actionId}"]`);
+      btn?.focus();
+    });
+  };
+
   createEffect(() => {
     const id = editingId();
     if (!id) return;
@@ -150,6 +159,7 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
 
       if (e.key === 'Escape') {
         setEditingId(null);
+        focusEditButton(id);
         return;
       }
 
@@ -158,6 +168,7 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
 
       context.updateBinding(id, combo);
       setEditingId(null);
+      focusEditButton(id);
     };
 
     document.addEventListener('keydown', handleKeyDown, true);
@@ -200,7 +211,10 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
                 <button
                   type="button"
                   class={panelTheme.row.reset}
-                  onClick={() => setEditingId(null)}
+                  onClick={() => {
+                    setEditingId(null);
+                    focusEditButton(action.id);
+                  }}
                 >
                   {labels().cancel}
                 </button>
@@ -212,6 +226,7 @@ const ShortcutPanel = (props: ShortcutPanelProps): JSX.Element => {
               type="button"
               class={panelTheme.row.edit}
               aria-label={`${ariaLabels().editShortcut}: ${action.label}`}
+              data-shortcut-edit={action.id}
               onClick={() => setEditingId(action.id)}
             >
               <svg

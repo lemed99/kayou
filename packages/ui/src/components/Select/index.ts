@@ -8,3 +8,4 @@ export {
   DEFAULT_SELECT_ARIA_LABELS,
 } from './useSelect';
 export { type Option } from '../../shared';
+export { type OptionGroupEntry, groupOptions } from './selectUtils';

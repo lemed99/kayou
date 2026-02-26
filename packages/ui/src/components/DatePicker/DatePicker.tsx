@@ -22,6 +22,7 @@ import Button from '../Button';
 import HelperText from '../HelperText';
 import Label from '../Label';
 import TextInput from '../TextInput';
+import { formatTime as formatTimeUtil } from '../TimePicker/timeUtils';
 import Calendar from './Calendar';
 import type { DatePickerShortcut } from './DatePickerContext';
 import Shortcuts from './Shortcuts';
@@ -967,16 +968,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
    */
   const showSeconds = createMemo(() => props.showSeconds ?? false);
 
-  const formatTime = (h: number, m: number, s: number): string => {
-    const minStr = m.toString().padStart(2, '0');
-    const secPart = showSeconds() ? `:${s.toString().padStart(2, '0')}` : '';
-    if (timeFormat() === '12h') {
-      const period = h >= 12 ? 'PM' : 'AM';
-      const hour12 = h % 12 || 12;
-      return `${hour12}:${minStr}${secPart} ${period}`;
-    }
-    return `${h.toString().padStart(2, '0')}:${minStr}${secPart}`;
-  };
+  const formatTime = (h: number, m: number, s: number): string =>
+    formatTimeUtil(h, m, s, timeFormat(), showSeconds());
 
   const getDisplayValue = createMemo<string>(() => {
     switch (type()) {

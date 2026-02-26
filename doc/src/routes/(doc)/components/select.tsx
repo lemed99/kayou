@@ -157,6 +157,7 @@ export default function SelectPage() {
             { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
             { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
             { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
+            { name: 'group', type: 'string', default: '-', description: 'Optional group name. Options with the same group render under a shared header.' },
           ],
         },
         {
@@ -239,6 +240,36 @@ export default function SelectPage() {
                 onSelect={(opt) => {}}
               />
 
+              {/* Grouped options */}
+              <Select
+                options={[
+                  { value: 'apple', label: 'Apple', group: 'Fruits' },
+                  { value: 'banana', label: 'Banana', group: 'Fruits' },
+                  { value: 'cherry', label: 'Cherry', group: 'Fruits' },
+                  { value: 'carrot', label: 'Carrot', group: 'Vegetables' },
+                  { value: 'broccoli', label: 'Broccoli', group: 'Vegetables' },
+                  { value: 'spinach', label: 'Spinach', group: 'Vegetables' },
+                ]}
+                label="Grouped Options"
+                helperText="Options grouped by category"
+                placeholder="Select food"
+                onSelect={(opt) => {}}
+              />
+
+              {/* Grouped options with virtual scroll */}
+              <Select
+                options={[
+                  ...['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 'Honeydew'].map(f => ({ value: f.toLowerCase(), label: f, group: 'Fruits' })),
+                  ...['Asparagus', 'Broccoli', 'Carrot', 'Daikon', 'Eggplant', 'Fennel', 'Garlic', 'Horseradish'].map(v => ({ value: v.toLowerCase(), label: v, group: 'Vegetables' })),
+                  ...['Basil', 'Cilantro', 'Dill', 'Mint', 'Oregano', 'Parsley', 'Rosemary', 'Thyme'].map(h => ({ value: h.toLowerCase(), label: h, group: 'Herbs' })),
+                ]}
+                label="Virtualized Groups"
+                helperText="Grouped + virtual scroll"
+                placeholder="Select food"
+                optionRowHeight={32}
+                onSelect={(opt) => {}}
+              />
+
               {/* Custom trigger (button) */}
               <Select
                 options={fruitOptions}
@@ -278,6 +309,16 @@ export default function SelectPage() {
             { value: '2', label: 'Unavailable', disabled: true },
             { value: '3', label: 'Also available' },
           ]}
+          onSelect={handleSelect}
+        />
+
+        {/* Grouped options */}
+        <Select
+          options={[
+            { value: 'apple', label: 'Apple', group: 'Fruits' },
+            { value: 'carrot', label: 'Carrot', group: 'Vegetables' },
+          ]}
+          placeholder="Select food"
           onSelect={handleSelect}
         />
 

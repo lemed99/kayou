@@ -69,6 +69,17 @@ export function useDynamicVirtualList<T extends readonly unknown[]>(
     }),
   );
 
+  // Batch sizeMapVersion updates: multiple ResizeObservers can fire in the
+  // same frame, but we only need one reactive notification per frame.
+  let sizeBatchRafId: number | undefined;
+  const batchSizeUpdate = () => {
+    if (sizeBatchRafId) return;
+    sizeBatchRafId = requestAnimationFrame(() => {
+      sizeBatchRafId = undefined;
+      setSizeMapVersion((v) => v + 1);
+    });
+  };
+
   const registerSize = (index: Accessor<number>, el: HTMLElement) => {
     if (!el) return;
 
@@ -77,24 +88,20 @@ export function useDynamicVirtualList<T extends readonly unknown[]>(
     // Clean up any existing observer for this index to prevent memory leaks
     cleanupObserver(capturedIndex);
 
-    let rafId: number | undefined;
     const observer = new ResizeObserver(() => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        // Only update if element is still connected to DOM
-        if (!el.isConnected) return;
+      // Only update if element is still connected to DOM
+      if (!el.isConnected) return;
 
-        const currentLength = items().length;
-        if (capturedIndex >= currentLength) return;
+      const currentLength = items().length;
+      if (capturedIndex >= currentLength) return;
 
-        const newHeight = el.offsetHeight;
-        const currentHeight = sizeMap.get(capturedIndex);
+      const newHeight = el.offsetHeight;
+      const currentHeight = sizeMap.get(capturedIndex);
 
-        if (currentHeight !== newHeight) {
-          sizeMap.set(capturedIndex, newHeight);
-          setSizeMapVersion((v) => v + 1);
-        }
-      });
+      if (currentHeight !== newHeight) {
+        sizeMap.set(capturedIndex, newHeight);
+        batchSizeUpdate();
+      }
     });
     observer.observe(el);
     observerMap.set(capturedIndex, { observer, index: capturedIndex });
@@ -104,7 +111,11 @@ export function useDynamicVirtualList<T extends readonly unknown[]>(
     sizeMapVersion(); // called to trigger reactivity
 
     if (sizeMap.size === 0) return undefined;
-    return [...sizeMap.values()].reduce((acc, v) => acc + v, 0) / sizeMap.size;
+    let sum = 0;
+    for (const v of sizeMap.values()) {
+      sum += v;
+    }
+    return sum / sizeMap.size;
   });
 
   // Report average height changes via effect (side effects must not be in memos)
@@ -216,6 +227,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>(
   onCleanup(() => {
     if (cleanupTimeoutId) clearTimeout(cleanupTimeoutId);
     if (scrollRafId) cancelAnimationFrame(scrollRafId);
+    if (sizeBatchRafId) cancelAnimationFrame(sizeBatchRafId);
     observerMap.forEach((entry) => entry.observer.disconnect());
     observerMap.clear();
     sizeMap.clear();

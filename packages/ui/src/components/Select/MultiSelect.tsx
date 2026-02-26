@@ -1,4 +1,4 @@
-import { JSX, Show, createMemo, createSignal, splitProps } from 'solid-js';
+import { JSX, Show, createEffect, createMemo, createSignal, splitProps } from 'solid-js';
 
 import { SearchRefractionIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { ChevronDownButton, ClearContentButton, type Option } from '../../shared';
 import Checkbox from '../Checkbox';
 import TextInput, { type TextInputProps } from '../TextInput';
-import { optionClass } from './selectUtils';
+import { groupHeaderClass, groupedOptionIndent, optionClass } from './selectUtils';
 import useSelect, {
   DEFAULT_SELECT_ARIA_LABELS,
   type SelectAriaLabels,
@@ -85,6 +85,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     Layout,
     highlightedOption,
     handleOptionClick,
+    handleGroupToggle,
     setHighlightedOption,
     selectedOptions,
     handleKeyDown,
@@ -205,6 +206,33 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
           </div>
         </Show>
       }
+      groupHeaderComponent={(group, groupOpts, headerId) => {
+        const enabled = () => groupOpts.filter((o) => !o.disabled);
+        const selectedCount = () =>
+          enabled().filter((o) => selectedOptions().some((s) => s.value === o.value))
+            .length;
+        const allSelected = () =>
+          enabled().length > 0 && selectedCount() === enabled().length;
+        const someSelected = () => selectedCount() > 0 && !allSelected();
+
+        return (
+          <div id={headerId} class={groupHeaderClass}>
+            <Checkbox
+              ref={(el: HTMLInputElement) => {
+                createEffect(() => {
+                  el.indeterminate = someSelected();
+                });
+              }}
+              color="dark"
+              checked={allSelected()}
+              onChange={() => handleGroupToggle(groupOpts)}
+              label={group}
+              labelClass="w-full font-normal cursor-pointer"
+              labelSpanClass="text-neutral-400 dark:text-neutral-500"
+            />
+          </div>
+        );
+      }}
       optionsComponent={(option) => (
         <div
           id={getOptionId(option)}
@@ -215,7 +243,10 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
           onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
         >
           <Checkbox
-            labelClass="px-2 py-1.5 w-full font-normal"
+            labelClass={twMerge(
+              'px-2 py-1.5 w-full font-normal',
+              option.group != null && groupedOptionIndent,
+            )}
             class="flex items-center"
             onChange={() => handleOptionClick(option)}
             checked={selectedOptions().some((o) => o.value === option.value)}
@@ -224,6 +255,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
           />
         </div>
       )}
+      groupSpacerClass="h-3"
     />
   );
 }

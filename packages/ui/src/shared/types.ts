@@ -12,4 +12,6 @@ export interface Option {
   labelWrapper?: (label: string) => JSX.Element;
   /** Whether this option is disabled and cannot be selected. @default false */
   disabled?: boolean;
+  /** Optional group name. Options with the same group render under a shared header. */
+  group?: string;
 }

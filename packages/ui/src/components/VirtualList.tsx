@@ -88,10 +88,9 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
     resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const newWidth = entry.target.scrollWidth;
-        if (newWidth !== contentWidth()) {
-          setContentWidth(newWidth);
-        }
+        // Defer to break the synchronous ResizeObserver → layout → ResizeObserver loop.
+        // SolidJS signals skip notification if the value hasn't changed.
+        requestAnimationFrame(() => setContentWidth(entry.target.scrollWidth));
       }
     });
     resizeObserver.observe(el);
