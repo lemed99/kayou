@@ -1,9 +1,43 @@
-import { expect, test } from '@playwright/test';
+import { Locator, expect, test } from '@playwright/test';
 
 type Page = import('@playwright/test').Page;
 
-const getFirstCombobox = (page: Page) =>
-  page.locator('[role="combobox"]').first();
+const getFirstCombobox = (page: Page) => page.locator('[role="combobox"]').first();
+
+const waitForPlayground = async (page: Page): Promise<Locator> => {
+  const playground = page.locator('section#playground');
+  await playground.scrollIntoViewIfNeeded();
+  // Attendre que le DatePicker du playground soit rendu
+  const combobox = playground.locator('[role="combobox"]').first();
+  await expect(combobox).toBeVisible({ timeout: 15000 });
+  return playground;
+};
+
+const getMultipleRangeDatePicker = async (page: Page) => {
+  const pg = await waitForPlayground(page);
+  const section = pg.locator('text=Date Ranges').first();
+  return section.locator('..').locator('..').locator('[role="combobox"]').first();
+};
+
+const openMultipleRangeCalendar = async (page: Page) => {
+  const combobox = await getMultipleRangeDatePicker(page);
+  await combobox.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  await combobox.click();
+  await page.waitForTimeout(300);
+  return combobox;
+};
+
+// Helper to click a day (per number in the month)
+const clickDay = async (page: Page, day: number) => {
+  const dayButton = page
+    .locator('[role="dialog"]')
+    .first()
+    .locator('[role="gridcell"]')
+    .filter({ hasText: new RegExp(`^${day}$`) })
+    .first();
+  await dayButton.click();
+};
 
 /** Scroll into view + wait for scroll to settle before clicking */
 const openCalendar = async (page: Page) => {
@@ -213,6 +247,115 @@ test.describe('DatePicker - Range Mode', () => {
     const datePickers = page.locator('[role="combobox"]');
     const count = await datePickers.count();
     expect(count).toBeGreaterThan(0);
+  });
+});
+
+// ==================== Calendar Multiple Range ====================
+test.describe('DatePicker - Multiple Range Mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/components/date-picker', { waitUntil: 'networkidle' });
+  });
+
+  test('should create multiple non-overlapping ranges', async ({ page }) => {
+    const combobox = await openMultipleRangeCalendar(page);
+
+    // Première plage : 5–7
+    await clickDay(page, 5);
+    await clickDay(page, 7);
+
+    // Deuxième plage : 10–12
+    await clickDay(page, 10);
+    await clickDay(page, 12);
+
+    const input = combobox.locator('input');
+    const value = await input.inputValue();
+
+    // On doit voir les 4 jours et le séparateur de plages " • "
+    expect(value).toContain('05/');
+    expect(value).toContain('07/');
+    expect(value).toContain('10/');
+    expect(value).toContain('12/');
+    expect(value).toContain(' • ');
+  });
+
+  test('should merge overlapping or containing ranges', async ({ page }) => {
+    const combobox = await openMultipleRangeCalendar(page);
+
+    // Plage 1 : 5–7
+    await clickDay(page, 5);
+    await clickDay(page, 7);
+
+    // Plage 2 qui chevauche / englobe : 6–10
+    await clickDay(page, 6);
+    await clickDay(page, 10);
+
+    const input = combobox.locator('input');
+    const value = await input.inputValue();
+
+    // Une seule plage après fusion (un seul "•" max)
+    expect(value.split('•').length).toBe(1);
+
+    // La plage fusionnée doit commencer au 5 et finir au 10
+    expect(value).toContain('05/');
+    expect(value).toContain('10/');
+  });
+
+  test('should edit an existing range and replace it', async ({ page }) => {
+    const combobox = await openMultipleRangeCalendar(page);
+    const calendar = page.locator('[role="dialog"]').first();
+
+    // Deux plages : 5–7 et 10–12
+    await clickDay(page, 5);
+    await clickDay(page, 7);
+    await clickDay(page, 10);
+    await clickDay(page, 12);
+
+    const input = combobox.locator('input');
+    let value = await input.inputValue();
+    expect(value.split('•').length).toBe(2);
+
+    // Récupérer le premier "chip" (plage) et cliquer sur le bouton d’édition
+    const firstChip = calendar.locator('div[data-multi-range-chip]').first();
+    const editButton = firstChip.locator('button').first();
+    await editButton.click();
+
+    // Nouvelle plage pour remplacer : 3–4
+    await clickDay(page, 3);
+    await clickDay(page, 4);
+
+    value = await input.inputValue();
+
+    // Toujours deux plages, mais la première a changé (03 au lieu de 05)
+    expect(value.split('•').length).toBe(2);
+    expect(value).toContain('03/');
+    expect(value).toContain('04/');
+    expect(value).not.toContain('05/');
+    expect(value).not.toContain('07/');
+  });
+
+  test('should remove a range using delete button', async ({ page }) => {
+    const combobox = await openMultipleRangeCalendar(page);
+    const calendar = page.locator('[role="dialog"]').first();
+
+    // Deux plages : 5–7 et 10–12
+    await clickDay(page, 5);
+    await clickDay(page, 7);
+    await clickDay(page, 10);
+    await clickDay(page, 12);
+
+    const input = combobox.locator('input');
+    let value = await input.inputValue();
+    expect(value.split('•').length).toBe(2);
+
+    // Supprimer la première plage via le bouton X
+    const firstChip = calendar.locator('div[data-multi-range-chip]').first();
+    const deleteButton = firstChip.locator('button').nth(1); // 0 = edit, 1 = delete (XIcon)
+    await deleteButton.click();
+
+    value = await input.inputValue();
+
+    // Il ne reste plus qu’une plage
+    expect(value.split('•').length).toBe(1);
   });
 });
 
@@ -527,7 +670,9 @@ test.describe('DatePicker - Keyboard Navigation', () => {
     await expect(calendar).not.toBeVisible();
   });
 
-  test('should cycle focus with Tab key: date -> header buttons -> date', async ({ page }) => {
+  test('should cycle focus with Tab key: date -> header buttons -> date', async ({
+    page,
+  }) => {
     await openCalendar(page);
 
     const calendar = page.locator('[role="dialog"]').first();
@@ -754,7 +899,10 @@ test.describe('DatePicker - Keyboard Navigation', () => {
     await expect(calendar).toBeVisible({ timeout: 5000 });
 
     // Navigate to day 31
-    const day31 = calendar.locator('[role="gridcell"]').filter({ hasText: /^31$/ }).first();
+    const day31 = calendar
+      .locator('[role="gridcell"]')
+      .filter({ hasText: /^31$/ })
+      .first();
     if (await day31.isVisible()) {
       await day31.focus();
 
@@ -763,7 +911,9 @@ test.describe('DatePicker - Keyboard Navigation', () => {
       await page.keyboard.press('Tab');
       await page.keyboard.press('Enter');
 
-      const monthSelector = calendar.locator('[role="listbox"][aria-label="Select month"]');
+      const monthSelector = calendar.locator(
+        '[role="listbox"][aria-label="Select month"]',
+      );
       await expect(monthSelector).toBeVisible();
 
       // Navigate to February (index 1) which has 28/29 days
@@ -1256,13 +1406,19 @@ test.describe('DatePicker - Edge Cases', () => {
       await expect(prevMonthBtn).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Select month"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Select month"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Select year"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Select year"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Next month"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Next month"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
       const cycledDate = page.locator('[role="gridcell"]:focus');
@@ -1295,16 +1451,24 @@ test.describe('DatePicker - Edge Cases', () => {
 
       // Verify Tab cycle: date -> header -> date
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Previous month"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Previous month"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Select month"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Select month"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Select year"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Select year"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(dialog.first().locator('button[aria-label="Next month"]')).toBeFocused();
+      await expect(
+        dialog.first().locator('button[aria-label="Next month"]'),
+      ).toBeFocused();
 
       await page.keyboard.press('Tab');
       const backToDate = page.locator('[role="gridcell"]:focus');
@@ -1315,7 +1479,10 @@ test.describe('DatePicker - Edge Cases', () => {
   // ==================== Footer ====================
 
   test.describe('Footer - Cancel/Apply', () => {
-    const openFooterDatePicker = async (page: import('@playwright/test').Page, label: string) => {
+    const openFooterDatePicker = async (
+      page: import('@playwright/test').Page,
+      label: string,
+    ) => {
       const datePicker = page.getByRole('combobox', { name: label });
       await datePicker.scrollIntoViewIfNeeded();
       await page.waitForTimeout(300);
@@ -1349,11 +1516,16 @@ test.describe('DatePicker - Edge Cases', () => {
       await expect(applyBtn).toBeVisible();
     });
 
-    test('should not close calendar when selecting a date with showFooter', async ({ page }) => {
+    test('should not close calendar when selecting a date with showFooter', async ({
+      page,
+    }) => {
       const dialog = await openFooterDatePicker(page, 'Select with Footer');
 
       // Select a date
-      const dayButton = dialog.locator('[role="gridcell"]').filter({ hasText: /^15$/ }).first();
+      const dayButton = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^15$/ })
+        .first();
       await dayButton.click();
 
       // Calendar should remain open (not closed like without footer)
@@ -1368,7 +1540,10 @@ test.describe('DatePicker - Edge Cases', () => {
       const dialog = await openFooterDatePicker(page, 'Select with Footer');
 
       // Select a date
-      const dayButton = dialog.locator('[role="gridcell"]').filter({ hasText: /^15$/ }).first();
+      const dayButton = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^15$/ })
+        .first();
       await dayButton.click();
 
       // Click Apply
@@ -1379,7 +1554,9 @@ test.describe('DatePicker - Edge Cases', () => {
       await expect(dialog).not.toBeVisible();
 
       // Input should have the date
-      const input = page.getByRole('combobox', { name: 'Select with Footer' }).locator('input');
+      const input = page
+        .getByRole('combobox', { name: 'Select with Footer' })
+        .locator('input');
       await expect(input).toHaveValue(/15/);
     });
 
@@ -1387,7 +1564,10 @@ test.describe('DatePicker - Edge Cases', () => {
       const dialog = await openFooterDatePicker(page, 'Select with Footer');
 
       // Select a date
-      const dayButton = dialog.locator('[role="gridcell"]').filter({ hasText: /^15$/ }).first();
+      const dayButton = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^15$/ })
+        .first();
       await dayButton.click();
       await expect(dialog).toBeVisible();
 
@@ -1401,7 +1581,10 @@ test.describe('DatePicker - Edge Cases', () => {
       // Reopen - should not have the date selected (onChange was never called)
       const dialog2 = await openFooterDatePicker(page, 'Select with Footer');
       // The 15th should NOT be aria-selected since Cancel discarded changes
-      const day15 = dialog2.locator('[role="gridcell"]').filter({ hasText: /^15$/ }).first();
+      const day15 = dialog2
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^15$/ })
+        .first();
       const isSelected = await day15.getAttribute('aria-selected');
       expect(isSelected).toBe('false');
     });
@@ -1412,12 +1595,18 @@ test.describe('DatePicker - Edge Cases', () => {
       const dialog = await openFooterDatePicker(page, 'Range with Footer');
 
       // Select start date
-      const startDay = dialog.locator('[role="gridcell"]').filter({ hasText: /^10$/ }).first();
+      const startDay = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^10$/ })
+        .first();
       await startDay.click();
       await expect(dialog).toBeVisible();
 
       // Select end date
-      const endDay = dialog.locator('[role="gridcell"]').filter({ hasText: /^20$/ }).first();
+      const endDay = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^20$/ })
+        .first();
       await endDay.click();
 
       // Calendar should remain open (footer controls closing)
@@ -1429,7 +1618,9 @@ test.describe('DatePicker - Edge Cases', () => {
       await expect(dialog).not.toBeVisible();
 
       // Input should have the range
-      const input = page.getByRole('combobox', { name: 'Range with Footer' }).locator('input');
+      const input = page
+        .getByRole('combobox', { name: 'Range with Footer' })
+        .locator('input');
       await expect(input).toHaveValue(/10/);
       await expect(input).toHaveValue(/20/);
     });
@@ -1593,7 +1784,10 @@ test.describe('DatePicker - Edge Cases', () => {
       const dialog = await openMeetingTimePicker(page);
 
       // Select a date
-      const dayButton = dialog.locator('[role="gridcell"]').filter({ hasText: /^10$/ }).first();
+      const dayButton = dialog
+        .locator('[role="gridcell"]')
+        .filter({ hasText: /^10$/ })
+        .first();
       await dayButton.click();
       await expect(dialog).toBeVisible();
 
