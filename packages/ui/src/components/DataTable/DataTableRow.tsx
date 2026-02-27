@@ -75,7 +75,6 @@ export function DataTableRow<T extends Record<string, unknown>>(
     return {
       position: 'relative',
       'z-index': 1,
-      // background: 'inherit',
       transform: 'translateX(var(--dt-sticky-offset, 0px))',
     };
   };
@@ -176,7 +175,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
   }
 
   return (
-    <div class="group/row box border-b border-neutral-200 bg-white last:border-b-0 hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+    <div class="group/row box border-b border-neutral-200 bg-white last:border-b-0 dark:border-neutral-800 dark:bg-neutral-900">
       {/* Data row */}
       <div
         role="row"
@@ -310,7 +309,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
       {/* Detail panel */}
       <Show when={ctx.expandRow && detailMounted()}>
         <div
-          class="overflow-hidden border-t border-neutral-200 transition-[height] duration-200 ease-out dark:border-neutral-800"
+          class="overflow-hidden border-t border-neutral-200 transition-[height] duration-200 ease-out group-hover/row:bg-neutral-100 dark:border-neutral-800 dark:group-hover/row:bg-neutral-800"
           style={{
             height: detailVisible() ? `${detailHeight()}px` : '0px',
           }}

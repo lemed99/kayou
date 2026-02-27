@@ -1012,14 +1012,6 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     return isInRange(date, r.startDate, r.endDate);
   };
 
-  // check if date is editing range endpoint
-  const isEditingRangeEndpoint = (date: Date): boolean => {
-    const r = editingRange();
-    if (!r) return false;
-    const d = parseDate(toISO(date));
-    return isSameDay(d, parseDate(r.startDate)) || isSameDay(d, parseDate(r.endDate));
-  };
-
   /**
    * Checks if a date is disabled based on min/max constraints and custom disabledDates function.
    * Compares at day level to ignore time components.
@@ -1710,7 +1702,6 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   isDateInPreviewRange={isDateInPreviewRange}
                   isPreviewEndpoint={isPreviewEndpoint}
                   isDateInEditingRange={isDateInEditingRange}
-                  isEditingRangeEndpoint={isEditingRangeEndpoint}
                   onDateHover={(date) => {
                     if (date === null) {
                       setHoveredDate(null);
@@ -1735,7 +1726,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   announce={announce}
                 />
                 {/* Multi range list for multiple range */}
-                <Show when={datesObjectValue.multipleRanges}>
+                <Show
+                  when={
+                    datesObjectValue.multipleRanges &&
+                    datesObjectValue.multipleRanges.length > 0
+                  }
+                >
                   <div class="flex flex-col gap-2 border-t border-neutral-300 py-3 dark:border-neutral-800">
                     <For each={datesObjectValue.multipleRanges}>
                       {(range) => (

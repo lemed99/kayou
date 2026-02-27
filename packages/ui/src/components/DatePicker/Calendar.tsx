@@ -57,8 +57,6 @@ export interface CalendarProps {
   isPreviewEndpoint?: (date: Date) => boolean;
   /** Function to check if a date falls within the editing range. */
   isDateInEditingRange?: (date: Date) => boolean;
-  /** Function to check if a date is the hovered endpoint of the editing range. */
-  isEditingRangeEndpoint?: (date: Date) => boolean;
   /** Callback when a date is hovered (for range preview). */
   onDateHover?: (date: Date | null) => void;
   /** Callback when mouse moves over a date (to detect mouse-to-keyboard switch). */
@@ -423,7 +421,6 @@ const Calendar = (props: CalendarProps) => {
   const isDisabled = (date: Date) => props.isDateDisabled(date);
   const isToday = (date: Date) => isSameDay(date, new Date());
   const isInEditingRange = (date: Date) => props.isDateInEditingRange?.(date) ?? false;
-  const isEditingEnd = (date: Date) => props.isEditingRangeEndpoint?.(date) ?? false;
 
   /**
    * Focuses the currently focused date button in the calendar grid.
@@ -578,20 +575,17 @@ const Calendar = (props: CalendarProps) => {
                                 isInCurrentMonth(date),
                               'bg-amber-500 text-white font-medium rounded-r-lg rounded-l-none':
                                 rangeInEdit(date).end &&
-                                isEditingEnd(date) &&
                                 isInCurrentMonth(date) &&
                                 !isSelected(date),
                               'bg-amber-100 dark:bg-amber-900/40':
                                 isInEditingRange(date) &&
-                                !isEditingEnd(date) &&
                                 !isSelected(date) &&
                                 !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),
                               'bg-amber-500 text-white font-medium rounded-l-lg rounded-r-none':
                                 rangeInEdit(date).start &&
                                 isInCurrentMonth(date) &&
-                                !isSelected(date) &&
-                                isEditingEnd(date),
+                                !isSelected(date),
                               'bg-blue-500 text-white font-medium rounded-lg':
                                 (isSelected(date) || isPreviewEnd(date)) &&
                                 isInCurrentMonth(date),
