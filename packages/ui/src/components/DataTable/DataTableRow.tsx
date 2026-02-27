@@ -52,7 +52,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
   };
 
   const rowClasses = () => {
-    let cls = 'grid w-fit border-b border-neutral-200 dark:border-neutral-800';
+    let cls = 'grid w-fit';
     cls += isSelected()
       ? ' bg-neutral-100 dark:bg-neutral-800'
       : ' bg-white hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800';
@@ -176,13 +176,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
   }
 
   return (
-    <div
-      class="group/row"
-      classList={{
-        'box border-b border-neutral-200 bg-white hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 last:border-b-0 dark:border-neutral-800':
-          !(ctx.rowHeight || ctx.estimatedRowHeight),
-      }}
-    >
+    <div class="group/row box border-b border-neutral-200 bg-white last:border-b-0 hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800">
       {/* Data row */}
       <div
         role="row"
