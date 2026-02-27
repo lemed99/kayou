@@ -75,7 +75,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
     return {
       position: 'relative',
       'z-index': 1,
-      background: 'inherit',
+      // background: 'inherit',
       transform: 'translateX(var(--dt-sticky-offset, 0px))',
     };
   };
@@ -229,7 +229,10 @@ export function DataTableRow<T extends Record<string, unknown>>(
         </Show>
         {/* Selection checkbox */}
         <Show when={ctx.rowSelection}>
-          <div role="cell" class="flex items-center py-3 pl-6">
+          <div
+            role="cell"
+            class="flex items-center py-3 pl-6 group-hover/row:bg-neutral-100 dark:group-hover/row:bg-neutral-800"
+          >
             <Checkbox
               checked={isSelected()}
               onChange={() => ctx.toggleSelectRow(rowKey())}
@@ -240,7 +243,10 @@ export function DataTableRow<T extends Record<string, unknown>>(
 
         {/* Expand/collapse button — only when onRowClick is set (otherwise row click toggles) */}
         <Show when={ctx.expandRow && ctx.onRowClick}>
-          <div role="cell" class="flex items-center justify-center">
+          <div
+            role="cell"
+            class="flex items-center justify-center group-hover/row:bg-neutral-100 dark:group-hover/row:bg-neutral-800"
+          >
             <button
               type="button"
               aria-expanded={isExpanded()}
@@ -263,9 +269,9 @@ export function DataTableRow<T extends Record<string, unknown>>(
           {(column) => (
             <div
               role="cell"
-              class="flex shrink-0 items-center px-6 py-4 text-neutral-900 group-hover/row:bg-neutral-100 dark:text-white dark:group-hover/row:bg-neutral-800"
+              class="flex shrink-0 items-center overflow-hidden px-6 py-4 text-neutral-900 group-hover/row:bg-neutral-100 dark:text-white dark:group-hover/row:bg-neutral-800"
               classList={{
-                'relative border-x border-dashed border-neutral-200 overflow-hidden dark:border-neutral-700':
+                'relative border-x border-dashed border-neutral-200 dark:border-neutral-700 bg-inherit':
                   isSticky(column.key),
                 'bg-neutral-100 dark:bg-neutral-800': isSelected(),
                 'bg-white dark:bg-neutral-900': !isSelected(),
