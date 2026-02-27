@@ -902,14 +902,14 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         datesObjectValue.endDate &&
         isSameDay(date, parseDate(datesObjectValue.endDate.date));
 
-      const rangesForBlue =
+      const uneditedRanges =
         datesObjectValue.multipleRanges?.filter((r) => r.id !== editingRangeId()) ?? [];
 
-      const existingStart = rangesForBlue?.some((range) =>
+      const existingStart = uneditedRanges?.some((range) =>
         isSameDay(date, parseDate(range.startDate)),
       );
 
-      const existingEnd = rangesForBlue.some((range) =>
+      const existingEnd = uneditedRanges.some((range) =>
         isSameDay(date, parseDate(range.endDate)),
       );
 
@@ -926,10 +926,10 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     if (type() !== 'range' && type() !== 'multipleRange') return false;
 
     if (type() === 'multipleRange') {
-      const rangesForBlue =
+      const uneditedRanges =
         datesObjectValue.multipleRanges?.filter((r) => r.id !== editingRangeId()) ?? [];
       const inExisting =
-        rangesForBlue.some((range) => isInRange(date, range.startDate, range.endDate)) ??
+        uneditedRanges.some((range) => isInRange(date, range.startDate, range.endDate)) ??
         false;
 
       if (datesObjectValue.startDate && datesObjectValue.endDate) {

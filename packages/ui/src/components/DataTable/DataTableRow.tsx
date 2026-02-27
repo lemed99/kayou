@@ -265,7 +265,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
               role="cell"
               class="flex shrink-0 items-center px-6 py-4 text-neutral-900 group-hover/row:bg-neutral-100 dark:text-white dark:group-hover/row:bg-neutral-800"
               classList={{
-                'relative border-x border-dashed border-neutral-200 overflow-hidden whitespace-nowrap dark:border-neutral-700':
+                'relative border-x border-dashed border-neutral-200 overflow-hidden dark:border-neutral-700':
                   isSticky(column.key),
                 'bg-neutral-100 dark:bg-neutral-800': isSelected(),
                 'bg-white dark:bg-neutral-900': !isSelected(),
