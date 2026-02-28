@@ -13,7 +13,7 @@ import { createStore, reconcile } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 
 import { type BackgroundScrollBehavior, type Placement, useFloating } from '@kayou/hooks';
-import { Edit02Icon, XIcon } from '@kayou/icons';
+import { Edit02Icon, FlipBackwardIcon, XIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
@@ -76,6 +76,7 @@ export interface DatePickerAriaLabels {
   rangeSelectedForEdit: string;
   startTime: string;
   endTime: string;
+  rangeEditCanceled: string;
 }
 
 export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
@@ -103,6 +104,7 @@ export const DEFAULT_DATE_PICKER_ARIA_LABELS: DatePickerAriaLabels = {
   rangeSelectedForEdit: 'Range selected for edition',
   startTime: 'Start time',
   endTime: 'End time',
+  rangeEditCanceled: 'Range Editing canceled',
 };
 
 function generateId(): string {
@@ -922,6 +924,32 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     return { start: false, end: false };
   };
 
+  const isRangeDateInEdition = (date: Date): { start: boolean; end: boolean } => {
+    if (
+      type() !== 'multipleRange' &&
+      datesObjectValue.startDate?.date === datesObjectValue.endDate?.date
+    ) {
+      return { start: false, end: false };
+    }
+
+    const rangeInEdition = datesObjectValue.multipleRanges?.find(
+      (r) => r.id === editingRangeId(),
+    );
+
+    const start = rangeInEdition?.startDate
+      ? isSameDay(date, parseDate(rangeInEdition?.startDate))
+      : false;
+
+    const end = rangeInEdition?.endDate
+      ? isSameDay(date, parseDate(rangeInEdition?.endDate))
+      : false;
+
+    return {
+      start: start,
+      end: end,
+    };
+  };
+
   const isDateInRange = (date: Date): boolean => {
     if (type() !== 'range' && type() !== 'multipleRange') return false;
 
@@ -982,14 +1010,6 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     const r = editingRange();
     if (!r) return false;
     return isInRange(date, r.startDate, r.endDate);
-  };
-
-  // check if date is editing range endpoint
-  const isEditingRangeEndpoint = (date: Date): boolean => {
-    const r = editingRange();
-    if (!r) return false;
-    const d = parseDate(toISO(date));
-    return isSameDay(d, parseDate(r.startDate)) || isSameDay(d, parseDate(r.endDate));
   };
 
   /**
@@ -1433,6 +1453,18 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     announce(a().rangeSelectedForEdit);
   };
 
+  const cancelEditingRange = () => {
+    setEditingRangeId(null);
+    setNewRangeId(null);
+    setDatesObjectValue({
+      ...datesObjectValue,
+      startDate: undefined,
+      endDate: undefined,
+    });
+    setHoveredDate(null);
+    announce(a().rangeEditCanceled);
+  };
+
   return (
     <div class={twMerge('relative w-full text-neutral-700 dark:text-neutral-200')}>
       {/* Hidden input for form integration (ISO format for server-side parsing) */}
@@ -1665,11 +1697,11 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   locale={props.locale || locale}
                   isSingletonDateSelected={isSingletonDateSelected}
                   isRangeDateSelected={isRangeDateSelected}
+                  isRangeDateInEdition={isRangeDateInEdition}
                   isDateInRange={isDateInRange}
                   isDateInPreviewRange={isDateInPreviewRange}
                   isPreviewEndpoint={isPreviewEndpoint}
                   isDateInEditingRange={isDateInEditingRange}
-                  isEditingRangeEndpoint={isEditingRangeEndpoint}
                   onDateHover={(date) => {
                     if (date === null) {
                       setHoveredDate(null);
@@ -1694,28 +1726,54 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   announce={announce}
                 />
                 {/* Multi range list for multiple range */}
-                <Show when={datesObjectValue.multipleRanges}>
+                <Show
+                  when={
+                    datesObjectValue.multipleRanges &&
+                    datesObjectValue.multipleRanges.length > 0
+                  }
+                >
                   <div class="flex flex-col gap-2 border-t border-neutral-300 py-3 dark:border-neutral-800">
                     <For each={datesObjectValue.multipleRanges}>
                       {(range) => (
                         <div
                           data-multi-range-chip
-                          class="flex w-fit items-center gap-2 rounded-lg bg-neutral-50 p-1 pl-3 text-xs dark:bg-neutral-800"
+                          classList={{
+                            'flex w-fit items-center gap-3 rounded-lg  p-1 pl-3 text-xs': true,
+                            'bg-amber-100 dark:bg-amber-900':
+                              editingRangeId() === range.id,
+                            'bg-neutral-50 dark:bg-neutral-800':
+                              editingRangeId() !== range.id,
+                          }}
                         >
                           <span>{`${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}</span>
-                          <button
-                            class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
-                            type="button"
-                            onClick={() => startEditingRange(range)}
-                          >
-                            <Edit02Icon class="size-4" />
-                          </button>
-                          <button
-                            class="inline-flex cursor-pointer items-center justify-center p-1 text-neutral-900 dark:text-white"
-                            onClick={() => removeCurrentRange(range.id)}
-                          >
-                            <XIcon class="size-4" />
-                          </button>
+                          <div>
+                            <Show
+                              when={editingRangeId() === range.id}
+                              fallback={
+                                <button
+                                  class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
+                                  type="button"
+                                  onClick={() => startEditingRange(range)}
+                                >
+                                  <Edit02Icon class="size-4" />
+                                </button>
+                              }
+                            >
+                              <button
+                                class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
+                                type="button"
+                                onClick={cancelEditingRange}
+                              >
+                                <FlipBackwardIcon class="size-4" />
+                              </button>
+                            </Show>
+                            <button
+                              class="inline-flex cursor-pointer items-center justify-center p-1 text-neutral-900 dark:text-white"
+                              onClick={() => removeCurrentRange(range.id)}
+                            >
+                              <XIcon class="size-4" />
+                            </button>
+                          </div>
                         </div>
                       )}
                     </For>

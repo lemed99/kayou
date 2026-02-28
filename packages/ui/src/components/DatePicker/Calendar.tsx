@@ -47,6 +47,8 @@ export interface CalendarProps {
   isSingletonDateSelected: (date: Date) => boolean;
   /** Function to check if a date is a range start/end. */
   isRangeDateSelected: (date: Date) => { start: boolean; end: boolean };
+  /** Function to check if a date is a range beign edited start/end. */
+  isRangeDateInEdition: (date: Date) => { start: boolean; end: boolean };
   /** Function to check if a date falls within the selected range. */
   isDateInRange: (date: Date) => boolean;
   /** Function to check if a date falls within the hover preview range. */
@@ -55,8 +57,6 @@ export interface CalendarProps {
   isPreviewEndpoint?: (date: Date) => boolean;
   /** Function to check if a date falls within the editing range. */
   isDateInEditingRange?: (date: Date) => boolean;
-  /** Function to check if a date is the hovered endpoint of the editing range. */
-  isEditingRangeEndpoint?: (date: Date) => boolean;
   /** Callback when a date is hovered (for range preview). */
   onDateHover?: (date: Date | null) => void;
   /** Callback when mouse moves over a date (to detect mouse-to-keyboard switch). */
@@ -413,6 +413,7 @@ const Calendar = (props: CalendarProps) => {
 
   const isSelected = (date: Date) => props.isSingletonDateSelected(date);
   const rangeSelection = (date: Date) => props.isRangeDateSelected(date);
+  const rangeInEdit = (date: Date) => props.isRangeDateInEdition(date);
   const isInCurrentMonth = (date: Date) => isCurrentMonth(date);
   const isInDateRange = (date: Date) => props.isDateInRange(date);
   const isInPreviewRange = (date: Date) => props.isDateInPreviewRange?.(date) ?? false;
@@ -420,7 +421,6 @@ const Calendar = (props: CalendarProps) => {
   const isDisabled = (date: Date) => props.isDateDisabled(date);
   const isToday = (date: Date) => isSameDay(date, new Date());
   const isInEditingRange = (date: Date) => props.isDateInEditingRange?.(date) ?? false;
-  const isEditingEnd = (date: Date) => props.isEditingRangeEndpoint?.(date) ?? false;
 
   /**
    * Focuses the currently focused date button in the calendar grid.
@@ -573,14 +573,19 @@ const Calendar = (props: CalendarProps) => {
                                 !isSelected(date) &&
                                 !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),
-                              'bg-amber-500 text-white font-medium rounded-lg':
-                                isEditingEnd(date) && isInCurrentMonth(date),
+                              'bg-amber-500 text-white font-medium rounded-r-lg rounded-l-none':
+                                rangeInEdit(date).end &&
+                                isInCurrentMonth(date) &&
+                                !isSelected(date),
                               'bg-amber-100 dark:bg-amber-900/40':
                                 isInEditingRange(date) &&
-                                !isEditingEnd(date) &&
                                 !isSelected(date) &&
                                 !isPreviewEnd(date) &&
                                 isInCurrentMonth(date),
+                              'bg-amber-500 text-white font-medium rounded-l-lg rounded-r-none':
+                                rangeInEdit(date).start &&
+                                isInCurrentMonth(date) &&
+                                !isSelected(date),
                               'bg-blue-500 text-white font-medium rounded-lg':
                                 (isSelected(date) || isPreviewEnd(date)) &&
                                 isInCurrentMonth(date),
