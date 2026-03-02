@@ -305,6 +305,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.selectRange}
           locale={props.config.dateConfig?.locale || 'en'}
           inputClass="flex-1"
+          sizing="sm"
         />
       </Match>
 
@@ -324,6 +325,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.selectDates}
           locale={props.config.dateConfig?.locale || 'en'}
           inputClass="flex-1"
+          sizing="sm"
         />
       </Match>
 
@@ -335,6 +337,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.selectDate}
           locale={props.config.dateConfig?.locale || 'en'}
           inputClass="min-w-[150px] flex-1"
+          sizing="sm"
         />
       </Match>
       <Match when={isSingleDateForArray()}>
@@ -345,6 +348,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           placeholder={props.config.placeholder || props.labels.selectDate}
           locale={props.config.dateConfig?.locale || 'en'}
           inputClass="min-w-[150px] flex-1"
+          sizing="sm"
         />
       </Match>
     </Switch>

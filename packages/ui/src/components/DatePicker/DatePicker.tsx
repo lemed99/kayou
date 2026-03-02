@@ -234,6 +234,8 @@ export interface DatePickerProps {
   name?: string;
   /** Function to determine if a specific date should be disabled. */
   disabledDates?: (date: Date) => boolean;
+  /** Input size variant. @default 'md' */
+  sizing?: 'xs' | 'sm' | 'md';
 }
 
 // CalendarProps re-exported from Calendar.tsx
@@ -287,6 +289,8 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
     ...DEFAULT_DATE_PICKER_ARIA_LABELS,
     ...props.ariaLabels,
   }));
+
+  const sizing = createMemo(() => props.sizing || 'md');
 
   const editingRange = createMemo(() => {
     const id = editingRangeId();
@@ -1455,6 +1459,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               ? props.style
               : {}),
           }}
+          sizing={sizing()}
         />
         <Show
           when={
@@ -1619,7 +1624,12 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                   onEscape={closeCalendar}
                 />
               </Show>
-              <form onSubmit={(e) => { e.preventDefault(); handleApply(); }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleApply();
+                }}
+              >
                 <Calendar
                   currentDate={currentDate}
                   setCurrentDate={setCurrentDate}
