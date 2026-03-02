@@ -116,7 +116,7 @@ export default function ModalPage() {
                   Are you sure you want to proceed? This action cannot be undone.
                 </p>
                 <div class="mt-4 flex justify-end gap-2">
-                  <Button color="light" onClick={() => setShow(false)}>Cancel</Button>
+                  <Button color="theme" onClick={() => setShow(false)}>Cancel</Button>
                   <Button onClick={() => setShow(false)}>Confirm</Button>
                 </div>
               </Modal>

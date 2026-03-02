@@ -54,9 +54,6 @@ export interface DataTableLabels {
   configDeleted: string;
   undo: string;
   cancel: string;
-  maxConfigsReached: string;
-  configLimitReached: string;
-  configLimitReachedAdditionnal: string;
   createNewConfiguration: string;
   createNewConfigurationDescription: string;
   updateCurrentConfiguration: string;
@@ -104,9 +101,6 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   configDeleted: 'Configuration deleted',
   undo: 'Undo',
   cancel: 'Cancel',
-  maxConfigsReached: 'Maximum of 3 configurations reached',
-  configLimitReached: 'Config limit of 3 reached',
-  configLimitReachedAdditionnal: 'Delete a config to save a new one.',
   createNewConfiguration: 'Create new configuration',
   createNewConfigurationDescription: 'Save current settings as a new configuration',
   updateCurrentConfiguration: 'Update current configuration',
@@ -287,6 +281,7 @@ export function DataTable<T extends Record<string, unknown>>(
     configEnabled,
     readConfigs,
     writeConfigs,
+    // eslint-disable-next-line solid/reactivity --- table id won't change
   } = useDataTableState(props.id);
 
   // --- Signals ---
@@ -975,7 +970,6 @@ export function DataTable<T extends Record<string, unknown>>(
         isAtLimit: configHook?.isAtLimit ?? (() => false),
         hasConfigs: configHook?.hasConfigs ?? (() => false),
         onSaveConfig: configHook?.saveConfig ?? (() => false),
-        restoreConfig: configHook?.restoreConfig ?? (() => false),
         onUpdateConfig: configHook?.updateConfig ?? (() => {}),
         onDeleteConfig: configHook?.deleteConfig ?? (() => {}),
         onActivateConfig: handleActivateConfig,

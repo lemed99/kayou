@@ -10,17 +10,10 @@ import {
   createSignal,
 } from 'solid-js';
 
-import {
-  ChevronDownIcon,
-  FilterFunnel01Icon,
-  InfoCircleIcon,
-  PlusIcon,
-  XCloseIcon,
-} from '@kayou/icons';
+import { ChevronDownIcon, FilterFunnel01Icon, PlusIcon, XCloseIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import { type Option } from '../../shared';
-import Alert from '../Alert';
 import Button from '../Button';
 import DatePicker from '../DatePicker';
 import NumberInput from '../NumberInput';
@@ -214,25 +207,25 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           !isEmptyOrNotEmptyOperators()
         }
       >
-        <div class="flex flex-1 items-center gap-1 rounded-lg border border-neutral-300 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+        <div class="flex flex-1 items-center rounded-lg border border-neutral-300 bg-neutral-50 text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
           <NumberInput
             value={betweenValues()[0] != null ? String(betweenValues()[0]) : ''}
             onValueChange={(v) => props.onChange([v ?? null, betweenValues()[1]])}
             placeholder={props.labels.min}
             sizing="sm"
-            type={props.config.numberConfig?.type || 'integer'}
-            class="w-[80px]"
-            inputClass="border-0 bg-transparent dark:border-transparent dark:bg-transparent py-1 focus:outline-0 dark:outline-0"
+            type={props.config.numberConfig?.type ?? 'integer'}
+            class="flex-1"
+            inputClass="border-none bg-transparent rounded-r-none"
           />
-          <span class="text-neutral-500 dark:text-neutral-400">|</span>
+          <div class="h-[36px] w-[2px] bg-neutral-300 dark:bg-neutral-700" />
           <NumberInput
             value={betweenValues()[1] != null ? String(betweenValues()[1]) : ''}
             onValueChange={(v) => props.onChange([betweenValues()[0], v ?? null])}
             placeholder={props.labels.max}
             sizing="sm"
-            type={props.config.numberConfig?.type || 'integer'}
-            class="w-[80px]"
-            inputClass="border-0 bg-transparent dark:border-transparent dark:bg-transparent py-1 focus:outline-0 dark:outline-0"
+            type={props.config.numberConfig?.type ?? 'integer'}
+            class="flex-1"
+            inputClass="border-none bg-transparent rounded-l-none"
           />
         </div>
       </Match>
@@ -294,19 +287,6 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
         />
       </Match>
 
-      <Match
-        when={props.config.fieldType === 'multiSelect' && !isEmptyOrNotEmptyOperators()}
-      >
-        <MultiSelect
-          options={props.config.options || []}
-          values={(props.filter.value as string[]) || []}
-          onMultiSelect={(options) => props.onChange(options?.map((o) => o.value) || [])}
-          placeholder={props.config.placeholder || props.labels.select}
-          sizing="sm"
-          class="flex-1"
-        />
-      </Match>
-
       {/* Date types: operator determines single vs range input */}
       <Match when={isDateRange()}>
         <DatePicker
@@ -324,7 +304,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           }}
           placeholder={props.config.placeholder || props.labels.selectRange}
           locale={props.config.dateConfig?.locale || 'en'}
-          inputClass="min-w-[200px] flex-1"
+          inputClass="flex-1"
         />
       </Match>
 
@@ -343,7 +323,7 @@ function FilterInput<T>(props: FilterInputProps<T>): JSX.Element {
           }}
           placeholder={props.config.placeholder || props.labels.selectDates}
           locale={props.config.dateConfig?.locale || 'en'}
-          inputClass="min-w-[200px] flex-1"
+          inputClass="flex-1"
         />
       </Match>
 
@@ -420,9 +400,9 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
   // );
 
   return (
-    <div class="space-y-2">
-      <h5 class="text-sm font-semibold capitalize">{props.filter.key}</h5>
-      <div class="grid grid-cols-[1fr_1fr_28px] items-center gap-2">
+    <div class="space-y-1">
+      <p class="text-sm font-medium capitalize">{props.filter.key}</p>
+      <div class="grid grid-cols-[1fr_1fr_20px] items-center gap-2">
         {/* Column selector */}
 
         {/* Operator selector */}
@@ -436,7 +416,6 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
           }}
           placeholder={props.ariaLabels.operator}
           sizing="sm"
-          class=""
         />
 
         {/* Value input */}
@@ -453,10 +432,10 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
         <button
           type="button"
           onClick={() => props.onRemove()}
-          class="shrink-0 rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+          class="shrink-0 cursor-pointer rounded p-0.5 text-neutral-400 transition-all hover:bg-neutral-100 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
           aria-label={props.ariaLabels.removeFilter}
         >
-          <XCloseIcon class="size-5" aria-hidden="true" />
+          <XCloseIcon aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -622,25 +601,15 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
   const activeFilterCount = createMemo(() => props.activeFilters().size);
 
   const popoverContentWithAttr = () => (
-    <div class="max-w-[calc(100dvw-32px)] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700">
-      <Alert color="info" class="mb-4">
-        Filters refine your results all selected criteria must apply.
-      </Alert>
-
+    <div class="w-[400px] rounded-lg bg-white p-4 shadow-lg ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-700">
       {/* Filter rows */}
-      <div class="mb-4 space-y-3">
+      <div class="mb-4 max-h-[280px] space-y-4 overflow-y-auto p-1">
         <Show
           when={draftFilters().length > 0}
           fallback={
-            <div class="flex items-center gap-2 py-2">
-              <InfoCircleIcon
-                class="size-5 text-neutral-400 dark:text-neutral-500"
-                aria-hidden="true"
-              />
-              <span class="text-sm text-neutral-500 dark:text-neutral-400">
-                {props.noFiltersText || l().noFiltersApplied}
-              </span>
-            </div>
+            <span class="py-2 text-sm text-neutral-500 dark:text-neutral-400">
+              {props.noFiltersText ?? l().noFiltersApplied}
+            </span>
           }
         >
           <Index each={draftFilters()}>
@@ -674,25 +643,24 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           }}
           placeholder={a().column}
           sizing="sm"
-          class=""
           inputComponent={() => (
-            <button
-              type="button"
-              // onClick={handleAddFilter}
-              class="flex cursor-pointer items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300"
+            <Button
+              icon={PlusIcon}
+              color="transparent"
+              size="xs"
+              class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
-              <PlusIcon class="size-4" aria-hidden="true" />
-              {props.addFilterText || l().addFilter}
-            </button>
+              {props.addFilterText ?? l().addFilter}
+            </Button>
           )}
         />
 
         <div class="ml-auto flex items-center gap-2 justify-self-end">
-          <Button size="sm" color="transparent" onClick={handleReset}>
-            {props.resetText || l().reset}
+          <Button size="xs" color="theme" onClick={handleReset}>
+            {props.resetText ?? l().reset}
           </Button>
-          <Button size="sm" onClick={handleApply}>
-            {props.applyText || l().filter}
+          <Button size="xs" onClick={handleApply}>
+            {props.applyText ?? l().filter}
           </Button>
         </div>
       </div>
@@ -746,20 +714,21 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             setIsOpen(false);
           }
         }}
+        backgroundScrollBehavior="follow"
       >
         <div>
           <Button
             size="sm"
-            color="transparent"
+            color="theme"
             icon={FilterFunnel01Icon}
             aria-expanded={isOpen()}
             aria-label={
               activeFilterCount() > 0
-                ? `${props.filterButtonText || l().filter} (${activeFilterCount()})`
+                ? `${props.filterButtonText ?? l().filter} (${activeFilterCount()})`
                 : undefined
             }
           >
-            {props.filterButtonText || l().filter}
+            {props.filterButtonText ?? l().filter}
             <Show when={activeFilterCount() > 0}>
               <span
                 aria-hidden="true"
@@ -822,7 +791,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           }}
           class="inline-flex items-center gap-0.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 dark:text-neutral-400 dark:hover:text-neutral-200"
         >
-          {props.addFilterText || l().addFilter}
+          {props.addFilterText ?? l().addFilter}
           <PlusIcon class="size-3" aria-hidden="true" />
         </button>
       </Show>

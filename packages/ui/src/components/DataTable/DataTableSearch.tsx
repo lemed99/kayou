@@ -30,7 +30,7 @@ export function DataTableSearch(): JSX.Element {
             }}
             class="absolute right-0 top-0 h-full cursor-pointer px-3 text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
           >
-            <XCloseIcon class="size-4" aria-hidden="true" />
+            <XCloseIcon aria-hidden="true" />
           </button>
         </Show>
       </div>

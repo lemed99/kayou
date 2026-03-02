@@ -192,7 +192,7 @@ const Navbar: Component = () => {
                 aria-label="Search documentation"
                 class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50/50 px-3 text-sm text-neutral-500 transition-colors dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400"
               >
-                <SearchRefractionIcon class="size-4" />
+                <SearchRefractionIcon  />
                 <span class="hidden sm:inline">Search</span>
                 <kbd class="ml-2 hidden rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-xs font-medium text-neutral-500 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
                   ⌘K
@@ -278,7 +278,7 @@ const Navbar: Component = () => {
           <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900 dark:border dark:border-neutral-700">
             <div class="relative border-b border-neutral-200 p-4 dark:border-neutral-800">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-7">
-                <SearchRefractionIcon class="size-4" />
+                <SearchRefractionIcon  />
               </div>
               <input
                 ref={searchInputRef}

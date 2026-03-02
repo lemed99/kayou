@@ -293,7 +293,7 @@ export default function SidebarPage() {
               <div class="mb-2 flex items-center justify-between">
                 <span class="font-semibold text-neutral-900 dark:text-white">5 Days left!</span>
                 <button type="button" class="cursor-pointer text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
-                  <XCloseIcon class="size-4" />
+                  <XCloseIcon  />
                 </button>
               </div>
               <div class="mb-2 h-1.5 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">

@@ -8,7 +8,7 @@ import Spinner from './Spinner';
 /**
  * Color variants for the Button component.
  */
-export type ButtonColor = 'info' | 'danger' | 'black' | 'white' | 'transparent';
+export type ButtonColor = 'info' | 'danger' | 'theme' | 'anti-theme' | 'transparent';
 
 /**
  * Size variants for the Button component.
@@ -43,21 +43,20 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const theme = {
-  base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 rounded-lg cursor-pointer transition-all duration-200',
+  base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 cursor-pointer transition-all duration-200',
   color: {
     info: 'text-white bg-blue-600 border border-transparent hover:bg-blue-700',
     danger: 'text-white bg-red-700 border border-transparent hover:bg-red-800',
-    black:
-      'text-white bg-black border border-transparent hover:bg-neutral-900 dark:border-neutral-800',
-    white:
-      'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:border-transparent',
-    transparent:
-      'text-neutral-900 dark:text-neutral-100 bg-transparent border border-neutral-300 dark:border-neutral-700',
+    theme:
+      'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:text-white dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-950',
+    'anti-theme':
+      'text-white bg-black border border-transparent hover:bg-neutral-900 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-50',
+    transparent: 'text-neutral-900 dark:text-neutral-100 bg-transparent',
   },
   size: {
-    xs: 'text-xs px-2 py-1.5',
-    sm: 'text-sm px-3 py-2',
-    md: 'text-sm px-4 py-2.5',
+    xs: 'text-xs px-2 py-1.5 rounded-md',
+    sm: 'text-sm px-3 py-2 rounded-lg',
+    md: 'text-sm px-4 py-2.5 rounded-lg',
   },
 };
 

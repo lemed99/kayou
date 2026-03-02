@@ -31,7 +31,7 @@ import {
   SubscriptIcon,
   SuperscriptIcon,
   TaskListIcon,
-  Trash01Icon,
+  Trash03Icon,
   Underline01Icon,
 } from '@kayou/icons';
 import { Editor } from '@tiptap/core';
@@ -651,7 +651,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
                         class="flex size-8 items-center justify-center rounded text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-red-400"
                         aria-label={l().removeLink}
                       >
-                        <Trash01Icon />
+                        <Trash03Icon />
                       </button>
                     </Tooltip>
                   </div>

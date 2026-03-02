@@ -1,25 +1,25 @@
 import {
-    For,
-    type JSX,
-    type ParentProps,
-    Show,
-    Suspense,
-    createMemo,
-    createSignal,
-    lazy,
+  For,
+  type JSX,
+  type ParentProps,
+  Show,
+  Suspense,
+  createMemo,
+  createSignal,
+  lazy,
 } from 'solid-js';
 
 import {
-    AlertTriangleIcon,
-    CheckIcon,
-    Copy01Icon,
-    Database01Icon,
-    Link01Icon,
+  AlertTriangleIcon,
+  CheckIcon,
+  Copy01Icon,
+  Database01Icon,
+  Link01Icon,
 } from '@kayou/icons';
 
 import { dedent } from '../helpers/dedent';
 import BaseDocPage, {
-    type RelatedItemDefinition,
+  type RelatedItemDefinition,
 } from './BaseDocPage';
 const ReadonlyCode = lazy(() => import('./ReadonlyCode'));
 
@@ -504,7 +504,7 @@ function CodeBlock(props: { code: string }): JSX.Element {
         class="absolute right-3 top-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-1 text-xs text-neutral-700 opacity-0 transition-opacity hover:bg-neutral-300 group-hover:opacity-100 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
         aria-label={copied() ? 'Copied!' : 'Copy code'}
       >
-        <Show when={copied()} fallback={<Copy01Icon class="size-4" />}>
+        <Show when={copied()} fallback={<Copy01Icon  />}>
           <CheckIcon class="size-4 text-green-600" />
         </Show>
         {copied() ? 'Copied!' : 'Copy'}

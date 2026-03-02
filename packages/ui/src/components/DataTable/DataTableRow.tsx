@@ -5,6 +5,7 @@ import {
   JSX,
   Show,
   createEffect,
+  createMemo,
   createSignal,
   onCleanup,
 } from 'solid-js';
@@ -53,9 +54,6 @@ export function DataTableRow<T extends Record<string, unknown>>(
 
   const rowClasses = () => {
     let cls = 'grid w-fit';
-    cls += isSelected()
-      ? ' bg-neutral-100 dark:bg-neutral-800'
-      : ' bg-white hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800';
     if (ctx.onRowClick || ctx.expandRow) cls += ' cursor-pointer';
     if (isLocked())
       cls += ' border-y border-dashed border-neutral-200 dark:border-neutral-700';
@@ -174,6 +172,12 @@ export function DataTableRow<T extends Record<string, unknown>>(
     });
   }
 
+  const rowElementsClassList = createMemo(() => ({
+    'bg-neutral-50 dark:bg-neutral-950': isSelected(),
+    'bg-white dark:bg-neutral-900': !isSelected(),
+    'group-hover/row:bg-neutral-50 dark:group-hover/row:bg-neutral-950': true,
+  }));
+
   return (
     <div class="group/row box border-b border-neutral-200 bg-white last:border-b-0 dark:border-neutral-800 dark:bg-neutral-900">
       {/* Data row */}
@@ -230,7 +234,8 @@ export function DataTableRow<T extends Record<string, unknown>>(
         <Show when={ctx.rowSelection}>
           <div
             role="cell"
-            class="flex items-center py-3 pl-6 group-hover/row:bg-neutral-100 dark:group-hover/row:bg-neutral-800"
+            class="flex items-center py-3 pl-6"
+            classList={rowElementsClassList()}
           >
             <Checkbox
               checked={isSelected()}
@@ -244,7 +249,8 @@ export function DataTableRow<T extends Record<string, unknown>>(
         <Show when={ctx.expandRow && ctx.onRowClick}>
           <div
             role="cell"
-            class="flex items-center justify-center group-hover/row:bg-neutral-100 dark:group-hover/row:bg-neutral-800"
+            class="flex items-center justify-center"
+            classList={rowElementsClassList()}
           >
             <button
               type="button"
@@ -268,12 +274,11 @@ export function DataTableRow<T extends Record<string, unknown>>(
           {(column) => (
             <div
               role="cell"
-              class="flex shrink-0 items-center overflow-hidden px-6 py-4 text-neutral-900 group-hover/row:bg-neutral-100 dark:text-white dark:group-hover/row:bg-neutral-800"
+              class="flex shrink-0 items-center overflow-hidden px-6 py-4 text-neutral-900 dark:text-white"
               classList={{
                 'relative border-x border-dashed border-neutral-200 dark:border-neutral-700 bg-inherit':
                   isSticky(column.key),
-                'bg-neutral-100 dark:bg-neutral-800': isSelected(),
-                'bg-white dark:bg-neutral-900': !isSelected(),
+                ...rowElementsClassList(),
               }}
               style={stickyStyle(column.key)}
             >
@@ -309,7 +314,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
       {/* Detail panel */}
       <Show when={ctx.expandRow && detailMounted()}>
         <div
-          class="overflow-hidden border-t border-neutral-200 transition-[height] duration-200 ease-out group-hover/row:bg-neutral-100 dark:border-neutral-800 dark:group-hover/row:bg-neutral-800"
+          class="overflow-hidden border-t border-neutral-200 transition-[height] duration-200 ease-out dark:border-neutral-800"
           style={{
             height: detailVisible() ? `${detailHeight()}px` : '0px',
           }}

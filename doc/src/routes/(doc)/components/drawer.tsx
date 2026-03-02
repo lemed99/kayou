@@ -131,7 +131,7 @@ export default function DrawerPage() {
                     Adjust your preferences below.
                   </p>
                   <div class="flex justify-end gap-2">
-                    <Button color="light" onClick={() => setShow(false)}>Cancel</Button>
+                    <Button color="theme" onClick={() => setShow(false)}>Cancel</Button>
                     <Button onClick={() => setShow(false)}>Save</Button>
                   </div>
                 </div>

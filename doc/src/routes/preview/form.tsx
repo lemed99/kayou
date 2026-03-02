@@ -344,7 +344,7 @@ function FormState() {
           <p data-testid="is-valid">{form.isValid() ? 'valid' : 'invalid'}</p>
           <div class="flex gap-2">
             <Button type="submit" disabled={form.isSubmitting()}>Submit</Button>
-            <Button type="button" color="white" onClick={() => form.reset()}>Reset</Button>
+            <Button type="button" color="theme" onClick={() => form.reset()}>Reset</Button>
           </div>
         </div>
       </Form>

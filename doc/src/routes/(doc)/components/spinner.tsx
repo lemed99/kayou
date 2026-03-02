@@ -31,7 +31,7 @@ export default function SpinnerPage() {
       props={[
         {
           name: 'color',
-          type: '"info" | "danger" | "black" | "white" | "transparent',
+          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent',
           default: '"info"',
           description: 'Color variant of the spinner',
         },
@@ -81,8 +81,8 @@ export default function SpinnerPage() {
                 <div class="flex items-center gap-4">
                   <Spinner color="info" />
                   <Spinner color="danger" />
-                  <Spinner color="black" />
-                  <Spinner color="white" />
+                  <Spinner color="theme" />
+                  <Spinner color="anti-theme" />
                   <Spinner color="transparent" />
                 </div>
               </div>

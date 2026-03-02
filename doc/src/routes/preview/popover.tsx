@@ -29,7 +29,7 @@ export default function PopoverPreview() {
               position="right"
               aria-label="Nested popover"
             >
-              <Button color="white" size="sm">
+              <Button color="theme" size="sm">
                 Open nested
               </Button>
             </Popover>

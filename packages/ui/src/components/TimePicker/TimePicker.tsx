@@ -168,7 +168,7 @@ const TimePicker = (props: TimePickerProps) => {
   };
 
   return (
-    <div class={twMerge('w-full', props.containerClass)}>
+    <div class={twMerge('w-fit', props.containerClass)}>
       <Show when={props.label}>
         <div class="mb-1 block">
           <Label id={labelId()} value={props.label} color={color()} />

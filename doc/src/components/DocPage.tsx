@@ -615,7 +615,7 @@ export function CodeBlock(props: { code: string }): JSX.Element {
         class="absolute top-3 right-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-1 text-xs text-neutral-700 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-300 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
         aria-label={copied() ? 'Copied!' : 'Copy code'}
       >
-        <Show when={copied()} fallback={<Copy01Icon class="size-4" />}>
+        <Show when={copied()} fallback={<Copy01Icon  />}>
           <CheckIcon class="size-4 text-green-600" />
         </Show>
         {copied() ? 'Copied!' : 'Copy'}

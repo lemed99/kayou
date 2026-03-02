@@ -8,12 +8,7 @@ import {
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
-import {
-  type BackgroundScrollBehavior,
-  type Placement,
-  useFloating,
-  useTheme,
-} from '@kayou/hooks';
+import { type BackgroundScrollBehavior, type Placement, useFloating } from '@kayou/hooks';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
@@ -78,18 +73,26 @@ export interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 const theme = {
-  arrow: {
-    base: 'absolute z-100',
-    theme: {
-      dark: 'text-neutral-700',
-      light: 'text-white',
-    },
-  },
   base: 'inline-block z-100 rounded-lg py-2 px-3 text-sm w-max outline shadow-sm',
-  hidden: 'invisible opacity-0',
-  theme: {
+  tooltip: {
+    auto: 'outline-neutral-200 bg-white text-neutral-900 dark:outline-neutral-600 dark:bg-neutral-700 dark:text-white',
+    invert:
+      'outline-neutral-600 bg-neutral-700 text-white dark:outline-neutral-200 dark:bg-white dark:text-neutral-900',
     dark: 'outline-neutral-600 bg-neutral-700 text-white',
     light: 'outline-neutral-200 bg-white text-neutral-900',
+  },
+  arrow: {
+    base: 'absolute z-100',
+    auto: 'text-white dark:text-neutral-700',
+    invert: 'text-neutral-700 dark:text-white',
+    dark: 'text-neutral-700',
+    light: 'text-white',
+  },
+  arrowBorder: {
+    auto: 'fill-neutral-200 dark:fill-neutral-600',
+    invert: 'fill-neutral-600 dark:fill-neutral-200',
+    dark: 'fill-neutral-600',
+    light: 'fill-neutral-200',
   },
 };
 
@@ -109,72 +112,10 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
   );
 
   const [showTooltip, setShowTooltip] = createSignal(false);
-  const [currentTheme, setCurrentTheme] = createSignal<'light' | 'dark'>('dark');
 
   const tooltipId = createUniqueId();
   let showTimeoutId: number | undefined;
   let hideTimeoutId: number | undefined;
-
-  // Standalone theme detection (works without ThemeProvider)
-  const detectThemeFromDOM = (): 'light' | 'dark' => {
-    if (typeof document === 'undefined') return 'dark';
-    // Check for dark class on document (Tailwind convention)
-    if (document.documentElement.classList.contains('dark')) {
-      return 'dark';
-    }
-    // Check system preference
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ) {
-      return 'dark';
-    }
-    return 'light';
-  };
-
-  // Theme detection: try ThemeProvider at top level (required for Solid.js context),
-  // fall back to DOM/system detection
-  let themeContext: ReturnType<typeof useTheme> | null = null;
-  try {
-    themeContext = useTheme();
-  } catch {
-    // No ThemeProvider available
-  }
-
-  createEffect(() => {
-    if (merged.theme !== 'auto' && merged.theme !== 'invert') return;
-    if (typeof document === 'undefined') return;
-
-    if (themeContext) {
-      const { systemTheme, appTheme } = themeContext;
-      setCurrentTheme(
-        appTheme() === 'system' ? systemTheme() : (appTheme() as 'light' | 'dark'),
-      );
-    } else {
-      setCurrentTheme(detectThemeFromDOM());
-
-      const observer = new MutationObserver(() => {
-        setCurrentTheme(detectThemeFromDOM());
-      });
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
-      });
-
-      const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
-      const handleChange = () => setCurrentTheme(detectThemeFromDOM());
-      mediaQuery?.addEventListener('change', handleChange);
-
-      onCleanup(() => {
-        observer.disconnect();
-        mediaQuery?.removeEventListener('change', handleChange);
-      });
-    }
-  });
-
-  const getThemeOpposite = (themeValue: 'light' | 'dark') => {
-    return themeValue === 'dark' ? 'light' : 'dark';
-  };
 
   const handleShow = () => {
     clearTimeout(hideTimeoutId);
@@ -231,12 +172,6 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
     onClose: () => setShowTooltip(false),
   });
 
-  const resolvedTheme = () => {
-    if (merged.theme === 'auto') return currentTheme();
-    if (merged.theme === 'invert') return getThemeOpposite(currentTheme());
-    return merged.theme;
-  };
-
   return (
     <>
       <div
@@ -267,11 +202,11 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
                 'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
               } as JSX.CSSProperties
             }
-            class={twMerge(merged.class, theme.base, theme.theme[resolvedTheme()])}
+            class={twMerge(merged.class, theme.base, theme.tooltip[merged.theme])}
           >
             <div
               ref={refs.setArrow}
-              class={twMerge(theme.arrow.base, theme.arrow.theme[resolvedTheme()])}
+              class={twMerge(theme.arrow.base, theme.arrow[merged.theme])}
               style={arrowStyles() as JSX.CSSProperties}
               aria-hidden="true"
             >
@@ -282,9 +217,7 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
                 />
                 <path
                   d="M11.0045 8.14139C10.2438 8.8259 9.08927 8.82593 8.32857 8.14137L3.47178 3.77026C2.92098 3.27447 2.20607 3.00014 1.46497 3.00014L4.10987 3.00015L8.99757 7.39808C9.37787 7.74035 9.95517 7.74035 10.3355 7.39808L15.2225 3.00015L17.8682 3.00014C17.127 3.00014 16.4121 3.27447 15.8613 3.77026L11.0045 8.14139Z"
-                  class={
-                    resolvedTheme() === 'dark' ? 'fill-neutral-600' : 'fill-neutral-200'
-                  }
+                  class={theme.arrowBorder[merged.theme]}
                 />
               </svg>
             </div>

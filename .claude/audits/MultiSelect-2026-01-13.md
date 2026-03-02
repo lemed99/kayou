@@ -181,14 +181,14 @@ if (key === 'Escape') {
 export const ClearContentButton = (props) => {
   return (
     <button type="button" ...>
-      <XCloseIcon class="size-4" />  // No accessible name!
+      <XCloseIcon  />  // No accessible name!
     </button>
   );
 };
 
 export const ChevronDownButton = (props) => (
   <button type="button" ...>
-    <ChevronDownIcon class="size-4" />  // No accessible name!
+    <ChevronDownIcon  />  // No accessible name!
   </button>
 );
 ```
@@ -200,11 +200,11 @@ Screen readers will announce these as unlabeled buttons. Users won't know what a
 
 ```typescript
 <button type="button" aria-label="Clear selection" ...>
-  <XCloseIcon class="size-4" aria-hidden="true" />
+  <XCloseIcon  aria-hidden="true" />
 </button>
 
 <button type="button" aria-label="Open dropdown" ...>
-  <ChevronDownIcon class="size-4" aria-hidden="true" />
+  <ChevronDownIcon  aria-hidden="true" />
 </button>
 ```
 

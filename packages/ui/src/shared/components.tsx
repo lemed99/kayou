@@ -16,7 +16,7 @@ export const ClearContentButton = (props: {
       onClick={(e: Event) => props.onClick(e)}
       class={twMerge(defaultClass, props.class)}
     >
-      <XCloseIcon class="size-4" aria-hidden="true" />
+      <XCloseIcon aria-hidden="true" />
     </button>
   );
 };
@@ -33,6 +33,6 @@ export const ChevronDownButton = (props: {
     onFocus={() => props.onFocus?.()}
     class="absolute right-0 top-0 h-full cursor-pointer px-3 text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500"
   >
-    <ChevronDownIcon class="size-4" aria-hidden="true" />
+    <ChevronDownIcon aria-hidden="true" />
   </button>
 );

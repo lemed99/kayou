@@ -1,38 +1,29 @@
-import { For, JSX, Show, createEffect, createSignal, onCleanup } from 'solid-js';
+import { For, JSX, Show, createSignal } from 'solid-js';
 
 import {
-  AlertCircleIcon,
   CheckIcon,
-  Edit01Icon,
+  Edit05Icon,
+  FlipBackwardIcon,
   Settings01Icon,
-  Trash01Icon,
-  XIcon,
+  Trash03Icon,
 } from '@kayou/icons';
+import { twMerge } from 'tailwind-merge';
 
-import Alert from '../Alert';
 import Button from '../Button';
 import Popover from '../Popover';
 import TextInput from '../TextInput';
 import { useDataTableInternal } from './DataTableInternalContext';
-import { SavedTableConfig } from './types';
 import { MAX_CONFIGS } from './useDataTableConfigs';
 
 export function DataTableConfigs(): JSX.Element {
   const ctx = useDataTableInternal();
 
-  const [saveMode, setSaveMode] = createSignal<'idle' | 'create' | 'edit'>('idle');
+  const [saveMode, setSaveMode] = createSignal<'idle' | 'create'>('idle');
   const [editingConfigId, setEditingConfigId] = createSignal<string | null>(null);
   const [configName, setConfigName] = createSignal('');
   const [configNameEdit, setConfigNameEdit] = createSignal('');
   const [listOpen, setListOpen] = createSignal(false);
-  const [deleteAlertVisible, setDeleteAlertVisible] = createSignal(false);
-  const [configToRestore, setConfigToRestore] = createSignal<SavedTableConfig | null>(
-    null,
-  );
-  const [deleteAlertTimer, setDeleteTimer] = createSignal(0);
-
-  let undoInterval: NodeJS.Timeout;
-  let undoTimeout: NodeJS.Timeout;
+  const [deletingConfigId, setDeletingConfigId] = createSignal<string | null>(null);
 
   const activeConfig = () => {
     const id = ctx.activeConfigId();
@@ -84,49 +75,18 @@ export function DataTableConfigs(): JSX.Element {
   };
 
   const handleDeleteConfig = (id: string) => {
-    if (id) {
-      setDeleteTimer(5);
-      setDeleteAlertVisible(true);
-      const config = ctx.getConfig(id);
-      if (config) {
-        setConfigToRestore(config);
-      }
-      ctx.onDeleteConfig(id);
-
-      undoTimeout = setTimeout(() => {
-        setConfigToRestore(null);
-        setDeleteAlertVisible(false);
-        setDeleteTimer(0);
-      }, 5500);
-    }
+    setEditingConfigId(null);
+    setDeletingConfigId(id);
   };
 
-  const restoreConfig = () => {
-    if (configToRestore()) {
-      ctx.restoreConfig(configToRestore()!);
-      setConfigToRestore(null);
-      setDeleteAlertVisible(false);
-      setDeleteTimer(0);
-      return;
-    }
+  const confirmDeleteConfig = (id: string) => {
+    ctx.onDeleteConfig(id);
+    setDeletingConfigId(null);
   };
 
-  createEffect(() => {
-    undoInterval = setInterval(() => {
-      if (deleteAlertTimer() > 0) {
-        setDeleteTimer(deleteAlertTimer() - 1);
-      }
-    }, 1000);
-  });
-
-  onCleanup(() => {
-    if (undoInterval) {
-      clearInterval(undoInterval);
-    }
-    if (undoTimeout) {
-      clearTimeout(undoTimeout);
-    }
-  });
+  const cancelDeleteConfig = () => {
+    setDeletingConfigId(null);
+  };
 
   const handleActivate = (id: string | null) => {
     ctx.onActivateConfig(id);
@@ -136,36 +96,16 @@ export function DataTableConfigs(): JSX.Element {
   const configListContent = () => (
     <div class="space-y-4 p-4" data-config-popover>
       <h3 class="font-medium">{ctx.labels().configPopoverContentTitle}</h3>
-      <Show when={ctx.isAtLimit()}>
-        <Alert
-          color="warning"
-          icon={AlertCircleIcon}
-          additionalContent={ctx.labels().configLimitReachedAdditionnal}
-        >
-          {ctx.labels().configLimitReached}
-        </Alert>
-      </Show>
-      <Show when={deleteAlertVisible()}>
-        <Alert color="warning" icon={AlertCircleIcon}>
-          <div>
-            <h5 class="mb-2 font-semibold">{ctx.labels().configDeleted}</h5>
-            <div class="flex justify-end">
-              <Button class="" size="sm" color="white" onClick={restoreConfig}>
-                {ctx.labels().undo} ({deleteAlertTimer()})s
-              </Button>
-            </div>
-          </div>
-        </Alert>
-      </Show>
-      <div class="min-w-[220px] space-y-2" data-config-list>
+      <div class="w-[220px] space-y-1" data-config-list>
         <button
           type="button"
           onClick={() => handleActivate(null)}
-          class={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
+          class={twMerge(
+            'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm',
             ctx.activeConfigId() === null
               ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-              : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-          }`}
+              : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800',
+          )}
         >
           <Show when={ctx.activeConfigId() === null}>
             <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
@@ -175,59 +115,96 @@ export function DataTableConfigs(): JSX.Element {
 
         <For each={ctx.configs()}>
           {(config) => (
-            <div
-              class={`flex items-center gap-1 rounded-md ${
-                ctx.activeConfigId() === config.id
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-              }`}
-            >
+            <div>
               <Show
-                when={editingConfigId() === config.id}
+                when={deletingConfigId() === config.id}
                 fallback={
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => handleActivate(config.id)}
-                      class={`flex flex-1 items-center gap-2 px-3 py-2 text-left text-sm`}
-                    >
-                      <Show when={ctx.activeConfigId() === config.id}>
-                        <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
-                      </Show>
-                      <span class="flex-1 truncate">{config.name}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEditConfig(config.id)}
-                      class="shrink-0 cursor-pointer p-2 text-neutral-950 hover:text-yellow-600 dark:text-neutral-100"
-                      aria-label={`Edit ${config.name}`}
-                    >
-                      <Edit01Icon class="size-4" aria-hidden="true" />
-                    </button>
-
-                    <Button
-                      size="sm"
-                      color="transparent"
-                      class="border-0 hover:text-red-500"
-                      icon={Trash01Icon}
-                      aria-label={ctx.labels().deleteConfiguration}
-                      onClick={() => handleDeleteConfig(config.id)}
-                    />
-                  </>
+                  <Show
+                    when={editingConfigId() === config.id}
+                    fallback={
+                      <div
+                        class={twMerge(
+                          'flex w-full items-center justify-between gap-1 rounded-md transition-all',
+                          ctx.activeConfigId() === config.id
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                            : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800',
+                        )}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleActivate(config.id)}
+                          class="flex flex-1 cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm"
+                        >
+                          <Show when={ctx.activeConfigId() === config.id}>
+                            <CheckIcon class="size-4 shrink-0" aria-hidden="true" />
+                          </Show>
+                          <span class="truncate">{config.name}</span>
+                        </button>
+                        <div class="flex px-1">
+                          <button
+                            onClick={() => handleEditConfig(config.id)}
+                            class="shrink-0 cursor-pointer p-1 text-neutral-950 transition-all hover:text-blue-600 dark:text-neutral-100"
+                            aria-label={`Edit ${config.name}`}
+                          >
+                            <Edit05Icon aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteConfig(config.id)}
+                            class="shrink-0 cursor-pointer p-1 text-neutral-950 transition-all hover:text-red-500 dark:text-neutral-100"
+                            aria-label={ctx.labels().deleteConfiguration}
+                          >
+                            <Trash03Icon aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  >
+                    <div class="flex w-full items-center justify-between gap-1">
+                      <TextInput
+                        placeholder={ctx.labels().configNamePlaceholder}
+                        value={configNameEdit()}
+                        onInput={(e) => setConfigNameEdit(e.currentTarget.value)}
+                        sizing="sm"
+                      />
+                      <div class="flex px-1">
+                        <button
+                          onClick={() => handleCancelRename()}
+                          class="shrink-0 cursor-pointer p-1 text-neutral-950 transition-all hover:text-red-500 dark:text-neutral-100"
+                        >
+                          <FlipBackwardIcon aria-hidden="true" />
+                        </button>
+                        <button
+                          onClick={() => handleRename()}
+                          class="shrink-0 cursor-pointer p-1 text-neutral-950 transition-all hover:text-blue-600 dark:text-neutral-100"
+                        >
+                          <CheckIcon aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  </Show>
                 }
               >
-                <TextInput
-                  placeholder={ctx.labels().configNamePlaceholder}
-                  value={configNameEdit()}
-                  onInput={(e) => setConfigNameEdit(e.currentTarget.value)}
-                  autofocus
-                />
-                <button onClick={() => handleRename()} class="p-1 text-emerald-500">
-                  <CheckIcon class="size-4" />
-                </button>
-                <button onClick={() => handleCancelRename()} class="p-1 text-red-500">
-                  <XIcon class="size-4" />
-                </button>
+                <div class="flex w-full items-center justify-between gap-1 rounded-md bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                  <span class="flex-1 truncate px-3 py-2 text-sm">
+                    {ctx.labels().deleteConfiguration}
+                  </span>
+                  <div class="flex px-1">
+                    <button
+                      onClick={cancelDeleteConfig}
+                      class="shrink-0 cursor-pointer p-1 transition-all hover:text-red-900 dark:hover:text-red-100"
+                      aria-label={ctx.labels().cancel}
+                    >
+                      <FlipBackwardIcon aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={() => confirmDeleteConfig(config.id)}
+                      class="shrink-0 cursor-pointer p-1 transition-all hover:text-red-900 dark:hover:text-red-100"
+                      aria-label={ctx.labels().deleteConfiguration}
+                    >
+                      <Trash03Icon aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
               </Show>
             </div>
           )}
@@ -247,6 +224,7 @@ export function DataTableConfigs(): JSX.Element {
               />
               <Button
                 size="sm"
+                color="anti-theme"
                 onClick={handleSubmit}
                 disabled={configName().trim().length === 0}
               >
@@ -256,24 +234,15 @@ export function DataTableConfigs(): JSX.Element {
           </Show>
 
           <div class="flex flex-col gap-2">
-            <Show
-              when={ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null}
-            >
-              <Button class="w-auto" onClick={handleDirectConfigUpdate}>
+            <Show when={ctx.activeConfigId() !== null}>
+              <Button color="anti-theme" onClick={handleDirectConfigUpdate}>
                 {ctx.labels().updateCurrentConfiguration}
               </Button>
             </Show>
-            <Show when={saveMode() === 'idle' && ctx.isDirty() && !ctx.isAtLimit()}>
+            <Show when={saveMode() === 'idle' && !ctx.isAtLimit()}>
               <Button
                 onClick={() => handleSaveNew()}
-                disabled={ctx.isAtLimit()}
-                class="w-auto"
-                color={
-                  ctx.isDirty() && !ctx.isAtLimit() && ctx.activeConfigId() !== null
-                    ? 'transparent'
-                    : 'info'
-                }
-                title={ctx.isAtLimit() ? ctx.ariaLabels().saveAsNewConfigTitle : ''}
+                color={ctx.activeConfigId() !== null ? 'theme' : 'anti-theme'}
               >
                 {ctx.labels().saveAsNew}
               </Button>
@@ -308,7 +277,7 @@ export function DataTableConfigs(): JSX.Element {
         >
           <Button
             size="sm"
-            color="transparent"
+            color="theme"
             class="rounded-b-none border-b-0 border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
             icon={Settings01Icon}
             data-config-list-trigger
@@ -317,13 +286,7 @@ export function DataTableConfigs(): JSX.Element {
             <Show
               when={ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)}
             >
-              <span class="h-2 w-2 rounded-full bg-amber-500" />
-            </Show>
-            <Show when={ctx.isDirty() && ctx.isAtLimit() && ctx.activeConfigId === null}>
-              <span
-                class="h-2 w-2 animate-pulse rounded-full bg-amber-500"
-                title={ctx.labels().maxConfigsReached}
-              />
+              <span class="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
             </Show>
           </Button>
         </Popover>

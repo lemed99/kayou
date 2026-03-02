@@ -82,7 +82,7 @@ const NavigationButton = (props: {
 }) => (
   <Tooltip hidden={props.disabled} content={props.tooltip}>
     <Button
-      color="transparent"
+      color="theme"
       onClick={props.onClick}
       disabled={props.disabled}
       class="size-8"

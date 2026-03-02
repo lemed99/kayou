@@ -169,21 +169,41 @@ function shiftWithinBounds(
 
   if (currentSide === 'top' || currentSide === 'bottom') {
     if (left < viewportRect.left) {
-      finalAlignment = 'start';
-      left = referenceRect.left;
+      const shiftedLeft = referenceRect.left;
+      const currentOverflow = viewportRect.left - left;
+      const shiftedOverflow = Math.max(0, shiftedLeft + dimensions.width - viewportRect.right);
+      if (shiftedOverflow < currentOverflow) {
+        finalAlignment = 'start';
+        left = shiftedLeft;
+      }
     } else if (left + dimensions.width > viewportRect.right) {
-      finalAlignment = 'end';
-      left = referenceRect.right - dimensions.width;
+      const shiftedLeft = referenceRect.right - dimensions.width;
+      const currentOverflow = left + dimensions.width - viewportRect.right;
+      const shiftedOverflow = Math.max(0, viewportRect.left - shiftedLeft);
+      if (shiftedOverflow < currentOverflow) {
+        finalAlignment = 'end';
+        left = shiftedLeft;
+      }
     }
   }
 
   if (currentSide === 'left' || currentSide === 'right') {
     if (top < viewportRect.top) {
-      finalAlignment = 'start';
-      top = referenceRect.top;
+      const shiftedTop = referenceRect.top;
+      const currentOverflow = viewportRect.top - top;
+      const shiftedOverflow = Math.max(0, shiftedTop + dimensions.height - viewportRect.bottom);
+      if (shiftedOverflow < currentOverflow) {
+        finalAlignment = 'start';
+        top = shiftedTop;
+      }
     } else if (top + dimensions.height > viewportRect.bottom) {
-      finalAlignment = 'end';
-      top = referenceRect.bottom - dimensions.height;
+      const shiftedTop = referenceRect.bottom - dimensions.height;
+      const currentOverflow = top + dimensions.height - viewportRect.bottom;
+      const shiftedOverflow = Math.max(0, viewportRect.top - shiftedTop);
+      if (shiftedOverflow < currentOverflow) {
+        finalAlignment = 'end';
+        top = shiftedTop;
+      }
     }
   }
 
@@ -218,15 +238,23 @@ export function computePosition(
 
   if ((side === 'top' || side === 'bottom') && !fits.vertical) {
     const flippedSide = getOppositeSide(side);
-    const flippedPosition = calculatePositionForSide(
-      referenceRect,
-      floatingDimensions,
-      flippedSide,
-      alignment,
-      effectiveOffset,
-    );
-    const flippedFits = checkFit(flippedPosition, floatingDimensions, viewportRect);
-    if (flippedFits.vertical) {
+    const spaceOnCurrentSide =
+      side === 'top'
+        ? referenceRect.top - viewportRect.top
+        : viewportRect.bottom - referenceRect.bottom;
+    const spaceOnFlippedSide =
+      flippedSide === 'top'
+        ? referenceRect.top - viewportRect.top
+        : viewportRect.bottom - referenceRect.bottom;
+
+    if (spaceOnFlippedSide > spaceOnCurrentSide) {
+      const flippedPosition = calculatePositionForSide(
+        referenceRect,
+        floatingDimensions,
+        flippedSide,
+        alignment,
+        effectiveOffset,
+      );
       position = flippedPosition;
       finalSide = flippedSide;
     }
@@ -234,15 +262,23 @@ export function computePosition(
 
   if ((side === 'left' || side === 'right') && !fits.horizontal) {
     const flippedSide = getOppositeSide(side);
-    const flippedPosition = calculatePositionForSide(
-      referenceRect,
-      floatingDimensions,
-      flippedSide,
-      alignment,
-      effectiveOffset,
-    );
-    const flippedFits = checkFit(flippedPosition, floatingDimensions, viewportRect);
-    if (flippedFits.horizontal) {
+    const spaceOnCurrentSide =
+      side === 'left'
+        ? referenceRect.left - viewportRect.left
+        : viewportRect.right - referenceRect.right;
+    const spaceOnFlippedSide =
+      flippedSide === 'left'
+        ? referenceRect.left - viewportRect.left
+        : viewportRect.right - referenceRect.right;
+
+    if (spaceOnFlippedSide > spaceOnCurrentSide) {
+      const flippedPosition = calculatePositionForSide(
+        referenceRect,
+        floatingDimensions,
+        flippedSide,
+        alignment,
+        effectiveOffset,
+      );
       position = flippedPosition;
       finalSide = flippedSide;
     }

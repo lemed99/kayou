@@ -200,7 +200,7 @@ const minWidth = columnWidths().get(col.key) || 0;
   }}
   class="absolute right-0 top-0 h-full cursor-pointer px-3 ..."
 >
-  <XCloseIcon class="size-4" />
+  <XCloseIcon />
 </button>
 ```
 
@@ -219,7 +219,7 @@ Icon-only button without `aria-label`. Screen reader users won't know what this 
   }}
   class="..."
 >
-  <XCloseIcon class="size-4" aria-hidden="true" />
+  <XCloseIcon aria-hidden="true" />
 </button>
 ```
 

@@ -35,7 +35,7 @@ export default function ButtonPage() {
         },
         {
           name: 'color',
-          type: '"info" | "danger" | "black" | "white" | "transparent',
+          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent',
           default: '"info"',
           description: 'Sets the color variant',
         },
@@ -113,8 +113,8 @@ export default function ButtonPage() {
               <div class="flex flex-wrap gap-2">
                 <Button color="info">Info</Button>
                 <Button color="danger">Danger</Button>
-                <Button color="black">Black</Button>
-                <Button color="white">White</Button>
+                <Button color="theme">Theme</Button>
+                <Button color="anti-theme">Anti-theme</Button>
                 <Button color="transparent">Transparent</Button>
               </div>
               <div class="flex flex-wrap gap-2">

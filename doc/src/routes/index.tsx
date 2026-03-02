@@ -1,13 +1,13 @@
 import { type Component, For } from 'solid-js';
 
 import {
-    ArrowNarrowRightIcon,
-    Brush01Icon,
-    Code01Icon,
-    Lightning01Icon,
-    ListIcon,
-    Moon01Icon,
-    Users01Icon,
+  ArrowNarrowRightIcon,
+  Brush01Icon,
+  Code01Icon,
+  Lightning01Icon,
+  ListIcon,
+  Moon01Icon,
+  Users01Icon,
 } from '@kayou/icons';
 import { A } from '@solidjs/router';
 
@@ -72,7 +72,7 @@ export default function HomePage() {
             class="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100"
           >
             Explore Kayou
-            <ArrowNarrowRightIcon class="size-4" />
+            <ArrowNarrowRightIcon  />
           </A>
         </div>
 

@@ -22,7 +22,6 @@ interface UseDataTableConfigsResult {
   isAtLimit: Accessor<boolean>;
   hasConfigs: Accessor<boolean>;
   saveConfig: (name: string) => boolean;
-  restoreConfig: (config: SavedTableConfig) => void;
   updateConfig: (id: string, name: string) => void;
   deleteConfig: (id: string) => void;
   activateConfig: (id: string | null) => void;
@@ -125,10 +124,6 @@ export function useDataTableConfigs(
     return true;
   };
 
-  const restoreConfig = (config: SavedTableConfig) => {
-    persistAndSet([...configs(), config]);
-  };
-
   const updateConfig = (id: string, name: string) => {
     persistAndSet(
       configs().map((c) =>
@@ -164,7 +159,6 @@ export function useDataTableConfigs(
     isAtLimit,
     hasConfigs,
     saveConfig,
-    restoreConfig,
     updateConfig,
     deleteConfig,
     activateConfig,

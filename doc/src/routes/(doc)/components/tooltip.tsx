@@ -104,16 +104,16 @@ export default function TooltipPage() {
               {/* All 4 placements */}
               <div class="flex flex-wrap items-center gap-4">
                 <Tooltip content="Top tooltip" placement="top">
-                  <Button color="light">Top</Button>
+                  <Button color="theme">Top</Button>
                 </Tooltip>
                 <Tooltip content="Bottom tooltip" placement="bottom">
-                  <Button color="light">Bottom</Button>
+                  <Button color="theme">Bottom</Button>
                 </Tooltip>
                 <Tooltip content="Left tooltip" placement="left">
-                  <Button color="light">Left</Button>
+                  <Button color="theme">Left</Button>
                 </Tooltip>
                 <Tooltip content="Right tooltip" placement="right">
-                  <Button color="light">Right</Button>
+                  <Button color="theme">Right</Button>
                 </Tooltip>
               </div>
 
