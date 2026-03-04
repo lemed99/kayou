@@ -39,6 +39,7 @@ const componentCategories: Record<string, string[]> = {
     'label',
     'multi-select',
     'number-input',
+    'otp-input',
     'password',
     'rich-text-editor',
     'select',

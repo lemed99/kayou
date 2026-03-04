@@ -250,7 +250,7 @@ export function DataTableHeader(): JSX.Element {
                         'flex shrink-0 items-center justify-center rounded p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                         isSticky(column.key)
                           ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-neutral-400 opacity-0 transition-opacity group-hover/header:opacity-100 dark:text-neutral-500',
+                          : 'text-neutral-400 opacity-0 transition-opacity group-hover/header:opacity-100 focus-visible:opacity-100 dark:text-neutral-500',
                       )}
                       aria-label={
                         isSticky(column.key)
@@ -283,12 +283,31 @@ export function DataTableHeader(): JSX.Element {
                     showDelay={500}
                   >
                     <div
-                      class="h-full w-full cursor-col-resize select-none border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 group-hover/header:opacity-100 dark:border-neutral-700"
+                      class="h-full w-full cursor-col-resize select-none border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 group-hover/header:opacity-100 focus-visible:opacity-100 dark:border-neutral-700"
                       onMouseDown={(e) => startResize(column.key, e)}
                       onDblClick={() => ctx.resetColumnResize(column.key)}
+                      onKeyDown={(e) => {
+                        const step = e.shiftKey ? 20 : 5;
+                        if (e.key === 'ArrowLeft') {
+                          e.preventDefault();
+                          const headerCell = (e.target as HTMLElement).closest('[role="columnheader"]');
+                          const currentWidth = (headerCell as HTMLElement)?.offsetWidth ?? 100;
+                          ctx.onColumnResize(column.key, Math.max(60, currentWidth - step));
+                        } else if (e.key === 'ArrowRight') {
+                          e.preventDefault();
+                          const headerCell = (e.target as HTMLElement).closest('[role="columnheader"]');
+                          const currentWidth = (headerCell as HTMLElement)?.offsetWidth ?? 100;
+                          ctx.onColumnResize(column.key, currentWidth + step);
+                        } else if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          ctx.resetColumnResize(column.key);
+                        }
+                      }}
                       role="separator"
                       aria-orientation="vertical"
                       aria-label={ctx.labels().resizeColumn}
+                      tabindex={0}
+                      aria-valuenow={ctx.resizedWidths().get(column.key)}
                     />
                   </Tooltip>
                 </Show>

@@ -1424,7 +1424,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         <div class="mb-1 block">
           <Label value={props.label} color="gray" />
           <Show when={props.required}>
-            <span class="ml-0.5 font-medium text-red-500">*</span>
+            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">*</span>
           </Show>
         </div>
       </Show>
@@ -1451,6 +1451,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
           aria-describedby={props.helperText ? helperId : undefined}
           inputMode="none"
           autocomplete="off"
+          readonly
           style={{
             'caret-color': 'transparent',
             'padding-right': '36px',
@@ -1493,6 +1494,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             ref={refs.setFloating}
             id={dialogId}
             role="dialog"
+            aria-modal="true"
             aria-label={a().chooseDate}
             onKeyDown={(e) => {
               if (e.key !== 'Tab') return;
@@ -1695,8 +1697,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                                   class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
                                   type="button"
                                   onClick={() => startEditingRange(range)}
+                                  aria-label={`Edit range ${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}
                                 >
-                                  <Edit05Icon />
+                                  <Edit05Icon aria-hidden="true" />
                                 </button>
                               }
                             >
@@ -1704,16 +1707,18 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                                 class="inline-flex cursor-pointer items-center justify-center rounded p-1 text-neutral-900 dark:text-white"
                                 type="button"
                                 onClick={cancelEditingRange}
+                                aria-label={`Cancel editing range ${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}
                               >
-                                <FlipBackwardIcon />
+                                <FlipBackwardIcon aria-hidden="true" />
                               </button>
                             </Show>
                             <button
                               class="inline-flex cursor-pointer items-center justify-center p-1 text-neutral-900 dark:text-white"
                               type="button"
                               onClick={() => removeCurrentRange(range.id)}
+                              aria-label={`Remove range ${formatDate(range.startDate, displayFormat())} - ${formatDate(range.endDate, displayFormat())}`}
                             >
-                              <XIcon />
+                              <XIcon aria-hidden="true" />
                             </button>
                           </div>
                         </div>

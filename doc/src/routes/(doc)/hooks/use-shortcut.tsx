@@ -6,7 +6,7 @@ export default function UseShortcutPage() {
       title="useShortcut"
       description="Register a keyboard shortcut action within a ShortcutProvider. The shortcut is automatically unregistered when the component unmounts. Must be used within a ShortcutProvider."
       relatedHooks={[
-        { name: 'ShortcutPanel', path: '/components/shortcut-panel' },
+        { name: 'ShortcutPanel', path: '/components/shortcut-panel', description: 'UI panel for viewing and editing keyboard shortcuts.' },
       ]}
       parameters={[
         {

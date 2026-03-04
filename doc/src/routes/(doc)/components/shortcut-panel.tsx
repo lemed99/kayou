@@ -6,7 +6,7 @@ export default function ShortcutPanelPage() {
       title="ShortcutPanel"
       description="UI panel for viewing and editing keyboard shortcuts. Displays registered shortcuts grouped by category with inline editing, conflict detection, and search. Must be used within a ShortcutProvider."
       relatedHooks={[
-        { name: 'useShortcut', path: '/hooks/use-shortcut' },
+        { name: 'useShortcut', path: '/hooks/use-shortcut', description: 'Hook to register keyboard shortcut actions.' },
       ]}
       keyConcepts={[
         {

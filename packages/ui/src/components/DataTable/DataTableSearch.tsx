@@ -10,7 +10,7 @@ export function DataTableSearch(): JSX.Element {
   return (
     <div class="flex w-full shrink-0 border-b border-neutral-200 px-6 dark:border-neutral-800">
       <div class="relative flex w-full max-w-md items-center">
-        <SearchRefractionIcon class="size-5 text-neutral-400 dark:text-neutral-500" />
+        <SearchRefractionIcon class="size-5 text-neutral-400 dark:text-neutral-500" aria-hidden="true" />
         <input
           ref={ctx.setSearchRef}
           value={ctx.searchKey()}

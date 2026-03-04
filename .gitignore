@@ -13,3 +13,5 @@ playwright-report
 # SolidStart / Vinxi
 .output
 .vinxi
+
+/e2e/screenshots

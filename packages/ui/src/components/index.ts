@@ -27,6 +27,13 @@ export {
 } from './Modal';
 export { default as NumberInput } from './NumberInput';
 export {
+  DEFAULT_OTP_INPUT_ARIA_LABELS,
+  default as OTPInput,
+  type OTPInputAriaLabels,
+  type OTPInputColor,
+  type OTPInputProps,
+} from './OTPInput';
+export {
   DEFAULT_PAGINATION_ARIA_LABELS,
   DEFAULT_PAGINATION_LABELS,
   default as Pagination,

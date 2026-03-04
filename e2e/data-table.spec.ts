@@ -227,13 +227,11 @@ test.describe('DataTable', () => {
     const filterPopover = page.locator('[role="dialog"]').filter({ hasText: /Add filter/ }).first();
     await expect(filterPopover).toBeVisible();
 
-    // Click "Add filter" inside the popover
+    // Click "Add filter" — this is a Select trigger that opens a column dropdown
     await filterPopover.getByText('Add filter').click();
+    await page.waitForTimeout(200);
 
-    // Change column to "Joined" — the column selector is a Select (role="combobox")
-    const columnSelect = filterPopover.locator('[role="combobox"]').first();
-    await expect(columnSelect).toBeVisible();
-    await columnSelect.click();
+    // Select "Joined" column from the dropdown
     await page.locator('[role="option"]').filter({ hasText: 'Joined' }).click();
 
     // The datepicker input should now be visible in the filter row
@@ -1382,7 +1380,7 @@ test.describe('DataTable', () => {
     await table.screenshot({ path: 'e2e/screenshots/column-lock-before-scroll.png' });
 
     // Scroll horizontally
-    const hScrollContainer = pg.locator('[role="table"]').first().locator('div.overflow-x-auto').first();
+    const hScrollContainer = pg.locator('div.overflow-x-auto:has([role="table"])').first();
     await hScrollContainer.evaluate((el) => { el.scrollLeft = 300; });
     await page.waitForTimeout(300);
 
@@ -1426,7 +1424,7 @@ test.describe('DataTable', () => {
     await table.screenshot({ path: 'e2e/screenshots/column-row-lock-vscroll.png' });
 
     // Now also scroll horizontally
-    const hScrollContainer = pg.locator('[role="table"]').first().locator('div.overflow-x-auto').first();
+    const hScrollContainer = pg.locator('div.overflow-x-auto:has([role="table"])').first();
     await hScrollContainer.evaluate((el) => { el.scrollLeft = 300; });
     await page.waitForTimeout(300);
 
@@ -1455,7 +1453,7 @@ test.describe('DataTable', () => {
     await colLockBtn.click();
     await page.waitForTimeout(300);
 
-    const hScroll = pg.locator('[role="table"]').first().locator('div.overflow-x-auto').first();
+    const hScroll = pg.locator('div.overflow-x-auto:has([role="table"])').first();
 
     // Scroll in steps, take screenshot at each and verify sticky cell alignment
     const positions = [100, 200, 300, 400];

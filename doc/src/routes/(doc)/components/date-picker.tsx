@@ -20,7 +20,7 @@ export default function DatePickerPage() {
       keyConcepts={[
         {
           term: 'Selection Type',
-          explanation: 'Three modes: single, range (start/end), or multiple dates.',
+          explanation: 'Four modes: single, range (start/end), multiple dates, or multipleRange (multiple date ranges).',
         },
         {
           term: 'Locale',
@@ -34,11 +34,11 @@ export default function DatePickerPage() {
         {
           term: 'DateValue Type',
           explanation:
-            'Value shape varies by mode: { date }, { startDate, endDate }, or { multipleDates }.',
+            'Value shape varies by mode: { date }, { startDate, endDate } (as DateStruct), { multipleDates }, or { multipleRanges }.',
         },
         {
           term: 'Time Selection',
-          explanation: 'showTime adds hour/minute/second dropdowns (single mode only).',
+          explanation: 'showTime adds hour/minute/second dropdowns (works with single and range modes).',
         },
         {
           term: 'Shortcuts',
@@ -99,9 +99,9 @@ function App() {
       props={[
         {
           name: 'type',
-          type: '"single" | "multiple" | "range"',
+          type: '"single" | "multiple" | "range" | "multipleRange"',
           default: '-',
-          description: 'Selection mode: single date, multiple dates, or date range.',
+          description: 'Selection mode: single date, multiple dates, date range, or multiple date ranges.',
           required: true,
         },
         {
@@ -214,7 +214,7 @@ function App() {
           type: 'boolean',
           default: 'false',
           description:
-            'Show time picker alongside the calendar. Only works with single type.',
+            'Show time picker alongside the calendar. Works with single and range types.',
         },
         {
           name: 'timeFormat',
@@ -233,6 +233,19 @@ function App() {
           type: 'number',
           default: '1',
           description: 'Second step increment for the time picker.',
+        },
+        {
+          name: 'showSeconds',
+          type: 'boolean',
+          default: 'false',
+          description: 'Show seconds input in the time picker.',
+        },
+        {
+          name: 'showFooter',
+          type: 'boolean',
+          default: 'false',
+          description:
+            'Show footer with Cancel/Apply buttons. When true, date selection does not trigger onChange until Apply is clicked.',
         },
         {
           name: 'showShortcuts',
@@ -272,6 +285,50 @@ function App() {
           default: 'DEFAULT_DATE_PICKER_ARIA_LABELS',
           description: 'Accessibility labels for screen readers',
         },
+        {
+          name: 'minSelectable',
+          type: 'number',
+          default: '-',
+          description:
+            'Minimum number of selectable dates or ranges (for multiple and multipleRange modes).',
+        },
+        {
+          name: 'maxSelectable',
+          type: 'number',
+          default: '-',
+          description:
+            'Maximum number of selectable dates or ranges (for multiple and multipleRange modes).',
+        },
+        {
+          name: 'disabledDates',
+          type: '(date: Date) => boolean',
+          default: '-',
+          description: 'Function to determine if a specific date should be disabled.',
+        },
+        {
+          name: 'sizing',
+          type: '"xs" | "sm" | "md"',
+          default: '"md"',
+          description: 'Input size variant.',
+        },
+        {
+          name: 'name',
+          type: 'string',
+          default: '-',
+          description: 'Name attribute for form integration.',
+        },
+        {
+          name: 'onFocus',
+          type: '() => void',
+          default: '-',
+          description: 'Callback fired when the input gains focus.',
+        },
+        {
+          name: 'onBlur',
+          type: '() => void',
+          default: '-',
+          description: 'Callback fired when the input loses focus.',
+        },
       ]}
       subComponents={[
         {
@@ -304,6 +361,68 @@ function App() {
           ],
         },
         {
+          name: 'DateStruct',
+          kind: 'type',
+          description:
+            'Date with optional time fields, used for range start/end values.',
+          props: [
+            {
+              name: 'date',
+              type: 'string',
+              default: '-',
+              description: 'Date in ISO format (YYYY-MM-DD).',
+              required: true,
+            },
+            {
+              name: 'hour',
+              type: 'number',
+              default: '-',
+              description: 'Hour (0-23) when showTime is enabled.',
+            },
+            {
+              name: 'minute',
+              type: 'number',
+              default: '-',
+              description: 'Minute (0-59) when showTime is enabled.',
+            },
+            {
+              name: 'second',
+              type: 'number',
+              default: '-',
+              description: 'Second (0-59) when showTime is enabled.',
+            },
+          ],
+        },
+        {
+          name: 'RangeValue',
+          kind: 'type',
+          description:
+            'A single date range with unique id, used in multipleRange mode.',
+          props: [
+            {
+              name: 'id',
+              type: 'string',
+              default: '-',
+              description: 'Unique identifier for the range.',
+              required: true,
+            },
+            {
+              name: 'startDate',
+              type: 'string',
+              default: '-',
+              description: 'Start date in ISO format.',
+              required: true,
+            },
+            {
+              name: 'endDate',
+              type: 'string',
+              default: '-',
+              description: 'End date in ISO format.',
+              required: true,
+            },
+          ],
+        },
+        {
           name: 'DateValue',
           kind: 'type',
           description:
@@ -317,15 +436,15 @@ function App() {
             },
             {
               name: 'startDate',
-              type: 'string',
+              type: 'DateStruct',
               default: '-',
-              description: 'Start date in ISO format (range mode).',
+              description: 'Start date with optional time (range mode).',
             },
             {
               name: 'endDate',
-              type: 'string',
+              type: 'DateStruct',
               default: '-',
-              description: 'End date in ISO format (range mode).',
+              description: 'End date with optional time (range mode).',
             },
             {
               name: 'multipleDates',
@@ -334,22 +453,28 @@ function App() {
               description: 'Array of selected dates in ISO format (multiple mode).',
             },
             {
+              name: 'multipleRanges',
+              type: 'RangeValue[]',
+              default: '-',
+              description: 'Array of selected date ranges (multipleRange mode).',
+            },
+            {
               name: 'hour',
               type: 'number',
               default: '-',
-              description: 'Selected hour (0-23) when showTime is enabled.',
+              description: 'Selected hour (0-23) when showTime is enabled (single mode).',
             },
             {
               name: 'minute',
               type: 'number',
               default: '-',
-              description: 'Selected minute (0-59) when showTime is enabled.',
+              description: 'Selected minute (0-59) when showTime is enabled (single mode).',
             },
             {
               name: 'second',
               type: 'number',
               default: '-',
-              description: 'Selected second (0-59) when showTime is enabled.',
+              description: 'Selected second (0-59) when showTime is enabled (single mode).',
             },
           ],
         },
@@ -359,10 +484,16 @@ function App() {
           description: 'Visible text labels for the date picker.',
           props: [
             {
-              name: 'done',
+              name: 'cancel',
               type: 'string',
-              default: '"Done"',
-              description: 'Label for the done/confirm button.',
+              default: '"Cancel"',
+              description: 'Label for the cancel button (shown when showFooter is true).',
+            },
+            {
+              name: 'apply',
+              type: 'string',
+              default: '"Apply"',
+              description: 'Label for the apply/confirm button (shown when showFooter is true).',
             },
           ],
         },
@@ -443,6 +574,84 @@ function App() {
               default: '"Calendar"',
               description: 'Aria label for the calendar region.',
             },
+            {
+              name: 'customYearGroup',
+              type: 'string',
+              default: '"Enter a custom year"',
+              description: 'Aria label for the custom year input group.',
+            },
+            {
+              name: 'shortcuts',
+              type: 'string',
+              default: '"Quick date selection"',
+              description: 'Aria label for the shortcuts panel.',
+            },
+            {
+              name: 'timePicker',
+              type: 'string',
+              default: '"Time selection"',
+              description: 'Aria label for the time picker section.',
+            },
+            {
+              name: 'dateNotAvailable',
+              type: 'string',
+              default: '"This date is not available"',
+              description: 'Announced when a disabled date is focused.',
+            },
+            {
+              name: 'dateBeforeMin',
+              type: 'string',
+              default: '"This date is before the minimum allowed date"',
+              description: 'Announced when a date before minDate is focused.',
+            },
+            {
+              name: 'dateAfterMax',
+              type: 'string',
+              default: '"This date is after the maximum allowed date"',
+              description: 'Announced when a date after maxDate is focused.',
+            },
+            {
+              name: 'rangeStartSelected',
+              type: 'string',
+              default: '"Start date selected. Now choose an end date."',
+              description: 'Announced when the start date of a range is selected.',
+            },
+            {
+              name: 'monthSelectorOpened',
+              type: 'string',
+              default: '"Month selector opened. Use arrow keys to navigate."',
+              description: 'Announced when the month selector is opened.',
+            },
+            {
+              name: 'yearSelectorOpened',
+              type: 'string',
+              default: '"Year selector opened. Use arrow keys to navigate."',
+              description: 'Announced when the year selector is opened.',
+            },
+            {
+              name: 'rangeSelectedForEdit',
+              type: 'string',
+              default: '"Range selected for edition"',
+              description: 'Announced when a range is selected for editing.',
+            },
+            {
+              name: 'startTime',
+              type: 'string',
+              default: '"Start time"',
+              description: 'Aria label for the start time picker in range mode.',
+            },
+            {
+              name: 'endTime',
+              type: 'string',
+              default: '"End time"',
+              description: 'Aria label for the end time picker in range mode.',
+            },
+            {
+              name: 'rangeEditCanceled',
+              type: 'string',
+              default: '"Range Editing canceled"',
+              description: 'Announced when range editing is canceled.',
+            },
           ],
         },
       ]}
@@ -517,7 +726,10 @@ function App() {
         // Multiple dates
         <DatePicker type="multiple" locale="en-US" value={value()} onChange={setValue} />
 
-        // With time selection
+        // Multiple date ranges
+        <DatePicker type="multipleRange" locale="en-US" value={value()} onChange={setValue} />
+
+        // With time selection (works with single and range)
         <DatePicker type="single" locale="en-US" showTime value={value()} onChange={setValue} />
 
         // With quick shortcuts

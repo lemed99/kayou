@@ -81,7 +81,8 @@ export function DataTableToolbar<T extends Record<string, unknown>>(
               }}
               values={ctx.columns().map((c) => c.key)}
               displayValue={ctx.labels().columns}
-              icon={() => <Columns03Icon class="size-5" />}
+              aria-label={ctx.labels().columns}
+              icon={() => <Columns03Icon class="size-5" aria-hidden="true" />}
               fitContent={true}
             />
           </Show>

@@ -59,6 +59,8 @@ export interface DataTableLabels {
   updateCurrentConfiguration: string;
   updateCurrentConfigurationDescription: string;
   back: string;
+  confirmDeletion: string;
+  maxConfigsReached: string;
   expandRow: string;
   collapseRow: string;
   lockColumn: string;
@@ -107,6 +109,8 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   updateCurrentConfigurationDescription:
     'Overwrite the active configuration with current settings',
   back: 'Back',
+  confirmDeletion: 'Confirm deletion?',
+  maxConfigsReached: 'Maximum of 3 configurations reached',
   expandRow: 'Expand row',
   collapseRow: 'Collapse row',
   lockColumn: 'Lock column',
@@ -981,8 +985,6 @@ export function DataTable<T extends Record<string, unknown>>(
       <div class="relative isolate w-full min-w-0">
         <div
           ref={setTableRef}
-          role="table"
-          aria-label={a().table}
           classList={{
             'flex w-full flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900': true,
             'rounded-tr-none': configEnabled,
@@ -1002,8 +1004,12 @@ export function DataTable<T extends Record<string, unknown>>(
 
           {/* Bulk Actions Bar */}
           <Show when={props.rowSelection && selectedRows().size > 0}>
-            <div class="flex shrink-0 items-center gap-3 border-b border-neutral-200 px-6 py-3 dark:border-neutral-800">
-              <span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            <div
+              role="toolbar"
+              aria-label={l().selectedElements(selectedRows().size, baseData().length)}
+              class="flex shrink-0 items-center gap-3 border-b border-neutral-200 px-6 py-3 dark:border-neutral-800"
+            >
+              <span aria-live="polite" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 {l().selectedElements(selectedRows().size, baseData().length)}
               </span>
               <Show when={props.bulkActions}>
@@ -1017,9 +1023,15 @@ export function DataTable<T extends Record<string, unknown>>(
           </Show>
 
           {/* Scrollable data area */}
-          <div ref={setScrollContainerRef} class="flex min-w-0 flex-col overflow-x-auto">
-            <DataTableHeader />
-            <DataTableBody />
+          <div
+            ref={setScrollContainerRef}
+            class="flex min-w-0 flex-col overflow-x-auto"
+          >
+            {/* role="table" scoped to actual table content (header + body) */}
+            <div role="table" aria-label={a().table} class="flex min-w-0 flex-col">
+              <DataTableHeader />
+              <DataTableBody />
+            </div>
           </div>
 
           {/* See more / Collapse trigger */}
@@ -1055,7 +1067,7 @@ export function DataTable<T extends Record<string, unknown>>(
           {/* Footer */}
           <DataTableFooter />
         </div>
-      </div>{' '}
+      </div>
     </DataTableInternalContext.Provider>
   );
 }

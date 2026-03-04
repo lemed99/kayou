@@ -259,9 +259,11 @@ const Calendar = (props: CalendarProps) => {
     if (isOpening) {
       setFocusedMonthIndex(props.currentDate().getMonth());
       props.announce?.(props.ariaLabels.monthSelectorOpened);
-      containerRef
-        ?.querySelector<HTMLButtonElement>('[data-month][tabindex="0"]')
-        ?.focus();
+      queueMicrotask(() => {
+        containerRef
+          ?.querySelector<HTMLButtonElement>('[data-month][tabindex="0"]')
+          ?.focus();
+      });
     } else {
       setFocusedMonthIndex(null);
     }
@@ -280,9 +282,11 @@ const Calendar = (props: CalendarProps) => {
       const currentYearIndex = years.indexOf(props.currentDate().getFullYear());
       setFocusedYearIndex(currentYearIndex >= 0 ? currentYearIndex : 0);
       props.announce?.(props.ariaLabels.yearSelectorOpened);
-      containerRef
-        ?.querySelector<HTMLButtonElement>('[data-year][tabindex="0"]')
-        ?.focus();
+      queueMicrotask(() => {
+        containerRef
+          ?.querySelector<HTMLButtonElement>('[data-year][tabindex="0"]')
+          ?.focus();
+      });
     } else {
       setFocusedYearIndex(null);
     }
@@ -439,14 +443,27 @@ const Calendar = (props: CalendarProps) => {
 
   /**
    * Formats a date for aria-label on day buttons.
+   * Includes contextual info about selection state, today, and disabled status.
    */
   const getDateAriaLabel = (date: Date): string => {
-    return date.toLocaleDateString(props.locale, {
+    const base = date.toLocaleDateString(props.locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
+    const parts: string[] = [base];
+    if (isToday(date)) parts.push('(today)');
+    if (isSelected(date)) parts.push('(selected)');
+    const range = rangeSelection(date);
+    if (range.start) parts.push('(range start)');
+    if (range.end) parts.push('(range end)');
+    if (!range.start && !range.end && !isSelected(date) && isInDateRange(date)) parts.push('(in range)');
+    const edit = rangeInEdit(date);
+    if (edit.start) parts.push('(editing range start)');
+    if (edit.end) parts.push('(editing range end)');
+    if (isDisabled(date)) parts.push('(unavailable)');
+    return parts.join(' ');
   };
 
   return (
@@ -458,8 +475,6 @@ const Calendar = (props: CalendarProps) => {
         'w-full focus:outline-none md:w-[292px] md:min-w-[292px]',
         props.calendarClass,
       )}
-      role="grid"
-      aria-label={props.ariaLabels.calendar}
       onKeyDown={(e) => props.onKeyDown?.(e)}
     >
       <div
@@ -522,22 +537,24 @@ const Calendar = (props: CalendarProps) => {
 
       <Switch
         fallback={
-          <div class="my-0.5">
-            <div
-              class="grid grid-cols-7 border-b border-neutral-300 py-2 dark:border-neutral-800"
-              role="row"
-            >
-              <For each={dayHeaders()}>
-                {(day) => (
-                  <div
-                    class="text-center capitalize tracking-wide text-neutral-500 dark:text-neutral-400"
-                    role="columnheader"
-                    aria-label={day.long}
-                  >
-                    {day.short}
-                  </div>
-                )}
-              </For>
+          <div class="my-0.5" role="grid" aria-label={props.ariaLabels.calendar}>
+            <div role="rowgroup">
+              <div
+                class="grid grid-cols-7 border-b border-neutral-300 py-2 dark:border-neutral-800"
+                role="row"
+              >
+                <For each={dayHeaders()}>
+                  {(day) => (
+                    <div
+                      class="text-center capitalize tracking-wide text-neutral-500 dark:text-neutral-400"
+                      role="columnheader"
+                      aria-label={day.long}
+                    >
+                      {day.short}
+                    </div>
+                  )}
+                </For>
+              </div>
             </div>
             <div class="mt-1 flex flex-col gap-y-0.5" role="rowgroup">
               <For each={dayRows()}>
@@ -555,7 +572,6 @@ const Calendar = (props: CalendarProps) => {
                             onMouseEnter={() => props.onDateHover?.(date)}
                             onMouseMove={() => props.onDateMouseMove?.()}
                             onMouseLeave={() => props.onDateHover?.(null)}
-                            disabled={isDisabled(date)}
                             role="gridcell"
                             aria-label={getDateAriaLabel(date)}
                             aria-selected={
@@ -563,7 +579,8 @@ const Calendar = (props: CalendarProps) => {
                               rangeSelection(date).start ||
                               rangeSelection(date).end
                             }
-                            aria-disabled={isDisabled(date)}
+                            aria-disabled={isDisabled(date) || undefined}
+                            aria-current={isToday(date) ? 'date' : undefined}
                             tabIndex={focusedDateISO() === dateISO ? 0 : -1}
                             class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                             classList={{

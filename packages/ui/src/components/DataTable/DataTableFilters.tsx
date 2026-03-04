@@ -403,9 +403,12 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
   //   () => props.filter.operator !== 'isEmpty' && props.filter.operator !== 'isNotEmpty',
   // );
 
+  // eslint-disable-next-line solid/reactivity --- FilterRow is rendered inside <Index> which re-creates on change
+  const filterId = `filter-label-${props.filter.key}`;
+
   return (
     <div class="space-y-1">
-      <p class="text-sm font-medium capitalize">{props.filter.key}</p>
+      <p id={filterId} class="text-sm font-medium capitalize">{props.filter.key}</p>
       <div class="grid grid-cols-[1fr_1fr_20px] items-center gap-2">
         {/* Column selector */}
 
@@ -419,6 +422,7 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
             }
           }}
           placeholder={props.ariaLabels.operator}
+          aria-labelledby={filterId}
           sizing="sm"
         />
 
@@ -619,6 +623,11 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           <Index each={draftFilters()}>
             {(filter, index) => (
               <>
+                <Show when={index > 0}>
+                  <span class="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">
+                    {l().and}
+                  </span>
+                </Show>
                 <FilterRow
                   filter={filter()}
                   filterConfigs={props.filterConfigs}

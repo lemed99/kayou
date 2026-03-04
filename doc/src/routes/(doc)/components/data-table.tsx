@@ -332,6 +332,13 @@ export default function DataTablePage() {
           default: 'DEFAULT_DATA_TABLE_ARIA_LABELS',
           description: 'Accessibility labels for screen readers',
         },
+        {
+          name: 'id',
+          type: 'string',
+          default: '-',
+          description:
+            'Stable identifier for this table instance. Required for state persistence via DataTableProvider. Must be unique among tables within the same provider scope.',
+        },
       ]}
       subComponents={[
         {
@@ -589,6 +596,54 @@ export default function DataTablePage() {
               default: '"Unlock column"',
               description: 'Tooltip and aria label for the unlock column button.',
             },
+            {
+              name: 'configPopoverContentTitle',
+              type: 'string',
+              default: '"Saved configurations"',
+              description: 'Title for the saved configurations popover.',
+            },
+            {
+              name: 'saveAsNew',
+              type: 'string',
+              default: '"Save as new"',
+              description: 'Text for the "Save as new" button in the config drawer.',
+            },
+            {
+              name: 'configDeleted',
+              type: 'string',
+              default: '"Configuration deleted"',
+              description: 'Text shown in the toast when a configuration is deleted.',
+            },
+            {
+              name: 'undo',
+              type: 'string',
+              default: '"Undo"',
+              description: 'Text for the undo action in the deletion toast.',
+            },
+            {
+              name: 'resizeColumn',
+              type: 'string',
+              default: '"Resize column"',
+              description: 'Tooltip for the column resize handle.',
+            },
+            {
+              name: 'resetColumnSize',
+              type: 'string',
+              default: '"Double-click to reset"',
+              description: 'Tooltip shown on the resize handle for resetting column size.',
+            },
+            {
+              name: 'lockRow',
+              type: 'string',
+              default: '"Lock row"',
+              description: 'Tooltip and aria label for the lock row button.',
+            },
+            {
+              name: 'unlockRow',
+              type: 'string',
+              default: '"Unlock row"',
+              description: 'Tooltip and aria label for the unlock row button.',
+            },
           ],
         },
         {
@@ -781,6 +836,7 @@ export default function Example() {
   <DatePickerProvider locale="en-US">
       <DataTableProvider storageKey="users" perPageOptions={[5, 10, 25, 50]}>
         <DataTable
+          id="playground"
           data={users}
           columns={columns}
           rowKey="id"

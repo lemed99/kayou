@@ -119,16 +119,18 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
   const ctx = useDataTableInternal<T>();
 
   const NoItemsComponent = () => (
-    <Show
-      when={ctx.emptyState}
-      fallback={
-        <div class="px-6 py-4 text-center font-medium text-neutral-900 dark:text-white">
-          {ctx.labels().noData}
-        </div>
-      }
-    >
-      {ctx.emptyState}
-    </Show>
+    <div role="status">
+      <Show
+        when={ctx.emptyState}
+        fallback={
+          <div class="px-6 py-4 text-center font-medium text-neutral-900 dark:text-white">
+            {ctx.labels().noData}
+          </div>
+        }
+      >
+        {ctx.emptyState}
+      </Show>
+    </div>
   );
 
   const LoadingMoreSpinner = () => (

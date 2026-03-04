@@ -121,9 +121,24 @@ export function DataTableRow<T extends Record<string, unknown>>(
         break;
       }
       case 'Enter':
-        if (ctx.expandRow) {
+        if (ctx.onRowClick) {
+          e.preventDefault();
+          ctx.onRowClick(props.row, props.index());
+        } else if (ctx.expandRow) {
           e.preventDefault();
           ctx.toggleRowExpansion(rowKey());
+        }
+        break;
+      case 'ContextMenu':
+      case 'F10':
+        if (ctx.rowContextMenu && (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey))) {
+          e.preventDefault();
+          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          ctx.openContextMenu(
+            { preventDefault: () => {}, clientX: rect.left + 20, clientY: rect.top + rect.height / 2 } as MouseEvent,
+            props.row,
+            props.index(),
+          );
         }
         break;
       case ' ':
@@ -183,6 +198,8 @@ export function DataTableRow<T extends Record<string, unknown>>(
       {/* Data row */}
       <div
         role="row"
+        aria-selected={ctx.rowSelection ? isSelected() : undefined}
+        aria-expanded={ctx.expandRow ? isExpanded() : undefined}
         class={rowClasses()}
         style={{ 'grid-template-columns': ctx.rowGridStyle() }}
         tabindex={
@@ -210,7 +227,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
                 class="flex items-center justify-center rounded p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 classList={{
                   'text-blue-600 dark:text-blue-400': isLocked(),
-                  'text-neutral-400 opacity-0 transition-opacity group-hover/row:opacity-100 dark:text-neutral-500':
+                  'text-neutral-400 opacity-0 transition-opacity group-hover/row:opacity-100 focus-visible:opacity-100 dark:text-neutral-500':
                     !isLocked(),
                 }}
                 aria-label={isLocked() ? ctx.labels().unlockRow : ctx.labels().lockRow}
@@ -314,6 +331,8 @@ export function DataTableRow<T extends Record<string, unknown>>(
       {/* Detail panel */}
       <Show when={ctx.expandRow && detailMounted()}>
         <div
+          role="region"
+          aria-label={`${ctx.labels().expandRow} ${props.index() + 1}`}
           class="overflow-hidden border-t border-neutral-200 transition-[height] duration-200 ease-out dark:border-neutral-800"
           style={{
             height: detailVisible() ? `${detailHeight()}px` : '0px',

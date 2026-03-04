@@ -90,6 +90,7 @@ export function DataTableContextMenu<T extends Record<string, unknown>>(): JSX.E
         <div
           ref={setMenuRef}
           role="menu"
+          aria-label="Row context menu"
           style={{
             ...cachedPosition(),
             opacity: isVisible() ? '1' : '0',
