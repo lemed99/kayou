@@ -9,10 +9,7 @@ import {
   useContext,
 } from 'solid-js';
 
-import {
-  CustomResourceContext,
-  ResourceOptions,
-} from '../context';
+import { CustomResourceContext, ResourceOptions } from '../context';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers';
 
 /** Maximum random jitter added to retry delays to prevent thundering herd (in ms) */
@@ -133,7 +130,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       return props.options?.dedupeInterval ?? context.options.dedupeInterval;
     },
     get fetcher() {
-      return (props.options?.fetcher ?? context.options.fetcher) as ResourceOptions<T>['fetcher'];
+      return (props.options?.fetcher ??
+        context.options.fetcher) as ResourceOptions<T>['fetcher'];
     },
     get onSuccess() {
       return props.options?.onSuccess ?? context.options.onSuccess;
@@ -200,7 +198,10 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       if (options?.dedupeRequests) {
         let entry = pendingRequests.get(url);
 
-        if (entry?.resolvedAt && Date.now() - entry.resolvedAt >= options.dedupeInterval!) {
+        if (
+          entry?.resolvedAt &&
+          Date.now() - entry.resolvedAt >= options.dedupeInterval!
+        ) {
           if (entry.timeoutId) {
             clearTimeout(entry.timeoutId);
           }
@@ -275,13 +276,15 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       try {
         if (!url) return undefined;
 
+        if (condition === false) return false;
+
         if (!context.refreshData?.()) return true;
 
         if (forceRefresh) return true;
 
-        if (condition === false) return false;
-
-        const cacheData = pullFromCache ? await getCacheRow(url, mergedOptions.cacheValidator) : null;
+        const cacheData = pullFromCache
+          ? await getCacheRow(url, mergedOptions.cacheValidator)
+          : null;
         const needsFetch = key ? context.refreshData?.()[key] !== false : true;
 
         return needsFetch || !cacheData;
@@ -298,14 +301,18 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
   const [resource, { refetch: originalRefetch }] = createResource(
     () => ({
-      url: shouldFetch() ? urlString() : '',
+      url: props.condition?.() !== false && shouldFetch() ? urlString() : '',
       swr: swr(),
     }),
     wrappedFetcher,
   );
 
   createResource(
-    () => (props.condition?.() !== false && ((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
+    () =>
+      (props.condition?.() !== false &&
+        ((shouldFetch() === false && pullFromCache()) || swr()) &&
+        urlString()) ||
+      '',
     async (url) => {
       try {
         if (!url) return undefined;
@@ -327,7 +334,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     const currentError = error();
     if (
       currentError &&
-      (errorStatus() === undefined || !mergedOptions.errorsBlackList?.includes(errorStatus()!))
+      (errorStatus() === undefined ||
+        !mergedOptions.errorsBlackList?.includes(errorStatus()!))
     ) {
       const currentAttempts = attempts();
       if (currentAttempts < mergedOptions.retryCount!) {
@@ -350,6 +358,18 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     }
   });
 
+  // Abort in-flight requests when condition transitions true → false.
+  // prev tracks the previous value so we don't abort on initial mount.
+  createEffect((prev: boolean | undefined) => {
+    const condition = props.condition?.() !== false;
+    if (prev === true && condition === false) {
+      abortController.abort();
+      abortController = new AbortController();
+      setValidating(false);
+    }
+    return condition;
+  });
+
   onCleanup(() => {
     clearAllRetryTimers();
     abortController.abort();
@@ -370,7 +390,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     errorStatus,
     setErrorStatus,
     attempts,
-    loading: () => (swr() ? resourceData() === undefined && resource.loading : resource.loading),
+    loading: () =>
+      swr() ? resourceData() === undefined && resource.loading : resource.loading,
     state: () => resource.state,
     latest: () => resource.latest ?? undefined,
     refetch,
