@@ -175,74 +175,87 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     if (swr) {
       setValidating(true);
     }
-    const options = mergedOptions;
-    const pendingRequests = context.pendingRequests;
-    const fetcher = options?.fetcher ?? defaultFetcher;
-    const fetchPromiseCallback = async (data: T) => {
-      setFromCache(false);
-      setErrorStatus(undefined);
-      setAttempts(0);
-      clearAllRetryTimers();
-      options?.onSuccess?.(data, false);
-      setResourceData(() => data);
-      setValidating(false);
-      await insertOrUpdateCacheRow(url, data);
-      return data;
-    };
+    try {
+      const options = mergedOptions;
+      const pendingRequests = context.pendingRequests;
+      const fetcher = options?.fetcher ?? defaultFetcher;
+      const fetchPromiseCallback = async (data: T) => {
+        setFromCache(false);
+        setErrorStatus(undefined);
+        setError(null);
+        setAttempts(0);
+        clearAllRetryTimers();
+        options?.onSuccess?.(data, false);
+        setResourceData(() => data);
+        setValidating(false);
+        await insertOrUpdateCacheRow(url, data);
+        return data;
+      };
 
-    const fetchPromise = async () => {
-      const data = await fetcher(url);
-      return data;
-    };
+      const fetchPromise = async () => {
+        const data = await fetcher(url);
+        return data;
+      };
 
-    if (options?.dedupeRequests) {
-      let entry = pendingRequests.get(url);
+      if (options?.dedupeRequests) {
+        let entry = pendingRequests.get(url);
 
-      if (entry?.resolvedAt && Date.now() - entry.resolvedAt >= options.dedupeInterval!) {
-        if (entry.timeoutId) {
-          clearTimeout(entry.timeoutId);
+        if (entry?.resolvedAt && Date.now() - entry.resolvedAt >= options.dedupeInterval!) {
+          if (entry.timeoutId) {
+            clearTimeout(entry.timeoutId);
+          }
+          pendingRequests.delete(url);
+          entry = undefined;
         }
-        pendingRequests.delete(url);
-        entry = undefined;
-      }
 
-      if (
-        entry?.lastValue !== undefined &&
-        entry?.resolvedAt &&
-        Date.now() - entry.resolvedAt < options.dedupeInterval!
-      ) {
-        return fetchPromiseCallback(entry.lastValue as T);
-      }
+        if (
+          entry?.lastValue !== undefined &&
+          entry?.resolvedAt &&
+          Date.now() - entry.resolvedAt < options.dedupeInterval!
+        ) {
+          return await fetchPromiseCallback(entry.lastValue as T);
+        }
 
-      let promiseReturn: Promise<T>;
+        let promiseReturn: Promise<T>;
 
-      if (entry?.promise) {
-        promiseReturn = entry.promise as Promise<T>;
-      } else {
-        promiseReturn = fetchPromise().then((data) => {
-          const timeOut = setTimeout(() => {
-            pendingRequests.delete(url);
-          }, options.dedupeInterval);
+        if (entry?.promise) {
+          promiseReturn = entry.promise as Promise<T>;
+        } else {
+          promiseReturn = fetchPromise().then((data) => {
+            const timeOut = setTimeout(() => {
+              pendingRequests.delete(url);
+            }, options.dedupeInterval);
 
-          pendingRequests.set(url, {
-            promise: null,
-            lastValue: data,
-            resolvedAt: Date.now(),
-            timeoutId: timeOut,
+            pendingRequests.set(url, {
+              promise: null,
+              lastValue: data,
+              resolvedAt: Date.now(),
+              timeoutId: timeOut,
+            });
+
+            return data;
           });
 
-          return data;
-        });
+          pendingRequests.set(url, {
+            promise: promiseReturn,
+          });
+        }
 
-        pendingRequests.set(url, {
-          promise: promiseReturn,
-        });
+        return await promiseReturn.then((data) => fetchPromiseCallback(data));
       }
 
-      return promiseReturn.then((data) => fetchPromiseCallback(data));
+      return await fetchPromise().then((data) => fetchPromiseCallback(data));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        setValidating(false);
+        return null;
+      }
+      const err = e instanceof Error ? e : new Error(String(e));
+      setError(err);
+      mergedOptions.onError?.(err);
+      setValidating(false);
+      return null;
     }
-
-    return fetchPromise().then((data) => fetchPromiseCallback(data));
   };
 
   const clearAllRetryTimers = () => {
@@ -259,18 +272,22 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       pullFromCache: pullFromCache(),
     }),
     async ({ url, forceRefresh, condition, key, pullFromCache }) => {
-      if (!url) return undefined;
+      try {
+        if (!url) return undefined;
 
-      if (!context.refreshData?.()) return true;
+        if (!context.refreshData?.()) return true;
 
-      if (forceRefresh) return true;
+        if (forceRefresh) return true;
 
-      if (condition === false) return false;
+        if (condition === false) return false;
 
-      const cacheData = pullFromCache ? await getCacheRow(url, mergedOptions.cacheValidator) : null;
-      const needsFetch = key ? context.refreshData?.()[key] !== false : true;
+        const cacheData = pullFromCache ? await getCacheRow(url, mergedOptions.cacheValidator) : null;
+        const needsFetch = key ? context.refreshData?.()[key] !== false : true;
 
-      return needsFetch || !cacheData;
+        return needsFetch || !cacheData;
+      } catch {
+        return true;
+      }
     },
   );
 
@@ -290,22 +307,26 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   createResource(
     () => (props.condition?.() !== false && ((shouldFetch() === false && pullFromCache()) || swr()) && urlString()) || '',
     async (url) => {
-      if (!url) return undefined;
-      const cached = (await getCacheRow(url, mergedOptions.cacheValidator)) as T | null;
-      if (cached) {
-        setFromCache(true);
-        setErrorStatus(undefined);
-        mergedOptions?.onSuccess?.(cached, true);
-        setResourceData(() => cached);
-        return cached;
+      try {
+        if (!url) return undefined;
+        const cached = (await getCacheRow(url, mergedOptions.cacheValidator)) as T | null;
+        if (cached) {
+          setFromCache(true);
+          setErrorStatus(undefined);
+          mergedOptions?.onSuccess?.(cached, true);
+          setResourceData(() => cached);
+          return cached;
+        }
+      } catch {
+        return undefined;
       }
     },
   );
 
   createEffect(() => {
+    const currentError = error();
     if (
-      resource.error &&
-      !(resource.error instanceof DOMException && resource.error.name === 'AbortError') &&
+      currentError &&
       (errorStatus() === undefined || !mergedOptions.errorsBlackList?.includes(errorStatus()!))
     ) {
       const currentAttempts = attempts();
@@ -329,24 +350,6 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     }
   });
 
-  createEffect(() => {
-    if (resource.error) {
-      const err =
-        resource.error instanceof Error
-          ? resource.error
-          : new Error(String(resource.error));
-      setError(err);
-      mergedOptions.onError?.(err);
-      setValidating(false);
-    }
-  });
-
-  createEffect(() => {
-    if (resource() && error()) {
-      setError(null);
-    }
-  });
-
   onCleanup(() => {
     clearAllRetryTimers();
     abortController.abort();
@@ -355,6 +358,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const refetch = () => {
     abortController.abort();
     abortController = new AbortController();
+    setError(null);
+    setErrorStatus(undefined);
     setAttempts(0);
     void originalRefetch();
   };

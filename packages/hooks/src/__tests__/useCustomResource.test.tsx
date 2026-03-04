@@ -572,12 +572,13 @@ describe('retry logic', () => {
     try {
       await waitFor(() => result.attempts() >= 1);
 
-      // Manual refetch should reset attempts
+      // Manual refetch should reset attempts — the refetch itself fails
+      // (callCount=2 ≤ 2), so retry fires once from the fresh counter: 0 → 1
       result.refetch();
       await flushMicrotasks();
       await vi.advanceTimersByTimeAsync(100);
       await flushMicrotasks();
-      expect(result.attempts()).toBe(0);
+      expect(result.attempts()).toBe(1);
     } finally {
       dispose();
     }
