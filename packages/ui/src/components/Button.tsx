@@ -6,21 +6,31 @@ import { twMerge } from 'tailwind-merge';
 import Spinner from './Spinner';
 
 /**
- * Color variants for the Button component.
+ * Colors for the Button component.
  */
-export type ButtonColor = 'info' | 'danger' | 'theme' | 'anti-theme' | 'transparent';
+export type ButtonColor = 'info' | 'danger' | 'theme' | 'anti-theme';
+
+/**
+ * Variants for the button component
+ */
+export type ButtonVariant = 'solid' | 'outline' | 'transparent';
 
 /**
  * Size variants for the Button component.
  */
 export type ButtonSize = 'xs' | 'sm' | 'md';
 
-export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * The color variant of the button.
-   * @default 'info'
-   */
-  color?: ButtonColor;
+/**
+ * Button color type excluding 'theme' color.
+ * Used for variants that don't support the 'theme' color.
+ */
+type ColorWithoutThemeValue = Exclude<ButtonColor, 'theme'>;
+
+/**
+ * Base props for the Button component.
+ * These props are shared across all button variants.
+ */
+type BaseButtonProps = Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, 'color'> & {
   /**
    * The size of the button.
    * @default 'md'
@@ -40,18 +50,67 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
    * @default 'left'
    */
   iconPlacement?: 'left' | 'right';
-}
+};
+
+/**
+ * Props for the Button component.
+ *
+ * This type describes all the properties that can be passed to the Button component,
+ * divided into three variants:
+ *
+ * - `solid` (default): Allows any `ButtonColor` via the `color` prop (default is 'info').
+ * - `outline`: Disallows the 'theme' color, only allowing 'info', 'danger', and 'anti-theme'.
+ * - `transparent`: Disallows the 'theme' color, only allowing 'info', 'danger', and 'anti-theme'.
+ *
+ * All variants extend `BaseButtonProps`.
+ */
+export type ButtonProps =
+  /**
+   * Solid button variant.
+   * Takes all color values.
+   */
+  | (BaseButtonProps & {
+      variant?: 'solid';
+
+      color?: ButtonColor;
+    })
+  /**
+   * Outline button variant.
+   * Renders a button with a border and transparent background.
+   * Restricts the color prop to exclude 'theme', only allowing 'info', 'danger', and 'anti-theme'.
+   */
+  | (BaseButtonProps & { variant: 'outline'; color?: Exclude<ButtonColor, 'theme'> })
+  /**
+   * Transparent button variant.
+   * Renders a button with no background or border.
+   * Restricts the color prop to exclude 'theme', only allowing 'info', 'danger', and 'anti-theme'.
+   */
+  | (BaseButtonProps & { variant: 'transparent'; color?: Exclude<ButtonColor, 'theme'> });
 
 const theme = {
   base: 'group flex h-min items-center disabled:cursor-not-allowed justify-center text-center font-medium focus:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 cursor-pointer transition-all duration-200',
-  color: {
-    info: 'text-white bg-blue-600 border border-transparent hover:bg-blue-700',
-    danger: 'text-white bg-red-700 border border-transparent hover:bg-red-800',
-    theme:
-      'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:text-white dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-950',
-    'anti-theme':
-      'text-white bg-black border border-transparent hover:bg-neutral-900 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-50',
-    transparent: 'text-neutral-900 dark:text-neutral-100 bg-transparent',
+  variant: {
+    solid: {
+      info: 'text-white bg-blue-600 border border-transparent hover:bg-blue-700',
+      danger: 'text-white bg-red-700 border border-transparent hover:bg-red-800',
+      theme:
+        'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:text-white dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-950',
+      'anti-theme':
+        'text-white bg-black border border-transparent hover:bg-neutral-900 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-50',
+    },
+    outline: {
+      info: 'text-blue-700 border border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-700/10',
+      danger:
+        'text-red-700 border border-red-700 hover:bg-red-50 dark:hover:bg-red-700/10',
+      'anti-theme':
+        'text-black border border-black hover:bg-neutral-100 dark:text-white dark:border-white dark:hover:bg-neutral-800/40',
+    },
+    transparent: {
+      info: 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20',
+      danger: 'text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20',
+      'anti-theme':
+        'text-black hover:bg-neutral-50 dark:text-white dark:hover:bg-neutral-800/40',
+    },
   },
   size: {
     xs: 'text-xs px-2 py-1.5 rounded-md',
@@ -65,6 +124,7 @@ const Button = (props: ButtonProps): JSX.Element => {
     'children',
     'type',
     'color',
+    'variant',
     'size',
     'class',
     'disabled',
@@ -75,8 +135,23 @@ const Button = (props: ButtonProps): JSX.Element => {
 
   const type = createMemo(() => local.type || 'button');
   const color = createMemo(() => local.color || 'info');
+  const variant = createMemo(() => local.variant || 'solid');
   const size = createMemo(() => local.size || 'md');
   const disabled = createMemo(() => local.disabled || local.isLoading);
+
+  const removeThemeValueFromColor = (color: ButtonColor): ColorWithoutThemeValue =>
+    color === 'theme' ? 'anti-theme' : color;
+
+  const variantClasses = createMemo(() => {
+    switch (variant()) {
+      case 'solid':
+        return theme.variant.solid[color()];
+      case 'outline':
+        return theme.variant.outline[removeThemeValueFromColor(color())];
+      case 'transparent':
+        return theme.variant.transparent[removeThemeValueFromColor(color())];
+    }
+  });
 
   return (
     <button
@@ -84,7 +159,7 @@ const Button = (props: ButtonProps): JSX.Element => {
       type={type()}
       class={twMerge(
         theme.base,
-        theme.color[color()],
+        variantClasses(),
         theme.size[size()],
         local.class,
         local.disabled ? 'opacity-60' : '',

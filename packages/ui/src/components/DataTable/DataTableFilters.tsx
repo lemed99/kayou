@@ -408,7 +408,9 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
 
   return (
     <div class="space-y-1">
-      <p id={filterId} class="text-sm font-medium capitalize">{props.filter.key}</p>
+      <p id={filterId} class="text-sm font-medium capitalize">
+        {props.filter.key}
+      </p>
       <div class="grid grid-cols-[1fr_1fr_20px] items-center gap-2">
         {/* Column selector */}
 
@@ -659,7 +661,8 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
           inputComponent={() => (
             <Button
               icon={PlusIcon}
-              color="transparent"
+              variant="transparent"
+              color="info"
               size="xs"
               class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
