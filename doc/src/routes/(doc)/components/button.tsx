@@ -34,10 +34,16 @@ export default function ButtonPage() {
           description: 'Button content (required)',
         },
         {
+          name: 'variant',
+          type: '"solid" | "outline" | "transparent"',
+          default: '"solid"',
+          description: 'Sets the variant. "theme" color will fallback to "anti-theme" when value is "outline" or "transparent"',
+        },
+        {
           name: 'color',
-          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent',
+          type: '"info" | "danger" | "theme" | "anti-theme"',
           default: '"info"',
-          description: 'Sets the color variant',
+          description: 'Sets the color. "theme" color will fallback to "anti-theme" when variant is "outline" or "transparent"',
         },
         {
           name: 'size',
@@ -88,7 +94,7 @@ export default function ButtonPage() {
 
         // Basic usage
         <Button>Click me</Button>
-        <Button color="success" size="md">Save</Button>
+        <Button size="md">Save</Button>
         <Button isLoading={true}>Saving...</Button>
 
         // With icon
@@ -115,7 +121,16 @@ export default function ButtonPage() {
                 <Button color="danger">Danger</Button>
                 <Button color="theme">Theme</Button>
                 <Button color="anti-theme">Anti-theme</Button>
-                <Button color="transparent">Transparent</Button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <Button color="info" variant="outline">Info</Button>
+                <Button color="danger" variant="outline">Danger</Button>
+                <Button color="anti-theme" variant="outline">Anti-theme</Button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <Button color="info" variant="transparent">Info</Button>
+                <Button color="danger" variant="transparent">Danger</Button>
+                <Button color="anti-theme" variant="transparent">Anti-theme</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button size="xs">Extra Small</Button>

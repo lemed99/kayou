@@ -844,10 +844,10 @@ export default function Example() {
           rowSelection
           bulkActions={(selectedKeys, clearSelection) => (
             <>
-              <Button size="xs" color="failure" onClick={() => { console.log('Delete:', [...selectedKeys]); clearSelection(); }}>
+              <Button size="xs" color="danger" onClick={() => { console.log('Delete:', [...selectedKeys]); clearSelection(); }}>
                 Delete
               </Button>
-              <Button size="xs" color="light" onClick={() => console.log('Export:', [...selectedKeys])}>
+              <Button size="xs" color="theme" onClick={() => console.log('Export:', [...selectedKeys])}>
                 Export
               </Button>
             </>

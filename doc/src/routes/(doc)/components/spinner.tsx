@@ -31,7 +31,7 @@ export default function SpinnerPage() {
       props={[
         {
           name: 'color',
-          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent',
+          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent"',
           default: '"info"',
           description: 'Color variant of the spinner',
         },
