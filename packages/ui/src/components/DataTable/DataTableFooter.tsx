@@ -1,7 +1,11 @@
 import { JSX, Show } from 'solid-js';
 
+import { ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
+
+import Button from '../Button';
 import Pagination from '../Pagination';
 import Select from '../Select';
+import Tooltip from '../Tooltip';
 import { useDataTableInternal } from './DataTableInternalContext';
 
 export function DataTableFooter(): JSX.Element {
@@ -33,12 +37,47 @@ export function DataTableFooter(): JSX.Element {
           </Show>
         </div>
 
-        <Show when={ctx.pageTotal && ctx.pageTotal > 1}>
-          <Pagination
-            total={ctx.pageTotal!}
-            page={ctx.currentPage()}
-            onChange={ctx.handlePageChange}
-          />
+        <Show
+          when={ctx.paginationType() === 'page'}
+          fallback={
+            <Show when={ctx.prevCursor() !== null || ctx.nextCursor() !== null}>
+              <div class="flex items-center gap-2">
+                <Tooltip
+                  hidden={ctx.prevCursor() === null}
+                  content={ctx.labels().previousPage}
+                >
+                  <Button
+                    color="theme"
+                    onClick={() => ctx.handleCursorChange(ctx.prevCursor())}
+                    disabled={ctx.prevCursor() === null}
+                    class="size-8"
+                    aria-label={ctx.ariaLabels().goToPreviousPage}
+                  >
+                    <ChevronLeftIcon class="size-2.5" strokeWidth={2} />
+                  </Button>
+                </Tooltip>
+                <Tooltip hidden={ctx.nextCursor() === null} content={ctx.labels().nextPage}>
+                  <Button
+                    color="theme"
+                    onClick={() => ctx.handleCursorChange(ctx.nextCursor())}
+                    disabled={ctx.nextCursor() === null}
+                    class="size-8"
+                    aria-label={ctx.ariaLabels().goToNextPage}
+                  >
+                    <ChevronRightIcon class="size-2.5" strokeWidth={2} />
+                  </Button>
+                </Tooltip>
+              </div>
+            </Show>
+          }
+        >
+          <Show when={ctx.pageTotal && ctx.pageTotal > 1}>
+            <Pagination
+              total={ctx.pageTotal!}
+              page={ctx.currentPage()}
+              onChange={ctx.handlePageChange}
+            />
+          </Show>
         </Show>
       </nav>
     </Show>

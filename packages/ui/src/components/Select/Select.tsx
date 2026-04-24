@@ -3,6 +3,7 @@ import { JSX, createEffect, createSignal, splitProps } from 'solid-js';
 import { type BackgroundScrollBehavior } from '@kayou/hooks';
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../../helpers';
 import { ChevronDownButton, type Option } from '../../shared';
 import TextInput, { TextInputProps } from '../TextInput';
 import { OptionLabel, groupedOptionIndent, optionClass } from './selectUtils';
@@ -46,6 +47,8 @@ export interface SelectProps extends Omit<TextInputProps, 'onSelect'> {
   referenceClass?: string;
   /** Custom class for the floating (dropdown) element. */
   floatingClass?: string;
+  /** Whether to capitalize the first word of the label. */
+  capitalizeFirstWord?: boolean;
 }
 
 /**
@@ -63,6 +66,8 @@ export default function Select(props: SelectProps): JSX.Element {
     'required',
     'backgroundScrollBehavior',
     'inputComponent',
+    'color',
+    'capitalizeFirstWord',
   ]);
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | undefined>();
@@ -109,8 +114,9 @@ export default function Select(props: SelectProps): JSX.Element {
               {...otherProps}
               ref={setInputRef}
               required={local.required}
-              value={selectedOption()?.label || ''}
+              value={capitalizeFirstWord(selectedOption()?.label || '')}
               placeholder={props.placeholder}
+              capitalizeFirstWord={local.capitalizeFirstWord}
               class="w-full"
               onKeyDown={handleKeyDown}
               role="combobox"
@@ -128,6 +134,7 @@ export default function Select(props: SelectProps): JSX.Element {
                   ? local.style
                   : {}),
               }}
+              color={local.color}
             />
 
             <ChevronDownButton

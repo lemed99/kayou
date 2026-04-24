@@ -271,7 +271,100 @@ test.describe('Form', () => {
     });
   });
 
-  // ── 6. Server errors ────────────────────────────────────────────
+  // ── 6. Password component validation ────────────────────────────
+
+  test.describe('password component validation', () => {
+    const S = 'password-internal-validation';
+
+    test('no password error is shown before submit', async ({ page }) => {
+      await expect(
+        section(page, S).getByText(
+          'Password strength is currently good. It must be at least strong.',
+        ),
+      ).not.toBeVisible();
+    });
+
+    test('blurring the password field does not show the validation message', async ({
+      page,
+    }) => {
+      const input = field(page, S, 'Password');
+      await input.focus();
+      await input.fill('Abcdefgh');
+      await input.blur();
+
+      await expect(
+        section(page, S).getByText(
+          'Password strength is currently good. It must be at least strong.',
+        ),
+      ).not.toBeVisible();
+    });
+
+    test('invalid password blocks submit and shows the password error', async ({
+      page,
+    }) => {
+      await field(page, S, 'Password').fill('Abcdefgh');
+      await submitBtn(page, S).click();
+
+      await expect(
+        section(page, S).getByText(
+          'Password strength is currently good. It must be at least strong.',
+        ),
+      ).toBeVisible();
+      await expect(section(page, S).locator('[role="progressbar"]')).not.toBeVisible();
+      await expect(
+        section(page, S).getByText('Password requirements:', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByTestId('password-internal-success')).not.toBeVisible();
+    });
+
+    test('password error hides as soon as the user starts typing again', async ({
+      page,
+    }) => {
+      const input = field(page, S, 'Password');
+      await input.fill('Abcdefgh');
+      await submitBtn(page, S).click();
+      await expect(
+        section(page, S).getByText(
+          'Password strength is currently good. It must be at least strong.',
+        ),
+      ).toBeVisible();
+
+      await input.focus();
+      await page.keyboard.type('x');
+      await expect(
+        section(page, S).getByText(
+          'Password strength is currently good. It must be at least strong.',
+        ),
+      ).not.toBeVisible();
+    });
+
+    test('valid password submits the real typed value', async ({ page }) => {
+      await field(page, S, 'Password').fill('Abcdefg1!');
+      await submitBtn(page, S).click();
+
+      await expect(page.getByTestId('password-internal-success')).toBeVisible();
+      await expect(page.getByTestId('password-internal-submitted')).toHaveText(
+        'Abcdefg1!',
+      );
+    });
+  });
+
+  test.describe('password custom validation message', () => {
+    const S = 'password-custom-message';
+
+    test('custom validation message is displayed on invalid submit', async ({
+      page,
+    }) => {
+      await field(page, S, 'Password').fill('Abcdefgh');
+      await submitBtn(page, S).click();
+
+      await expect(
+        section(page, S).getByText('Use a stronger password.'),
+      ).toBeVisible();
+    });
+  });
+
+  // ── 7. Server errors ────────────────────────────────────────────
 
   test.describe('server errors', () => {
     const S = 'server-errors';
@@ -294,7 +387,7 @@ test.describe('Form', () => {
     });
   });
 
-  // ── 7. Submit error (onSubmit throws) ───────────────────────────
+  // ── 8. Submit error (onSubmit throws) ───────────────────────────
 
   test.describe('submit error', () => {
     const S = 'submit-error';
@@ -307,7 +400,7 @@ test.describe('Form', () => {
     });
   });
 
-  // ── 8. Form state (isDirty, isSubmitting, reset) ────────────────
+  // ── 9. Form state (isDirty, isSubmitting, reset) ────────────────
 
   test.describe('form state', () => {
     const S = 'form-state';

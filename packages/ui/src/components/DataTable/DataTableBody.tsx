@@ -16,6 +16,7 @@ import { DynamicVirtualList } from '../DynamicVirtualList';
 import Skeleton from '../Skeleton';
 import Spinner from '../Spinner';
 import { VirtualList } from '../VirtualList';
+import { getDataTableColumnAlignmentClasses } from './alignment';
 import { DataTableContextMenu } from './DataTableContextMenu';
 import { useDataTableInternal } from './DataTableInternalContext';
 import { DataTableRow } from './DataTableRow';
@@ -193,11 +194,22 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
                     </div>
                   </Show>
                   <For each={ctx.columns()}>
-                    {() => (
-                      <div role="cell" class="px-6 py-5">
+                    {(column) => {
+                      const alignment = getDataTableColumnAlignmentClasses(column.align);
+
+                      return (
+                        <div
+                          role="cell"
+                          class={twMerge(
+                            'flex px-6 py-5',
+                            alignment.justifyClass,
+                            alignment.textClass,
+                          )}
+                        >
                         <Skeleton width={100} height={10} />
-                      </div>
-                    )}
+                        </div>
+                      );
+                    }}
                   </For>
                 </div>
               </div>

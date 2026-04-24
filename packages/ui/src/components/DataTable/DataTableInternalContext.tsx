@@ -1,6 +1,12 @@
 import { Accessor, JSX, createContext, useContext } from 'solid-js';
 
-import { DataTableAriaLabels, DataTableColumnProps, DataTableLabels } from './DataTable';
+import {
+  DataTableAriaLabels,
+  DataTableColumnProps,
+  DataTableCursor,
+  DataTableLabels,
+  DataTablePaginationType,
+} from './DataTable';
 import { SavedTableConfig, SortAction, SortEntry } from './types';
 
 export interface ContextMenuState<T> {
@@ -39,8 +45,14 @@ export interface DataTableInternalContextValue<T> {
   setSearchRef: (ref: HTMLInputElement | undefined) => void;
 
   // Pagination
+  paginationType: Accessor<DataTablePaginationType>;
   currentPage: Accessor<number>;
   handlePageChange: (page: number) => void;
+  currentCursor: Accessor<DataTableCursor>;
+  prevCursor: Accessor<DataTableCursor>;
+  nextCursor: Accessor<DataTableCursor>;
+  handleCursorChange: (cursor: DataTableCursor) => void;
+  pageTotal?: number;
   perPage: Accessor<number>;
   handlePerPageChange: (value: number) => void;
   perPageOptions: number[];
@@ -124,7 +136,6 @@ export interface DataTableInternalContextValue<T> {
   rowHeight?: number;
   estimatedRowHeight?: number;
   isLoadingMore?: boolean;
-  pageTotal?: number;
   perPageControl?: boolean;
   footer?: boolean;
   searchBar?: boolean;

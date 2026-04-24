@@ -1424,7 +1424,9 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
         <div class="mb-1 block">
           <Label value={props.label} color="gray" />
           <Show when={props.required}>
-            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">*</span>
+            <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">
+              *
+            </span>
           </Show>
         </div>
       </Show>
@@ -1613,7 +1615,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
               } as JSX.CSSProperties
             }
             class={twMerge(
-              'z-50 w-fit rounded-lg border border-neutral-300 bg-white px-2.5 py-3 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
+              'z-100 w-fit rounded-lg border border-neutral-300 bg-white px-2.5 py-3 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
             )}
           >
             <div class="flex gap-3">

@@ -87,6 +87,15 @@ export interface ModalProps extends JSX.HTMLAttributes<HTMLDivElement> {
    * Labels for i18n support.
    */
   ariaLabels?: Partial<ModalAriaLabels>;
+  /**
+   * Optional target to receive focus when the modal opens.
+   * Falls back to the first focusable element when not provided or unavailable.
+   */
+  initialFocusRef?: () => HTMLElement | undefined;
+  /**
+   * Body of the modal class
+   */
+  bodyClass?: string;
 }
 
 const theme = {
@@ -134,7 +143,9 @@ const Modal = (props: ModalProps): JSX.Element => {
     'children',
     'title',
     'ariaLabels',
+    'initialFocusRef',
     'class',
+    'bodyClass',
   ]);
 
   const a = createMemo(() => ({ ...DEFAULT_MODAL_ARIA_LABELS, ...local.ariaLabels }));
@@ -160,8 +171,14 @@ const Modal = (props: ModalProps): JSX.Element => {
     const modal = modalEl()!;
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
-    // Focus the first focusable element when modal opens
+    // Focus the initial focus target if provided or the first focusable element when modal opens
     queueMicrotask(() => {
+      const initialFocusTarget = local.initialFocusRef?.();
+      if (initialFocusTarget && initialFocusTarget.offsetParent !== null) {
+        initialFocusTarget.focus();
+        return;
+      }
+
       const focusable = getFocusableElements(modal);
       if (focusable.length > 0) {
         focusable[0].focus();
@@ -244,7 +261,9 @@ const Modal = (props: ModalProps): JSX.Element => {
                 <XCloseIcon class={theme.header.close.icon} />
               </button>
             </div>
-            <div class={twMerge(theme.body, local.title ? 'pt-4' : 'pt-0')}>
+            <div
+              class={twMerge(theme.body, local.title ? 'pt-4' : 'pt-0', local.bodyClass)}
+            >
               {local.children}
             </div>
           </div>

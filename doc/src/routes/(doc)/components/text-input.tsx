@@ -1,4 +1,174 @@
+import { createSignal } from 'solid-js';
+
+import { TextInput } from '@kayou/ui';
+
 import DocPage from '../../../components/DocPage';
+
+function TextInputExamples() {
+  const [controlledValue, setControlledValue] = createSignal('');
+
+  return (
+    <section id="examples" class="mb-8 scroll-mt-20">
+      <h2 class="mb-4 text-2xl font-medium">Examples</h2>
+      <div class="grid gap-6 xl:grid-cols-2">
+        <div
+          id="basic-input"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Basic Input</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Standard single-line text entry with placeholder support.
+          </p>
+          <div class="mt-4">
+            <TextInput placeholder="Enter your name" />
+          </div>
+        </div>
+
+        <div
+          id="with-label-and-helper-text"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            With Label and Helper Text
+          </h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Labels and helper text stay linked through generated accessibility IDs.
+          </p>
+          <div class="mt-4">
+            <TextInput
+              label="Email Address"
+              placeholder="you@example.com"
+              helperText="We'll never share your email."
+            />
+          </div>
+        </div>
+
+        <div
+          id="size-variants"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Size Variants</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            `TextInput` keeps the same structure across compact and regular sizes.
+          </p>
+          <div class="mt-4 space-y-3">
+            <TextInput sizing="xs" placeholder="Extra Small" />
+            <TextInput sizing="sm" placeholder="Small" />
+            <TextInput sizing="md" placeholder="Medium" />
+          </div>
+        </div>
+
+        <div
+          id="validation-states"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Validation States
+          </h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Color variants control validation styling while preserving the same input API.
+          </p>
+          <div class="mt-4 space-y-3">
+            <TextInput
+              color="failure"
+              value="Invalid input"
+              helperText="Please check this field"
+            />
+            <TextInput color="success" value="Valid input" helperText="Looks good" />
+          </div>
+        </div>
+
+        <div
+          id="with-addon"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">With Addon</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Left addons remain the default for prefix-style values.
+          </p>
+          <div class="mt-4">
+            <TextInput addon="https://" placeholder="example.com" />
+          </div>
+        </div>
+
+        <div
+          id="with-right-addon"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            With Right Addon
+          </h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Set `addonPosition=&quot;right&quot;` for suffix-style values.
+          </p>
+          <div class="mt-4">
+            <TextInput addon=".com" addonPosition="right" placeholder="example" />
+          </div>
+        </div>
+
+        <div
+          id="loading-state"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Loading State</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Loading disables the field and swaps the leading icon slot for a spinner.
+          </p>
+          <div class="mt-4">
+            <TextInput isLoading placeholder="Loading..." />
+          </div>
+        </div>
+
+        <div
+          id="disabled-state"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Disabled State</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Disabled inputs keep their value visible while blocking interaction.
+          </p>
+          <div class="mt-4">
+            <TextInput disabled value="Disabled input" />
+          </div>
+        </div>
+
+        <div
+          id="required-field"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Required Field</h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Required fields preserve native form semantics and add a visual indicator.
+          </p>
+          <div class="mt-4">
+            <TextInput label="Required Field" placeholder="Required value" required />
+          </div>
+        </div>
+
+        <div
+          id="controlled-input"
+          class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Controlled Input
+          </h3>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Controlled usage keeps the displayed value and surrounding UI in sync.
+          </p>
+          <div class="mt-4">
+            <TextInput
+              label="Controlled Input"
+              placeholder="Type here"
+              value={controlledValue()}
+              onInput={(event) => setControlledValue(event.currentTarget.value)}
+            />
+            <p class="mt-3 text-xs text-neutral-500">You typed: {controlledValue()}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function TextInputPage() {
   return (
@@ -19,7 +189,7 @@ export default function TextInputPage() {
         },
         {
           term: 'Icons and Addons',
-          explanation: 'Icons go inside; addons are external prefixes like "https://".',
+          explanation: 'Icons stay inside the field; addons can attach to the left or right edge.',
         },
         {
           term: 'Accessibility',
@@ -61,7 +231,13 @@ export default function TextInputPage() {
           name: 'addon',
           type: 'JSX.Element',
           default: '-',
-          description: 'Addon element displayed before the input',
+          description: 'Addon element displayed beside the input',
+        },
+        {
+          name: 'addonPosition',
+          type: '"left" | "right"',
+          default: '"left"',
+          description: 'Controls whether the addon renders before or after the input',
         },
         {
           name: 'isLoading',
@@ -134,8 +310,15 @@ export default function TextInputPage() {
                 helperText="We'll never share your email."
               />
 
-              {/* With addon */}
+              {/* With left addon */}
               <TextInput addon="https://" placeholder="example.com" />
+
+              {/* With right addon */}
+              <TextInput
+                addon=".com"
+                addonPosition="right"
+                placeholder="example"
+              />
             </div>
           );
         }
@@ -147,7 +330,10 @@ export default function TextInputPage() {
         <TextInput label="Email" helperText="We'll never share your email." />
         <TextInput color="failure" label="Password" helperText="Invalid password" />
         <TextInput addon="https://" placeholder="example.com" />
+        <TextInput addon=".com" addonPosition="right" placeholder="example" />
       `}
-    />
+    >
+      <TextInputExamples />
+    </DocPage>
   );
 }

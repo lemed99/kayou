@@ -1,5 +1,9 @@
 // Components - @kayou/ui
 export { default as Accordion, type AccordionProps, type PanelData } from './Accordion';
+export {
+  default as ActionTextInput,
+  type ActionTextInputProps,
+} from './ActionTextInput';
 export { default as Alert } from './Alert';
 export { default as Badge, type BadgeColor, type BadgeSize } from './Badge';
 export {
@@ -61,6 +65,12 @@ export {
   type TimeValue,
 } from './TimePicker';
 export {
+  DEFAULT_TAG_INPUT_ARIA_LABELS,
+  default as TagInput,
+  type TagInputAriaLabels,
+  type TagInputProps,
+} from './TagInput';
+export {
   default as TextInput,
   type TextInputAriaLabels,
   type TextInputProps,
@@ -114,6 +124,8 @@ export {
   useDataTableState,
   type ActiveFilter,
   type DataTableColumnProps,
+  type DataTableCursor,
+  type DataTablePaginationType,
   type DataTableFiltersLabels,
   type DataTableFiltersProps,
   type DataTableLabels,

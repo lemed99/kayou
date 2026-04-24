@@ -2,6 +2,8 @@
 export {
   DataTable,
   type DataTableColumnProps,
+  type DataTableCursor,
+  type DataTablePaginationType,
   type DataTableLabels,
   DEFAULT_DATA_TABLE_LABELS,
   type DataTableAriaLabels,

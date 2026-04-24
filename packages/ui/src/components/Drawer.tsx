@@ -100,6 +100,11 @@ export interface DrawerProps extends JSX.HTMLAttributes<HTMLDivElement> {
    * Labels for i18n support.
    */
   ariaLabels?: Partial<DrawerAriaLabels>;
+  /**
+   * Optional target to receive focus when the modal opens.
+   * Falls back to the first focusable element when not provided or unavailable.
+   */
+  initialFocusRef?: () => HTMLElement | undefined;
 }
 
 const theme = {
@@ -116,7 +121,7 @@ const theme = {
     },
     base: 'fixed z-[91]',
     inner: {
-      base: 'relative bg-white w-full h-full dark:bg-neutral-800 overflow-auto',
+      base: 'relative bg-white flex flex-col w-full h-full dark:bg-neutral-800 overflow-auto',
       positions: {
         top: 'rounded-b-lg',
         bottom: 'rounded-t-lg',
@@ -129,7 +134,7 @@ const theme = {
     base: 'p-6',
   },
   header: {
-    base: 'flex items-center justify-between p-4',
+    base: 'flex items-center justify-between p-4 shrink-0',
     title: 'grow text-lg font-semibold text-neutral-900 dark:text-white p-2',
     close: {
       base: 'ml-auto inline-flex cursor-pointer transition-all items-center rounded-lg bg-transparent p-2 text-sm text-neutral-400 dark:text-neutral-400 hover:bg-neutral-200 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
@@ -156,6 +161,7 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     'ariaLabels',
     'children',
     'class',
+    'initialFocusRef',
   ]);
 
   const a = createMemo(() => ({ ...DEFAULT_DRAWER_ARIA_LABELS, ...local.ariaLabels }));
@@ -184,8 +190,14 @@ const Drawer = (props: DrawerProps): JSX.Element => {
     const drawer = drawerEl()!;
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
-    // Focus the first focusable element when drawer opens
+    // Focus the initial focus target if provided or the first focusable element when drawer opens
     queueMicrotask(() => {
+      const initialFocusTarget = local.initialFocusRef?.();
+      if (initialFocusTarget && initialFocusTarget.offsetParent !== null) {
+        initialFocusTarget.focus();
+        return;
+      }
+
       const focusable = getFocusableElements(drawer);
       if (focusable.length > 0) {
         focusable[0].focus();

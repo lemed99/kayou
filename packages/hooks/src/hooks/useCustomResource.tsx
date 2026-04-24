@@ -67,6 +67,24 @@ export interface CustomResourceProps<T> {
 }
 
 /**
+ * Extracts and returns the HTTP status code from an error object, if available.
+ *
+ * @param error - The error object to check for a status property.
+ * @returns The status code as a number if present, otherwise undefined.
+ */
+function getErrorStatus(error: unknown): number | undefined {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    typeof (error as { status?: unknown }).status === 'number'
+  ) {
+    return (error as { status: number }).status;
+  }
+  return undefined;
+}
+
+/**
  * Custom resource hook implementing SWR pattern with caching and retry logic.
  *
  * Features:
@@ -96,6 +114,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   const [attempts, setAttempts] = createSignal(0);
   const [resourceData, setResourceData] = createSignal<T | undefined>(undefined);
   const [validating, setValidating] = createSignal(false);
+  let resourceDataUrl: string | null = null;
 
   let abortController = new AbortController();
 
@@ -145,6 +164,16 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   };
 
   const retryTimers = new Set<number>();
+  let instanceRequestSeq = 0;
+  let forceFreshNextFetch = false;
+
+  const incrementInstanceRequestSeq = () => {
+    instanceRequestSeq += 1;
+    return instanceRequestSeq;
+  };
+
+  const isCurrentInstanceRequest = (seq: number) => instanceRequestSeq === seq;
+  const getNoopResult = () => resourceData() as T | null;
 
   const defaultFetcher = async (url: string): Promise<T> => {
     const res = await fetch(url, { signal: abortController.signal });
@@ -169,7 +198,13 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     url: string;
     swr?: boolean;
   }): Promise<T | null> => {
-    if (!url) return null;
+    const shouldBypassDedupeReuse = forceFreshNextFetch;
+    forceFreshNextFetch = false;
+    if (!url) {
+      setValidating(false);
+      return getNoopResult();
+    }
+    const requestSeq = incrementInstanceRequestSeq();
     if (swr) {
       setValidating(true);
     }
@@ -178,6 +213,9 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
       const pendingRequests = context.pendingRequests;
       const fetcher = options?.fetcher ?? defaultFetcher;
       const fetchPromiseCallback = async (data: T) => {
+        if (!isCurrentInstanceRequest(requestSeq)) {
+          return data;
+        }
         setFromCache(false);
         setErrorStatus(undefined);
         setError(null);
@@ -185,8 +223,32 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
         clearAllRetryTimers();
         options?.onSuccess?.(data, false);
         setResourceData(() => data);
+        resourceDataUrl = url;
+        const previousCommittedVersion = context.networkVersionByUrl.get(url) ?? 0;
+        const currentAnnouncedVersion =
+          context.nextNetworkVersionByUrl.get(url) ??
+          previousCommittedVersion;
+        const nextNetworkVersion = currentAnnouncedVersion + 1;
+        const nextCacheReadGuardVersion =
+          (context.cacheReadGuardVersionByUrl.get(url) ?? 0) + 1;
+        context.cacheReadGuardVersionByUrl.set(url, nextCacheReadGuardVersion);
+        context.nextNetworkVersionByUrl.set(url, nextNetworkVersion);
         setValidating(false);
-        await insertOrUpdateCacheRow(url, data);
+        try {
+          await insertOrUpdateCacheRow(url, data);
+          const currentCommittedVersion = context.networkVersionByUrl.get(url) ?? 0;
+          if (nextNetworkVersion > currentCommittedVersion) {
+            context.networkVersionByUrl.set(url, nextNetworkVersion);
+          }
+        } catch (cacheWriteError) {
+          const failedWriteGuardVersion =
+            (context.cacheReadGuardVersionByUrl.get(url) ?? 0) + 1;
+          context.cacheReadGuardVersionByUrl.set(url, failedWriteGuardVersion);
+          if ((context.nextNetworkVersionByUrl.get(url) ?? 0) === nextNetworkVersion) {
+            context.nextNetworkVersionByUrl.set(url, previousCommittedVersion);
+          }
+          void cacheWriteError;
+        }
         return data;
       };
 
@@ -210,6 +272,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
         }
 
         if (
+          !shouldBypassDedupeReuse &&
           entry?.lastValue !== undefined &&
           entry?.resolvedAt &&
           Date.now() - entry.resolvedAt < options.dedupeInterval!
@@ -219,43 +282,74 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
 
         let promiseReturn: Promise<T>;
 
-        if (entry?.promise) {
+        if (entry?.promise && !shouldBypassDedupeReuse) {
           promiseReturn = entry.promise as Promise<T>;
         } else {
-          promiseReturn = fetchPromise().then((data) => {
-            const timeOut = setTimeout(() => {
-              pendingRequests.delete(url);
-            }, options.dedupeInterval);
+          promiseReturn = fetchPromise().then(
+            (data) => {
+              if (pendingRequests.get(url)?.promise !== promiseReturn) {
+                return data;
+              }
+              const timeOut = setTimeout(() => {
+                pendingRequests.delete(url);
+              }, options.dedupeInterval);
 
-            pendingRequests.set(url, {
-              promise: null,
-              lastValue: data,
-              resolvedAt: Date.now(),
-              timeoutId: timeOut,
-            });
+              pendingRequests.set(url, {
+                promise: null,
+                lastValue: data,
+                resolvedAt: Date.now(),
+                timeoutId: timeOut,
+              });
 
-            return data;
-          });
+              return data;
+            },
+            (error) => {
+              // If in-flight request fails, clear dedupe entry so next refetch can
+              // issue a new network request instead of reusing a stale rejected promise.
+              if (pendingRequests.get(url)?.promise === promiseReturn) {
+                pendingRequests.delete(url);
+              }
+              throw error;
+            },
+          );
 
           pendingRequests.set(url, {
             promise: promiseReturn,
           });
         }
 
-        return await promiseReturn.then((data) => fetchPromiseCallback(data));
+        return await promiseReturn.then(async (data) => {
+          if (!isCurrentInstanceRequest(requestSeq)) {
+            return getNoopResult();
+          }
+          return await fetchPromiseCallback(data);
+        });
       }
 
-      return await fetchPromise().then((data) => fetchPromiseCallback(data));
+      const data = await fetchPromise();
+      if (!isCurrentInstanceRequest(requestSeq)) {
+        return getNoopResult();
+      }
+      return await fetchPromiseCallback(data);
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') {
-        setValidating(false);
-        return null;
+        if (isCurrentInstanceRequest(requestSeq)) {
+          setValidating(false);
+        }
+        return getNoopResult();
+      }
+      if (!isCurrentInstanceRequest(requestSeq)) {
+        return getNoopResult();
       }
       const err = e instanceof Error ? e : new Error(String(e));
+      const extractedStatus = getErrorStatus(e);
+      if (extractedStatus !== undefined) {
+        setErrorStatus(extractedStatus);
+      }
       setError(err);
       mergedOptions.onError?.(err);
       setValidating(false);
-      return null;
+      return getNoopResult();
     }
   };
 
@@ -316,12 +410,34 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     async (url) => {
       try {
         if (!url) return undefined;
+        const cacheReadSeq = instanceRequestSeq;
+        const snapshotCacheReadGuardVersion =
+          context.cacheReadGuardVersionByUrl.get(url) ?? 0;
+        const snapshotCommittedVersion = context.networkVersionByUrl.get(url) ?? 0;
         const cached = (await getCacheRow(url, mergedOptions.cacheValidator)) as T | null;
         if (cached) {
+          if (!isCurrentInstanceRequest(cacheReadSeq)) {
+            return cached;
+          }
+          const currentCacheReadGuardVersion =
+            context.cacheReadGuardVersionByUrl.get(url) ?? 0;
+          if (currentCacheReadGuardVersion > snapshotCacheReadGuardVersion) {
+            return cached;
+          }
+          const currentAnnouncedVersion =
+            context.nextNetworkVersionByUrl.get(url) ??
+            (context.networkVersionByUrl.get(url) ?? 0);
+          if (currentAnnouncedVersion > snapshotCommittedVersion) {
+            return cached;
+          }
+          if (resourceDataUrl === url && resourceData() !== undefined && !fromCache()) {
+            return cached;
+          }
           setFromCache(true);
           setErrorStatus(undefined);
           mergedOptions?.onSuccess?.(cached, true);
           setResourceData(() => cached);
+          resourceDataUrl = url;
           return cached;
         }
       } catch {
@@ -376,6 +492,11 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
   });
 
   const refetch = () => {
+    const currentUrl = urlString();
+    const canFetchNow = Boolean(currentUrl) && props.condition?.() !== false;
+    forceFreshNextFetch = canFetchNow;
+    incrementInstanceRequestSeq();
+    setValidating(false);
     abortController.abort();
     abortController = new AbortController();
     setError(null);
@@ -393,7 +514,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
     loading: () =>
       swr() ? resourceData() === undefined && resource.loading : resource.loading,
     state: () => resource.state,
-    latest: () => resource.latest ?? undefined,
+    latest: () => resourceData() ?? resource.latest ?? undefined,
     refetch,
     fromCache,
     validating,

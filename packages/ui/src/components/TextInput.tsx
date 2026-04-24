@@ -31,8 +31,14 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   helperText?: string;
   /** Label text displayed above the input. */
   label?: string;
-  /** Addon element displayed before the input. */
+  /** Addon element displayed beside the input; side controlled by `addonPosition`. */
   addon?: JSX.Element;
+  /** Addon element displayed to the left of the input. */
+  addonLeft?: JSX.Element;
+  /** Addon element displayed to the right of the input. */
+  addonRight?: JSX.Element;
+  /** Addon side relative to the input. Defaults to 'left'. */
+  addonPosition?: 'left' | 'right';
   /** Icon component rendered inside the input. */
   icon?: (props: IconProps) => JSX.Element;
   /** Color variant for styling and validation states. Defaults to 'gray'. */
@@ -57,16 +63,31 @@ export interface TextInputProps extends JSX.InputHTMLAttributes<HTMLInputElement
   isLoading?: boolean;
   /** Additional CSS class for the input element. */
   inputClass?: string;
+  /** Additional CSS class for the input wrapper. */
+  wrapperClass?: string;
+  /** Additional CSS class for the addon wrapper. */
+  addonClass?: string;
+  /** Additional CSS class for the left addon wrapper. */
+  addonLeftClass?: string;
+  /** Additional CSS class for the right addon wrapper. */
+  addonRightClass?: string;
   /**
    * Labels for i18n support.
    */
   ariaLabels?: Partial<TextInputAriaLabels>;
+  /** Whether to capitalize the first word of the label. */
+  capitalizeFirstWord?: boolean;
 }
 
 const theme = {
   base: 'flex',
-  addon:
-    'inline-flex items-center rounded-l-lg border border-r-0 border-neutral-300 bg-neutral-200 px-3 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-700 dark:text-neutral-400',
+  addon: {
+    base: 'inline-flex items-center border border-neutral-300 bg-neutral-200 px-3 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-700 dark:text-neutral-400',
+    position: {
+      left: 'rounded-l-lg border-r-0',
+      right: 'rounded-r-lg border-l-0',
+    },
+  },
   field: {
     base: 'relative w-full',
     icon: {
@@ -104,7 +125,9 @@ const theme = {
         off: '',
       },
       withAddon: {
-        on: 'rounded-r-lg',
+        both: 'rounded-none',
+        left: 'rounded-r-lg rounded-l-none',
+        right: 'rounded-l-lg rounded-r-none',
         off: 'rounded-lg',
       },
       withShadow: {
@@ -120,6 +143,9 @@ const TextInput = (props: TextInputProps): JSX.Element => {
     'color',
     'class',
     'addon',
+    'addonLeft',
+    'addonRight',
+    'addonPosition',
     'sizing',
     'icon',
     'helperText',
@@ -140,6 +166,12 @@ const TextInput = (props: TextInputProps): JSX.Element => {
     'inputClass',
     'id',
     'ariaLabels',
+    'aria-describedby',
+    'wrapperClass',
+    'addonClass',
+    'addonLeftClass',
+    'addonRightClass',
+    'capitalizeFirstWord',
   ]);
   const a = createMemo(() => ({
     ...DEFAULT_TEXT_INPUT_ARIA_LABELS,
@@ -152,11 +184,23 @@ const TextInput = (props: TextInputProps): JSX.Element => {
   const helperId = createMemo(() =>
     local.helperText ? `${inputId()}-helper` : undefined,
   );
+  const ariaDescribedBy = createMemo(
+    () => [local['aria-describedby'], helperId()].filter(Boolean).join(' ') || undefined,
+  );
 
   const color = createMemo(() => local.color || 'gray');
   const sizing = createMemo(() => local.sizing || 'md');
   const showArrows = createMemo(() => local.showArrows || false);
   const fitContent = createMemo(() => local.fitContent || false);
+  const addonPosition = createMemo(() => local.addonPosition || 'left');
+  const resolvedAddonLeft = createMemo(() =>
+    local.addonLeft ?? (addonPosition() === 'left' ? local.addon : undefined),
+  );
+  const resolvedAddonRight = createMemo(() =>
+    local.addonRight ?? (addonPosition() === 'right' ? local.addon : undefined),
+  );
+  const hasLeftAddon = createMemo(() => Boolean(resolvedAddonLeft()));
+  const hasRightAddon = createMemo(() => Boolean(resolvedAddonRight()));
 
   // Determine ARIA attributes based on state
   const ariaInvalid = createMemo(() => (color() === 'failure' ? true : undefined));
@@ -174,9 +218,21 @@ const TextInput = (props: TextInputProps): JSX.Element => {
   };
 
   createEffect(() => {
-    if (!fitContent() || !inputRef) return;
+    if (!inputRef) {
+      return;
+    }
+
+    if (!fitContent()) {
+      if ('fieldSizing' in inputRef.style) {
+        (inputRef.style as unknown as Record<string, string>).fieldSizing = '';
+      }
+      inputRef.style.width = '';
+      return;
+    }
+
     if ('fieldSizing' in inputRef.style) {
-      (inputRef.style as Record<string, string>).fieldSizing = 'content';
+      (inputRef.style as unknown as Record<string, string>).fieldSizing = 'content';
+      inputRef.style.width = '';
       return;
     }
 
@@ -209,11 +265,43 @@ const TextInput = (props: TextInputProps): JSX.Element => {
     updateWidth();
   });
 
+  const leftAddonClass = createMemo(() =>
+    twMerge(theme.addon.base, theme.addon.position.left, local.addonClass, local.addonLeftClass),
+  );
+  const rightAddonClass = createMemo(() =>
+    twMerge(
+      theme.addon.base,
+      theme.addon.position.right,
+      local.addonClass,
+      local.addonRightClass,
+    ),
+  );
+  const inputAddonState = createMemo<'off' | 'left' | 'right' | 'both'>(() => {
+    if (hasLeftAddon() && hasRightAddon()) {
+      return 'both';
+    }
+
+    if (hasLeftAddon()) {
+      return 'left';
+    }
+
+    if (hasRightAddon()) {
+      return 'right';
+    }
+
+    return 'off';
+  });
+
   return (
-    <div class="w-full">
+    <div class={twMerge('w-full', local.wrapperClass)}>
       <Show when={local.label}>
         <div class="mb-1 block">
-          <Label for={inputId()} value={local.label} color={color()} />
+          <Label
+            for={inputId()}
+            value={local.label}
+            color={color()}
+            capitalizeFirstWord={local.capitalizeFirstWord}
+          />
           <Show when={props.required}>
             <span aria-hidden="true" class="ml-0.5 font-medium text-red-500">
               *
@@ -222,8 +310,8 @@ const TextInput = (props: TextInputProps): JSX.Element => {
         </div>
       </Show>
       <div class={twMerge(theme.base, local.class)}>
-        <Show when={local.addon}>
-          <span class={theme.addon}>{local.addon}</span>
+        <Show when={hasLeftAddon()}>
+          <span class={leftAddonClass()}>{resolvedAddonLeft()}</span>
         </Show>
         <div class={theme.field.base}>
           <Show when={local.icon && !local.isLoading}>
@@ -244,7 +332,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
               theme.field.input.base,
               theme.field.input.colors[color()],
               theme.field.input.sizes[sizing()],
-              theme.field.input.withAddon[local.addon ? 'on' : 'off'],
+              theme.field.input.withAddon[inputAddonState()],
               theme.field.input.withIcon[local.icon || local.isLoading ? 'on' : 'off'],
               theme.field.input.withArrows[showArrows() ? 'on' : 'off'],
               local.inputClass,
@@ -255,7 +343,7 @@ const TextInput = (props: TextInputProps): JSX.Element => {
             value={local.value}
             aria-invalid={ariaInvalid()}
             aria-busy={ariaBusy()}
-            aria-describedby={helperId()}
+            aria-describedby={ariaDescribedBy()}
           />
 
           <Show when={showArrows()}>
@@ -289,6 +377,9 @@ const TextInput = (props: TextInputProps): JSX.Element => {
             </div>
           </Show>
         </div>
+        <Show when={hasRightAddon()}>
+          <span class={rightAddonClass()}>{resolvedAddonRight()}</span>
+        </Show>
       </div>
 
       <Show when={local.helperText}>

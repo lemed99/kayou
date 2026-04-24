@@ -50,6 +50,7 @@ const gettingStartedPages = [
 
 const componentCategories: Record<string, string[]> = {
   Form: [
+    'action-text-input',
     'button',
     'checkbox',
     'date-picker',
@@ -62,6 +63,7 @@ const componentCategories: Record<string, string[]> = {
     'rich-text-editor',
     'select',
     'select-with-search',
+    'tag-input',
     'text-input',
     'textarea',
     'toggle-switch',

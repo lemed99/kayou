@@ -16,15 +16,17 @@ import { type BackgroundScrollBehavior, useFloating } from '@kayou/hooks';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../../helpers';
 import { type Option } from '../../shared';
+import { DynamicVirtualList, type DynamicVirtualListHandle } from '../DynamicVirtualList';
 import HelperText from '../HelperText';
 import Label from '../Label';
 import { TextInputProps } from '../TextInput';
-import { DynamicVirtualList, type DynamicVirtualListHandle } from '../DynamicVirtualList';
 import { VirtualList } from '../VirtualList';
 import {
   CTA,
   InfiniteScrollLoader,
+  type SelectCTA,
   type VirtualGroupItem,
   buildVirtualGroupItems,
   getScrollProgress,
@@ -55,8 +57,10 @@ export const DEFAULT_SELECT_ARIA_LABELS: SelectAriaLabels = {
   searchOptions: 'Search options',
 };
 
-interface MergedSelectProps
-  extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
+interface MergedSelectProps extends Omit<
+  TextInputProps,
+  'onSelect' | 'labels' | 'ariaLabels'
+> {
   options: Option[];
   value?: string;
   onSelect?: (option?: Option) => void;
@@ -68,7 +72,7 @@ interface MergedSelectProps
   autoFillSearchKey?: boolean;
   idValue?: string;
   optionRowHeight?: number;
-  cta?: JSX.Element;
+  cta?: SelectCTA;
   isLoadingMore?: boolean;
   onLoadMore?: (scrollProgress: number) => void;
   /** How to handle background scroll when dropdown is open. @default 'close' */
@@ -117,12 +121,12 @@ const useSelect = <T extends MergedSelectProps>(
       if (props.idValue) {
         const opt = props.options.find((o) => o.value === props.idValue);
         if (opt) {
-          if (props.autoFillSearchKey) setSearchKey(opt.label);
+          if (props.autoFillSearchKey) setSearchKey(capitalizeFirstWord(opt.label));
           setSelectedOption(opt);
           setHighlightedOption(opt);
         }
       } else if (props.value) {
-        setSearchKey(props.value);
+        setSearchKey(capitalizeFirstWord(props.value));
       }
     }
     if (type === 'multiSelect' && props.values) {
@@ -247,7 +251,7 @@ const useSelect = <T extends MergedSelectProps>(
     if (option.disabled) return;
     if (type === 'selectWithSearch' || type === 'select') {
       if (props.autoFillSearchKey && type === 'selectWithSearch')
-        setSearchKey(option.label);
+        setSearchKey(capitalizeFirstWord(option.label));
       setSelectedOption(option);
       props.onSelect?.(option);
       setIsOpen(false);
@@ -432,7 +436,9 @@ const useSelect = <T extends MergedSelectProps>(
       e.preventDefault();
       const highlighted = highlightedOption();
       if (highlighted && !highlighted.disabled) {
-        const currentIndex = filteredOptions().findIndex((o) => o.value === highlighted.value);
+        const currentIndex = filteredOptions().findIndex(
+          (o) => o.value === highlighted.value,
+        );
         if (currentIndex !== -1) {
           handleOptionClick(highlighted);
           return;
@@ -487,7 +493,9 @@ const useSelect = <T extends MergedSelectProps>(
       e.preventDefault();
       const highlighted = highlightedOption();
       if (highlighted && !highlighted.disabled) {
-        const currentIndex = filteredOptions().findIndex((o) => o.value === highlighted.value);
+        const currentIndex = filteredOptions().findIndex(
+          (o) => o.value === highlighted.value,
+        );
         if (currentIndex !== -1) {
           handleOptionClick(highlighted);
           return;
@@ -549,7 +557,11 @@ const useSelect = <T extends MergedSelectProps>(
     inputComponent: JSX.Element;
     optionsComponent: (option: Option, index: Accessor<number>) => JSX.Element;
     preOptionsComponent?: JSX.Element;
-    groupHeaderComponent?: (group: string, options: Option[], headerId: string) => JSX.Element;
+    groupHeaderComponent?: (
+      group: string,
+      options: Option[],
+      headerId: string,
+    ) => JSX.Element;
     groupSpacerClass?: string;
   }) => {
     const grouped = createMemo(() => hasGroups(filteredOptions()));
@@ -558,7 +570,11 @@ const useSelect = <T extends MergedSelectProps>(
       const opts = filteredOptions();
       if (!grouped()) {
         flatToVirtualIndex = undefined;
-        return opts.map((o, i) => ({ _type: 'option' as const, option: o, flatIndex: i }));
+        return opts.map((o, i) => ({
+          _type: 'option' as const,
+          option: o,
+          flatIndex: i,
+        }));
       }
       const items = buildVirtualGroupItems(opts, listboxId);
       // Build reverse lookup for scrollToHighlightedOption
@@ -576,7 +592,10 @@ const useSelect = <T extends MergedSelectProps>(
     const renderVirtualItem = (item: VirtualGroupItem) => {
       if (item._type === 'spacer') {
         return (
-          <div role="separator" class={layoutProps.groupSpacerClass ?? groupSpacerClass} />
+          <div
+            role="separator"
+            class={layoutProps.groupSpacerClass ?? groupSpacerClass}
+          />
         );
       }
       if (item._type === 'header') {
@@ -584,20 +603,12 @@ const useSelect = <T extends MergedSelectProps>(
           <Show
             when={layoutProps.groupHeaderComponent}
             fallback={
-              <div
-                id={item.headerId}
-                role="presentation"
-                class={groupHeaderClass}
-              >
+              <div id={item.headerId} role="presentation" class={groupHeaderClass}>
                 {item.group}
               </div>
             }
           >
-            {layoutProps.groupHeaderComponent!(
-              item.group,
-              item.options,
-              item.headerId,
-            )}
+            {layoutProps.groupHeaderComponent!(item.group, item.options, item.headerId)}
           </Show>
         );
       }
@@ -609,13 +620,21 @@ const useSelect = <T extends MergedSelectProps>(
         <div class="relative w-full">
           <Show when={props.label}>
             <div class="mb-1 block">
-              <Label value={props.label} color={props.color} />
+              <Label
+                value={props.label}
+                color={props.color}
+                capitalizeFirstWord={props.capitalizeFirstWord}
+              />
               <Show when={props.required}>
                 <span class="ml-0.5 font-medium text-red-500">*</span>
               </Show>
             </div>
           </Show>
-          <div ref={refs.setReference} onClick={handleInputClick} class={twMerge('relative w-full', props.referenceClass)}>
+          <div
+            ref={refs.setReference}
+            onClick={handleInputClick}
+            class={twMerge('relative w-full', props.referenceClass)}
+          >
             {layoutProps.inputComponent}
           </div>
 
@@ -663,7 +682,7 @@ const useSelect = <T extends MergedSelectProps>(
                           <For
                             each={filteredOptions()}
                             fallback={
-                              <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                              <div class="px-2 py-1.5 text-sm whitespace-nowrap">
                                 {selectLabels().noResults}
                               </div>
                             }
@@ -673,12 +692,14 @@ const useSelect = <T extends MergedSelectProps>(
                         }
                       >
                         {(() => {
-                          const groups = createMemo(() => groupOptions(filteredOptions()));
+                          const groups = createMemo(() =>
+                            groupOptions(filteredOptions()),
+                          );
                           return (
                             <Show
                               when={filteredOptions().length > 0}
                               fallback={
-                                <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                                <div class="px-2 py-1.5 text-sm whitespace-nowrap">
                                   {selectLabels().noResults}
                                 </div>
                               }
@@ -687,7 +708,12 @@ const useSelect = <T extends MergedSelectProps>(
                                 {(entry, groupIdx) => (
                                   <>
                                     <Show when={groupIdx > 0}>
-                                      <div role="separator" class={layoutProps.groupSpacerClass ?? groupSpacerClass} />
+                                      <div
+                                        role="separator"
+                                        class={
+                                          layoutProps.groupSpacerClass ?? groupSpacerClass
+                                        }
+                                      />
                                     </Show>
                                     <Show
                                       when={entry().group !== null}
@@ -743,16 +769,21 @@ const useSelect = <T extends MergedSelectProps>(
                         rootHeight={200}
                         rowHeight={props.optionRowHeight!}
                         overscanCount={3}
+                        containerWidth={
+                          props.withSearch || props.cta ? '100%' : undefined
+                        }
                         setContainerRef={setOptionsContainerRef}
                         minWidth={props.withSearch ? 210 : undefined}
                         id={listboxId}
                         role="listbox"
                         aria-multiselectable={type === 'multiSelect' ? true : undefined}
                         aria-label={props.label || selectAriaLabels().selectOptions}
-                        loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
+                        loading={
+                          <InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />
+                        }
                         setScrollPosition={setScrollTop}
                         fallback={
-                          <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                          <div class="px-2 py-1.5 text-sm whitespace-nowrap">
                             {selectLabels().noResults}
                           </div>
                         }
@@ -766,25 +797,36 @@ const useSelect = <T extends MergedSelectProps>(
                       rootHeight={200}
                       estimatedRowHeight={props.optionRowHeight!}
                       overscanCount={3}
+                      containerWidth={props.withSearch || props.cta ? '100%' : undefined}
+                      minWidth={props.withSearch ? 210 : undefined}
                       setContainerRef={setOptionsContainerRef}
                       id={listboxId}
                       role="listbox"
                       aria-multiselectable={type === 'multiSelect' ? true : undefined}
                       aria-label={props.label || selectAriaLabels().selectOptions}
-                      loading={<InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />}
+                      loading={
+                        <InfiniteScrollLoader isLoadingMore={props.isLoadingMore} />
+                      }
                       setScrollPosition={setScrollTop}
                       fallback={
-                        <div class="whitespace-nowrap px-2 py-1.5 text-sm">
+                        <div class="px-2 py-1.5 text-sm whitespace-nowrap">
                           {selectLabels().noResults}
                         </div>
                       }
-                      ref={(handle) => { dynamicVirtualHandle = handle; }}
+                      ref={(handle) => {
+                        dynamicVirtualHandle = handle;
+                      }}
                     >
                       {(item) => renderVirtualItem(item)}
                     </DynamicVirtualList>
                   </Show>
                 </Show>
-                <CTA cta={props.cta} />
+                <CTA
+                  cta={props.cta}
+                  controls={{
+                    closeDropdown: () => setIsOpen(false),
+                  }}
+                />
               </div>
             </Portal>
           </Show>

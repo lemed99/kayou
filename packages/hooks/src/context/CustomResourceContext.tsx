@@ -61,6 +61,9 @@ export interface PendingEntry<T> {
 export interface CustomResourceContextValue<T = unknown> {
   options: ResourceOptions<T>;
   pendingRequests: Map<string, PendingEntry<T>>;
+  networkVersionByUrl: Map<string, number>;
+  nextNetworkVersionByUrl: Map<string, number>;
+  cacheReadGuardVersionByUrl: Map<string, number>;
   refreshData: Accessor<Record<string, boolean>> | null;
   baseUrl: string | undefined;
 }
@@ -91,12 +94,18 @@ export const CustomResourceProvider: ParentComponent<
   CustomResourceProviderProps<unknown>
 > = (props) => {
   const pendingRequests = new Map<string, PendingEntry<unknown>>();
+  const networkVersionByUrl = new Map<string, number>();
+  const nextNetworkVersionByUrl = new Map<string, number>();
+  const cacheReadGuardVersionByUrl = new Map<string, number>();
 
   onCleanup(() => {
     for (const entry of pendingRequests.values()) {
       if (entry.timeoutId) clearTimeout(entry.timeoutId);
     }
     pendingRequests.clear();
+    networkVersionByUrl.clear();
+    nextNetworkVersionByUrl.clear();
+    cacheReadGuardVersionByUrl.clear();
   });
 
   const options: ResourceOptions<unknown> = {
@@ -145,6 +154,9 @@ export const CustomResourceProvider: ParentComponent<
       value={{
         options,
         pendingRequests,
+        networkVersionByUrl,
+        nextNetworkVersionByUrl,
+        cacheReadGuardVersionByUrl,
         get refreshData() {
           return props.refreshData;
         },

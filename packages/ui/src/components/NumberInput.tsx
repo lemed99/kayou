@@ -24,6 +24,8 @@ export interface NumberInputProps extends ExtendedTextInputProps {
   onValueChange?: (value: number | null) => void;
   /** Wrap around when stepping past min/max. Requires both min and max to be set. Defaults to false. */
   wrap?: boolean;
+  /** Whether to capitalize the first word of the label. */
+  capitalizeFirstWord?: boolean;
 }
 
 const NON_ALPHANUM_KEYS = [
@@ -67,6 +69,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
     'ariaLabels',
     'wrap',
     'value',
+    'capitalizeFirstWord',
   ]);
 
   // Safe accessors for min/max with proper type handling
@@ -446,6 +449,7 @@ const NumberInput = (props: NumberInputProps): JSX.Element => {
       {...inputProps}
       value={local.value}
       ref={setInputRef}
+      capitalizeFirstWord={local.capitalizeFirstWord}
       role="spinbutton"
       aria-valuemin={minValue()}
       aria-valuemax={maxValue()}

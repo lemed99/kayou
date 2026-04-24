@@ -2,12 +2,21 @@ import { JSX, Show, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../../helpers';
 import { ClearContentButton, type Option } from '../../shared';
 import TextInput, { type TextInputProps } from '../TextInput';
-import { OptionLabel, groupedOptionIndent, optionClass } from './selectUtils';
+import {
+  OptionLabel,
+  type SelectCTA,
+  groupedOptionIndent,
+  optionClass,
+} from './selectUtils';
 import useSelect, { type SelectAriaLabels, type SelectLabels } from './useSelect';
 
-export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
+export interface SelectWithSearchProps extends Omit<
+  TextInputProps,
+  'onSelect' | 'labels' | 'ariaLabels'
+> {
   /** Array of options to display in the dropdown. */
   options: Option[];
   /** Callback when an option is selected. */
@@ -23,7 +32,7 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' |
   /** Height of each option row for virtualization. */
   optionRowHeight?: number;
   /** Custom call-to-action element at bottom of dropdown. */
-  cta?: JSX.Element;
+  cta?: SelectCTA;
   /** Show loading spinner when loading more items (infinite scroll). */
   isLoadingMore?: boolean;
   /** Callback when user scrolls near bottom of list (infinite scroll). */
@@ -36,6 +45,8 @@ export interface SelectWithSearchProps extends Omit<TextInputProps, 'onSelect' |
   referenceClass?: string;
   /** Custom class for the floating (dropdown) element. */
   floatingClass?: string;
+  /** Whether to capitalize the first word of the label. */
+  capitalizeFirstWord?: boolean;
 }
 
 export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Element {
@@ -58,6 +69,8 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
     'placeholder',
     'labels',
     'ariaLabels',
+    'color',
+    'capitalizeFirstWord',
   ]);
 
   const {
@@ -92,11 +105,15 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
             value={searchKey()}
             onInput={handleSearchChange}
             placeholder={local.placeholder}
+            capitalizeFirstWord={local.capitalizeFirstWord}
             disabled={local.disabled}
             isLoading={local.isLoading}
             onBlur={() => {
-              if (!selectedOption() && searchKey())
-                local.onSelect({ value: '', label: searchKey() });
+              if (!selectedOption() && searchKey()) {
+                const capitalized = capitalizeFirstWord(searchKey());
+                setSearchKey(capitalized);
+                local.onSelect({ value: '', label: capitalized });
+              }
             }}
             onFocus={(e) => e.target.select()}
             class="w-full"
@@ -109,6 +126,7 @@ export default function SelectWithSearch(props: SelectWithSearchProps): JSX.Elem
             aria-autocomplete="list"
             aria-haspopup="listbox"
             autocomplete="off"
+            color={local.color}
           />
 
           <Show when={searchKey() && !local.disabled && !local.isLoading}>

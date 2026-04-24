@@ -31,6 +31,7 @@ const hooksPackageHooks = [
 // Component categories for grouping in sidebar
 const componentCategories: Record<string, string[]> = {
   Form: [
+    'action-text-input',
     'button',
     'checkbox',
     'date-picker',
@@ -44,6 +45,7 @@ const componentCategories: Record<string, string[]> = {
     'rich-text-editor',
     'select',
     'select-with-search',
+    'tag-input',
     'text-input',
     'textarea',
     'time-picker',
@@ -361,7 +363,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
   );
 
   return (
-    <div class="mx-auto max-w-[90rem]">
+    <div class="mx-auto max-w-360">
       {/* Mobile menu button */}
       <div class="sticky top-16 z-20 flex h-12 items-center border-b border-neutral-200 bg-white/95 px-4 backdrop-blur-sm lg:hidden dark:border-neutral-800 dark:bg-neutral-900/95">
         <button

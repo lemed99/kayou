@@ -4,13 +4,13 @@ export default function UseFormPage() {
   return (
     <HookDocPage
       title="useForm"
-      description="A form state management hook that provides reactive values, validation, touched tracking, submission handling, and optional persistence via FormProvider. Designed to wire directly into @kayou/ui form components via fieldError() and fieldColor() helpers."
+      description="A form state management hook that provides reactive values, validation, touched tracking, submission handling, optional persistence via FormProvider, and exact dotted-path support for nested form fields like units.0.name. Designed to wire directly into @kayou/ui form components via fieldError(), fieldColor(), fieldErrorAt(), and fieldColorAt()."
       parameters={[
         {
           name: 'id',
           type: 'string',
           description:
-            'Stable identifier for persistence via FormProvider. When set, form values are auto-saved and restored across mounts.',
+            'Stable identifier for persistence via FormProvider. When set, form values are auto-saved in a batched way and restored across mounts.',
         },
         {
           name: 'initialValues',
@@ -21,7 +21,7 @@ export default function UseFormPage() {
         },
         {
           name: 'onSubmit',
-          type: '(values: T) => void | Partial<Record<keyof T, string>> | Promise<...>',
+          type: '(values: T) => void | Record<string, string | undefined> | Promise<...>',
           description:
             'Called on successful validation. Can return field errors (e.g. from server) which are merged into the errors store. Thrown errors are captured in submitError.',
           required: true,
@@ -34,9 +34,9 @@ export default function UseFormPage() {
         },
         {
           name: 'validate',
-          type: '(values: T) => Partial<Record<keyof T, string>>',
+          type: '(values: T) => Record<string, string | undefined>',
           description:
-            'Form-level validation function for cross-field rules. Returns an object mapping field names to error strings. When both schema and validate are provided, schema runs first, then validate errors merge on top.',
+            'Form-level validation function for cross-field rules. Returns an object mapping top-level fields and dotted nested paths to error strings. When both schema and validate are provided, schema runs first, then validate errors merge on top.',
         },
         {
           name: 'validateOn',
@@ -54,15 +54,27 @@ export default function UseFormPage() {
             'Reactive store of current form values. Access fields as form.values.email.',
         },
         {
+          name: 'setValues',
+          type: 'SetStoreFunction<T>',
+          description:
+            "Low-level Solid store setter for advanced updates and exact path writes such as form.setValues('units', 0, 'name', 'kg'). This returned setter is persistence-aware and still participates in draft saving when id is enabled.",
+        },
+        {
+          name: 'replaceAllValues',
+          type: '(nextValues: T) => void',
+          description:
+            'Replace the entire values store at once. Useful when loading a full draft or resetting a nested structure while preserving the same useForm helpers.',
+        },
+        {
           name: 'errors',
           type: 'Partial<Record<keyof T, string>>',
           description:
-            'Reactive store of all validation errors (including untouched fields).',
+            'Reactive store of top-level validation errors (including untouched fields). Dotted nested errors are read through fieldErrorAt().',
         },
         {
           name: 'touched',
           type: 'Record<keyof T, boolean>',
-          description: 'Reactive store of touched state per field.',
+          description: 'Reactive store of touched state per top-level field.',
         },
         {
           name: 'handleChange',
@@ -75,6 +87,18 @@ export default function UseFormPage() {
           type: '(name: keyof T) => () => void',
           description:
             'Returns an onBlur handler. Marks the field as touched and validates if validateOn is "blur".',
+        },
+        {
+          name: 'handleChangeAt',
+          type: '(...path: FormPath) => (e: Event) => void',
+          description:
+            'Returns an onInput handler for an exact nested path such as handleChangeAt("units", index, "name").',
+        },
+        {
+          name: 'handleBlurAt',
+          type: '(...path: FormPath) => () => void',
+          description:
+            'Returns an onBlur handler for an exact nested path. Marks that path as touched and validates it when validateOn is "blur".',
         },
         {
           name: 'handleSubmit',
@@ -93,6 +117,18 @@ export default function UseFormPage() {
           type: '(name: keyof T) => "failure" | "gray"',
           description:
             'Returns "failure" if the field has a visible error, otherwise "gray". Pass to color prop.',
+        },
+        {
+          name: 'fieldErrorAt',
+          type: '(path: FormPath) => string | undefined',
+          description:
+            'Returns the visible error for an exact nested path such as ["units", 0, "name"].',
+        },
+        {
+          name: 'fieldColorAt',
+          type: '(path: FormPath) => "failure" | "gray"',
+          description:
+            'Returns "failure" if an exact nested path has a visible error, otherwise "gray".',
         },
         {
           name: 'isSubmitting',
@@ -135,16 +171,28 @@ export default function UseFormPage() {
             'Programmatically mark a field as touched. Call alongside setValue for components without blur events.',
         },
         {
-          name: 'setErrors',
-          type: '(errors: Partial<Record<keyof T, string>>) => void',
+          name: 'setTouchedAt',
+          type: '(path: FormPath, isTouched?: boolean) => void',
           description:
-            'Set multiple field errors at once (e.g. server-side errors). Merges into existing errors.',
+            'Programmatically mark an exact nested path as touched or untouched.',
+        },
+        {
+          name: 'setErrors',
+          type: '(errors: Record<string, string | undefined>) => void',
+          description:
+            'Set multiple field errors at once (e.g. server-side errors). Merges into existing errors and supports dotted keys such as units.0.name.',
         },
         {
           name: 'setFieldError',
           type: '(name: keyof T, error: string | undefined) => void',
           description:
-            'Set or clear a single field error. Pass undefined to clear.',
+            'Set or clear a single field error. Pass undefined to clear. Advanced fields like Password can use this to own their own validation and still report errors through useForm.',
+        },
+        {
+          name: 'setFieldErrorAt',
+          type: '(path: FormPath, error: string | undefined) => void',
+          description:
+            'Set or clear a single exact nested-path error.',
         },
         {
           name: 'validateField',
@@ -152,17 +200,23 @@ export default function UseFormPage() {
           description: 'Run validation for a single field and update the errors store.',
         },
         {
-          name: 'validateForm',
-          type: '() => Partial<Record<keyof T, string>>',
+          name: 'validateFieldAt',
+          type: '(path: FormPath) => void',
           description:
-            'Run full form validation and update the errors store. Returns the errors object.',
+            'Run validation for an exact nested path and refresh only that dotted-path error entry.',
+        },
+        {
+          name: 'validateForm',
+          type: '() => Record<string, string | undefined>',
+          description:
+            'Run full form validation and update both top-level and dotted nested errors. Returns the merged errors object.',
         },
       ]}
       provider={{
         name: 'FormProvider',
         required: false,
         description:
-          'Wrap your app or page in FormProvider to opt into sessionStorage-based persistence. Forms with an id prop will auto-save values and restore them when remounted. Without FormProvider, useForm works normally but does not persist.',
+          'Wrap your app or page in FormProvider to opt into sessionStorage-based persistence. Forms with an id prop will auto-save values, restore them when remounted, and clear persisted drafts after reset() or a successful submit. Without FormProvider, useForm works normally but does not persist.',
         props: [
           {
             name: 'storageKey',
@@ -224,8 +278,9 @@ export default function UseFormPage() {
         `,
       }}
       usage={`
+        import { Show } from 'solid-js';
         import { useForm } from '@kayou/hooks';
-        import { Form, TextInput, Select, UploadFile, Button } from '@kayou/ui';
+        import { Form, TextInput, Select, UploadFile, Password, Button } from '@kayou/ui';
         import type { ExistingFile } from '@kayou/ui';
 
         function ProfileForm() {
@@ -233,12 +288,15 @@ export default function UseFormPage() {
             initialValues: {
               name: '',
               role: '',
+              password: '',
               avatar: [] as ExistingFile[],
+              units: [{ name: '', conversion_factor: 1, is_reference: true }],
             },
             validate: (values) => {
-              const errors: Partial<Record<string, string>> = {};
+              const errors: Record<string, string | undefined> = {};
               if (!values.name) errors.name = 'Name is required';
               if (!values.role) errors.role = 'Select a role';
+              if (!values.units[0]?.name.trim()) errors['units.0.name'] = 'Unit name is required';
               return errors;
             },
             onSubmit: async (values) => {
@@ -265,6 +323,14 @@ export default function UseFormPage() {
                 color={form.fieldColor('role')}
                 helperText={form.fieldError('role')}
               />
+              <Password
+                label="Password"
+                name="password"
+                form={form}
+                requiredStrength="strong"
+                showStrength
+                showRequirements
+              />
               <UploadFile
                 value={form.values.avatar}
                 onChange={(file) => form.setValue('avatar', file)}
@@ -273,6 +339,14 @@ export default function UseFormPage() {
                 )}
                 accept="image/*"
                 helperText={form.fieldError('avatar')}
+              />
+              <TextInput
+                label="Unit name"
+                value={form.values.units[0].name}
+                onInput={form.handleChangeAt('units', 0, 'name')}
+                onBlur={form.handleBlurAt('units', 0, 'name')}
+                color={form.fieldColorAt(['units', 0, 'name'])}
+                helperText={form.fieldErrorAt(['units', 0, 'name'])}
               />
               <Show when={form.submitError()}>
                 <p class="text-sm text-red-600">{form.submitError()!.message}</p>
