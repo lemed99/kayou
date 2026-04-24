@@ -17,6 +17,8 @@ export function DynamicVirtualList<
   children: (item: T[number], index: Accessor<number>) => U;
   setContainerRef?: (el: HTMLElement) => void;
   containerWidth?: string | number;
+  /** Minimum width for the container */
+  minWidth?: number;
   containerPadding?: number;
   loading?: JSX.Element;
   setScrollPosition?: (scrollTop: number) => void;
@@ -105,13 +107,14 @@ export function DynamicVirtualList<
   });
 
   const containerPadding = () => props.containerPadding ?? 4;
+  const hasExplicitContainerWidth = () => props.containerWidth !== undefined;
 
   // Use the larger of measured content height or calculated virtual height
   // This prevents UI breaks when estimatedRowHeight doesn't match actual row heights
   const effectiveHeight = () => Math.max(contentHeight(), virtual().containerHeight);
 
   const containerWidth = (): string => {
-    if (props.containerWidth !== undefined) {
+    if (hasExplicitContainerWidth()) {
       if (typeof props.containerWidth === 'number') {
         return `${props.containerWidth}px`;
       }
@@ -196,11 +199,13 @@ export function DynamicVirtualList<
       aria-rowcount={props.role ? virtual().totalItems : undefined}
       tabIndex={props.role ? 0 : undefined}
       style={{
-        overflow: 'auto',
+        'overflow-y': 'auto',
+        'overflow-x': 'hidden',
         height: `${effectiveHeight() + containerPadding() * 2}px`,
         'max-height': `${props.rootHeight}px`,
         padding: `${containerPadding()}px`,
         width: containerWidth(),
+        'min-width': props.minWidth ? `${props.minWidth}px` : undefined,
         'box-sizing': 'border-box',
         'will-change': 'scroll-position',
       }}
@@ -218,7 +223,7 @@ export function DynamicVirtualList<
           style={{
             position: 'absolute',
             top: `${virtual().viewerTop}px`,
-            width: props.containerWidth ? containerWidth() : 'auto',
+            width: hasExplicitContainerWidth() ? containerWidth() : 'auto',
             contain: 'content',
           }}
         >
@@ -232,6 +237,7 @@ export function DynamicVirtualList<
                   role={props.rowRole}
                   aria-setsize={props.rowRole ? virtual().totalItems : undefined}
                   aria-posinset={props.rowRole ? itemIndex() + 1 : undefined}
+                  style={{ width: '100%' }}
                 >
                   {props.children(item, itemIndex)}
                 </div>

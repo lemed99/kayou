@@ -26,7 +26,16 @@ async function sortColumn(
       : action === 'desc'
         ? 'Sort descending'
         : 'Clear sort';
-  await page.locator(`#${listboxId} [role="option"]`).filter({ hasText: label }).click();
+  const option = page
+    .locator(`#${listboxId}`)
+    .getByRole('option', { name: label, exact: true })
+    .first();
+  await option.waitFor({ state: 'visible' });
+  await option.click({ force: true });
+}
+
+async function getComputedTextAlign(locator: Locator): Promise<string> {
+  return locator.evaluate((element) => getComputedStyle(element as HTMLElement).textAlign);
 }
 
 test.describe('DataTable', () => {
@@ -89,6 +98,53 @@ test.describe('DataTable', () => {
     const pg = await waitForPlayground(page);
     const header = pg.locator('[role="columnheader"]').filter({ hasText: 'Department' }).first();
     await expect(header).toBeVisible();
+  });
+
+  test('should apply configured column alignment to header and cells', async ({
+    page,
+  }) => {
+    const pg = await waitForPlayground(page);
+
+    const emailHeader = pg
+      .locator('[role="columnheader"]')
+      .filter({ hasText: 'Email' })
+      .first();
+    const statusHeader = pg
+      .locator('[role="columnheader"]')
+      .filter({ hasText: 'Status' })
+      .first();
+    const ageHeader = pg.locator('[role="columnheader"]').filter({ hasText: 'Age' }).first();
+
+    await expect(emailHeader).toBeVisible();
+    await expect(statusHeader).toBeVisible();
+    await expect(ageHeader).toBeVisible();
+
+    const emailHeaderLabel = emailHeader.locator('span').filter({ hasText: 'Email' }).first();
+    const statusHeaderButton = statusHeader.locator('button[data-sort-button]').first();
+    const ageHeaderButton = ageHeader.locator('button[data-sort-button]').first();
+
+    expect(await getComputedTextAlign(emailHeaderLabel)).toBe('left');
+    expect(await getComputedTextAlign(statusHeaderButton)).toBe('center');
+    expect(await getComputedTextAlign(ageHeaderButton)).toBe('right');
+
+    const emailCellText = pg.locator('[data-column="email"]').first();
+    const statusCellText = pg.locator('[data-column="status"]').first();
+    const ageCellText = pg.locator('[data-column="age"]').first();
+
+    expect(await getComputedTextAlign(emailCellText)).toBe('left');
+    expect(await getComputedTextAlign(statusCellText)).toBe('center');
+    expect(await getComputedTextAlign(ageCellText)).toBe('right');
+  });
+
+  test('aligned sortable columns should keep sorting behavior', async ({ page }) => {
+    const pg = await waitForPlayground(page);
+    const statusHeader = pg
+      .locator('[role="columnheader"]')
+      .filter({ hasText: 'Status' })
+      .first();
+
+    await sortColumn(page, statusHeader, 'asc');
+    await expect(statusHeader).toHaveAttribute('aria-sort', 'ascending');
   });
 
   // ==================== Data Display ====================
@@ -228,11 +284,12 @@ test.describe('DataTable', () => {
     await expect(filterPopover).toBeVisible();
 
     // Click "Add filter" — this is a Select trigger that opens a column dropdown
-    await filterPopover.getByText('Add filter').click();
-    await page.waitForTimeout(200);
+    const addFilterTrigger = filterPopover.getByRole('button', { name: 'Add filter' });
+    await addFilterTrigger.click();
 
-    // Select "Joined" column from the dropdown
-    await page.locator('[role="option"]').filter({ hasText: 'Joined' }).click();
+    const joinedOption = page.getByRole('option', { name: 'Joined' }).last();
+    await expect(joinedOption).toBeVisible();
+    await joinedOption.click({ force: true });
 
     // The datepicker input should now be visible in the filter row
     const datepickerInput = filterPopover.getByPlaceholder('Select a date');
@@ -252,10 +309,44 @@ test.describe('DataTable', () => {
 
   // ==================== Pagination ====================
 
-  test('should render pagination controls', async ({ page }) => {
+  test('should render cursor pagination controls', async ({ page }) => {
     const pg = await waitForPlayground(page);
-    const pagination = pg.locator('nav[aria-label="Page"]').first();
+    const pagination = pg.locator('nav[aria-label="Table pagination"]').first();
     await expect(pagination).toBeVisible();
+    await expect(pg.getByRole('button', { name: 'Go to previous page' })).toBeVisible();
+    await expect(pg.getByRole('button', { name: 'Go to next page' })).toBeVisible();
+  });
+
+  test('should disable the previous cursor button on the first page', async ({ page }) => {
+    const pg = await waitForPlayground(page);
+    const previousButton = pg.getByRole('button', { name: 'Go to previous page' });
+    const nextButton = pg.getByRole('button', { name: 'Go to next page' });
+
+    await expect(previousButton).toBeDisabled();
+    await expect(nextButton).toBeEnabled();
+  });
+
+  test('should navigate between pages with cursor controls', async ({ page }) => {
+    const pg = await waitForPlayground(page);
+    const table = pg.locator('[role="table"]').first();
+    const previousButton = pg.getByRole('button', { name: 'Go to previous page' });
+    const nextButton = pg.getByRole('button', { name: 'Go to next page' });
+    const cursorState = pg.locator('[data-cursor-state]');
+
+    await expect(cursorState).toContainText('Showing page 1');
+    await expect(table.locator('text=John Doe').first()).toBeVisible();
+
+    await nextButton.click();
+
+    await expect(cursorState).toContainText('Showing page 2');
+    await expect(previousButton).toBeEnabled();
+    await expect(table.locator('text=Samuel Green').first()).toBeVisible();
+    await expect(table.locator('text=John Doe')).toHaveCount(0);
+
+    await previousButton.click();
+
+    await expect(cursorState).toContainText('Showing page 1');
+    await expect(table.locator('text=John Doe').first()).toBeVisible();
   });
 
   test('should render per-page control when enabled', async ({ page }) => {

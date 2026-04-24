@@ -4,7 +4,7 @@ export default function DataTablePage() {
   return (
     <DocPage
       title="DataTable"
-      description="Table with virtualization, pagination, row selection, sorting, and a comprehensive filter system."
+      description="Table with virtualization, page-based or cursor-based pagination, row selection, sorting, and a comprehensive filter system."
       dependencies={[
         {
           name: 'tailwind-merge',
@@ -13,6 +13,11 @@ export default function DataTablePage() {
         },
       ]}
       keyConcepts={[
+        {
+          term: 'Pagination Modes',
+          explanation:
+            'The footer supports either page-based pagination or cursor-based pagination via the paginationType prop. The consumer controls the active page or cursor and handles data fetching.',
+        },
         {
           term: 'Virtualization',
           explanation:
@@ -71,7 +76,7 @@ export default function DataTablePage() {
           type: 'DataTableColumnProps<T>[]',
           default: '-',
           description:
-            'Column configurations with key, label, width (percentage), optional render function and tooltip',
+            'Column configurations with key, label, width (percentage), optional render function, tooltip, and align (left|center|right)',
           required: true,
         },
         {
@@ -229,16 +234,57 @@ export default function DataTablePage() {
             'Which columns can be sorted. Defaults to all columns if onSortsChange is provided.',
         },
         {
+          name: 'paginationType',
+          type: '"cursor" | "page"',
+          default: '"cursor"',
+          description:
+            'Pagination model used by the footer controls. When omitted, page mode is inferred if page props are provided.',
+        },
+        {
+          name: 'currentPage',
+          type: 'number',
+          default: '-',
+          description: 'Current page number for page-based pagination.',
+        },
+        {
           name: 'pageTotal',
           type: 'number',
           default: '-',
-          description: 'Total number of pages for pagination',
+          description: 'Total number of pages for page-based pagination.',
         },
         {
           name: 'onPageChange',
           type: '(page: number) => void',
           default: '-',
-          description: 'Callback fired when page changes',
+          description:
+            'Callback fired when page-based pagination changes to a different page.',
+        },
+        {
+          name: 'prevCursor',
+          type: 'DataTableCursor',
+          default: '-',
+          description:
+            'Cursor for the previous page. Set to null when there is no previous page.',
+        },
+        {
+          name: 'currentCursor',
+          type: 'DataTableCursor',
+          default: '-',
+          description: 'Cursor for the current page.',
+        },
+        {
+          name: 'nextCursor',
+          type: 'DataTableCursor',
+          default: '-',
+          description:
+            'Cursor for the next page. Set to null when there is no next page.',
+        },
+        {
+          name: 'onCursorChange',
+          type: '(cursor: DataTableCursor) => void',
+          default: '-',
+          description:
+            'Callback fired when pagination moves to a different cursor. The consumer is responsible for fetching and swapping page data.',
         },
         {
           name: 'onSearchChange',
@@ -318,7 +364,7 @@ export default function DataTablePage() {
           name: 'footer',
           type: 'boolean',
           default: 'true',
-          description: 'Whether to show the footer with pagination controls',
+          description: 'Whether to show the footer with cursor navigation controls',
         },
         {
           name: 'labels',
@@ -463,6 +509,18 @@ export default function DataTablePage() {
               type: 'string',
               default: '"per page"',
               description: 'Text label for the per-page control.',
+            },
+            {
+              name: 'previousPage',
+              type: 'string',
+              default: '"Previous"',
+              description: 'Text label for the previous-page button.',
+            },
+            {
+              name: 'nextPage',
+              type: 'string',
+              default: '"Next"',
+              description: 'Text label for the next-page button.',
             },
             {
               name: 'selectedElements',
@@ -675,15 +733,28 @@ export default function DataTablePage() {
               default: '"Refreshing data"',
               description: 'Aria label for the refreshing state.',
             },
+            {
+              name: 'goToPreviousPage',
+              type: 'string',
+              default: '"Go to previous page"',
+              description: 'Aria label for the previous-page button.',
+            },
+            {
+              name: 'goToNextPage',
+              type: 'string',
+              default: '"Go to next page"',
+              description: 'Aria label for the next-page button.',
+            },
           ],
         },
       ]}
       playground={`
 import { Button, DataTable, DataTableProvider, Select, DatePickerProvider } from '@kayou/ui';
-import { createSignal } from 'solid-js';
+import { createMemo, createSignal } from 'solid-js';
 
 export default function Example() {
-  const [page, setPage] = createSignal(1);
+  const [currentCursor, setCurrentCursor] = createSignal('cursor-1');
+  const [perPage, setPerPage] = createSignal(20);
   const [sorts, setSorts] = createSignal([]);
 
   const users = [
@@ -754,6 +825,7 @@ export default function Example() {
       key: 'status',
       label: 'Status',
       width: 10,
+      align: 'center',
       tooltip: 'Current account status',
       render: (value) => (
         <span
@@ -770,7 +842,7 @@ export default function Example() {
       ),
     },
     { key: 'role', label: 'Role', width: 10 },
-    { key: 'age', label: 'Age', width: 8 },
+    { key: 'age', label: 'Age', width: 8, align: 'right' },
     { key: 'joinedAt', label: 'Joined', width: 10 },
     {
       key: 'department',
@@ -832,12 +904,37 @@ export default function Example() {
     ], dateConfig: { locale: 'en-US' } },
   ]
 
+  const pageIndex = createMemo(() => {
+    const cursor = currentCursor();
+    const match = /^cursor-(\\d+)$/.exec(cursor);
+    return Math.max(0, Number(match?.[1] ?? 1) - 1);
+  });
+
+  const totalPages = createMemo(() => Math.ceil(users.length / perPage()));
+
+  const visibleUsers = createMemo(() => {
+    const start = pageIndex() * perPage();
+    return users.slice(start, start + perPage());
+  });
+
+  const prevCursor = createMemo(() =>
+    pageIndex() <= 0 ? null : \`cursor-\${pageIndex()}\`,
+  );
+
+  const nextCursor = createMemo(() =>
+    pageIndex() + 1 >= totalPages() ? null : \`cursor-\${pageIndex() + 2}\`,
+  );
+
   return (
   <DatePickerProvider locale="en-US">
-      <DataTableProvider storageKey="users" perPageOptions={[5, 10, 25, 50]}>
+      <DataTableProvider storageKey="users" perPageOptions={[5, 10, 20, 25, 50]}>
+        <div class="mb-3 text-sm text-neutral-600 dark:text-neutral-400" data-cursor-state>
+          Showing page {pageIndex() + 1} of {totalPages()} with cursor {currentCursor()}
+        </div>
         <DataTable
           id="playground"
-          data={users}
+          paginationType="cursor"
+          data={visibleUsers()}
           columns={columns}
           rowKey="id"
           searchBar
@@ -864,10 +961,16 @@ export default function Example() {
           onFiltersChange={(filters) => {
             console.log('Active filters:', [...filters.entries()].map(([k, f]) => \`\${k}: \${f.operator} \${f.value}\`));
           }}
-          pageTotal={3}
-          onPageChange={setPage}
+          prevCursor={prevCursor()}
+          currentCursor={currentCursor()}
+          nextCursor={nextCursor()}
+          onCursorChange={setCurrentCursor}
           onSearchChange={(search) => console.log('search:', search)}
-          onPerPageChange={(pp) => console.log('perPage:', pp)}
+          onPerPageChange={(pp) => {
+            setPerPage(pp);
+            setCurrentCursor('cursor-1');
+            console.log('perPage:', pp);
+          }}
           onSelectionChange={(sel) => console.log('selection:', [...sel])}
           perPageControl
           footer
@@ -901,6 +1004,8 @@ export default function Example() {
             seeMore: 'See more',
             collapse: 'See less',
             elementsPerPage: 'per page',
+            previousPage: 'Previous',
+            nextPage: 'Next',
             selectedElements: (count, total) => \`\${count} of \${total} selected\`,
           }}
         />
@@ -910,7 +1015,7 @@ export default function Example() {
 }
 `}
       usage={`
-        import { DataTable, type FilterConfig } from '@kayou/ui';
+        import { DataTable, type DataTableCursor, type FilterConfig } from '@kayou/ui';
 
         // Basic usage (all text is configurable via labels)
         <DataTable data={users} columns={columns} loading={isLoading()} labels={{ error: 'Error', noData: 'No data' }} />
@@ -921,8 +1026,31 @@ export default function Example() {
         // With row identity (selections persist across data changes)
         <DataTable data={users} columns={columns} rowKey="id" rowSelection onSelectionChange={(keys) => console.log(keys)} ... />
 
-        // With filters and pagination
-        <DataTable data={users} columns={columns} rowSelection searchBar filterConfigs={filterConfigs} pageTotal={10} onPageChange={setPage} ... />
+        // With filters and cursor-based pagination
+        <DataTable
+          data={users}
+          columns={columns}
+          paginationType="cursor"
+          rowSelection
+          searchBar
+          filterConfigs={filterConfigs}
+          prevCursor={prevCursor()}
+          currentCursor={currentCursor()}
+          nextCursor={nextCursor()}
+          onCursorChange={(cursor: DataTableCursor) => setCurrentCursor(cursor)}
+          ...
+        />
+
+        // With page-based pagination
+        <DataTable
+          data={users}
+          columns={columns}
+          paginationType="page"
+          currentPage={page()}
+          pageTotal={10}
+          onPageChange={setPage}
+          ...
+        />
 
         // With infinite scroll (requires expandable + virtualization)
         <DataTable data={users} columns={columns} expandable rowHeight={56} isLoadingMore={isLoadingMore()} onLoadMore={() => fetchNextPage()} ... />

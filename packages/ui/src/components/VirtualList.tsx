@@ -101,8 +101,9 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
   });
 
   const containerPadding = () => props.containerPadding ?? 4;
+  const hasExplicitContainerWidth = () => props.containerWidth !== undefined;
   const containerWidth = () => {
-    if (props.containerWidth) {
+    if (hasExplicitContainerWidth()) {
       if (typeof props.containerWidth === 'number') return `${props.containerWidth}px`;
       if (typeof props.containerWidth === 'string') return props.containerWidth;
     }
@@ -120,7 +121,8 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
       aria-multiselectable={props['aria-multiselectable']}
       aria-label={props['aria-label']}
       style={{
-        overflow: 'auto',
+        'overflow-y': 'auto',
+        'overflow-x': 'hidden',
         height: `${virtual().containerHeight + containerPadding() * 2}px`,
         'max-height': `${props.rootHeight}px`,
         padding: `${containerPadding()}px`,
@@ -142,7 +144,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
           style={{
             position: 'absolute',
             top: `${virtual().viewerTop}px`,
-            width: props.containerWidth ? containerWidth() : 'auto',
+            width: hasExplicitContainerWidth() ? containerWidth() : 'auto',
             'min-width': props.minWidth
               ? `${props.minWidth - containerPadding() * 2}px`
               : undefined,
@@ -155,6 +157,7 @@ export function VirtualList<T extends readonly unknown[], U extends JSX.Element>
                 class={props.rowClass}
                 style={{
                   height: `${props.rowHeight}px`,
+                  width: '100%',
                   overflow: 'hidden',
                 }}
               >

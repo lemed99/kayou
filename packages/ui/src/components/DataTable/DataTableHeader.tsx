@@ -14,6 +14,7 @@ import Checkbox from '../Checkbox';
 import Select from '../Select';
 import Tooltip from '../Tooltip';
 import { useDataTableInternal } from './DataTableInternalContext';
+import { getDataTableColumnAlignmentClasses } from './alignment';
 import { SortAction } from './types';
 
 export function DataTableHeader(): JSX.Element {
@@ -85,7 +86,7 @@ export function DataTableHeader(): JSX.Element {
         ref={ctx.setHeaderRef}
         role="row"
         class={twMerge(
-          'relative grid w-fit border-b border-neutral-200 bg-neutral-100 text-xs font-bold uppercase text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
+          'relative grid w-fit border-b border-neutral-200 bg-neutral-100 text-xs font-bold text-neutral-700 uppercase dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
           !ctx.searchBar &&
             !ctx.configureColumns &&
             !(ctx.rowSelection && ctx.selectedRows().size > 0)
@@ -114,6 +115,7 @@ export function DataTableHeader(): JSX.Element {
 
         <For each={ctx.columns()}>
           {(column) => {
+            const alignment = getDataTableColumnAlignmentClasses(column.align);
             const isSortable = () => ctx.sortableColumns().has(column.key);
             const isActiveSort = () => !!getSortEntry(column.key);
             const sortDirection = () => getSortEntry(column.key)?.direction;
@@ -130,7 +132,8 @@ export function DataTableHeader(): JSX.Element {
                 aria-sort={getAriaSortValue(column.key)}
                 data-column-key={column.key}
                 class={twMerge(
-                  'group/header relative flex items-center gap-1 overflow-hidden whitespace-nowrap px-6 py-3',
+                  'group/header relative flex items-center gap-1 overflow-hidden px-6 py-3 whitespace-nowrap',
+                  alignment.textClass,
                   isSticky(column.key) &&
                     'border-x border-dashed border-neutral-200 dark:border-neutral-700',
                 )}
@@ -140,14 +143,27 @@ export function DataTableHeader(): JSX.Element {
                 <Show
                   when={isSortable()}
                   fallback={
-                    <Tooltip
-                      content={column.tooltip}
-                      placement="top"
-                      class="capitalize"
-                      hidden={!column.tooltip}
+                    <div
+                      class={twMerge(
+                        'flex w-full items-center',
+                        alignment.justifyClass,
+                        alignment.textClass,
+                      )}
                     >
-                      <span>{column.label}</span>
-                    </Tooltip>
+                      <Tooltip
+                        content={column.tooltip}
+                        placement="top"
+                        class="capitalize"
+                        hidden={!column.tooltip}
+                      >
+                        <span
+                          data-header-content
+                          class="inline-flex max-w-full items-center"
+                        >
+                          {column.label}
+                        </span>
+                      </Tooltip>
+                    </div>
                   }
                 >
                   <Tooltip
@@ -195,39 +211,50 @@ export function DataTableHeader(): JSX.Element {
                         ctx.onSortSelect(column.key, opt.value as SortAction);
                       }}
                       inputComponent={(triggerProps) => (
-                        <button
-                          type="button"
-                          data-sort-button
-                          onKeyDown={triggerProps.onKeyDown}
-                          role="combobox"
-                          aria-expanded={triggerProps.isOpen()}
-                          aria-controls={triggerProps.listboxId}
-                          aria-activedescendant={triggerProps.highlightedOptionId()}
-                          aria-haspopup="listbox"
-                          disabled={triggerProps.disabled}
-                          class="flex cursor-pointer items-center gap-1 focus:outline-none"
-                          aria-label={`${column.label}, ${sortTooltip()}`}
+                        <div
+                          class={twMerge(
+                            'flex w-full items-center',
+                            alignment.justifyClass,
+                          )}
                         >
-                          <span>{column.label}</span>
-                          <Show when={isActiveSort() && sortDirection() === 'asc'}>
-                            <ChevronUpIcon
-                              class="size-3.5 text-blue-600 dark:text-blue-400"
-                              aria-hidden="true"
-                            />
-                          </Show>
-                          <Show when={isActiveSort() && sortDirection() === 'desc'}>
-                            <ChevronDownIcon
-                              class="size-3.5 text-blue-600 dark:text-blue-400"
-                              aria-hidden="true"
-                            />
-                          </Show>
-                          <Show when={!isActiveSort()}>
-                            <ChevronSelectorVerticalIcon
-                              class="size-3.5 text-neutral-400 dark:text-neutral-500"
-                              aria-hidden="true"
-                            />
-                          </Show>
-                        </button>
+                          <button
+                            data-header-content
+                            type="button"
+                            data-sort-button
+                            onKeyDown={triggerProps.onKeyDown}
+                            role="combobox"
+                            aria-expanded={triggerProps.isOpen()}
+                            aria-controls={triggerProps.listboxId}
+                            aria-activedescendant={triggerProps.highlightedOptionId()}
+                            aria-haspopup="listbox"
+                            disabled={triggerProps.disabled}
+                            class={twMerge(
+                              'inline-flex max-w-full cursor-pointer items-center gap-1 focus:outline-none',
+                              alignment.textClass,
+                            )}
+                            aria-label={`${column.label}, ${sortTooltip()}`}
+                          >
+                            <span>{column.label}</span>
+                            <Show when={isActiveSort() && sortDirection() === 'asc'}>
+                              <ChevronUpIcon
+                                class="size-3.5 text-blue-600 dark:text-blue-400"
+                                aria-hidden="true"
+                              />
+                            </Show>
+                            <Show when={isActiveSort() && sortDirection() === 'desc'}>
+                              <ChevronDownIcon
+                                class="size-3.5 text-blue-600 dark:text-blue-400"
+                                aria-hidden="true"
+                              />
+                            </Show>
+                            <Show when={!isActiveSort()}>
+                              <ChevronSelectorVerticalIcon
+                                class="size-3.5 text-neutral-400 dark:text-neutral-500"
+                                aria-hidden="true"
+                              />
+                            </Show>
+                          </button>
+                        </div>
                       )}
                     />
                   </Tooltip>
@@ -283,20 +310,29 @@ export function DataTableHeader(): JSX.Element {
                     showDelay={500}
                   >
                     <div
-                      class="h-full w-full cursor-col-resize select-none border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 group-hover/header:opacity-100 focus-visible:opacity-100 dark:border-neutral-700"
+                      class="h-full w-full cursor-col-resize border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 select-none group-hover/header:opacity-100 focus-visible:opacity-100 dark:border-neutral-700"
                       onMouseDown={(e) => startResize(column.key, e)}
                       onDblClick={() => ctx.resetColumnResize(column.key)}
                       onKeyDown={(e) => {
                         const step = e.shiftKey ? 20 : 5;
                         if (e.key === 'ArrowLeft') {
                           e.preventDefault();
-                          const headerCell = (e.target as HTMLElement).closest('[role="columnheader"]');
-                          const currentWidth = (headerCell as HTMLElement)?.offsetWidth ?? 100;
-                          ctx.onColumnResize(column.key, Math.max(60, currentWidth - step));
+                          const headerCell = (e.target as HTMLElement).closest(
+                            '[role="columnheader"]',
+                          );
+                          const currentWidth =
+                            (headerCell as HTMLElement)?.offsetWidth ?? 100;
+                          ctx.onColumnResize(
+                            column.key,
+                            Math.max(60, currentWidth - step),
+                          );
                         } else if (e.key === 'ArrowRight') {
                           e.preventDefault();
-                          const headerCell = (e.target as HTMLElement).closest('[role="columnheader"]');
-                          const currentWidth = (headerCell as HTMLElement)?.offsetWidth ?? 100;
+                          const headerCell = (e.target as HTMLElement).closest(
+                            '[role="columnheader"]',
+                          );
+                          const currentWidth =
+                            (headerCell as HTMLElement)?.offsetWidth ?? 100;
                           ctx.onColumnResize(column.key, currentWidth + step);
                         } else if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();

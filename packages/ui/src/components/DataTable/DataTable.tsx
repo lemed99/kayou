@@ -22,6 +22,10 @@ import { FilterConfig, FilterState, SortAction, SortEntry } from './types';
 import { useDataTableConfigs } from './useDataTableConfigs';
 import { useDataTableFilters } from './useDataTableFilters';
 
+export type DataTableCursor = string | null;
+export type DataTablePaginationType = 'cursor' | 'page';
+export type DataTableColumnAlignment = 'left' | 'center' | 'right';
+
 export interface DataTableLabels {
   searchPlaceholder: string;
   filter: string;
@@ -39,6 +43,8 @@ export interface DataTableLabels {
   seeMore: string;
   collapse: string;
   elementsPerPage: string;
+  previousPage: string;
+  nextPage: string;
   selectedElements: (count: number, total: number) => string;
   saveConfiguration: string;
   configPopoverContentTitle: string;
@@ -88,6 +94,8 @@ export const DEFAULT_DATA_TABLE_LABELS: DataTableLabels = {
   seeMore: 'See more',
   collapse: 'See less',
   elementsPerPage: 'per page',
+  previousPage: 'Previous',
+  nextPage: 'Next',
   selectedElements: (count, total) => `${count} of ${total} selected`,
   saveConfiguration: 'Save configuration',
   configurations: 'Configurations',
@@ -127,6 +135,8 @@ export interface DataTableAriaLabels {
   clearSearch: string;
   loadingData: string;
   refreshingData: string;
+  goToPreviousPage: string;
+  goToNextPage: string;
   selectAllRows: string;
   expand: string;
   saveAsNewConfigTitle: string;
@@ -138,6 +148,8 @@ export const DEFAULT_DATA_TABLE_ARIA_LABELS: DataTableAriaLabels = {
   clearSearch: 'Clear search',
   loadingData: 'Loading data',
   refreshingData: 'Refreshing data',
+  goToPreviousPage: 'Go to previous page',
+  goToNextPage: 'Go to next page',
   selectAllRows: 'Select all rows',
   expand: 'Expand',
   saveAsNewConfigTitle: 'Delete a config to save a new one',
@@ -156,6 +168,8 @@ export interface DataTableColumnProps<T> {
   minWidth?: number;
   /** Tooltip text for the column header. */
   tooltip?: string;
+  /** Horizontal alignment for header and cells. @default 'left' */
+  align?: DataTableColumnAlignment;
 }
 
 export interface DataTableProps<T> {
@@ -171,18 +185,32 @@ export interface DataTableProps<T> {
   defaultRowsCount?: number;
   /** Column configurations. */
   columns: DataTableColumnProps<T>[];
-  /** Total number of pages for pagination. */
+  /** Pagination model used by the footer controls. Defaults to cursor mode unless page props are provided. */
+  paginationType?: DataTablePaginationType;
+  /** Current page number for page-based pagination. */
+  currentPage?: number;
+  /** Total number of pages for page-based pagination. */
   pageTotal?: number;
+  /** Cursor for the previous page. Set to null when there is no previous page. */
+  prevCursor?: DataTableCursor;
+  /** Cursor for the current page. */
+  currentCursor?: DataTableCursor;
+  /** Cursor for the next page. Set to null when there is no next page. */
+  nextCursor?: DataTableCursor;
   /** Whether row selection is enabled. */
   rowSelection?: boolean;
   /** Error state for the table. */
   error?: unknown;
-  /** Callback fired when page changes. */
+  /** Callback fired when the active cursor changes. */
+  onCursorChange?: (cursor: DataTableCursor) => void;
+  /** Callback fired when the active page changes. */
   onPageChange?: (page: number) => void;
   /** Callback fired when search value changes (debounced by searchDebounceMs). */
   onSearchChange?: (search: string) => void;
   /** Callback fired when per-page value changes. */
   onPerPageChange?: (perPage: number) => void;
+  /** Default page size used before persisted state or saved configs are restored. */
+  defaultPerPage?: number;
   /** Callback fired when row selection changes. Emits selected row keys. */
   onSelectionChange?: (selectedKeys: Set<string>) => void;
   /** Whether to show the search bar. */
@@ -288,11 +316,35 @@ export function DataTable<T extends Record<string, unknown>>(
     // eslint-disable-next-line solid/reactivity --- table id won't change
   } = useDataTableState(props.id);
 
+  const paginationType = createMemo<DataTablePaginationType>(() => {
+    if (props.paginationType) return props.paginationType;
+    if (
+      props.pageTotal !== undefined ||
+      props.currentPage !== undefined ||
+      props.onPageChange !== undefined
+    ) {
+      return 'page';
+    }
+    return 'cursor';
+  });
+
+  const defaultPerPage = createMemo(
+    () => props.defaultPerPage ?? perPageOptions[0] ?? 10,
+  );
+  const resolvedPerPageOptions = createMemo(() => {
+    const nextOptions = new Set(perPageOptions);
+    nextOptions.add(defaultPerPage());
+    return [...nextOptions].sort((a, b) => a - b);
+  });
+
   // --- Signals ---
   const [searchKey, setSearchKey] = createSignal('');
   const [selectedRows, setSelectedRows] = createSignal<Set<string>>(new Set());
-  const [currentPage, setCurrentPage] = createSignal(1);
-  const [perPage, setPerPage] = createSignal(perPageOptions[0] ?? 10);
+  const [currentPage, setCurrentPage] = createSignal(props.currentPage ?? 1);
+  const [currentCursor, setCurrentCursor] = createSignal<DataTableCursor>(
+    props.currentCursor ?? null,
+  );
+  const [perPage, setPerPage] = createSignal(defaultPerPage());
   const [columns, setColumns] = createSignal<DataTableColumnProps<T>[]>([]);
   const [tableRef, setTableRef] = createSignal<HTMLDivElement | undefined>();
   const [tableWidth, setTableWidth] = createSignal(0);
@@ -413,16 +465,34 @@ export function DataTable<T extends Record<string, unknown>>(
         currentFilters: filterHook.activeFilters,
         currentPerPage: perPage,
         defaultColumns: defaultColumnKeys,
-        defaultPerPage: perPageOptions[0] ?? 10,
+        defaultPerPage: defaultPerPage(),
       })
     : null;
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    props.onPageChange?.(page);
+  };
+
+  const handleCursorChange = (cursor: DataTableCursor) => {
+    setCurrentCursor(cursor);
+    props.onCursorChange?.(cursor);
+  };
+
+  const resetPagination = () => {
+    if (paginationType() === 'page') {
+      handlePageChange(1);
+      return;
+    }
+    handleCursorChange(null);
+  };
 
   const handleActivateConfig = (id: string | null) => {
     if (!configHook) return;
     configHook.activateConfig(id);
     if (id === null) {
       setColumns(props.columns.filter((c) => defaultColumnKeys().includes(c.key)));
-      handlePerPageChange(perPageOptions[0] ?? 10);
+      handlePerPageChange(defaultPerPage());
       props.onSortsChange?.([]);
       filterHook.replaceAllFilters(new Map());
     } else {
@@ -433,7 +503,6 @@ export function DataTable<T extends Record<string, unknown>>(
       props.onSortsChange?.(config.sorts);
       filterHook.replaceAllFilters(new Map(config.filters));
     }
-    handlePageChange(1);
   };
 
   // --- State restoration ---
@@ -445,9 +514,22 @@ export function DataTable<T extends Record<string, unknown>>(
     if (state.searchKey !== undefined) setSearchKey(state.searchKey);
     if (state.expanded !== undefined) setExpanded(state.expanded);
     if (state.currentPage !== undefined) setCurrentPage(state.currentPage);
+    if (state.currentCursor !== undefined) setCurrentCursor(state.currentCursor ?? null);
     if (state.perPage !== undefined) setPerPage(state.perPage);
     if (state.selectedColumns !== undefined) {
       setColumns(props.columns.filter((c) => state.selectedColumns!.includes(c.key)));
+    }
+  });
+
+  createEffect(() => {
+    if (props.currentPage !== undefined) {
+      setCurrentPage(props.currentPage);
+    }
+  });
+
+  createEffect(() => {
+    if (props.currentCursor !== undefined) {
+      setCurrentCursor(props.currentCursor ?? null);
     }
   });
 
@@ -459,6 +541,7 @@ export function DataTable<T extends Record<string, unknown>>(
       searchKey: searchKey(),
       expanded: expanded(),
       currentPage: currentPage(),
+      currentCursor: currentCursor(),
       perPage: perPage(),
       selectedColumns: columns().map((c) => c.key),
     };
@@ -584,7 +667,7 @@ export function DataTable<T extends Record<string, unknown>>(
           ).map((e) => (e as HTMLElement).offsetWidth);
 
           const headerCell = header?.querySelector<HTMLElement>(
-            `[data-column-key="${col.key}"]>div`,
+            `[data-column-key="${col.key}"] [data-header-content]`,
           );
           const headerMeasured = headerCell ? headerCell.offsetWidth : 0;
           const bodyMeasured = bodyCells.length > 0 ? Math.max(...bodyCells) + 48 : 0;
@@ -812,11 +895,6 @@ export function DataTable<T extends Record<string, unknown>>(
   });
 
   // --- Handlers ---
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    props.onPageChange?.(page);
-  };
-
   let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
   const handleSearchChange = (value: string) => {
     setSearchKey(value);
@@ -836,7 +914,7 @@ export function DataTable<T extends Record<string, unknown>>(
 
   const handlePerPageChange = (value: number) => {
     setPerPage(value);
-    handlePageChange(1);
+    resetPagination();
     props.onPerPageChange?.(value);
   };
 
@@ -866,11 +944,18 @@ export function DataTable<T extends Record<string, unknown>>(
         handleSearchChange,
         searchRef,
         setSearchRef,
+        paginationType,
         currentPage,
         handlePageChange,
+        currentCursor,
+        prevCursor: () => props.prevCursor ?? null,
+        nextCursor: () => props.nextCursor ?? null,
+        handleCursorChange,
         perPage,
         handlePerPageChange,
-        perPageOptions,
+        get perPageOptions() {
+          return resolvedPerPageOptions();
+        },
         expanded,
         toggleExpanded: () => setExpanded((v) => !v),
         sorts,
@@ -1009,7 +1094,10 @@ export function DataTable<T extends Record<string, unknown>>(
               aria-label={l().selectedElements(selectedRows().size, baseData().length)}
               class="flex shrink-0 items-center gap-3 border-b border-neutral-200 px-6 py-3 dark:border-neutral-800"
             >
-              <span aria-live="polite" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <span
+                aria-live="polite"
+                class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
                 {l().selectedElements(selectedRows().size, baseData().length)}
               </span>
               <Show when={props.bulkActions}>
@@ -1023,10 +1111,7 @@ export function DataTable<T extends Record<string, unknown>>(
           </Show>
 
           {/* Scrollable data area */}
-          <div
-            ref={setScrollContainerRef}
-            class="flex min-w-0 flex-col overflow-x-auto"
-          >
+          <div ref={setScrollContainerRef} class="flex min-w-0 flex-col overflow-x-auto">
             {/* role="table" scoped to actual table content (header + body) */}
             <div role="table" aria-label={a().table} class="flex min-w-0 flex-col">
               <DataTableHeader />
@@ -1041,7 +1126,7 @@ export function DataTable<T extends Record<string, unknown>>(
               aria-expanded={expanded()}
               aria-label={expanded() ? l().collapse : l().seeMore}
               onClick={() => setExpanded((v) => !v)}
-              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
+              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
             >
               <Show
                 when={expanded()}

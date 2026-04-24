@@ -41,6 +41,24 @@ export function maxLength(len: number, msg?: string): FieldValidator {
   };
 }
 
+export function minArrayLength(len: number, msg?: string): FieldValidator {
+  const message = msg ?? `Must contain at least ${len} items`;
+  return (value: unknown) => {
+    if (!Array.isArray(value)) return undefined;
+    if (value.length < len) return message;
+    return undefined;
+  };
+}
+
+export function maxArrayLength(len: number, msg?: string): FieldValidator {
+  const message = msg ?? `Must contain at most ${len} items`;
+  return (value: unknown) => {
+    if (!Array.isArray(value)) return undefined;
+    if (value.length > len) return message;
+    return undefined;
+  };
+}
+
 export function pattern(regex: RegExp, msg = 'Invalid format'): FieldValidator {
   return (value: unknown) => {
     if (typeof value !== 'string' || value === '') return undefined;

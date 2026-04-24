@@ -1,13 +1,14 @@
-import { JSX, Show } from 'solid-js';
+import { JSX, Show, createMemo } from 'solid-js';
 
 import { CheckIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../../helpers';
 import { type Option } from '../../shared';
 import Spinner from '../Spinner';
 
 export const optionsContainerClass =
-  'box-border max-h-[200px] h-full overflow-y-auto p-1';
+  'box-border max-h-[200px] h-full overflow-y-auto overflow-x-hidden p-1';
 
 export const optionClass = (option: Option, highlightedOption: Option | null) => {
   return twMerge(
@@ -29,22 +30,34 @@ export const InfiniteScrollLoader = (props: { isLoadingMore?: boolean }) => (
   </Show>
 );
 
-export const CTA = (props: { cta?: JSX.Element }) => (
-  <Show when={props.cta}>{props.cta}</Show>
+export interface SelectCTAControls {
+  closeDropdown: () => void;
+}
+
+export type SelectCTA = JSX.Element | ((controls: SelectCTAControls) => JSX.Element);
+
+export const CTA = (props: { cta?: SelectCTA; controls: SelectCTAControls }) => (
+  <Show when={props.cta}>
+    {typeof props.cta === 'function' ? props.cta(props.controls) : props.cta}
+  </Show>
 );
 
-export const OptionLabel = (props: { option: Option; selectedOption: Option | null }) => (
-  <>
-    {props.option.labelWrapper
-      ? props.option.labelWrapper(props.option.label)
-      : props.option.label}
-    <div class="ml-2.5">
-      <Show when={props.selectedOption?.value === props.option.value}>
-        <CheckIcon aria-hidden="true" />
-      </Show>
-    </div>
-  </>
-);
+export const OptionLabel = (props: { option: Option; selectedOption: Option | null }) => {
+  const capitalizedLabel = createMemo(() => capitalizeFirstWord(props.option.label));
+
+  return (
+    <>
+      {props.option.labelWrapper
+        ? props.option.labelWrapper(capitalizedLabel())
+        : capitalizedLabel()}
+      <div class="ml-2.5">
+        <Show when={props.selectedOption?.value === props.option.value}>
+          <CheckIcon aria-hidden="true" />
+        </Show>
+      </div>
+    </>
+  );
+};
 
 export interface OptionGroupEntry {
   /** Group name, or null for ungrouped options. */

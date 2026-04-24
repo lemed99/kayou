@@ -1,183 +1,224 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+
+const exampleSection = (page: Page, name: string) =>
+  page.locator(`[data-section="${name}"]`);
+
+const passwordInput = (section: Locator) =>
+  section.locator('input[type="password"], input[type="text"]').first();
+
+const fillPassword = async (section: Locator, value: string) => {
+  const input = passwordInput(section);
+  await input.scrollIntoViewIfNeeded();
+  await input.focus();
+  await input.fill(value);
+  return input;
+};
+
+const blurPassword = async (section: Locator) => {
+  await passwordInput(section).evaluate((input) => input.blur());
+};
 
 test.describe('Password', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/components/password');
-  });
-
-  // ==================== Basic Rendering ====================
-
-  test('should render password input', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    await expect(input).toBeVisible();
-  });
-
-  test('should render toggle visibility button', async ({ page }) => {
-    const toggleButton = page.locator('button[aria-label*="password"], button svg').first();
-    await expect(toggleButton).toBeVisible();
-  });
-
-  // ==================== Password Visibility Toggle ====================
-
-  test('should toggle password visibility on button click', async ({ page }) => {
-    const showBtn = page.locator('button[aria-label="Show password"]').first();
-    await showBtn.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    await showBtn.click();
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(100);
-
-    // After toggling, a "Hide password" button should appear
-    const hideBtn = page.locator('button[aria-label="Hide password"]').first();
-    await expect(hideBtn).toBeVisible();
-
-    // The first input in the same container should now be type="text"
-    const inputType = await page.evaluate(() => {
-      const btn = document.querySelector('button[aria-label="Hide password"]');
-      const container = btn?.closest('.relative');
-      return container?.querySelector('input')?.type;
-    });
-    expect(inputType).toBe('text');
-
-    // Toggle back to hide password
-    await hideBtn.click();
-    await page.waitForTimeout(100);
-
-    await expect(showBtn).toBeVisible();
-    const inputTypeAfter = await page.evaluate(() => {
-      const btn = document.querySelector('button[aria-label="Show password"]');
-      const container = btn?.closest('.relative');
-      return container?.querySelector('input')?.type;
-    });
-    expect(inputTypeAfter).toBe('password');
   });
 
-  // ==================== Input Behavior ====================
-
-  test('should accept text input', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    await input.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    await input.fill('testpassword123');
-    await expect(input).toHaveValue('testpassword123');
+  test('renders a password input and toggle button', async ({ page }) => {
+    const section = exampleSection(page, 'passthrough');
+    await expect(passwordInput(section)).toBeVisible();
+    await expect(section.locator('button[aria-label="Show password"]')).toBeVisible();
   });
 
-  test('should mask password by default', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    await expect(input).toHaveAttribute('type', 'password');
-  });
+  test('toggles password visibility without losing the typed value', async ({ page }) => {
+    const section = exampleSection(page, 'passthrough');
+    const input = passwordInput(section);
+    const toggleButton = section.locator('button[aria-label="Show password"]').first();
 
-  // ==================== Placeholder ====================
-
-  test('should render placeholder when provided', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    const placeholder = await input.getAttribute('placeholder');
-    // Placeholder may or may not be set
-    expect(placeholder !== null || (await input.inputValue()) !== null).toBeTruthy();
-  });
-
-  // ==================== Disabled State ====================
-
-  test('should render disabled state', async ({ page }) => {
-    const disabledInput = page.locator('input[type="password"][disabled]');
-    const count = await disabledInput.count();
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
-
-  test('disabled input should not accept input', async ({ page }) => {
-    const disabledInput = page.locator('input[type="password"][disabled]').first();
-    if (await disabledInput.isVisible()) {
-      await expect(disabledInput).toBeDisabled();
-    }
-  });
-
-  // ==================== Keyboard Accessibility ====================
-
-  test('should be focusable via keyboard', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    await input.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    await input.focus();
-    await expect(input).toBeFocused();
-  });
-
-  test('should support Tab navigation', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    await input.focus();
-    await page.keyboard.press('Tab');
-    // Focus should move to toggle button
-  });
-
-  // ==================== Accessibility ====================
-
-  test('should have accessible toggle button', async ({ page }) => {
-    const toggleButton = page
-      .locator('button')
-      .filter({ has: page.locator('svg') })
-      .first();
-    if (await toggleButton.isVisible()) {
-      // Button should be accessible
-      await expect(toggleButton).toBeVisible();
-    }
-  });
-
-  // ==================== Icon Changes ====================
-
-  test('should change icon when visibility toggles', async ({ page }) => {
-    const toggleButton = page
-      .locator('button')
-      .filter({ has: page.locator('svg') })
-      .first();
-
-    if (await toggleButton.isVisible()) {
-      const iconBefore = await toggleButton.locator('svg').innerHTML();
-      await toggleButton.click();
-      await page.waitForTimeout(100);
-      const iconAfter = await toggleButton.locator('svg').innerHTML();
-
-      // Icon should change (different SVG content)
-      expect(iconBefore !== iconAfter || true).toBeTruthy();
-    }
-  });
-
-  // ==================== Edge Cases ====================
-
-  test('should handle rapid toggle clicks', async ({ page }) => {
-    const toggleButton = page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first();
-
-    if (await toggleButton.isVisible()) {
-      await toggleButton.click();
-      await page.waitForTimeout(50);
-      await page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first().click();
-      await page.waitForTimeout(50);
-      await page.locator('button[aria-label="Show password"], button[aria-label="Hide password"]').first().click();
-
-      // Should be in valid state
-      const input = page.locator('input[type="password"], input[type="text"]').first();
-      const type = await input.getAttribute('type');
-      expect(['password', 'text']).toContain(type);
-    }
-  });
-
-  test('should render without crashing', async ({ page }) => {
-    await page.waitForTimeout(500);
-    const body = page.locator('body');
-    await expect(body).toBeVisible();
-  });
-
-  test('should maintain value when toggling visibility', async ({ page }) => {
-    const input = page.locator('input[type="password"]').first();
-    const toggleButton = page
-      .locator('button')
-      .filter({ has: page.locator('svg') })
-      .first();
-
-    await input.fill('mySecurePassword');
-    const valueBefore = await input.inputValue();
-
+    await fillPassword(section, 'mySecurePassword');
     await toggleButton.click();
-    await page.waitForTimeout(100);
 
-    const valueAfter = await input.inputValue();
-    expect(valueAfter).toBe(valueBefore);
+    await expect(section.locator('button[aria-label="Hide password"]')).toBeVisible();
+    await expect(input).toHaveAttribute('type', 'text');
+    await expect(input).toHaveValue('mySecurePassword');
+
+    await section.locator('button[aria-label="Hide password"]').click();
+    await expect(input).toHaveAttribute('type', 'password');
+    await expect(input).toHaveValue('mySecurePassword');
+  });
+
+  test('passes through the raw value when requiredStrength is unset', async ({ page }) => {
+    const section = exampleSection(page, 'passthrough');
+    const input = await fillPassword(section, 'plain-password');
+
+    await expect(input).toHaveValue('plain-password');
+    await expect(section.locator('[data-testid="passthrough-typed"]')).toContainText(
+      'plain-password',
+    );
+  });
+
+  test('keeps invalid typed value visible while onChange still exposes an empty value below the strong threshold', async ({
+    page,
+  }) => {
+    const section = exampleSection(page, 'required-strong');
+    const input = await fillPassword(section, 'Abcdefgh');
+
+    await expect(input).toHaveValue('Abcdefgh');
+    await expect(section.locator('[data-testid="threshold-typed"]')).toContainText(
+      'Abcdefgh',
+    );
+    await expect(section.locator('[data-testid="threshold-accepted"]')).toContainText(
+      '[empty]',
+    );
+    await expect(section.locator('[data-testid="threshold-strength"]')).toContainText(
+      'good',
+    );
+    await expect(section.locator('[data-testid="threshold-status"]')).toContainText(
+      'rejected',
+    );
+    await expect(input).toHaveClass(/border-red-500/);
+  });
+
+  test('exposes the real value once the required strong threshold is met', async ({
+    page,
+  }) => {
+    const section = exampleSection(page, 'required-strong');
+    const input = await fillPassword(section, 'Abcdefg1!');
+
+    await expect(input).toHaveValue('Abcdefg1!');
+    await expect(section.locator('[data-testid="threshold-typed"]')).toContainText(
+      'Abcdefg1!',
+    );
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="threshold-accepted"]')).toContainText(
+      'Abcdefg1!',
+    );
+    await expect(section.locator('[data-testid="threshold-strength"]')).toContainText(
+      'strong',
+    );
+    await expect(section.locator('[data-testid="threshold-status"]')).toContainText(
+      'accepted',
+    );
+  });
+
+  test('returns to an empty exposed value when strength drops below the threshold again', async ({
+    page,
+  }) => {
+    const section = exampleSection(page, 'required-strong');
+    const input = await fillPassword(section, 'Abcdefg1!');
+
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="threshold-accepted"]')).toContainText(
+      'Abcdefg1!',
+    );
+
+    await fillPassword(section, 'Abcdefgh');
+
+    await expect(input).toHaveValue('Abcdefgh');
+    await expect(section.locator('[data-testid="threshold-typed"]')).toContainText(
+      'Abcdefgh',
+    );
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="threshold-accepted"]')).toContainText(
+      '[empty]',
+    );
+    await expect(section.locator('[data-testid="threshold-strength"]')).toContainText(
+      'good',
+    );
+
+    await input.focus();
+    await input.press('Backspace');
+    await expect(input).toHaveValue('Abcdefg');
+    await expect(section.locator('[data-testid="threshold-typed"]')).toContainText(
+      'Abcdefg',
+    );
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="threshold-accepted"]')).toContainText(
+      '[empty]',
+    );
+  });
+
+  test('requiredStrength honors a custom strength calculator', async ({ page }) => {
+    const section = exampleSection(page, 'custom-strength');
+    const input = await fillPassword(section, 'abcdefz');
+
+    await expect(input).toHaveValue('abcdefz');
+    await expect(section.locator('[data-testid="custom-typed"]')).toContainText('abcdefz');
+    await expect(section.locator('[data-testid="custom-strength"]')).toContainText('strong');
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="custom-accepted"]')).toContainText(
+      'abcdefz',
+    );
+  });
+
+  test('below-threshold failure styling overrides an explicit color prop', async ({ page }) => {
+    const section = exampleSection(page, 'color-override');
+    const input = await fillPassword(section, 'Abcdefgh');
+
+    await expect(input).toHaveClass(/border-red-500/);
+    await expect(input).not.toHaveClass(/border-blue-500/);
+    await expect(section.locator('[data-testid="color-override-typed"]')).toContainText(
+      'Abcdefgh',
+    );
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="color-override-accepted"]')).toContainText(
+      '[empty]',
+    );
+
+    await fillPassword(section, 'Abcdefg1!');
+
+    await expect(section.locator('[data-testid="color-override-typed"]')).toContainText(
+      'Abcdefg1!',
+    );
+    await blurPassword(section);
+    await expect(input).toHaveClass(/border-blue-500/);
+    await expect(section.locator('[data-testid="color-override-strength"]')).toContainText(
+      'strong',
+    );
+  });
+
+  test('supports sanitized values through onChange handlers', async ({ page }) => {
+    const section = exampleSection(page, 'change-handler-camel');
+    const input = await fillPassword(section, 'Abcdefgh');
+
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="camel-change-value"]')).toContainText(
+      '[empty]',
+    );
+
+    await fillPassword(section, 'Abcdefg1!');
+    await blurPassword(section);
+    await expect(section.locator('[data-testid="camel-change-value"]')).toContainText(
+      'Abcdefg1!',
+    );
+  });
+
+  test('can couple password validation into useForm on the docs page', async ({
+    page,
+  }) => {
+    const section = exampleSection(page, 'form-coupling');
+    const input = await fillPassword(section, 'Abcdefgh');
+
+    await section.getByRole('button', { name: 'Submit' }).click();
+    await expect(
+      section.getByText('Password strength is currently good. It must be at least strong.'),
+    ).toBeVisible();
+    await expect(section.locator('[role="progressbar"]')).not.toBeVisible();
+    await expect(
+      section.getByText('Password requirements:', { exact: true }),
+    ).toBeVisible();
+    await expect(section.locator('[data-testid="form-coupling-submitted"]')).toContainText(
+      '[empty]',
+    );
+
+    await input.fill('Abcdefg1!');
+    await section.getByRole('button', { name: 'Submit' }).click();
+    await expect(
+      section.getByText('Password strength is currently good. It must be at least strong.'),
+    ).not.toBeVisible();
+    await expect(section.locator('[data-testid="form-coupling-submitted"]')).toContainText(
+      'Abcdefg1!',
+    );
   });
 });

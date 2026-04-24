@@ -7,6 +7,7 @@ export interface DataTableState {
   searchKey?: string;
   expanded?: boolean;
   currentPage?: number;
+  currentCursor?: string | null;
   perPage?: number;
   selectedColumns?: string[];
 }

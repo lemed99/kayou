@@ -10,7 +10,7 @@ import {
   onMount,
   splitProps,
 } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, reconcile } from 'solid-js/store';
 
 import {
   ChevronRightIcon,
@@ -184,6 +184,15 @@ export interface SidebarCollapseProps {
   class?: string;
 }
 
+const isSidebarItem = (item: SidebarItem | undefined): item is SidebarItem =>
+  item !== undefined;
+
+const sanitizeSidebarItems = (itemList: readonly (SidebarItem | undefined)[]): SidebarItem[] =>
+  itemList.filter(isSidebarItem).map((item) => ({
+    ...item,
+    children: item.children?.filter(isSidebarItem),
+  }));
+
 const sidebarTheme = {
   root: {
     base: 'h-full max-w-[248px] w-fit',
@@ -242,6 +251,9 @@ const sidebarCollapseTheme = {
 const Sidebar = (props: SidebarProps): JSX.Element => {
   const [isItemCollapsed, setIsItemCollapsed] = createStore<Record<string, boolean>>({});
   const [hoveredItem, setHoveredItem] = createSignal('');
+  const [sanitizedItems, setSanitizedItems] = createStore<SidebarItem[]>([]);
+  const [sanitizedHeaderItems, setSanitizedHeaderItems] = createStore<SidebarItem[]>([]);
+  const [sanitizedFooterItems, setSanitizedFooterItems] = createStore<SidebarItem[]>([]);
   const [local, otherProps] = splitProps(props, [
     'children',
     'class',
@@ -282,9 +294,21 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
     }
   });
 
-  const items = createMemo(() => local.items ?? []);
-  const headerItems = createMemo(() => local.headerItems ?? []);
-  const footerItems = createMemo(() => local.footerItems ?? []);
+  const items = createMemo(() => sanitizeSidebarItems(local.items ?? []));
+  const headerItems = createMemo(() => sanitizeSidebarItems(local.headerItems ?? []));
+  const footerItems = createMemo(() => sanitizeSidebarItems(local.footerItems ?? []));
+
+  createEffect(() => {
+    setSanitizedItems(reconcile(items(), { key: 'id' }));
+  });
+
+  createEffect(() => {
+    setSanitizedHeaderItems(reconcile(headerItems(), { key: 'id' }));
+  });
+
+  createEffect(() => {
+    setSanitizedFooterItems(reconcile(footerItems(), { key: 'id' }));
+  });
 
   // Controlled vs uncontrolled pinned state
   const isPinnedControlled = createMemo(
@@ -349,7 +373,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
       }
     };
 
-    collectPinnedItems(items());
+    collectPinnedItems(sanitizedItems);
     return result;
   });
 
@@ -513,10 +537,10 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Header menu items */}
-            <Show when={headerItems().length > 0 || pinnedItemsData().length > 0}>
+            <Show when={sanitizedHeaderItems.length > 0 || pinnedItemsData().length > 0}>
               <ul class={sidebarTheme.itemGroup} role="menu">
-                <Show when={headerItems().length > 0}>
-                  <For each={headerItems()}>{(mn) => renderMenuItem(mn)}</For>
+                <Show when={sanitizedHeaderItems.length > 0}>
+                  <For each={sanitizedHeaderItems}>{(mn) => renderMenuItem(mn)}</For>
                 </Show>
 
                 {/* Pinned section */}
@@ -535,7 +559,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Border separator between header and body */}
-            <Show when={headerItems().length > 0 || pinnedItemsData().length > 0}>
+            <Show when={sanitizedHeaderItems.length > 0 || pinnedItemsData().length > 0}>
               <div class="mt-2 border-b border-neutral-200 dark:border-neutral-800" />
             </Show>
           </div>
@@ -544,14 +568,14 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         {/* Body section - scrollable main menu */}
         <div class="flex-1 overflow-y-auto overflow-x-hidden pt-2">
           <ul class={sidebarTheme.itemGroup} role="menu">
-            <For each={items()}>
+            <For each={sanitizedItems}>
               {(mn) => renderMenuItem(mn, { showPinButton: true })}
             </For>
           </ul>
         </div>
 
         {/* Footer section */}
-        <Show when={local.footerContent !== undefined || footerItems().length > 0}>
+        <Show when={local.footerContent !== undefined || sanitizedFooterItems.length > 0}>
           <div class="mt-auto shrink-0">
             {/* Custom footer content (e.g., promo cards) */}
             <Show when={local.footerContent !== undefined && isSidebarOpen()}>
@@ -559,10 +583,10 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             </Show>
 
             {/* Footer menu items */}
-            <Show when={footerItems().length > 0}>
+            <Show when={sanitizedFooterItems.length > 0}>
               <div class="pt-2">
                 <ul class={sidebarTheme.itemGroup} role="menu">
-                  <For each={footerItems()}>{(mn) => renderMenuItem(mn)}</For>
+                  <For each={sanitizedFooterItems}>{(mn) => renderMenuItem(mn)}</For>
                 </ul>
               </div>
             </Show>

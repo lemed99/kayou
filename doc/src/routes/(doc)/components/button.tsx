@@ -41,7 +41,7 @@ export default function ButtonPage() {
         },
         {
           name: 'color',
-          type: '"info" | "danger" | "theme" | "anti-theme"',
+          type: '"info" | "danger" | "theme" | "anti-theme" | "gray"',
           default: '"info"',
           description: 'Sets the color. "theme" color will fallback to "anti-theme" when variant is "outline" or "transparent"',
         },
@@ -121,16 +121,19 @@ export default function ButtonPage() {
                 <Button color="danger">Danger</Button>
                 <Button color="theme">Theme</Button>
                 <Button color="anti-theme">Anti-theme</Button>
+                <Button color="gray">Gray</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button color="info" variant="outline">Info</Button>
                 <Button color="danger" variant="outline">Danger</Button>
                 <Button color="anti-theme" variant="outline">Anti-theme</Button>
+                <Button color="gray" variant="outline">Gray</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button color="info" variant="transparent">Info</Button>
                 <Button color="danger" variant="transparent">Danger</Button>
                 <Button color="anti-theme" variant="transparent">Anti-theme</Button>
+                <Button color="gray" variant="transparent">Gray</Button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Button size="xs">Extra Small</Button>

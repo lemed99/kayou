@@ -31,7 +31,7 @@ export default function SpinnerPage() {
       props={[
         {
           name: 'color',
-          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent"',
+          type: '"info" | "danger" | "theme" | "anti-theme" | "transparent" | "gray"',
           default: '"info"',
           description: 'Color variant of the spinner',
         },
@@ -84,6 +84,7 @@ export default function SpinnerPage() {
                   <Spinner color="theme" />
                   <Spinner color="anti-theme" />
                   <Spinner color="transparent" />
+                  <Spinner color="gray" />
                 </div>
               </div>
 

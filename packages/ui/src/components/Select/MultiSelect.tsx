@@ -3,18 +3,26 @@ import { JSX, Show, createEffect, createMemo, createSignal, splitProps } from 's
 import { SearchRefractionIcon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../../helpers';
 import { ChevronDownButton, ClearContentButton, type Option } from '../../shared';
 import Checkbox from '../Checkbox';
 import TextInput, { type TextInputProps } from '../TextInput';
-import { groupHeaderClass, groupedOptionIndent, optionClass } from './selectUtils';
+import {
+  type SelectCTA,
+  groupHeaderClass,
+  groupedOptionIndent,
+  optionClass,
+} from './selectUtils';
 import useSelect, {
   DEFAULT_SELECT_ARIA_LABELS,
   type SelectAriaLabels,
   type SelectLabels,
 } from './useSelect';
 
-export interface MultiSelectProps
-  extends Omit<TextInputProps, 'onSelect' | 'labels' | 'ariaLabels'> {
+export interface MultiSelectProps extends Omit<
+  TextInputProps,
+  'onSelect' | 'labels' | 'ariaLabels'
+> {
   /** Array of options to display in the dropdown */
   options: Option[];
 
@@ -37,7 +45,7 @@ export interface MultiSelectProps
   displayValue?: string;
 
   /** Custom element to render at the bottom of the dropdown */
-  cta?: JSX.Element;
+  cta?: SelectCTA;
 
   /** Whether more items are currently being loaded (infinite scroll) */
   isLoadingMore?: boolean;
@@ -55,6 +63,8 @@ export interface MultiSelectProps
   referenceClass?: string;
   /** Custom class for the floating (dropdown) element. */
   floatingClass?: string;
+  /** Whether to capitalize the first word of the label. */
+  capitalizeFirstWord?: boolean;
 }
 
 export default function MultiSelect(props: MultiSelectProps): JSX.Element {
@@ -75,6 +85,8 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     'required',
     'labels',
     'ariaLabels',
+    'color',
+    'capitalizeFirstWord',
   ]);
 
   const a = createMemo(() => ({ ...DEFAULT_SELECT_ARIA_LABELS, ...local.ariaLabels }));
@@ -109,7 +121,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     const selected = selectedOptions();
     if (selected.length === 0) return '';
     return selected
-      .map((o) => o.label)
+      .map((o) => capitalizeFirstWord(o.label))
       .reverse()
       .join(' • ');
   });
@@ -125,6 +137,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
             disabled={props.disabled}
             value={local.displayValue ?? displayValue()}
             placeholder={props.placeholder}
+            capitalizeFirstWord={local.capitalizeFirstWord}
             class="w-full"
             required={local.required}
             onKeyDown={handleKeyDown}
@@ -143,6 +156,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
                 ? local.style
                 : {}),
             }}
+            color={local.color}
           />
           <Show
             when={
@@ -214,6 +228,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
         const allSelected = () =>
           enabled().length > 0 && selectedCount() === enabled().length;
         const someSelected = () => selectedCount() > 0 && !allSelected();
+        const capitalizedLabel = createMemo(() => capitalizeFirstWord(group));
 
         return (
           <div id={headerId} class={groupHeaderClass}>
@@ -226,35 +241,42 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
               color="dark"
               checked={allSelected()}
               onChange={() => handleGroupToggle(groupOpts)}
-              label={group}
+              label={capitalizedLabel()}
               labelClass="w-full font-normal cursor-pointer"
               labelSpanClass="text-neutral-400 dark:text-neutral-500"
             />
           </div>
         );
       }}
-      optionsComponent={(option) => (
-        <div
-          id={getOptionId(option)}
-          role="option"
-          aria-selected={selectedOptions().some((o) => o.value === option.value)}
-          aria-disabled={option.disabled || undefined}
-          class={twMerge(optionClass(option, highlightedOption()), 'p-0')}
-          onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
-        >
-          <Checkbox
-            labelClass={twMerge(
-              'px-2 py-1.5 w-full font-normal',
-              option.group != null && groupedOptionIndent,
-            )}
-            class="flex items-center"
-            onChange={() => handleOptionClick(option)}
-            checked={selectedOptions().some((o) => o.value === option.value)}
-            disabled={option.disabled}
-            label={option.labelWrapper ? option.labelWrapper(option.label) : option.label}
-          />
-        </div>
-      )}
+      optionsComponent={(option) => {
+        const capitalizedLabel = createMemo(() => capitalizeFirstWord(option.label));
+        return (
+          <div
+            id={getOptionId(option)}
+            role="option"
+            aria-selected={selectedOptions().some((o) => o.value === option.value)}
+            aria-disabled={option.disabled || undefined}
+            class={twMerge(optionClass(option, highlightedOption()), 'p-0')}
+            onMouseEnter={() => !option.disabled && setHighlightedOption(option)}
+          >
+            <Checkbox
+              labelClass={twMerge(
+                'px-2 py-1.5 w-full font-normal',
+                option.group != null && groupedOptionIndent,
+              )}
+              class="flex items-center"
+              onChange={() => handleOptionClick(option)}
+              checked={selectedOptions().some((o) => o.value === option.value)}
+              disabled={option.disabled}
+              label={
+                option.labelWrapper
+                  ? option.labelWrapper(capitalizedLabel())
+                  : capitalizedLabel()
+              }
+            />
+          </div>
+        );
+      }}
       groupSpacerClass="h-3"
     />
   );

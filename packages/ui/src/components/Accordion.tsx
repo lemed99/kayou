@@ -13,6 +13,8 @@ import { ChevronRightIcon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
 import { twMerge } from 'tailwind-merge';
 
+type PanelSlot = JSX.Element | (() => JSX.Element);
+
 /**
  * Data structure for each accordion panel.
  */
@@ -20,9 +22,9 @@ export interface PanelData {
   /** Unique identifier for the panel */
   itemKey: string;
   /** Content displayed in the panel header */
-  title: JSX.Element;
+  title: PanelSlot;
   /** Content displayed when the panel is expanded */
-  content: JSX.Element;
+  content: PanelSlot;
   /** Additional CSS classes for the panel container */
   class?: string;
   /** Additional CSS classes for the panel header */
@@ -145,6 +147,11 @@ const Accordion = (props: AccordionProps): JSX.Element => {
 
   const isSeparated = () => !!props.gap;
 
+  const panelkeys = createMemo(() => panels().map((panel) => panel.itemKey));
+  const panelByKey = createMemo(
+    () => new Map(panels().map((panel) => [panel.itemKey, panel])),
+  );
+
   return (
     <div
       class={twMerge('w-full', isSeparated() && 'flex flex-col', props.class)}
@@ -156,20 +163,23 @@ const Accordion = (props: AccordionProps): JSX.Element => {
           : undefined
       }
     >
-      <For each={panels()}>
-        {(panel, index) => (
-          <Panel
-            panel={panel}
-            isOpen={getOpenState(panel.itemKey)}
-            toggle={() => togglePanel(panel.itemKey)}
-            isSimple={getIsSimple()}
-            isSeparated={isSeparated()}
-            isFirst={index() === 0}
-            isLast={index() === panels().length - 1}
-            highlightedKey={getHighlightedKey()}
-            highlightedClass={getHighlightedClass()}
-          />
-        )}
+      <For each={panelkeys()}>
+        {(itemKey, index) => {
+          const panel = createMemo(() => panelByKey().get(itemKey)!);
+          return (
+            <Panel
+              panel={panel()}
+              isOpen={getOpenState(itemKey)}
+              toggle={() => togglePanel(itemKey)}
+              isSimple={getIsSimple()}
+              isSeparated={isSeparated()}
+              isFirst={index() === 0}
+              isLast={index() === panels().length - 1}
+              highlightedKey={getHighlightedKey()}
+              highlightedClass={getHighlightedClass()}
+            />
+          );
+        }}
       </For>
     </div>
   );
@@ -186,6 +196,9 @@ interface PanelProps {
   highlightedKey?: string;
   highlightedClass?: string;
 }
+
+const resolvePanelSlot = (slot: PanelSlot): JSX.Element =>
+  typeof slot === 'function' ? slot() : slot;
 
 const Panel = (props: PanelProps): JSX.Element => {
   const isHighlighted = createMemo(() => props.highlightedKey === props.panel.itemKey);
@@ -205,7 +218,7 @@ const Panel = (props: PanelProps): JSX.Element => {
   });
 
   const { isVisible, isMounted } = createPresence(
-    () => props.panel.content && props.isOpen,
+    () => Boolean(props.panel.content) && props.isOpen,
     {
       transitionDuration: 200,
     },
@@ -231,7 +244,7 @@ const Panel = (props: PanelProps): JSX.Element => {
   return (
     <div
       class={twMerge(
-        'border-neutral-200 dark:border-neutral-800',
+        'border-neutral-200 dark:border-neutral-700',
         props.isSeparated ? 'rounded-lg border' : 'border-b',
         !props.isSimple &&
           !props.isSeparated &&
@@ -248,7 +261,7 @@ const Panel = (props: PanelProps): JSX.Element => {
         aria-controls={panelId()}
         class={twMerge(
           'flex w-full cursor-pointer items-center justify-between p-3 text-left transition-all duration-200',
-          props.isOpen && !props.isSimple && 'bg-neutral-100/60 dark:bg-neutral-800',
+          props.isOpen && !props.isSimple && 'bg-white dark:bg-neutral-800',
           props.isSeparated && 'rounded-t-lg',
           props.isSeparated && !props.isOpen && 'rounded-b-lg',
           isHighlighted() && (props.highlightedClass ?? 'bg-teal-200 dark:bg-teal-800'),
@@ -267,7 +280,9 @@ const Panel = (props: PanelProps): JSX.Element => {
             : undefined
         }
       >
-        <span class="flex w-full items-center">{props.panel.title}</span>
+        <span class="flex w-full items-center">
+          {resolvePanelSlot(props.panel.title)}
+        </span>
         <Show when={props.panel.content}>
           <span aria-hidden="true">
             <ChevronRightIcon
@@ -286,10 +301,9 @@ const Panel = (props: PanelProps): JSX.Element => {
           role="region"
           aria-labelledby={triggerId()}
           class={twMerge(
-            'overflow-hidden border-t border-neutral-200 dark:border-neutral-800',
+            'overflow-hidden border-t border-neutral-200 dark:border-neutral-700',
             !props.isSimple && 'dark:bg-neutral-900/50',
             props.isSeparated && 'rounded-b-lg',
-            props.panel.contentClass,
           )}
           style={{
             height: isVisible() ? `${panelElementHeight()}px` : '0px',
@@ -302,8 +316,11 @@ const Panel = (props: PanelProps): JSX.Element => {
               : {}),
           }}
         >
-          <div ref={setPanelContentElement} class="p-3">
-            {props.panel.content}
+          <div
+            ref={setPanelContentElement}
+            class={twMerge('p-3', props.panel.contentClass)}
+          >
+            {resolvePanelSlot(props.panel.content)}
           </div>
         </div>
       </Show>

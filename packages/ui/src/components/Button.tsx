@@ -8,7 +8,7 @@ import Spinner from './Spinner';
 /**
  * Colors for the Button component.
  */
-export type ButtonColor = 'info' | 'danger' | 'theme' | 'anti-theme';
+export type ButtonColor = 'info' | 'danger' | 'theme' | 'anti-theme' | 'gray';
 
 /**
  * Variants for the button component
@@ -97,6 +97,7 @@ const theme = {
         'text-neutral-900 bg-white border border-neutral-200 hover:bg-neutral-50 dark:text-white dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-950',
       'anti-theme':
         'text-white bg-black border border-transparent hover:bg-neutral-900 dark:text-neutral-900 dark:bg-white dark:hover:bg-neutral-50',
+      gray: 'text-white bg-neutral-600 border border-transparent hover:bg-neutral-700',
     },
     outline: {
       info: 'text-blue-700 border border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-700/10',
@@ -104,12 +105,14 @@ const theme = {
         'text-red-700 border border-red-700 hover:bg-red-50 dark:hover:bg-red-700/10',
       'anti-theme':
         'text-black border border-black hover:bg-neutral-100 dark:text-white dark:border-white dark:hover:bg-neutral-800/40',
+      gray: 'text-neutral-600 border border-neutral-300 hover:bg-neutral-100 dark:text-neutral-400 dark:border-neutral-700 dark:hover:bg-neutral-700/20',
     },
     transparent: {
       info: 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20',
       danger: 'text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20',
       'anti-theme':
         'text-black hover:bg-neutral-50 dark:text-white dark:hover:bg-neutral-800/40',
+      gray: 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700/20',
     },
   },
   size: {

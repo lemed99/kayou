@@ -14,7 +14,13 @@ export const DEFAULT_SPINNER_ARIA_LABELS: SpinnerAriaLabels = {
 /**
  * Color variants for the Spinner component.
  */
-export type SpinnerColor = 'info' | 'danger' | 'theme' | 'anti-theme' | 'transparent';
+export type SpinnerColor =
+  | 'info'
+  | 'danger'
+  | 'theme'
+  | 'anti-theme'
+  | 'transparent'
+  | 'gray';
 
 /**
  * Size variants for the Spinner component.
@@ -49,6 +55,7 @@ const theme = {
     theme: 'fill-black dark:fill-white',
     'anti-theme': 'fill-white dark:fill-black',
     transparent: 'fill-transparent',
+    gray: 'fill-neutral-500',
   },
   size: {
     xs: 'w-3 h-3',

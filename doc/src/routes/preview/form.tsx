@@ -1,7 +1,7 @@
 import { type JSX, Show, createSignal } from 'solid-js';
 
 import { useForm } from '@kayou/hooks';
-import { Button, Form, TextInput } from '@kayou/ui';
+import { Button, Form, Password, TextInput } from '@kayou/ui';
 
 const v = useForm.validators;
 
@@ -246,7 +246,72 @@ function CrossField() {
   );
 }
 
-// ── 6. Server errors (onSubmit returns field errors) ────────────────
+// ── 6. Password component-owned validation ───────────────────────────
+
+function PasswordInternalValidation() {
+  const [submittedValue, setSubmittedValue] = createSignal('');
+  const form = useForm({
+    initialValues: { password: '' },
+    onSubmit: (values) => {
+      setSubmittedValue(values.password);
+    },
+  });
+
+  return (
+    <Section
+      id="password-internal-validation"
+      title="Password Component Validation"
+    >
+      <Form onSubmit={form.handleSubmit} isSubmitting={form.isSubmitting()}>
+        <div class="flex flex-col gap-3">
+          <Password
+            label="Password"
+            name="password"
+            form={form}
+            requiredStrength="strong"
+            showStrength
+            helperText="The password component owns this field validation."
+          />
+          <Button type="submit">Submit</Button>
+          <Show when={submittedValue()}>
+            <p data-testid="password-internal-success">Password form submitted</p>
+            <p data-testid="password-internal-submitted">{submittedValue()}</p>
+          </Show>
+        </div>
+      </Form>
+    </Section>
+  );
+}
+
+function PasswordCustomValidationMessage() {
+  const form = useForm({
+    initialValues: { password: '' },
+    onSubmit: () => {},
+  });
+
+  return (
+    <Section
+      id="password-custom-message"
+      title="Password Custom Validation Message"
+    >
+      <Form onSubmit={form.handleSubmit} isSubmitting={form.isSubmitting()}>
+        <div class="flex flex-col gap-3">
+          <Password
+            label="Password"
+            name="password"
+            form={form}
+            requiredStrength="strong"
+            validationMessage="Use a stronger password."
+            showStrength
+          />
+          <Button type="submit">Submit</Button>
+        </div>
+      </Form>
+    </Section>
+  );
+}
+
+// ── 7. Server errors (onSubmit returns field errors) ────────────────
 
 function ServerErrors() {
   const form = useForm({
@@ -278,7 +343,7 @@ function ServerErrors() {
   );
 }
 
-// ── 7. Submit error (onSubmit throws) ───────────────────────────────
+// ── 8. Submit error (onSubmit throws) ───────────────────────────────
 
 function SubmitError() {
   const form = useForm({
@@ -315,7 +380,7 @@ function SubmitError() {
   );
 }
 
-// ── 8. Form state (isDirty, isSubmitting / aria-busy, reset) ────────
+// ── 9. Form state (isDirty, isSubmitting / aria-busy, reset) ────────
 
 function FormState() {
   const form = useForm({
@@ -363,6 +428,8 @@ export default function FormPreview() {
       <ValidateOnBlur />
       <ValidateOnChange />
       <CrossField />
+      <PasswordInternalValidation />
+      <PasswordCustomValidationMessage />
       <ServerErrors />
       <SubmitError />
       <FormState />

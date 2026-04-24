@@ -17,7 +17,7 @@ export default function DocsPage() {
       <div class="mt-10 grid gap-6 sm:grid-cols-2">
         {/* Getting Started */}
         <A
-          href="/ui/button"
+          href="/components/button"
           class="group rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:border-blue-500 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-blue-400"
         >
           <div class="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
@@ -33,7 +33,7 @@ export default function DocsPage() {
 
         {/* Components */}
         <A
-          href="/ui/button"
+          href="/components/button"
           class="group rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:border-blue-500 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-blue-400"
         >
           <div class="flex size-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
@@ -70,11 +70,19 @@ export default function DocsPage() {
         <h3 class="font-semibold text-neutral-950 dark:text-white">Popular Components</h3>
         <div class="mt-4 flex flex-wrap gap-2">
           <For
-            each={['Button', 'TextInput', 'Select', 'Modal', 'DataTable', 'DatePicker']}
+            each={[
+              'Button',
+              'TextInput',
+              'TagInput',
+              'Select',
+              'Modal',
+              'DataTable',
+              'DatePicker',
+            ]}
           >
             {(comp) => (
               <A
-                href={`/ui/${comp
+                href={`/components/${comp
                   .toLowerCase()
                   .replace(/([A-Z])/g, '-$1')
                   .replace(/^-/, '')}`}

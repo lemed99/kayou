@@ -145,6 +145,7 @@ function generateKeywords(label: string, filename: string): string {
     drawer: ['sidebar', 'panel', 'sheet'],
     select: ['dropdown', 'picker', 'choose'],
     input: ['field', 'form', 'text'],
+    tag: ['tags', 'chips', 'token', 'tokens'],
     table: ['grid', 'data', 'rows'],
     chart: ['graph', 'visualization', 'data'],
     virtual: ['scroll', 'performance', 'list'],

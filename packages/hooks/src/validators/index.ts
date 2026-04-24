@@ -1,2 +1,12 @@
 export type { FieldValidator, FormSchema } from './types';
-export { required, email, minLength, maxLength, min, max, pattern } from './validators';
+export {
+  email,
+  max,
+  maxArrayLength,
+  maxLength,
+  min,
+  minArrayLength,
+  minLength,
+  pattern,
+  required,
+} from './validators';

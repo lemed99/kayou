@@ -89,8 +89,6 @@ test.describe('TextInput', () => {
 
   test('success state has green border', async ({ page }) => {
     const section = exampleSection(page, 'Validation States');
-    const successInput = section.locator('input').filter({ hasText: '' }).first();
-    // Find the input with "Valid input" value
     const input = section.locator('input[class*="border-green"]');
     await expect(input).toBeVisible();
     await expect(input).toHaveValue('Valid input');
@@ -98,14 +96,41 @@ test.describe('TextInput', () => {
 
   // ── Addon ────────────────────────────────────────────────────────
 
-  test('renders addon text before input', async ({ page }) => {
+  test('renders left addon text before input by default', async ({ page }) => {
     const section = exampleSection(page, 'With Addon');
     const addon = section.getByText('https://', { exact: true });
     await expect(addon).toBeVisible();
     const input = section.locator('input').first();
     await expect(input).toHaveAttribute('placeholder', 'example.com');
-    // Addon input should have rounded-r-lg (right-only rounding)
     await expect(input).toHaveClass(/rounded-r-lg/);
+    await expect(addon).toHaveClass(/rounded-l-lg/);
+  });
+
+  test('renders right addon after input with mirrored rounding', async ({ page }) => {
+    const section = exampleSection(page, 'With Right Addon');
+    const input = section.locator('input').first();
+    const addon = section.getByText('.com', { exact: true });
+
+    await expect(input).toHaveAttribute('placeholder', 'example');
+    await expect(input).toHaveClass(/rounded-l-lg/);
+    await expect(addon).toHaveClass(/rounded-r-lg/);
+
+    const inputHandle = await input.elementHandle();
+    const addonHandle = await addon.elementHandle();
+    expect(inputHandle).toBeTruthy();
+    expect(addonHandle).toBeTruthy();
+
+    const addonFollowsInput = await page.evaluate(
+      ([inputEl, addonEl]) =>
+        Boolean(
+          inputEl &&
+            addonEl &&
+            inputEl.compareDocumentPosition(addonEl) & Node.DOCUMENT_POSITION_FOLLOWING,
+        ),
+      [inputHandle, addonHandle],
+    );
+
+    expect(addonFollowsInput).toBe(true);
   });
 
   // ── Loading state ────────────────────────────────────────────────

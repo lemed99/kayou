@@ -2,6 +2,8 @@ import { JSX, createMemo, splitProps } from 'solid-js';
 
 import { twMerge } from 'tailwind-merge';
 
+import { capitalizeFirstWord } from '../helpers';
+
 /**
  * Color variants for the Label component.
  */
@@ -10,8 +12,10 @@ export type LabelColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 /**
  * Props for the Label component.
  */
-export interface LabelProps
-  extends Omit<JSX.LabelHTMLAttributes<HTMLLabelElement>, 'color'> {
+export interface LabelProps extends Omit<
+  JSX.LabelHTMLAttributes<HTMLLabelElement>,
+  'color'
+> {
   /**
    * Color variant of the label.
    * @default 'gray'
@@ -22,6 +26,11 @@ export interface LabelProps
    */
   value?: string;
   children?: JSX.Element;
+  /**
+   * Whether to capitalize the first word of the label.
+   * @default false
+   */
+  capitalizeFirstWord?: boolean;
 }
 
 const theme = {
@@ -39,16 +48,29 @@ const theme = {
  * Label component for form field labels.
  */
 const Label = (props: LabelProps): JSX.Element => {
-  const [local, labelProps] = splitProps(props, ['color', 'class', 'value', 'children']);
+  const [local, labelProps] = splitProps(props, [
+    'color',
+    'class',
+    'value',
+    'children',
+    'capitalizeFirstWord',
+  ]);
 
   const color = createMemo(() => local.color ?? 'gray');
+
+  const value = createMemo(() => {
+    if (local.capitalizeFirstWord) {
+      return capitalizeFirstWord(local.value ?? '');
+    }
+    return local.value;
+  });
 
   return (
     <label
       {...labelProps}
       class={twMerge(theme.base, theme.colors[color()], local.class)}
     >
-      {local.value ?? local.children ?? ''}
+      {value() ?? local.children ?? ''}
     </label>
   );
 };

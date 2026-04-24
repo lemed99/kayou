@@ -11,6 +11,7 @@ export {
   useVirtualList,
   useDynamicVirtualList,
   useForm,
+  type FormPath,
   type UseFormOptions,
   type UseFormReturn,
   useShortcut,

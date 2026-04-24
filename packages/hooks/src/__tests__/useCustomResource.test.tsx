@@ -1,8 +1,13 @@
-import { createRoot, createSignal } from 'solid-js';
+import { createRoot, createSignal, useContext } from 'solid-js';
 import { describe, expect, it, vi } from 'vitest';
 
+import {
+  CustomResourceContext,
+  CustomResourceProvider,
+  type PendingEntry,
+} from '../context/CustomResourceContext';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
-import { useCustomResource } from '../hooks/useCustomResource';
+import { useCustomResource, type CustomResource } from '../hooks/useCustomResource';
 
 import {
   createTestResource,
@@ -227,6 +232,592 @@ describe('SWR pattern', () => {
       // Note: validating is set when swr=true in wrappedFetcher
       await vi.advanceTimersByTimeAsync(150);
       await flushMicrotasks();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('does not let slow cache overwrite fresh network data', async () => {
+    const freshData = { id: 1, name: 'Fresh' };
+    const staleCacheData = { id: 1, name: 'Stale Cache' };
+    let resolveCacheRead!: (value: unknown) => void;
+    vi.mocked(getCacheRow).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCacheRead = resolve;
+        }),
+    );
+    globalThis.fetch = mockFetchSuccess(freshData);
+
+    const { result, dispose } = createTestResource({
+      urlString: () => '/api/users/1',
+      swr: true,
+      pullFromCache: false,
+    }, {
+      dedupeRequests: false,
+    });
+
+    try {
+      await waitFor(() => result.data() !== undefined);
+      expect(result.data()).toEqual(freshData);
+      expect(result.fromCache()).toBe(false);
+
+      resolveCacheRead(staleCacheData);
+      await flushMicrotasks();
+
+      expect(result.data()).toEqual(freshData);
+      expect(result.fromCache()).toBe(false);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('applies cache for new URL without being blocked by previous URL network sequence', async () => {
+    const [url, setUrl] = createSignal('/a');
+    const [forceRefresh, setForceRefresh] = createSignal(true);
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+    const fetcher = vi.fn().mockImplementation((requestUrl: string) => {
+      if (requestUrl === '/a') {
+        return Promise.resolve({ id: 'a', name: 'Network A' });
+      }
+      if (requestUrl === '/b') {
+        return Promise.resolve({ id: 'b', name: 'Network B' });
+      }
+      return Promise.resolve({ id: 'unknown', name: 'Unknown' });
+    });
+
+    vi.mocked(getCacheRow).mockImplementation((requestUrl: string) => {
+      if (requestUrl === '/a') {
+        return Promise.resolve({ id: 'a-cache', name: 'Cache A' });
+      }
+      if (requestUrl === '/b') {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve({ id: 'b-cache', name: 'Cache B' }), 120);
+        });
+      }
+      return Promise.resolve(null);
+    });
+
+    let result!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const Wrapper = () => {
+        result = useCustomResource<{ id: string; name: string }>({
+          urlString: url,
+          refreshKey: 'user',
+          swr: false,
+          forceRefresh,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+        >
+          <Wrapper />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => result.data()?.id === 'a');
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      setForceRefresh(false);
+      await flushMicrotasks();
+      setUrl('/b');
+      await waitFor(() => result.data()?.id === 'b-cache');
+
+      expect(result.data()).toEqual({ id: 'b-cache', name: 'Cache B' });
+      expect(result.fromCache()).toBe(true);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('blocks stale cache apply across hook instances after shared URL network success', async () => {
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    let cacheCallCount = 0;
+    vi.mocked(getCacheRow).mockImplementation((requestUrl: string) => {
+      if (requestUrl !== '/api/users/1') return Promise.resolve(null);
+      cacheCallCount += 1;
+      if (cacheCallCount === 1) {
+        // B hook shouldFetch check: cache exists -> no network for B.
+        return Promise.resolve({ id: 'stale', name: 'Stale Cache' });
+      }
+      // B hook cache resource read: resolves late with stale value.
+      return new Promise((resolve) => {
+        setTimeout(() => resolve({ id: 'stale', name: 'Stale Cache' }), 120);
+      });
+    });
+
+    let resultA!: CustomResource<{ id: string; name: string }>;
+    let resultB!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const HookA = () => {
+        resultA = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          forceRefresh: () => true,
+          swr: false,
+        });
+        return null;
+      };
+
+      const HookB = () => {
+        resultB = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          swr: true,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+        >
+          <HookA />
+          <HookB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => resultA.data() !== undefined);
+      expect(resultA.data()).toEqual({ id: 'fresh', name: 'Fresh Network' });
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(150);
+      await flushMicrotasks();
+
+      expect(resultB.data()).toBeUndefined();
+      expect(resultB.fromCache()).toBe(false);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('blocks stale delayed cache when another instance succeeds with lower local seq', async () => {
+    const [conditionA, setConditionA] = createSignal(false);
+    const [conditionB, setConditionB] = createSignal(false);
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    let cacheCallCount = 0;
+    vi.mocked(getCacheRow).mockImplementation((requestUrl: string) => {
+      if (requestUrl !== '/api/users/1') return Promise.resolve(null);
+      cacheCallCount += 1;
+      if (cacheCallCount === 1) {
+        // B shouldFetch check: cache exists, so no network in B.
+        return Promise.resolve({ id: 'stale', name: 'Stale Cache' });
+      }
+      // B cache read: delayed stale value captured before A network success.
+      return new Promise((resolve) => {
+        setTimeout(() => resolve({ id: 'stale', name: 'Stale Cache' }), 120);
+      });
+    });
+
+    let resultA!: CustomResource<{ id: string; name: string }>;
+    let resultB!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const HookA = () => {
+        resultA = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionA,
+          forceRefresh: () => true,
+          swr: false,
+        });
+        return null;
+      };
+
+      const HookB = () => {
+        resultB = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionB,
+          swr: true,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+        >
+          <HookA />
+          <HookB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      // Inflate B local request sequence while blocked.
+      resultB.refetch();
+      resultB.refetch();
+
+      // Start B delayed cache read first (snapshot before any A network success).
+      setConditionB(true);
+      await flushMicrotasks();
+
+      // Then A succeeds with lower local seq.
+      setConditionA(true);
+      await waitFor(() => resultA.data() !== undefined);
+      expect(resultA.data()).toEqual({ id: 'fresh', name: 'Fresh Network' });
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      // Late stale cache in B must be blocked.
+      await vi.advanceTimersByTimeAsync(150);
+      await flushMicrotasks();
+      expect(resultB.data()).toBeUndefined();
+      expect(resultB.fromCache()).toBe(false);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('does not apply stale cache read started during pending shared cache write', async () => {
+    const [conditionA, setConditionA] = createSignal(false);
+    const [conditionB, setConditionB] = createSignal(false);
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    const onSuccess = vi.fn();
+    let cacheWriteStarted = false;
+    let resolveCacheWrite: (() => void) | undefined;
+    vi.mocked(insertOrUpdateCacheRow).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          cacheWriteStarted = true;
+          resolveCacheWrite = resolve;
+        }),
+    );
+
+    let cacheCallCount = 0;
+    vi.mocked(getCacheRow).mockImplementation((requestUrl: string) => {
+      if (requestUrl !== '/api/users/1') return Promise.resolve(null);
+      cacheCallCount += 1;
+      if (cacheCallCount === 1) {
+        return Promise.resolve({ id: 'stale', name: 'Stale Cache' });
+      }
+      return Promise.resolve({ id: 'stale', name: 'Stale Cache' });
+    });
+
+    let resultA!: CustomResource<{ id: string; name: string }>;
+    let resultB!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const HookA = () => {
+        resultA = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionA,
+          forceRefresh: () => true,
+          swr: false,
+        });
+        return null;
+      };
+
+      const HookB = () => {
+        resultB = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionB,
+          swr: true,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+          onSuccess={onSuccess}
+        >
+          <HookA />
+          <HookB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      setConditionA(true);
+      await waitFor(() => resultA.data()?.id === 'fresh');
+      await waitFor(() => cacheWriteStarted);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      // Start B cache read after A network success but before cache write commits.
+      setConditionB(true);
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(20);
+      await flushMicrotasks();
+
+      expect(resultB.data()).toBeUndefined();
+      expect(resultB.fromCache()).toBe(false);
+      const cacheSuccessCall = onSuccess.mock.calls.find(
+        (call: unknown[]) => call[1] === true,
+      );
+      expect(cacheSuccessCall).toBeUndefined();
+    } finally {
+      if (resolveCacheWrite) {
+        resolveCacheWrite();
+        await flushMicrotasks();
+      }
+      dispose();
+    }
+  });
+
+  it('does not apply stale cache when shared cache write fails after gap read starts', async () => {
+    const [conditionA, setConditionA] = createSignal(false);
+    const [conditionB, setConditionB] = createSignal(false);
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    const onSuccess = vi.fn();
+    let cacheWriteStarted = false;
+    let rejectCacheWrite: ((reason?: unknown) => void) | undefined;
+    let resolveGapCacheRead: ((value: unknown) => void) | undefined;
+    vi.mocked(insertOrUpdateCacheRow).mockImplementationOnce(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          cacheWriteStarted = true;
+          rejectCacheWrite = reject;
+        }),
+    );
+
+    let cacheCallCount = 0;
+    vi.mocked(getCacheRow).mockImplementation((requestUrl: string) => {
+      if (requestUrl !== '/api/users/1') return Promise.resolve(null);
+      cacheCallCount += 1;
+      if (cacheCallCount === 1) {
+        return Promise.resolve({ id: 'stale', name: 'Stale Cache' });
+      }
+      return new Promise((resolve) => {
+        resolveGapCacheRead = resolve;
+      });
+    });
+
+    let resultA!: CustomResource<{ id: string; name: string }>;
+    let resultB!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const HookA = () => {
+        resultA = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionA,
+          forceRefresh: () => true,
+          swr: false,
+        });
+        return null;
+      };
+
+      const HookB = () => {
+        resultB = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionB,
+          swr: true,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+          onSuccess={onSuccess}
+        >
+          <HookA />
+          <HookB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      setConditionA(true);
+      await waitFor(() => resultA.data()?.id === 'fresh');
+      await waitFor(() => cacheWriteStarted);
+
+      // Start B cache read after A network success but before failed cache write settles.
+      setConditionB(true);
+      await waitFor(() => cacheCallCount >= 2);
+
+      rejectCacheWrite?.(new Error('cache write failed'));
+      resolveGapCacheRead?.({ id: 'stale', name: 'Stale Cache' });
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(20);
+      await flushMicrotasks();
+
+      expect(resultB.data()).toBeUndefined();
+      expect(resultB.fromCache()).toBe(false);
+      const cacheSuccessCall = onSuccess.mock.calls.find(
+        (call: unknown[]) => call[1] === true,
+      );
+      expect(cacheSuccessCall).toBeUndefined();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('allows cache apply again after failed shared cache write settles', async () => {
+    const [conditionA, setConditionA] = createSignal(false);
+    const [conditionB, setConditionB] = createSignal(false);
+    const [refreshData] = createSignal<Record<string, boolean>>({ user: false });
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    const onSuccess = vi.fn();
+    let rejectCacheWrite: ((reason?: unknown) => void) | undefined;
+    vi.mocked(insertOrUpdateCacheRow).mockImplementationOnce(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          rejectCacheWrite = reject;
+        }),
+    );
+
+    vi.mocked(getCacheRow).mockResolvedValue({ id: 'stale', name: 'Stale Cache' });
+
+    let resultA!: CustomResource<{ id: string; name: string }>;
+    let resultB!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const HookA = () => {
+        resultA = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionA,
+          forceRefresh: () => true,
+          swr: false,
+        });
+        return null;
+      };
+
+      const HookB = () => {
+        resultB = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          condition: conditionB,
+          swr: true,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+          onSuccess={onSuccess}
+        >
+          <HookA />
+          <HookB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      setConditionA(true);
+      await waitFor(() => resultA.data()?.id === 'fresh');
+
+      rejectCacheWrite?.(new Error('cache write failed'));
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(20);
+      await flushMicrotasks();
+
+      // After failure settles, cache suppression should recover and allow cache apply.
+      setConditionB(true);
+      await waitFor(() => resultB.data()?.id === 'stale');
+      expect(resultB.fromCache()).toBe(true);
+      const cacheSuccessCall = onSuccess.mock.calls.find(
+        (call: unknown[]) => call[1] === true,
+      );
+      expect(cacheSuccessCall).toBeTruthy();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('keeps successful network state when cache write fails and later cache checks run', async () => {
+    const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({ user: true });
+    const [forceRefresh, setForceRefresh] = createSignal(true);
+    const onError = vi.fn();
+    const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
+    vi.mocked(insertOrUpdateCacheRow).mockRejectedValueOnce(new Error('cache write failed'));
+    vi.mocked(getCacheRow).mockResolvedValue({ id: 'stale', name: 'Stale Cache' });
+
+    let result!: CustomResource<{ id: string; name: string }>;
+    let dispose!: () => void;
+
+    createRoot((d) => {
+      dispose = d;
+
+      const Hook = () => {
+        result = useCustomResource<{ id: string; name: string }>({
+          urlString: () => '/api/users/1',
+          refreshKey: 'user',
+          forceRefresh,
+          swr: false,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={refreshData}
+          retryCount={0}
+          fetcher={fetcher}
+          onError={onError}
+        >
+          <Hook />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => result.data()?.id === 'fresh');
+      expect(result.error()).toBeNull();
+
+      // Trigger cache-only path on same hook after failed cache write settled.
+      setForceRefresh(false);
+      setRefreshData({ user: false });
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(20);
+      await flushMicrotasks();
+
+      expect(result.data()).toEqual({ id: 'fresh', name: 'Fresh Network' });
+      expect(result.fromCache()).toBe(false);
+      expect(result.error()).toBeNull();
+      expect(result.attempts()).toBe(0);
+      expect(onError).not.toHaveBeenCalled();
     } finally {
       dispose();
     }
@@ -634,6 +1225,456 @@ describe('request deduplication', () => {
       dispose();
     }
   });
+
+  it('clears stale rejected dedupe promise after 401 so refetch performs new request', async () => {
+    const fetcher = vi.fn()
+      .mockRejectedValueOnce(Object.assign(new Error('Unauthorized'), { status: 401 }))
+      .mockResolvedValueOnce({ id: 1, name: 'Recovered' });
+
+    const { result, dispose } = createTestResource({
+      urlString: () => '/api/users/1',
+      swr: false,
+    }, {
+      retryCount: 0,
+      errorsBlackList: [401],
+      fetcher,
+    });
+
+    try {
+      await waitFor(() => result.error() !== null);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      result.refetch();
+      await waitFor(() => result.data() !== undefined);
+
+      expect(result.data()).toEqual({ id: 1, name: 'Recovered' });
+      expect(fetcher).toHaveBeenCalledTimes(2);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('clears stale rejected dedupe promise after AbortError so refetch performs new request', async () => {
+    const abortError = new DOMException('The operation was aborted', 'AbortError');
+    const fetcher = vi.fn()
+      .mockRejectedValueOnce(abortError)
+      .mockResolvedValueOnce({ id: 1, name: 'Recovered' });
+
+    const { result, dispose } = createTestResource({
+      urlString: () => '/api/users/1',
+      swr: false,
+    }, {
+      retryCount: 0,
+      fetcher,
+    });
+
+    try {
+      await vi.advanceTimersByTimeAsync(100);
+      await flushMicrotasks();
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      result.refetch();
+      await waitFor(() => result.data() !== undefined);
+
+      expect(result.data()).toEqual({ id: 1, name: 'Recovered' });
+      expect(fetcher).toHaveBeenCalledTimes(2);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('clears rejected dedupe entry within same microtask flush', async () => {
+    let rejectFirstRequest!: (reason: unknown) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((_resolve, reject) => {
+      rejectFirstRequest = reject;
+    });
+    const fetcher = vi.fn().mockReturnValueOnce(firstRequest);
+
+    let pendingRequests!: Map<string, PendingEntry<unknown>>;
+    let dispose!: () => void;
+    const defaultRefreshData = createSignal<Record<string, boolean>>({});
+
+    createRoot((d) => {
+      dispose = d;
+
+      const Wrapper = () => {
+        useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        const context = useContext(CustomResourceContext);
+        if (!context) throw new Error('missing CustomResourceContext in test');
+        pendingRequests = context.pendingRequests as Map<string, PendingEntry<unknown>>;
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={defaultRefreshData[0]}
+          retryCount={0}
+          errorsBlackList={[401]}
+          fetcher={fetcher}
+        >
+          <Wrapper />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      expect(pendingRequests.get('/api/users/1')?.promise).toBeTruthy();
+
+      rejectFirstRequest(Object.assign(new Error('Unauthorized'), { status: 401 }));
+      await flushMicrotasks();
+
+      expect(pendingRequests.get('/api/users/1')).toBeUndefined();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('manual refetch bypasses shared pending dedupe promise without entry-gap', async () => {
+    let resolveFirstRequest!: (value: { id: number; name: string }) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+    const fetcher = vi.fn()
+      .mockReturnValueOnce(firstRequest)
+      .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
+
+    let result!: CustomResource<{ id: number; name: string }>;
+    let pendingRequests!: Map<string, PendingEntry<unknown>>;
+    let dispose!: () => void;
+    const defaultRefreshData = createSignal<Record<string, boolean>>({});
+
+    createRoot((d) => {
+      dispose = d;
+
+      const Wrapper = () => {
+        result = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        const context = useContext(CustomResourceContext);
+        if (!context) throw new Error('missing CustomResourceContext in test');
+        pendingRequests = context.pendingRequests as Map<string, PendingEntry<unknown>>;
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={defaultRefreshData[0]}
+          retryCount={0}
+          fetcher={fetcher}
+        >
+          <Wrapper />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+      expect(pendingRequests.get('/api/users/1')?.promise).toBeTruthy();
+
+      result.refetch();
+      expect(pendingRequests.get('/api/users/1')?.promise).toBeTruthy();
+
+      await waitFor(() => fetcher.mock.calls.length === 2);
+      await waitFor(() => result.data() !== undefined);
+      expect(result.data()).toEqual({ id: 2, name: 'Fresh' });
+      expect(pendingRequests.get('/api/users/1')?.lastValue).toEqual({
+        id: 2,
+        name: 'Fresh',
+      });
+
+      resolveFirstRequest({ id: 1, name: 'Stale' });
+      await flushMicrotasks();
+
+      expect(result.data()).toEqual({ id: 2, name: 'Fresh' });
+      expect(result.error()).toBeNull();
+      expect(pendingRequests.get('/api/users/1')?.lastValue).toEqual({
+        id: 2,
+        name: 'Fresh',
+      });
+    } finally {
+      dispose();
+    }
+  });
+
+  it('does not leak forceFreshNextFetch after refetch while URL is empty', async () => {
+    const [url, setUrl] = createSignal('/api/users/1');
+    const fetcher = vi.fn().mockResolvedValue({ id: 1, name: 'Fresh' });
+
+    const { result, dispose } = createTestResource({
+      urlString: url,
+      swr: false,
+    }, {
+      retryCount: 0,
+      fetcher,
+      dedupeInterval: 10_000,
+    });
+
+    try {
+      await waitFor(() => result.data() !== undefined);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      setUrl('');
+      await flushMicrotasks();
+      result.refetch();
+      await flushMicrotasks();
+
+      setUrl('/api/users/1');
+      await flushMicrotasks();
+      await waitFor(() => result.data() !== undefined);
+
+      // Should reuse dedupe lastValue; no forced bypass-triggered second network call.
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    } finally {
+      dispose();
+    }
+  });
+
+  it('ignores stale first rejection after newer manual refetch success', async () => {
+    let rejectFirstRequest!: (reason: unknown) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((_resolve, reject) => {
+      rejectFirstRequest = reject;
+    });
+    const fetcher = vi.fn()
+      .mockReturnValueOnce(firstRequest)
+      .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
+    const onError = vi.fn();
+
+    let result!: CustomResource<{ id: number; name: string }>;
+    let dispose!: () => void;
+    const defaultRefreshData = createSignal<Record<string, boolean>>({});
+
+    createRoot((d) => {
+      dispose = d;
+
+      const Wrapper = () => {
+        result = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={defaultRefreshData[0]}
+          retryCount={0}
+          errorsBlackList={[401]}
+          fetcher={fetcher}
+          onError={onError}
+        >
+          <Wrapper />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+
+      result.refetch();
+      await waitFor(() => fetcher.mock.calls.length === 2);
+      await waitFor(() => result.data() !== undefined);
+      expect(result.data()).toEqual({ id: 2, name: 'Fresh' });
+
+      rejectFirstRequest(Object.assign(new Error('Unauthorized'), { status: 401 }));
+      await flushMicrotasks();
+
+      expect(result.data()).toEqual({ id: 2, name: 'Fresh' });
+      expect(result.error()).toBeNull();
+      expect(result.errorStatus()).toBeUndefined();
+      expect(onError).not.toHaveBeenCalled();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('stale abort from older request does not prematurely settle newer pending request', async () => {
+    let rejectFirstRequest!: (reason: unknown) => void;
+    let resolveSecondRequest!: (value: { id: number; name: string }) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((_resolve, reject) => {
+      rejectFirstRequest = reject;
+    });
+    const secondRequest = new Promise<{ id: number; name: string }>((resolve) => {
+      resolveSecondRequest = resolve;
+    });
+    const fetcher = vi.fn()
+      .mockReturnValueOnce(firstRequest)
+      .mockReturnValueOnce(secondRequest);
+
+    const { result, dispose } = createTestResource({
+      urlString: () => '/api/users/1',
+      swr: false,
+    }, {
+      retryCount: 0,
+      fetcher,
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+      result.refetch();
+      await waitFor(() => fetcher.mock.calls.length === 2);
+
+      rejectFirstRequest(new DOMException('The operation was aborted', 'AbortError'));
+      await flushMicrotasks();
+
+      expect(result.loading()).toBe(true);
+      expect(result.data()).toBeUndefined();
+      expect(result.error()).toBeNull();
+
+      resolveSecondRequest({ id: 2, name: 'Fresh' });
+      await waitFor(() => result.data() !== undefined);
+
+      expect(result.loading()).toBe(false);
+      expect(result.data()).toEqual({ id: 2, name: 'Fresh' });
+      expect(result.error()).toBeNull();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('keeps sibling shared-request completion while protecting refetching instance state', async () => {
+    let resolveFirstRequest!: (value: { id: number; name: string }) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+    const fetcher = vi.fn()
+      .mockReturnValueOnce(firstRequest)
+      .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
+
+    let resultA!: CustomResource<{ id: number; name: string }>;
+    let resultB!: CustomResource<{ id: number; name: string }>;
+    let dispose!: () => void;
+    const defaultRefreshData = createSignal<Record<string, boolean>>({});
+
+    createRoot((d) => {
+      dispose = d;
+
+      const WrapperA = () => {
+        resultA = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        return null;
+      };
+
+      const WrapperB = () => {
+        resultB = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={defaultRefreshData[0]}
+          retryCount={0}
+          fetcher={fetcher}
+        >
+          <WrapperA />
+          <WrapperB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+
+      resultA.refetch();
+      await waitFor(() => fetcher.mock.calls.length === 2);
+      await waitFor(() => resultA.data() !== undefined);
+      expect(resultA.data()).toEqual({ id: 2, name: 'Fresh' });
+
+      resolveFirstRequest({ id: 1, name: 'Stale' });
+      await flushMicrotasks();
+      await waitFor(() => resultB.data() !== undefined);
+
+      expect(resultA.data()).toEqual({ id: 2, name: 'Fresh' });
+      expect(resultA.error()).toBeNull();
+      expect(resultB.data()).toEqual({ id: 1, name: 'Stale' });
+      expect(resultB.error()).toBeNull();
+    } finally {
+      dispose();
+    }
+  });
+
+  it('keeps sibling completion with dedupeRequests=false while protecting refetching instance', async () => {
+    let resolveFirstRequest!: (value: { id: number; name: string }) => void;
+    let resolveSecondRequest!: (value: { id: number; name: string }) => void;
+    const firstRequest = new Promise<{ id: number; name: string }>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+    const secondRequest = new Promise<{ id: number; name: string }>((resolve) => {
+      resolveSecondRequest = resolve;
+    });
+    const fetcher = vi.fn()
+      .mockReturnValueOnce(firstRequest)
+      .mockReturnValueOnce(secondRequest)
+      .mockResolvedValueOnce({ id: 3, name: 'Fresh' });
+
+    let resultA!: CustomResource<{ id: number; name: string }>;
+    let resultB!: CustomResource<{ id: number; name: string }>;
+    let dispose!: () => void;
+    const defaultRefreshData = createSignal<Record<string, boolean>>({});
+
+    createRoot((d) => {
+      dispose = d;
+
+      const WrapperA = () => {
+        resultA = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        return null;
+      };
+
+      const WrapperB = () => {
+        resultB = useCustomResource<{ id: number; name: string }>({
+          urlString: () => '/api/users/1',
+          swr: false,
+        });
+        return null;
+      };
+
+      return (
+        <CustomResourceProvider
+          refreshData={defaultRefreshData[0]}
+          retryCount={0}
+          dedupeRequests={false}
+          fetcher={fetcher}
+        >
+          <WrapperA />
+          <WrapperB />
+        </CustomResourceProvider>
+      );
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 2);
+
+      resultA.refetch();
+      await waitFor(() => fetcher.mock.calls.length === 3);
+      await waitFor(() => resultA.data() !== undefined);
+      expect(resultA.data()).toEqual({ id: 3, name: 'Fresh' });
+
+      resolveFirstRequest({ id: 1, name: 'Stale A' });
+      resolveSecondRequest({ id: 2, name: 'Stale B' });
+      await flushMicrotasks();
+      await waitFor(() => resultB.data() !== undefined);
+
+      expect(resultA.data()).toEqual({ id: 3, name: 'Fresh' });
+      expect(resultA.error()).toBeNull();
+      expect(resultB.data()).toEqual({ id: 2, name: 'Stale B' });
+      expect(resultB.error()).toBeNull();
+    } finally {
+      dispose();
+    }
+  });
 });
 
 // ==================== AbortController ====================
@@ -701,6 +1742,34 @@ describe('abort and cancellation', () => {
       if (signals.length >= 2) {
         expect(signals[0].aborted).toBe(true);
       }
+    } finally {
+      dispose();
+    }
+  });
+
+  it('refetch clears validating when replacement fetch is skipped', async () => {
+    const neverSettles = new Promise<{ id: number }>(() => undefined);
+    const fetcher = vi.fn().mockReturnValue(neverSettles);
+    const [url, setUrl] = createSignal('/api/users/1');
+
+    const { result, dispose } = createTestResource<{ id: number }>({
+      urlString: url,
+      swr: true,
+    }, {
+      retryCount: 0,
+      fetcher,
+    });
+
+    try {
+      await waitFor(() => fetcher.mock.calls.length === 1);
+      expect(result.validating()).toBe(true);
+
+      setUrl('');
+      result.refetch();
+      await flushMicrotasks();
+
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      expect(result.validating()).toBe(false);
     } finally {
       dispose();
     }

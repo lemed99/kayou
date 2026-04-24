@@ -12,10 +12,12 @@ import {
 
 import { ChevronRightIcon, Lock01Icon, LockUnlocked01Icon } from '@kayou/icons';
 import { createPresence } from '@solid-primitives/presence';
+import { twMerge } from 'tailwind-merge';
 
 import Checkbox from '../Checkbox';
 import Tooltip from '../Tooltip';
 import { useDataTableInternal } from './DataTableInternalContext';
+import { getDataTableColumnAlignmentClasses } from './alignment';
 
 interface DataTableRowProps<T> {
   row: T;
@@ -131,11 +133,18 @@ export function DataTableRow<T extends Record<string, unknown>>(
         break;
       case 'ContextMenu':
       case 'F10':
-        if (ctx.rowContextMenu && (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey))) {
+        if (
+          ctx.rowContextMenu &&
+          (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey))
+        ) {
           e.preventDefault();
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           ctx.openContextMenu(
-            { preventDefault: () => {}, clientX: rect.left + 20, clientY: rect.top + rect.height / 2 } as MouseEvent,
+            {
+              preventDefault: () => {},
+              clientX: rect.left + 20,
+              clientY: rect.top + rect.height / 2,
+            } as MouseEvent,
             props.row,
             props.index(),
           );
@@ -216,7 +225,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
       >
         {/* Row lock icon */}
         <Show when={ctx.rowLocking}>
-          <div class="absolute left-1 top-1/2 z-10 -translate-y-1/2">
+          <div class="absolute top-1/2 left-1 z-10 -translate-y-1/2">
             <Tooltip
               content={isLocked() ? ctx.labels().unlockRow : ctx.labels().lockRow}
               placement="right"
@@ -288,43 +297,51 @@ export function DataTableRow<T extends Record<string, unknown>>(
 
         {/* Data cells */}
         <For each={ctx.columns()}>
-          {(column) => (
-            <div
-              role="cell"
-              class="flex shrink-0 items-center overflow-hidden px-6 py-4 text-neutral-900 dark:text-white"
-              classList={{
-                'relative border-x border-dashed border-neutral-200 dark:border-neutral-700 bg-inherit':
-                  isSticky(column.key),
-                ...rowElementsClassList(),
-              }}
-              style={stickyStyle(column.key)}
-            >
-              <Show
-                when={column.render}
-                fallback={
-                  <span data-column={column.key}>
-                    {formatCellValue(props.row[column.key])}
-                  </span>
-                }
+          {(column) => {
+            const alignment = getDataTableColumnAlignmentClasses(column.align);
+
+            return (
+              <div
+                role="cell"
+                class={twMerge(
+                  'flex shrink-0 items-center overflow-hidden px-6 py-4 text-neutral-900 dark:text-white',
+                  alignment.justifyClass,
+                  alignment.textClass,
+                )}
+                classList={{
+                  'relative border-x border-dashed border-neutral-200 dark:border-neutral-700 bg-inherit':
+                    isSticky(column.key),
+                  ...rowElementsClassList(),
+                }}
+                style={stickyStyle(column.key)}
               >
-                <ErrorBoundary
-                  fallback={(err) => (
-                    <span
-                      data-column={column.key}
-                      title={String(err)}
-                      class="text-red-500"
-                    >
+                <Show
+                  when={column.render}
+                  fallback={
+                    <span data-column={column.key} class={alignment.textClass}>
                       {formatCellValue(props.row[column.key])}
                     </span>
-                  )}
+                  }
                 >
-                  <span data-column={column.key}>
-                    {column.render!(props.row[column.key], props.row, props.index())}
-                  </span>
-                </ErrorBoundary>
-              </Show>
-            </div>
-          )}
+                  <ErrorBoundary
+                    fallback={(err) => (
+                      <span
+                        data-column={column.key}
+                        title={String(err)}
+                        class={twMerge('text-red-500', alignment.textClass)}
+                      >
+                        {formatCellValue(props.row[column.key])}
+                      </span>
+                    )}
+                  >
+                    <span data-column={column.key} class={alignment.textClass}>
+                      {column.render!(props.row[column.key], props.row, props.index())}
+                    </span>
+                  </ErrorBoundary>
+                </Show>
+              </div>
+            );
+          }}
         </For>
       </div>
 
