@@ -86,7 +86,7 @@ export function DataTableHeader(): JSX.Element {
         ref={ctx.setHeaderRef}
         role="row"
         class={twMerge(
-          'relative grid w-fit border-b border-neutral-200 bg-neutral-100 text-xs font-bold text-neutral-700 uppercase dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
+          'relative grid w-fit border-b border-neutral-200 bg-neutral-100 text-xs font-bold uppercase text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400',
           !ctx.searchBar &&
             !ctx.configureColumns &&
             !(ctx.rowSelection && ctx.selectedRows().size > 0)
@@ -132,7 +132,7 @@ export function DataTableHeader(): JSX.Element {
                 aria-sort={getAriaSortValue(column.key)}
                 data-column-key={column.key}
                 class={twMerge(
-                  'group/header relative flex items-center gap-1 overflow-hidden px-6 py-3 whitespace-nowrap',
+                  'group/header relative flex items-center gap-1 overflow-hidden whitespace-nowrap px-6 py-3',
                   alignment.textClass,
                   isSticky(column.key) &&
                     'border-x border-dashed border-neutral-200 dark:border-neutral-700',
@@ -277,7 +277,7 @@ export function DataTableHeader(): JSX.Element {
                         'flex shrink-0 items-center justify-center rounded p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                         isSticky(column.key)
                           ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-neutral-400 opacity-0 transition-opacity group-hover/header:opacity-100 focus-visible:opacity-100 dark:text-neutral-500',
+                          : 'text-neutral-400 opacity-0 transition-opacity focus-visible:opacity-100 group-hover/header:opacity-100 dark:text-neutral-500',
                       )}
                       aria-label={
                         isSticky(column.key)
@@ -310,7 +310,7 @@ export function DataTableHeader(): JSX.Element {
                     showDelay={500}
                   >
                     <div
-                      class="h-full w-full cursor-col-resize border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 select-none group-hover/header:opacity-100 focus-visible:opacity-100 dark:border-neutral-700"
+                      class="h-full w-full cursor-col-resize select-none border-x-2 border-neutral-200 opacity-0 transition-opacity duration-300 focus-visible:opacity-100 group-hover/header:opacity-100 dark:border-neutral-700"
                       onMouseDown={(e) => startResize(column.key, e)}
                       onDblClick={() => ctx.resetColumnResize(column.key)}
                       onKeyDown={(e) => {

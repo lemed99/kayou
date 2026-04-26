@@ -142,6 +142,9 @@ export const insertOrUpdateCacheRow = async (key: string, value: unknown) => {
   await cache.set(key, value);
 };
 
-export const getCacheRow = async (key: string, validator?: (data: unknown) => boolean): Promise<unknown> => {
+export const getCacheRow = async (
+  key: string,
+  validator?: (data: unknown) => boolean,
+): Promise<unknown> => {
   return cache.get(key, validator);
 };

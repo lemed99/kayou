@@ -167,7 +167,10 @@ const OTPInput = (props: OTPInputProps): JSX.Element => {
     e: InputEvent & { currentTarget: HTMLInputElement },
   ) => {
     const inputValue = e.currentTarget.value;
-    const char = inputValue.replace(/[^a-zA-Z0-9]/g, '').slice(-1).toUpperCase();
+    const char = inputValue
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(-1)
+      .toUpperCase();
 
     // eslint-disable-next-line solid/reactivity
     const arr = Array.from({ length: length() }, (_, i) => currentValue()[i] ?? '');

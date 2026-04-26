@@ -15,7 +15,9 @@ function TagInputExamples() {
           id="basic-input"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Basic Input</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Basic Input
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Type a value and press comma, semicolon, enter, or blur to create a tag.
           </p>
@@ -55,8 +57,8 @@ function TagInputExamples() {
             Controlled Value
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            This example mirrors `NumberInput`: control the committed tags through
-            `value` and `onValueChange`.
+            This example mirrors `NumberInput`: control the committed tags through `value`
+            and `onValueChange`.
           </p>
           <div class="mt-4">
             <TagInput
@@ -123,15 +125,18 @@ export default function TagInputPage() {
       keyConcepts={[
         {
           term: 'Shared Input API',
-          explanation: 'Supports the same sizing, color, label, helper, icon, and addon props as TextInput.',
+          explanation:
+            'Supports the same sizing, color, label, helper, icon, and addon props as TextInput.',
         },
         {
           term: 'Tag Creation',
-          explanation: 'Comma, semicolon, enter, blur, and pasted lists can all commit tags.',
+          explanation:
+            'Comma, semicolon, enter, blur, and pasted lists can all commit tags.',
         },
         {
           term: 'Accessible Tag List',
-          explanation: 'Tags render in a labeled list with dedicated remove buttons and live status updates.',
+          explanation:
+            'Tags render in a labeled list with dedicated remove buttons and live status updates.',
         },
       ]}
       props={[

@@ -1,13 +1,13 @@
 import {
-    For,
-    type JSX,
-    type ParentProps,
-    Show,
-    createEffect,
-    createSignal,
-    onCleanup,
-    onMount,
-    untrack,
+  For,
+  type JSX,
+  type ParentProps,
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
+  untrack,
 } from 'solid-js';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@kayou/icons';
@@ -300,7 +300,9 @@ export default function BaseDocPage(props: ParentProps<BaseDocPageProps>): JSX.E
                       href={`#${item.id}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        document
+                          .getElementById(item.id)
+                          ?.scrollIntoView({ behavior: 'smooth' });
                         history.replaceState(null, '', `#${item.id}`);
                       }}
                       class="text-neutral-500 transition-colors hover:text-neutral-900 aria-[current]:font-medium aria-[current]:text-neutral-900 dark:text-neutral-400 dark:hover:text-white dark:aria-[current]:text-white"

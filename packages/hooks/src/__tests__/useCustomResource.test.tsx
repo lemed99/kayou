@@ -1,4 +1,5 @@
 import { createRoot, createSignal, useContext } from 'solid-js';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -7,8 +8,7 @@ import {
   type PendingEntry,
 } from '../context/CustomResourceContext';
 import { getCacheRow, insertOrUpdateCacheRow } from '../helpers/indexedDB';
-import { useCustomResource, type CustomResource } from '../hooks/useCustomResource';
-
+import { type CustomResource, useCustomResource } from '../hooks/useCustomResource';
 import {
   createTestResource,
   flushMicrotasks,
@@ -57,13 +57,16 @@ describe('basic fetching', () => {
   it('sets error and errorStatus on HTTP error response', async () => {
     globalThis.fetch = mockFetchError(500, { message: 'Internal Server Error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -77,14 +80,17 @@ describe('basic fetching', () => {
   it('parses error message from JSON body', async () => {
     globalThis.fetch = mockFetchError(400, 'Validation failed');
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      errorsBlackList: [400],
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        errorsBlackList: [400],
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -100,16 +106,19 @@ describe('basic fetching', () => {
       status: 502,
       statusText: 'Bad Gateway',
       json: () => Promise.reject(new Error('invalid json')),
-    }) as unknown as typeof globalThis.fetch;
-
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      errorsBlackList: [502],
-      dedupeRequests: false,
     });
+
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        errorsBlackList: [502],
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -125,16 +134,19 @@ describe('basic fetching', () => {
       status: 503,
       statusText: '',
       json: () => Promise.reject(new Error('invalid json')),
-    }) as unknown as typeof globalThis.fetch;
-
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      errorsBlackList: [503],
-      dedupeRequests: false,
     });
+
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        errorsBlackList: [503],
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -191,12 +203,15 @@ describe('SWR pattern', () => {
     // Delay the network fetch so cache resolves first
     globalThis.fetch = mockFetchSuccess(freshData, 200);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-    }, {
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+      },
+      {
+        dedupeRequests: false,
+      },
+    );
 
     try {
       // Cache data should arrive first
@@ -249,13 +264,16 @@ describe('SWR pattern', () => {
     );
     globalThis.fetch = mockFetchSuccess(freshData);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-      pullFromCache: false,
-    }, {
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+        pullFromCache: false,
+      },
+      {
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
@@ -767,11 +785,15 @@ describe('SWR pattern', () => {
   });
 
   it('keeps successful network state when cache write fails and later cache checks run', async () => {
-    const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({ user: true });
+    const [refreshData, setRefreshData] = createSignal<Record<string, boolean>>({
+      user: true,
+    });
     const [forceRefresh, setForceRefresh] = createSignal(true);
     const onError = vi.fn();
     const fetcher = vi.fn().mockResolvedValue({ id: 'fresh', name: 'Fresh Network' });
-    vi.mocked(insertOrUpdateCacheRow).mockRejectedValueOnce(new Error('cache write failed'));
+    vi.mocked(insertOrUpdateCacheRow).mockRejectedValueOnce(
+      new Error('cache write failed'),
+    );
     vi.mocked(getCacheRow).mockResolvedValue({ id: 'stale', name: 'Stale Cache' });
 
     let result!: CustomResource<{ id: string; name: string }>;
@@ -848,19 +870,20 @@ describe('SWR pattern', () => {
     vi.mocked(getCacheRow).mockResolvedValue(cachedData);
     globalThis.fetch = mockFetchSuccess({ id: 1, name: 'Fresh' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-    }, {
-      onSuccess,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+      },
+      {
+        onSuccess,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
       // First call should be from cache
-      const cacheCall = onSuccess.mock.calls.find(
-        (call: unknown[]) => call[1] === true,
-      );
+      const cacheCall = onSuccess.mock.calls.find((call: unknown[]) => call[1] === true);
       expect(cacheCall).toBeTruthy();
       expect(cacheCall![0]).toEqual(cachedData);
     } finally {
@@ -874,12 +897,15 @@ describe('SWR pattern', () => {
     vi.mocked(getCacheRow).mockResolvedValue(null);
     globalThis.fetch = mockFetchSuccess(freshData);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-    }, {
-      onSuccess,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+      },
+      {
+        onSuccess,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
@@ -938,19 +964,19 @@ describe('cache integration', () => {
     vi.mocked(getCacheRow).mockResolvedValue(cachedData);
     globalThis.fetch = mockFetchSuccess({ id: 1, name: 'Fresh' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-    }, {
-      cacheValidator: validator,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+      },
+      {
+        cacheValidator: validator,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
-      expect(getCacheRow).toHaveBeenCalledWith(
-        expect.any(String),
-        validator,
-      );
+      expect(getCacheRow).toHaveBeenCalledWith(expect.any(String), validator);
     } finally {
       dispose();
     }
@@ -987,18 +1013,21 @@ describe('retry logic', () => {
         statusText: 'Bad Gateway',
         json: () => Promise.resolve({ message: 'error' }),
       });
-    }) as unknown as typeof globalThis.fetch;
-
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 2,
-      retryDelay: 100,
-      exponentialBackoff: false,
-      errorsBlackList: [],
-      dedupeRequests: false,
     });
+
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 2,
+        retryDelay: 100,
+        exponentialBackoff: false,
+        errorsBlackList: [],
+        dedupeRequests: false,
+      },
+    );
 
     try {
       // Wait for initial fetch to fail
@@ -1022,15 +1051,18 @@ describe('retry logic', () => {
     const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     globalThis.fetch = mockFetchError(502, { message: 'error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 3,
-      retryDelay: 1000,
-      exponentialBackoff: true,
-      errorsBlackList: [],
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 3,
+        retryDelay: 1000,
+        exponentialBackoff: true,
+        errorsBlackList: [],
+      },
+    );
 
     try {
       await waitFor(() => result.attempts() >= 1);
@@ -1050,13 +1082,16 @@ describe('retry logic', () => {
   it('does not retry for blacklisted error status codes', async () => {
     globalThis.fetch = mockFetchError(404, { message: 'Not found' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 3,
-      errorsBlackList: [404],
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 3,
+        errorsBlackList: [404],
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1074,20 +1109,24 @@ describe('retry logic', () => {
   it('does not retry AbortError', async () => {
     // Use a custom fetcher: first call rejects with AbortError, second would succeed
     const abortError = new DOMException('The operation was aborted', 'AbortError');
-    const customFetcher = vi.fn()
+    const customFetcher = vi
+      .fn()
       .mockRejectedValueOnce(abortError)
       .mockResolvedValue({ id: 1, name: 'Success' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-      options: { fetcher: customFetcher },
-    }, {
-      retryCount: 3,
-      retryDelay: 100,
-      errorsBlackList: [],
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+        options: { fetcher: customFetcher },
+      },
+      {
+        retryCount: 3,
+        retryDelay: 100,
+        errorsBlackList: [],
+        dedupeRequests: false,
+      },
+    );
 
     try {
       // Let initial fetch + effects resolve
@@ -1110,15 +1149,18 @@ describe('retry logic', () => {
   it('retries network errors (no status code)', async () => {
     globalThis.fetch = mockFetchNetworkError();
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 2,
-      retryDelay: 500,
-      exponentialBackoff: false,
-      errorsBlackList: [404, 500],
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 2,
+        retryDelay: 500,
+        exponentialBackoff: false,
+        errorsBlackList: [404, 500],
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1148,17 +1190,20 @@ describe('retry logic', () => {
         status: 200,
         json: () => Promise.resolve({ id: 1 }),
       });
-    }) as unknown as typeof globalThis.fetch;
-
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 1,
-      retryDelay: 1000,
-      exponentialBackoff: false,
-      errorsBlackList: [],
     });
+
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 1,
+        retryDelay: 1000,
+        exponentialBackoff: false,
+        errorsBlackList: [],
+      },
+    );
 
     try {
       await waitFor(() => result.attempts() >= 1);
@@ -1178,15 +1223,18 @@ describe('retry logic', () => {
   it('stops retrying after reaching retryCount', async () => {
     globalThis.fetch = mockFetchError(502, { message: 'error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 1,
-      retryDelay: 500,
-      exponentialBackoff: false,
-      errorsBlackList: [],
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 1,
+        retryDelay: 500,
+        exponentialBackoff: false,
+        errorsBlackList: [],
+      },
+    );
 
     try {
       await waitFor(() => result.attempts() >= 1);
@@ -1212,11 +1260,14 @@ describe('request deduplication', () => {
     const data = { id: 1 };
     globalThis.fetch = mockFetchSuccess(data);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-    }, {
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+      },
+      {
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
@@ -1227,18 +1278,22 @@ describe('request deduplication', () => {
   });
 
   it('clears stale rejected dedupe promise after 401 so refetch performs new request', async () => {
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockRejectedValueOnce(Object.assign(new Error('Unauthorized'), { status: 401 }))
       .mockResolvedValueOnce({ id: 1, name: 'Recovered' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      errorsBlackList: [401],
-      fetcher,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        errorsBlackList: [401],
+        fetcher,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1256,17 +1311,21 @@ describe('request deduplication', () => {
 
   it('clears stale rejected dedupe promise after AbortError so refetch performs new request', async () => {
     const abortError = new DOMException('The operation was aborted', 'AbortError');
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockRejectedValueOnce(abortError)
       .mockResolvedValueOnce({ id: 1, name: 'Recovered' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      fetcher,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        fetcher,
+      },
+    );
 
     try {
       await vi.advanceTimersByTimeAsync(100);
@@ -1304,7 +1363,7 @@ describe('request deduplication', () => {
         });
         const context = useContext(CustomResourceContext);
         if (!context) throw new Error('missing CustomResourceContext in test');
-        pendingRequests = context.pendingRequests as Map<string, PendingEntry<unknown>>;
+        pendingRequests = context.pendingRequests;
         return null;
       };
 
@@ -1339,7 +1398,8 @@ describe('request deduplication', () => {
     const firstRequest = new Promise<{ id: number; name: string }>((resolve) => {
       resolveFirstRequest = resolve;
     });
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockReturnValueOnce(firstRequest)
       .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
 
@@ -1358,7 +1418,7 @@ describe('request deduplication', () => {
         });
         const context = useContext(CustomResourceContext);
         if (!context) throw new Error('missing CustomResourceContext in test');
-        pendingRequests = context.pendingRequests as Map<string, PendingEntry<unknown>>;
+        pendingRequests = context.pendingRequests;
         return null;
       };
 
@@ -1406,14 +1466,17 @@ describe('request deduplication', () => {
     const [url, setUrl] = createSignal('/api/users/1');
     const fetcher = vi.fn().mockResolvedValue({ id: 1, name: 'Fresh' });
 
-    const { result, dispose } = createTestResource({
-      urlString: url,
-      swr: false,
-    }, {
-      retryCount: 0,
-      fetcher,
-      dedupeInterval: 10_000,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: url,
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        fetcher,
+        dedupeInterval: 10_000,
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
@@ -1440,7 +1503,8 @@ describe('request deduplication', () => {
     const firstRequest = new Promise<{ id: number; name: string }>((_resolve, reject) => {
       rejectFirstRequest = reject;
     });
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockReturnValueOnce(firstRequest)
       .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
     const onError = vi.fn();
@@ -1502,17 +1566,21 @@ describe('request deduplication', () => {
     const secondRequest = new Promise<{ id: number; name: string }>((resolve) => {
       resolveSecondRequest = resolve;
     });
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockReturnValueOnce(firstRequest)
       .mockReturnValueOnce(secondRequest);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      fetcher,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        fetcher,
+      },
+    );
 
     try {
       await waitFor(() => fetcher.mock.calls.length === 1);
@@ -1542,7 +1610,8 @@ describe('request deduplication', () => {
     const firstRequest = new Promise<{ id: number; name: string }>((resolve) => {
       resolveFirstRequest = resolve;
     });
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockReturnValueOnce(firstRequest)
       .mockResolvedValueOnce({ id: 2, name: 'Fresh' });
 
@@ -1612,7 +1681,8 @@ describe('request deduplication', () => {
     const secondRequest = new Promise<{ id: number; name: string }>((resolve) => {
       resolveSecondRequest = resolve;
     });
-    const fetcher = vi.fn()
+    const fetcher = vi
+      .fn()
       .mockReturnValueOnce(firstRequest)
       .mockReturnValueOnce(secondRequest)
       .mockResolvedValueOnce({ id: 3, name: 'Fresh' });
@@ -1752,13 +1822,16 @@ describe('abort and cancellation', () => {
     const fetcher = vi.fn().mockReturnValue(neverSettles);
     const [url, setUrl] = createSignal('/api/users/1');
 
-    const { result, dispose } = createTestResource<{ id: number }>({
-      urlString: url,
-      swr: true,
-    }, {
-      retryCount: 0,
-      fetcher,
-    });
+    const { result, dispose } = createTestResource<{ id: number }>(
+      {
+        urlString: url,
+        swr: true,
+      },
+      {
+        retryCount: 0,
+        fetcher,
+      },
+    );
 
     try {
       await waitFor(() => fetcher.mock.calls.length === 1);
@@ -1854,13 +1927,16 @@ describe('error state management', () => {
   it('sets error signal on fetch failure', async () => {
     globalThis.fetch = mockFetchError(500, { message: 'Server Error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1874,14 +1950,17 @@ describe('error state management', () => {
     const onError = vi.fn();
     globalThis.fetch = mockFetchError(500, { message: 'Server Error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-    }, {
-      retryCount: 0,
-      onError,
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+      },
+      {
+        retryCount: 0,
+        onError,
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1901,14 +1980,17 @@ describe('error state management', () => {
       return Promise.resolve({ id: 1, name: 'Success' });
     });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: false,
-      options: { fetcher: customFetcher },
-    }, {
-      retryCount: 0,
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: false,
+        options: { fetcher: customFetcher },
+      },
+      {
+        retryCount: 0,
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1947,13 +2029,16 @@ describe('error state management', () => {
   it('sets validating to false on error', async () => {
     globalThis.fetch = mockFetchError(500, { message: 'Error' });
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/api/users/1',
-      swr: true,
-    }, {
-      retryCount: 0,
-      dedupeRequests: false,
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/api/users/1',
+        swr: true,
+      },
+      {
+        retryCount: 0,
+        dedupeRequests: false,
+      },
+    );
 
     try {
       await waitFor(() => result.error() !== null);
@@ -1971,11 +2056,14 @@ describe('context integration', () => {
     const data = { id: 1 };
     globalThis.fetch = mockFetchSuccess(data);
 
-    const { result, dispose } = createTestResource({
-      urlString: () => '/users/1',
-    }, {
-      baseUrl: 'https://api.example.com',
-    });
+    const { result, dispose } = createTestResource(
+      {
+        urlString: () => '/users/1',
+      },
+      {
+        baseUrl: 'https://api.example.com',
+      },
+    );
 
     try {
       await waitFor(() => result.data() !== undefined);
@@ -2040,7 +2128,7 @@ describe('cleanup and lifecycle', () => {
         status: 200,
         json: () => Promise.resolve(data),
       });
-    }) as unknown as typeof globalThis.fetch;
+    });
 
     const [userId, setUserId] = createSignal(1);
 

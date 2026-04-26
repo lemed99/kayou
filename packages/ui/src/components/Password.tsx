@@ -31,6 +31,19 @@ type PasswordFormAdapter = Pick<
   | 'registerSubmitValidator'
 >;
 
+const toPasswordString = (value: unknown): string => {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string') return value;
+  if (
+    typeof value === 'number' ||
+    typeof value === 'bigint' ||
+    typeof value === 'boolean'
+  ) {
+    return value.toString();
+  }
+  return '';
+};
+
 /**
  * Password strength levels.
  */
@@ -274,11 +287,11 @@ export default function Password(props: PasswordProps): JSX.Element {
     const name = fieldName();
     if (!local.form || !name) return undefined;
     const value = local.form.values[name];
-    return value === undefined || value === null ? '' : String(value);
+    return toPasswordString(value);
   })();
   // `value` seeds the initial password, but the field is internally uncontrolled after mount.
   const initialPasswordValue =
-    initialFormValue ?? (local.value !== undefined ? String(local.value) : '');
+    initialFormValue ?? (local.value !== undefined ? toPasswordString(local.value) : '');
   const [passwordValue, setPasswordValue] = createSignal(initialPasswordValue);
   const [showFormValidationMessage, setShowFormValidationMessage] = createSignal(false);
 
@@ -403,8 +416,7 @@ export default function Password(props: PasswordProps): JSX.Element {
     if (!form || !name) return;
 
     const nextValue = form.values[name];
-    const normalizedValue =
-      nextValue === undefined || nextValue === null ? '' : String(nextValue);
+    const normalizedValue = toPasswordString(nextValue);
 
     if (normalizedValue !== untrack(passwordValue)) {
       setPasswordValue(normalizedValue);

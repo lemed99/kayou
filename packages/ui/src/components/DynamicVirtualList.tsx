@@ -136,10 +136,7 @@ export function DynamicVirtualList<
     if (props.ref && container) {
       props.ref({
         scrollToIndex: (index: number, scrollBehavior: ScrollBehavior = 'auto') => {
-          const result = scrollToIndex(index, scrollBehavior) as {
-            scrollTop: number;
-            behavior: ScrollBehavior;
-          };
+          const result = scrollToIndex(index, scrollBehavior);
           container.scrollTo({ top: result.scrollTop, behavior: result.behavior });
         },
       });

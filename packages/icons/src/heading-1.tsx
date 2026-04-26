@@ -1,4 +1,5 @@
 import { JSX } from 'solid-js';
+
 import { IconProps, IconWrapper } from './components/IconWrapper';
 
 export const Heading1Icon = (props: IconProps): JSX.Element => (

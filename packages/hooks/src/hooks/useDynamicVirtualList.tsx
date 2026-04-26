@@ -180,7 +180,7 @@ export function useDynamicVirtualList<T extends readonly unknown[]>(
     return {
       containerHeight: total,
       viewerTop: offsets[firstIdx] ?? 0,
-      visibleItems: itemList.slice(firstIdx, lastIdx) as T[number][],
+      visibleItems: itemList.slice(firstIdx, lastIdx),
       startIndex: firstIdx,
       endIndex: lastIdx,
       totalItems: itemList.length,

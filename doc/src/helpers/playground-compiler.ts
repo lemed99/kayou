@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-implied-eval */
 import type { Component } from 'solid-js';
 import * as solidJs from 'solid-js';
-import * as solidJsWeb from 'solid-js/web';
 import * as solidJsStore from 'solid-js/store';
-import * as kayouUi from '@kayou/ui';
-import * as kayouIcons from '@kayou/icons';
+import * as solidJsWeb from 'solid-js/web';
+
 import * as kayouHooks from '@kayou/hooks';
+import * as kayouIcons from '@kayou/icons';
+import * as kayouUi from '@kayou/ui';
 
 // Module registry — provides sync require() for compiled playground code
 const moduleMap: Record<string, unknown> = {
@@ -30,9 +31,7 @@ async function getBabel(): Promise<typeof import('@babel/standalone')> {
   if (!babelPromise) {
     babelPromise = (async () => {
       const babel = await import('@babel/standalone');
-      // babel-preset-solid has no type declarations
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const solidPreset: object = (await import('babel-preset-solid')).default;
+      const solidPreset = (await import('babel-preset-solid')).default;
       babel.registerPreset('solid', solidPreset);
       return babel;
     })();
@@ -70,7 +69,10 @@ export async function compileAndExecute(code: string): Promise<CompileResult> {
 
     const exports: Record<string, unknown> = {};
     try {
-      const fn = new Function('require', 'exports', compiledCode) as (req: typeof playgroundRequire, exp: Record<string, unknown>) => void;
+      const fn = new Function('require', 'exports', compiledCode) as (
+        req: typeof playgroundRequire,
+        exp: Record<string, unknown>,
+      ) => void;
       fn(playgroundRequire, exports);
     } catch (execErr) {
       console.error('[Playground] Execution failed. Compiled code:', compiledCode);
@@ -79,7 +81,10 @@ export async function compileAndExecute(code: string): Promise<CompileResult> {
 
     const component = exports.default as Component | undefined;
     if (!component) {
-      return { component: null, error: 'No default export found. Export a default function component.' };
+      return {
+        component: null,
+        error: 'No default export found. Export a default function component.',
+      };
     }
 
     return { component, error: null };

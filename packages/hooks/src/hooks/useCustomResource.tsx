@@ -226,8 +226,7 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
         resourceDataUrl = url;
         const previousCommittedVersion = context.networkVersionByUrl.get(url) ?? 0;
         const currentAnnouncedVersion =
-          context.nextNetworkVersionByUrl.get(url) ??
-          previousCommittedVersion;
+          context.nextNetworkVersionByUrl.get(url) ?? previousCommittedVersion;
         const nextNetworkVersion = currentAnnouncedVersion + 1;
         const nextCacheReadGuardVersion =
           (context.cacheReadGuardVersionByUrl.get(url) ?? 0) + 1;
@@ -426,7 +425,8 @@ export function useCustomResource<T>(props: CustomResourceProps<T>): CustomResou
           }
           const currentAnnouncedVersion =
             context.nextNetworkVersionByUrl.get(url) ??
-            (context.networkVersionByUrl.get(url) ?? 0);
+            context.networkVersionByUrl.get(url) ??
+            0;
           if (currentAnnouncedVersion > snapshotCommittedVersion) {
             return cached;
           }

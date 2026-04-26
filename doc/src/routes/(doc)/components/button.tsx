@@ -37,13 +37,15 @@ export default function ButtonPage() {
           name: 'variant',
           type: '"solid" | "outline" | "transparent"',
           default: '"solid"',
-          description: 'Sets the variant. "theme" color will fallback to "anti-theme" when value is "outline" or "transparent"',
+          description:
+            'Sets the variant. "theme" color will fallback to "anti-theme" when value is "outline" or "transparent"',
         },
         {
           name: 'color',
           type: '"info" | "danger" | "theme" | "anti-theme" | "gray"',
           default: '"info"',
-          description: 'Sets the color. "theme" color will fallback to "anti-theme" when variant is "outline" or "transparent"',
+          description:
+            'Sets the color. "theme" color will fallback to "anti-theme" when variant is "outline" or "transparent"',
         },
         {
           name: 'size',

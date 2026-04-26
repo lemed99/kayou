@@ -1,9 +1,6 @@
 // Components - @kayou/ui
 export { default as Accordion, type AccordionProps, type PanelData } from './Accordion';
-export {
-  default as ActionTextInput,
-  type ActionTextInputProps,
-} from './ActionTextInput';
+export { default as ActionTextInput, type ActionTextInputProps } from './ActionTextInput';
 export { default as Alert } from './Alert';
 export { default as Badge, type BadgeColor, type BadgeSize } from './Badge';
 export {

@@ -38,7 +38,10 @@ const baseExtensions = [
  * can tokenize JSX tags correctly. Returns character ranges to hide
  * via Decoration.replace so the user sees the original code.
  */
-function prepareForParser(code: string): { text: string; hideRanges: Array<[number, number]> } {
+function prepareForParser(code: string): {
+  text: string;
+  hideRanges: Array<[number, number]>;
+} {
   const lines = code.split('\n');
   const hideRanges: Array<[number, number]> = [];
 

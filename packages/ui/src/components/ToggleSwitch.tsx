@@ -16,8 +16,10 @@ export type ToggleSwitchColor =
 /**
  * Props for the ToggleSwitch component.
  */
-export interface ToggleSwitchProps
-  extends Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> {
+export interface ToggleSwitchProps extends Omit<
+  JSX.ButtonHTMLAttributes<HTMLButtonElement>,
+  'onChange'
+> {
   /**
    * Whether the switch is in the on state.
    */

@@ -23,7 +23,11 @@ export {
   type UseFormOptions,
   type UseFormReturn,
 } from './useForm';
-export { useShortcut, type UseShortcutOptions, type UseShortcutReturn } from './useShortcut';
+export {
+  useShortcut,
+  type UseShortcutOptions,
+  type UseShortcutReturn,
+} from './useShortcut';
 
 // useFloating types
 export type {

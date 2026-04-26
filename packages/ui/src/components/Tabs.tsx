@@ -245,7 +245,7 @@ const Tabs = (props: TabsProps): JSX.Element => {
   };
 
   const resolveContent = (content: JSX.Element | (() => JSX.Element)): JSX.Element => {
-    return typeof content === 'function' ? (content as () => JSX.Element)() : content;
+    return typeof content === 'function' ? content() : content;
   };
 
   const tabId = (key: string) => `${instanceId}-tab-${key}`;

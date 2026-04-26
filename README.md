@@ -2,6 +2,8 @@
 
 A complete, opinionated UI component library for [SolidJS](https://solidjs.com), built with TypeScript and Tailwind CSS.
 
+📚 **Documentation:** [kayou-docs.vercel.app](https://kayou-docs.vercel.app)
+
 ## Packages
 
 | Package | Description |

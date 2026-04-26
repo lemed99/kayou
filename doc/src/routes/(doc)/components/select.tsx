@@ -153,24 +153,81 @@ export default function SelectPage() {
           kind: 'type',
           description: 'Option item shared by Select, SelectWithSearch, and MultiSelect',
           props: [
-            { name: 'value', type: 'string', default: '-', description: 'Unique value identifying this option' },
-            { name: 'label', type: 'string', default: '-', description: 'Display text shown to the user' },
-            { name: 'labelWrapper', type: '(label: string) => JSX.Element', default: '-', description: 'Optional custom renderer for the label' },
-            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether this option is disabled and cannot be selected' },
-            { name: 'group', type: 'string', default: '-', description: 'Optional group name. Options with the same group render under a shared header.' },
+            {
+              name: 'value',
+              type: 'string',
+              default: '-',
+              description: 'Unique value identifying this option',
+            },
+            {
+              name: 'label',
+              type: 'string',
+              default: '-',
+              description: 'Display text shown to the user',
+            },
+            {
+              name: 'labelWrapper',
+              type: '(label: string) => JSX.Element',
+              default: '-',
+              description: 'Optional custom renderer for the label',
+            },
+            {
+              name: 'disabled',
+              type: 'boolean',
+              default: 'false',
+              description: 'Whether this option is disabled and cannot be selected',
+            },
+            {
+              name: 'group',
+              type: 'string',
+              default: '-',
+              description:
+                'Optional group name. Options with the same group render under a shared header.',
+            },
           ],
         },
         {
           name: 'SelectTriggerProps',
           kind: 'type',
-          description: 'Props passed to a custom trigger element via the inputComponent render function',
+          description:
+            'Props passed to a custom trigger element via the inputComponent render function',
           props: [
-            { name: 'selectedOption', type: '() => Option | null', default: '-', description: 'Accessor for the currently selected option' },
-            { name: 'isOpen', type: '() => boolean', default: '-', description: 'Accessor for whether the dropdown is open' },
-            { name: 'onKeyDown', type: '(e: KeyboardEvent) => void', default: '-', description: 'Keyboard handler for arrow keys, Enter, Escape, etc.' },
-            { name: 'listboxId', type: 'string', default: '-', description: 'ID of the listbox element, for aria-controls' },
-            { name: 'highlightedOptionId', type: '() => string | undefined', default: '-', description: 'ID of the highlighted option, for aria-activedescendant' },
-            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether the select is disabled' },
+            {
+              name: 'selectedOption',
+              type: '() => Option | null',
+              default: '-',
+              description: 'Accessor for the currently selected option',
+            },
+            {
+              name: 'isOpen',
+              type: '() => boolean',
+              default: '-',
+              description: 'Accessor for whether the dropdown is open',
+            },
+            {
+              name: 'onKeyDown',
+              type: '(e: KeyboardEvent) => void',
+              default: '-',
+              description: 'Keyboard handler for arrow keys, Enter, Escape, etc.',
+            },
+            {
+              name: 'listboxId',
+              type: 'string',
+              default: '-',
+              description: 'ID of the listbox element, for aria-controls',
+            },
+            {
+              name: 'highlightedOptionId',
+              type: '() => string | undefined',
+              default: '-',
+              description: 'ID of the highlighted option, for aria-activedescendant',
+            },
+            {
+              name: 'disabled',
+              type: 'boolean',
+              default: 'false',
+              description: 'Whether the select is disabled',
+            },
           ],
         },
         {
@@ -178,7 +235,12 @@ export default function SelectPage() {
           kind: 'type',
           description: 'Visible text labels for the select dropdown',
           props: [
-            { name: 'noResults', type: 'string', default: '"No results found"', description: 'Message shown when no options match' },
+            {
+              name: 'noResults',
+              type: 'string',
+              default: '"No results found"',
+              description: 'Message shown when no options match',
+            },
           ],
         },
         {
@@ -186,8 +248,18 @@ export default function SelectPage() {
           kind: 'type',
           description: 'Accessibility labels for screen readers',
           props: [
-            { name: 'selectOptions', type: 'string', default: '"Select options"', description: 'Aria label for the options listbox' },
-            { name: 'searchOptions', type: 'string', default: '"Search options"', description: 'Aria label for the search input' },
+            {
+              name: 'selectOptions',
+              type: 'string',
+              default: '"Select options"',
+              description: 'Aria label for the options listbox',
+            },
+            {
+              name: 'searchOptions',
+              type: 'string',
+              default: '"Search options"',
+              description: 'Aria label for the search input',
+            },
           ],
         },
       ]}

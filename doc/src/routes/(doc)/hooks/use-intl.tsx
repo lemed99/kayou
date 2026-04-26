@@ -43,8 +43,7 @@ export default function UseIntlPage() {
             type: 'Record<string, string>',
             required: true,
             default: '-',
-            description:
-              'Key-value map of translated messages for the current locale.',
+            description: 'Key-value map of translated messages for the current locale.',
           },
         ],
       }}

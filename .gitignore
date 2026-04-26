@@ -9,6 +9,8 @@ playwright-report
 
 # Build artifacts (generated .d.ts files in src folders)
 **/src/**/*.d.ts
+# Hand-written ambient type shims (kept in source)
+!doc/src/types/*.d.ts
 
 # SolidStart / Vinxi
 .output

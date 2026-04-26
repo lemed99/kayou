@@ -18,9 +18,21 @@ function BasicTabs() {
     <Section id="basic" title="Basic Tabs (underline)">
       <Tabs
         tabs={[
-          { key: 'tab1', label: 'General', content: <p data-testid="basic-content-1">General content</p> },
-          { key: 'tab2', label: 'Settings', content: <p data-testid="basic-content-2">Settings content</p> },
-          { key: 'tab3', label: 'Advanced', content: <p data-testid="basic-content-3">Advanced content</p> },
+          {
+            key: 'tab1',
+            label: 'General',
+            content: <p data-testid="basic-content-1">General content</p>,
+          },
+          {
+            key: 'tab2',
+            label: 'Settings',
+            content: <p data-testid="basic-content-2">Settings content</p>,
+          },
+          {
+            key: 'tab3',
+            label: 'Advanced',
+            content: <p data-testid="basic-content-3">Advanced content</p>,
+          },
         ]}
       />
     </Section>
@@ -34,7 +46,9 @@ function ControlledTabs() {
 
   return (
     <Section id="controlled" title="Controlled Tabs">
-      <p data-testid="controlled-active" class="mb-2 text-sm">Active: {active()}</p>
+      <p data-testid="controlled-active" class="mb-2 text-sm">
+        Active: {active()}
+      </p>
       <button
         type="button"
         class="mb-3 rounded bg-blue-600 px-3 py-1 text-sm text-white"
@@ -46,9 +60,21 @@ function ControlledTabs() {
         activeTab={active()}
         onTabChange={setActive}
         tabs={[
-          { key: 'ctrl-1', label: 'One', content: <p data-testid="ctrl-content-1">Content one</p> },
-          { key: 'ctrl-2', label: 'Two', content: <p data-testid="ctrl-content-2">Content two</p> },
-          { key: 'ctrl-3', label: 'Three', content: <p data-testid="ctrl-content-3">Content three</p> },
+          {
+            key: 'ctrl-1',
+            label: 'One',
+            content: <p data-testid="ctrl-content-1">Content one</p>,
+          },
+          {
+            key: 'ctrl-2',
+            label: 'Two',
+            content: <p data-testid="ctrl-content-2">Content two</p>,
+          },
+          {
+            key: 'ctrl-3',
+            label: 'Three',
+            content: <p data-testid="ctrl-content-3">Content three</p>,
+          },
         ]}
       />
     </Section>
@@ -62,9 +88,22 @@ function DisabledTabs() {
     <Section id="disabled" title="Disabled Tabs">
       <Tabs
         tabs={[
-          { key: 'dis-1', label: 'Enabled 1', content: <p data-testid="dis-content-1">Enabled 1 content</p> },
-          { key: 'dis-2', label: 'Disabled', content: <p>Never shown</p>, disabled: true },
-          { key: 'dis-3', label: 'Enabled 2', content: <p data-testid="dis-content-3">Enabled 2 content</p> },
+          {
+            key: 'dis-1',
+            label: 'Enabled 1',
+            content: <p data-testid="dis-content-1">Enabled 1 content</p>,
+          },
+          {
+            key: 'dis-2',
+            label: 'Disabled',
+            content: <p>Never shown</p>,
+            disabled: true,
+          },
+          {
+            key: 'dis-3',
+            label: 'Enabled 2',
+            content: <p data-testid="dis-content-3">Enabled 2 content</p>,
+          },
         ]}
       />
     </Section>
@@ -79,8 +118,16 @@ function PillsTabs() {
       <Tabs
         variant="pills"
         tabs={[
-          { key: 'pill-1', label: 'Alpha', content: <p data-testid="pill-content-1">Alpha content</p> },
-          { key: 'pill-2', label: 'Beta', content: <p data-testid="pill-content-2">Beta content</p> },
+          {
+            key: 'pill-1',
+            label: 'Alpha',
+            content: <p data-testid="pill-content-1">Alpha content</p>,
+          },
+          {
+            key: 'pill-2',
+            label: 'Beta',
+            content: <p data-testid="pill-content-2">Beta content</p>,
+          },
         ]}
       />
     </Section>
@@ -95,8 +142,16 @@ function BorderedTabs() {
       <Tabs
         variant="bordered"
         tabs={[
-          { key: 'brd-1', label: 'First', content: <p data-testid="brd-content-1">First content</p> },
-          { key: 'brd-2', label: 'Second', content: <p data-testid="brd-content-2">Second content</p> },
+          {
+            key: 'brd-1',
+            label: 'First',
+            content: <p data-testid="brd-content-1">First content</p>,
+          },
+          {
+            key: 'brd-2',
+            label: 'Second',
+            content: <p data-testid="brd-content-2">Second content</p>,
+          },
         ]}
       />
     </Section>
@@ -111,8 +166,16 @@ function LazyTabs() {
       <Tabs
         lazy
         tabs={[
-          { key: 'lz-1', label: 'Loaded', content: <p data-testid="lazy-content-1">Lazy content 1</p> },
-          { key: 'lz-2', label: 'Deferred', content: () => <p data-testid="lazy-content-2">Lazy content 2</p> },
+          {
+            key: 'lz-1',
+            label: 'Loaded',
+            content: <p data-testid="lazy-content-1">Lazy content 1</p>,
+          },
+          {
+            key: 'lz-2',
+            label: 'Deferred',
+            content: () => <p data-testid="lazy-content-2">Lazy content 2</p>,
+          },
         ]}
       />
     </Section>

@@ -216,8 +216,7 @@ export default function DataTablePage() {
           name: 'sorts',
           type: 'SortEntry[]',
           default: '[]',
-          description:
-            'Sort state (controlled). Each entry has a key and direction.',
+          description: 'Sort state (controlled). Each entry has a key and direction.',
         },
         {
           name: 'onSortsChange',
@@ -448,13 +447,15 @@ export default function DataTablePage() {
               name: 'clearSort',
               type: 'string',
               default: '"Clear sort"',
-              description: 'Tooltip and aria label shown when clicking will clear the sort.',
+              description:
+                'Tooltip and aria label shown when clicking will clear the sort.',
             },
             {
               name: 'sortPriority',
               type: 'string',
               default: '"Sort priority"',
-              description: 'Aria label prefix for sort priority badges (e.g. "Sort priority 1").',
+              description:
+                'Aria label prefix for sort priority badges (e.g. "Sort priority 1").',
             },
             {
               name: 'addFilter',
@@ -598,7 +599,8 @@ export default function DataTablePage() {
               name: 'maxConfigsReached',
               type: 'string',
               default: '"Maximum of 3 configurations reached"',
-              description: 'Text shown when the maximum number of saved configurations is reached.',
+              description:
+                'Text shown when the maximum number of saved configurations is reached.',
             },
             {
               name: 'createNewConfiguration',
@@ -622,13 +624,15 @@ export default function DataTablePage() {
               name: 'updateCurrentConfigurationDescription',
               type: 'string',
               default: '"Overwrite the active configuration with current settings"',
-              description: 'Description for the update current option in the choose drawer.',
+              description:
+                'Description for the update current option in the choose drawer.',
             },
             {
               name: 'back',
               type: 'string',
               default: '"Back"',
-              description: 'Text for the back button when navigating from create form to choose screen.',
+              description:
+                'Text for the back button when navigating from create form to choose screen.',
             },
             {
               name: 'expandRow',
@@ -688,7 +692,8 @@ export default function DataTablePage() {
               name: 'resetColumnSize',
               type: 'string',
               default: '"Double-click to reset"',
-              description: 'Tooltip shown on the resize handle for resetting column size.',
+              description:
+                'Tooltip shown on the resize handle for resetting column size.',
             },
             {
               name: 'lockRow',

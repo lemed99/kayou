@@ -197,7 +197,11 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
       const referenceEl = refs.reference();
 
       // Hover mode: close if click is outside both floating and reference
-      if (merged.onHover && !floatingEl?.contains(target) && !referenceEl?.contains(target)) {
+      if (
+        merged.onHover &&
+        !floatingEl?.contains(target) &&
+        !referenceEl?.contains(target)
+      ) {
         setOpen(false);
         return;
       }
@@ -321,16 +325,14 @@ const Popover: ParentComponent<PopoverProps> = (props): JSX.Element => {
             aria-modal="false"
             aria-label={props['aria-label']}
             class={twMerge('z-50', merged.floatingClass)}
-            style={
-              {
-                ...floatingStyles(),
-                opacity: isVisible() ? '1' : '0',
-                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
-                'transition-property': 'opacity, transform',
-                'transition-duration': '.2s',
-                'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
-              } as JSX.CSSProperties
-            }
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+              'transition-property': 'opacity, transform',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >

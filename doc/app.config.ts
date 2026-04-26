@@ -47,7 +47,7 @@ export default defineConfig({
           '@kayou/ui': join(__dirname, '../packages/ui/src'),
           '@kayou/hooks': join(__dirname, '../packages/hooks/src'),
           '@kayou/icons': join(__dirname, '../packages/icons/src'),
-          'assert': 'assert/',
+          assert: 'assert/',
         },
         dedupe: ['tailwind-merge', 'solid-js'],
       },

@@ -62,7 +62,6 @@ export default function DocsPage() {
             Reusable hooks for common patterns like floating UI, virtual lists, and more.
           </p>
         </A>
-
       </div>
 
       {/* Quick Links */}

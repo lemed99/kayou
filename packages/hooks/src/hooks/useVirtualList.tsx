@@ -23,21 +23,20 @@ export function useVirtualList<T extends readonly unknown[]>(
 
   const virtual = createMemo((): VirtualListResult<T> => {
     const itemList = config.items();
-    const rh = typeof config.rootHeight === 'function' ? config.rootHeight() : config.rootHeight;
+    const rh =
+      typeof config.rootHeight === 'function' ? config.rootHeight() : config.rootHeight;
     const rowH = config.rowHeight;
     const ov = config.overscanCount;
     const firstIdx = Math.max(0, Math.floor(scrollTop() / rowH) - ov);
     const lastIdx = Math.min(
       itemList.length,
-      Math.floor(scrollTop() / rowH) +
-        Math.ceil(rh / rowH) +
-        ov,
+      Math.floor(scrollTop() / rowH) + Math.ceil(rh / rowH) + ov,
     );
 
     return {
       containerHeight: itemList.length * rowH,
       viewerTop: firstIdx * rowH,
-      visibleItems: itemList.slice(firstIdx, lastIdx) as T[number][],
+      visibleItems: itemList.slice(firstIdx, lastIdx),
       startIndex: firstIdx,
       totalItems: itemList.length,
     };

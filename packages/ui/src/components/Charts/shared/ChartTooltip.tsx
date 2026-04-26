@@ -160,7 +160,7 @@ export function ChartTooltipOverlay(): JSX.Element {
                   {(k) => (
                     <div class="flex gap-1 whitespace-nowrap">
                       <dt>{String(k)}:</dt>
-                      <dd>{String(chart.activePoint()!.item[k] as number)}</dd>
+                      <dd>{String(chart.activePoint()!.item[k])}</dd>
                     </div>
                   )}
                 </For>

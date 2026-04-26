@@ -29,7 +29,6 @@ const GitHubIcon = () => (
   </svg>
 );
 
-
 const Navbar: Component = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -160,7 +159,9 @@ const Navbar: Component = () => {
                   <path d="M22.993 15.533q-.382.367-.895.467a975 975 0 0 1-9.94-.073 1.24 1.24 0 0 1-.606-.607l-1.711-4.054q-.217-.676.345-1.117a74 74 0 0 1 3.139-2.784 1.3 1.3 0 0 1 .505.014 437 437 0 0 1 9.002 6.038q.283.243.38.603a23 23 0 0 1-.219 1.513M16.636 4.225q.875-.78 1.767-1.543.483-.18.925.092a199 199 0 0 1 4.61 5.936l.062.31q-.133 1.243-.366 2.479-.447.997-1.434.525a432 432 0 0 1-7.26-5.01q-.42-.497-.117-1.075.904-.862 1.813-1.714M10.39 15.501q-.272.232-.584.406-3.622.072-7.245.041-.746.014-1.027-.685A314 314 0 0 0 .05 7.45a1.18 1.18 0 0 1 .12-.944 114 114 0 0 1 4.493-3.47 1.1 1.1 0 0 1 .69.138q.387.383.597.884a641 641 0 0 0 4.47 10.614q.111.426-.03.83M6.256 1.85A26 26 0 0 1 8.29.189.9.9 0 0 1 8.593 0q4.447.245 8.895.521.861.48.483 1.374a1120 1120 0 0 1-7.57 6.968q-.732.676-1.506.087a376 376 0 0 1-2.774-6.638.77.77 0 0 1 .135-.462" />
                 </svg>
               </div>
-              <span class="text-xl font-bold text-neutral-900 dark:text-white">Kayou</span>
+              <span class="text-xl font-bold text-neutral-900 dark:text-white">
+                Kayou
+              </span>
             </A>
           </div>
 
@@ -182,7 +183,7 @@ const Navbar: Component = () => {
                 )}
               </For>
             </div>
-            <div class="hidden lg:block mx-4 h-8 w-1 border-r border-neutral-200 dark:border-neutral-700" />
+            <div class="mx-4 hidden h-8 w-1 border-r border-neutral-200 lg:block dark:border-neutral-700" />
             {/* Right: Search + GitHub + Dark Mode */}
             <div class="flex items-center gap-2">
               {/* Search Button */}
@@ -192,7 +193,7 @@ const Navbar: Component = () => {
                 aria-label="Search documentation"
                 class="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50/50 px-3 text-sm text-neutral-500 transition-colors dark:border-neutral-800 dark:bg-neutral-900/50 dark:text-neutral-400"
               >
-                <SearchRefractionIcon  />
+                <SearchRefractionIcon />
                 <span class="hidden sm:inline">Search</span>
                 <kbd class="ml-2 hidden rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-xs font-medium text-neutral-500 sm:inline-flex dark:border-neutral-700 dark:bg-neutral-800">
                   ⌘K
@@ -201,7 +202,7 @@ const Navbar: Component = () => {
 
               {/* GitHub Link with Stars */}
               <a
-                href="https://github.com/kayou"
+                href="https://github.com/lemed99/kayou"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub repository"
@@ -230,10 +231,7 @@ const Navbar: Component = () => {
                 aria-label={isMobileMenuOpen() ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen()}
               >
-                <Show
-                  when={isMobileMenuOpen()}
-                  fallback={<Menu01Icon class="size-5" />}
-                >
+                <Show when={isMobileMenuOpen()} fallback={<Menu01Icon class="size-5" />}>
                   <XCloseIcon class="size-5" />
                 </Show>
               </button>
@@ -275,10 +273,10 @@ const Navbar: Component = () => {
               setSearchQuery('');
             }}
           />
-          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900 dark:border dark:border-neutral-700">
+          <div class="fixed inset-x-4 top-24 mx-auto max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl dark:border dark:border-neutral-700 dark:bg-neutral-900">
             <div class="relative border-b border-neutral-200 p-4 dark:border-neutral-800">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-7">
-                <SearchRefractionIcon  />
+                <SearchRefractionIcon />
               </div>
               <input
                 ref={searchInputRef}

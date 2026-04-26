@@ -191,8 +191,7 @@ export default function UseFormPage() {
         {
           name: 'setFieldErrorAt',
           type: '(path: FormPath, error: string | undefined) => void',
-          description:
-            'Set or clear a single exact nested-path error.',
+          description: 'Set or clear a single exact nested-path error.',
         },
         {
           name: 'validateField',

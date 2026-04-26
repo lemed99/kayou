@@ -55,9 +55,11 @@ export default function LicensePage() {
 
       {/* License Text */}
       <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">MIT License</h2>
+        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">
+          MIT License
+        </h2>
         <div class="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-neutral-900">
-          <pre class="whitespace-pre-wrap font-mono text-sm text-neutral-700 dark:text-neutral-300">
+          <pre class="font-mono text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
             {`MIT License
 
 Copyright (c) 2026 Kayou
@@ -94,8 +96,8 @@ SOFTWARE.`}
               Can I use Kayou in a client project?
             </h3>
             <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-              Yes! You can use Kayou in any project, including client work and
-              commercial applications.
+              Yes! You can use Kayou in any project, including client work and commercial
+              applications.
             </p>
           </div>
           <div class="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">

@@ -16,10 +16,10 @@ import { DynamicVirtualList } from '../DynamicVirtualList';
 import Skeleton from '../Skeleton';
 import Spinner from '../Spinner';
 import { VirtualList } from '../VirtualList';
-import { getDataTableColumnAlignmentClasses } from './alignment';
 import { DataTableContextMenu } from './DataTableContextMenu';
 import { useDataTableInternal } from './DataTableInternalContext';
 import { DataTableRow } from './DataTableRow';
+import { getDataTableColumnAlignmentClasses } from './alignment';
 
 /** Border-bottom adds 1px per row; account for it in virtualized height. */
 const BORDER_WIDTH = 1;
@@ -145,7 +145,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
   const VirtualizedList = () => (
     <Dynamic
       component={ctx.rowHeight && !ctx.expandRow ? VirtualList : DynamicVirtualList}
-      items={() => ctx.visibleData() as unknown as readonly unknown[]}
+      items={() => ctx.visibleData()}
       rootHeight={ctx.expandedHeight()}
       rowHeight={ctx.rowHeight ? ctx.rowHeight + BORDER_WIDTH : undefined!}
       estimatedRowHeight={
@@ -206,7 +206,7 @@ export function DataTableBody<T extends Record<string, unknown>>(): JSX.Element 
                             alignment.textClass,
                           )}
                         >
-                        <Skeleton width={100} height={10} />
+                          <Skeleton width={100} height={10} />
                         </div>
                       );
                     }}

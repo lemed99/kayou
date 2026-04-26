@@ -13,7 +13,10 @@ export function DataTableFooter(): JSX.Element {
 
   return (
     <Show when={ctx.footer ?? true}>
-      <nav aria-label="Table pagination" class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-neutral-200 px-6 py-5 sm:flex-row dark:border-neutral-800">
+      <nav
+        aria-label="Table pagination"
+        class="flex shrink-0 flex-col items-center justify-between gap-4 border-t border-neutral-200 px-6 py-5 sm:flex-row dark:border-neutral-800"
+      >
         <div class="flex items-center gap-4">
           <Show when={ctx.perPageControl}>
             <div class="flex items-center gap-2">
@@ -56,7 +59,10 @@ export function DataTableFooter(): JSX.Element {
                     <ChevronLeftIcon class="size-2.5" strokeWidth={2} />
                   </Button>
                 </Tooltip>
-                <Tooltip hidden={ctx.nextCursor() === null} content={ctx.labels().nextPage}>
+                <Tooltip
+                  hidden={ctx.nextCursor() === null}
+                  content={ctx.labels().nextPage}
+                >
                   <Button
                     color="theme"
                     onClick={() => ctx.handleCursorChange(ctx.nextCursor())}

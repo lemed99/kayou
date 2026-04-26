@@ -52,7 +52,10 @@ function ActionRegistrar() {
   return (
     <>
       <Show when={triggered()}>
-        <p data-testid="triggered-action" class="mb-3 rounded bg-green-100 p-2 text-sm text-green-800">
+        <p
+          data-testid="triggered-action"
+          class="mb-3 rounded bg-green-100 p-2 text-sm text-green-800"
+        >
           Triggered: {triggered()}
         </p>
       </Show>
@@ -104,7 +107,10 @@ function InputRegistrar() {
   return (
     <>
       <Show when={triggered()}>
-        <p data-testid="input-triggered" class="mb-3 rounded bg-green-100 p-2 text-sm text-green-800">
+        <p
+          data-testid="input-triggered"
+          class="mb-3 rounded bg-green-100 p-2 text-sm text-green-800"
+        >
           Triggered: {triggered()}
         </p>
       </Show>

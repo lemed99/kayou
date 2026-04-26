@@ -1,4 +1,4 @@
-import { type JSX, createSignal } from 'solid-js';
+import { type JSX } from 'solid-js';
 
 import { MultiSelect, Select, SelectWithSearch } from '@kayou/ui';
 
@@ -44,14 +44,23 @@ const frameworkOptions = [
 ];
 
 const virtualizedFrameworkOptions = [
-  ...['React', 'SolidJS', 'Vue', 'Angular', 'Svelte', 'Preact', 'Lit', 'Qwik'].map((f) => ({
-    value: f.toLowerCase(),
-    label: f,
-    group: 'JavaScript',
-  })),
-  ...['Django', 'Flask', 'FastAPI', 'Tornado', 'Pyramid', 'Bottle', 'Sanic', 'Starlette'].map(
-    (f) => ({ value: f.toLowerCase(), label: f, group: 'Python' }),
+  ...['React', 'SolidJS', 'Vue', 'Angular', 'Svelte', 'Preact', 'Lit', 'Qwik'].map(
+    (f) => ({
+      value: f.toLowerCase(),
+      label: f,
+      group: 'JavaScript',
+    }),
   ),
+  ...[
+    'Django',
+    'Flask',
+    'FastAPI',
+    'Tornado',
+    'Pyramid',
+    'Bottle',
+    'Sanic',
+    'Starlette',
+  ].map((f) => ({ value: f.toLowerCase(), label: f, group: 'Python' })),
   ...['Rails', 'Sinatra', 'Hanami', 'Roda', 'Grape', 'Padrino'].map((f) => ({
     value: f.toLowerCase(),
     label: f,

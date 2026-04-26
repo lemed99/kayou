@@ -11,7 +11,11 @@ import {
 } from '@kayou/icons';
 import { A } from '@solidjs/router';
 
-const features: { title: string; description: string; icon: Component<{ class?: string }> }[] = [
+const features: {
+  title: string;
+  description: string;
+  icon: Component<{ class?: string }>;
+}[] = [
   {
     title: 'Built for SolidJS',
     description:
@@ -52,18 +56,17 @@ const features: { title: string; description: string; icon: Component<{ class?: 
 
 export default function HomePage() {
   return (
-    <div class="px-4 pb-24 pt-10 sm:px-6">
+    <div class="px-4 pt-10 pb-24 sm:px-6">
       {/* Hero Section */}
       <div class="mx-auto max-w-4xl text-center">
-
         <h1 class="text-4xl font-bold tracking-tight text-neutral-950 sm:text-5xl lg:text-6xl dark:text-white">
           Enterprise grade UI
           <span class="text-blue-600 dark:text-blue-500"> for SolidJS</span>
         </h1>
 
         <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-600 dark:text-neutral-300">
-          35+ fully accessible UI components styled with Tailwind CSS, and high level hooks
-          built for production. SSR ready but CSR was the main target here!
+          35+ fully accessible UI components styled with Tailwind CSS, and high level
+          hooks built for production. SSR ready but CSR was the main target here!
         </p>
 
         <div class="mt-10 flex items-center justify-center">
@@ -72,7 +75,7 @@ export default function HomePage() {
             class="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100"
           >
             Explore Kayou
-            <ArrowNarrowRightIcon  />
+            <ArrowNarrowRightIcon />
           </A>
         </div>
 
@@ -94,7 +97,6 @@ export default function HomePage() {
           </For>
         </div>
       </div>
-
     </div>
   );
 }

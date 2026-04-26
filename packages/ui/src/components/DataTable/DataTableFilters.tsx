@@ -432,7 +432,7 @@ function FilterRow<T>(props: FilterRowProps<T>): JSX.Element {
         <Show when={config()} fallback={<div class="h-full" />}>
           <FilterInput
             config={config()!}
-            filter={props.filter as ActiveFilter}
+            filter={props.filter}
             onChange={props.onValueChange}
             labels={props.labels}
           />
@@ -500,10 +500,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
     ...props.ariaLabels,
   }));
   // Merge default operator labels with i18n overrides
-  const opLabels = createMemo(
-    () =>
-      ({ ...OPERATOR_LABELS, ...l().operatorLabels }) as Record<FilterOperator, string>,
-  );
+  const opLabels = createMemo(() => ({ ...OPERATOR_LABELS, ...l().operatorLabels }));
 
   // Draft filters - local state for editing before submit
   const [draftFilters, setDraftFilters] = createSignal<DraftFilter[]>([]);

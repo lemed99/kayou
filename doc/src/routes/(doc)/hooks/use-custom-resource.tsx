@@ -103,7 +103,8 @@ export default function UseCustomResourcePage() {
         {
           name: 'refetch',
           type: '() => void',
-          description: 'Manually trigger a refetch. Aborts any in-flight request before starting a new one.',
+          description:
+            'Manually trigger a refetch. Aborts any in-flight request before starting a new one.',
         },
         {
           name: 'setErrorStatus',
@@ -122,7 +123,8 @@ export default function UseCustomResourcePage() {
               name: 'fetcher',
               type: '(url: string) => Promise<T>',
               default: 'fetch + JSON.parse',
-              description: 'Custom fetcher function. Defaults to fetch with JSON parsing.',
+              description:
+                'Custom fetcher function. Defaults to fetch with JSON parsing.',
             },
             {
               name: 'onSuccess',

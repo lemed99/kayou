@@ -1,31 +1,32 @@
 import {
-    For,
-    type JSX,
-    type ParentProps,
-    Show,
-    Suspense,
-    createMemo,
-    createSignal,
-    lazy,
-    onCleanup,
-    onMount,
+  For,
+  type JSX,
+  type ParentProps,
+  Show,
+  Suspense,
+  createMemo,
+  createSignal,
+  lazy,
+  onCleanup,
+  onMount,
 } from 'solid-js';
 
 import {
-    AlertTriangleIcon,
-    CheckIcon,
-    Copy01Icon,
-    Cube01Icon,
-    Database01Icon,
-    Link01Icon,
-    LinkExternal01Icon,
+  AlertTriangleIcon,
+  CheckIcon,
+  Copy01Icon,
+  Cube01Icon,
+  Database01Icon,
+  Link01Icon,
+  LinkExternal01Icon,
 } from '@kayou/icons';
 
 import { dedent } from '../helpers/dedent';
 import BaseDocPage, {
-    type KeyConceptDefinition,
-    type RelatedItemDefinition,
+  type KeyConceptDefinition,
+  type RelatedItemDefinition,
 } from './BaseDocPage';
+
 const ReadonlyCode = lazy(() => import('./ReadonlyCode'));
 const Playground = lazy(() => import('./Playground'));
 
@@ -95,10 +96,7 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
   const dependenciesArray = createMemo(() => props.dependencies ?? []);
 
   return (
-    <BaseDocPage
-      title={props.title}
-      description={props.description}
-    >
+    <BaseDocPage title={props.title} description={props.description}>
       <Show when={dependenciesArray().length > 0}>
         <section id="dependencies" class="mb-10 scroll-mt-20">
           <h2 class="mb-4 flex items-center text-2xl font-medium">
@@ -259,7 +257,9 @@ export default function DocPage(props: ParentProps<DocPageProps>): JSX.Element {
                     <Link01Icon class="size-5" />
                   </div>
                   <div>
-                    <h3 class="font-medium text-neutral-900 dark:text-white">{hook.name}</h3>
+                    <h3 class="font-medium text-neutral-900 dark:text-white">
+                      {hook.name}
+                    </h3>
                     <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
                       {hook.description}
                     </p>
@@ -608,14 +608,14 @@ export function CodeBlock(props: { code: string }): JSX.Element {
   };
 
   return (
-    <div class="group relative rounded-lg overflow-hidden">
+    <div class="group relative overflow-hidden rounded-lg">
       <button
         type="button"
         onClick={() => void handleCopy()}
         class="absolute top-3 right-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-1 text-xs text-neutral-700 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-300 dark:bg-neutral-700/80 dark:text-neutral-300 dark:hover:bg-neutral-600"
         aria-label={copied() ? 'Copied!' : 'Copy code'}
       >
-        <Show when={copied()} fallback={<Copy01Icon  />}>
+        <Show when={copied()} fallback={<Copy01Icon />}>
           <CheckIcon class="size-4 text-green-600" />
         </Show>
         {copied() ? 'Copied!' : 'Copy'}

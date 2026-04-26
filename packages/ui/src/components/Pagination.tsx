@@ -49,8 +49,10 @@ export const DEFAULT_PAGINATION_ARIA_LABELS: PaginationAriaLabels = {
 /**
  * Props for the Pagination component.
  */
-export interface PaginationProps
-  extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface PaginationProps extends Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  'onChange'
+> {
   /**
    * Total number of pages.
    */

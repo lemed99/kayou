@@ -20,7 +20,8 @@ export default function DatePickerPage() {
       keyConcepts={[
         {
           term: 'Selection Type',
-          explanation: 'Four modes: single, range (start/end), multiple dates, or multipleRange (multiple date ranges).',
+          explanation:
+            'Four modes: single, range (start/end), multiple dates, or multipleRange (multiple date ranges).',
         },
         {
           term: 'Locale',
@@ -38,7 +39,8 @@ export default function DatePickerPage() {
         },
         {
           term: 'Time Selection',
-          explanation: 'showTime adds hour/minute/second dropdowns (works with single and range modes).',
+          explanation:
+            'showTime adds hour/minute/second dropdowns (works with single and range modes).',
         },
         {
           term: 'Shortcuts',
@@ -101,7 +103,8 @@ function App() {
           name: 'type',
           type: '"single" | "multiple" | "range" | "multipleRange"',
           default: '-',
-          description: 'Selection mode: single date, multiple dates, date range, or multiple date ranges.',
+          description:
+            'Selection mode: single date, multiple dates, date range, or multiple date ranges.',
           required: true,
         },
         {
@@ -363,8 +366,7 @@ function App() {
         {
           name: 'DateStruct',
           kind: 'type',
-          description:
-            'Date with optional time fields, used for range start/end values.',
+          description: 'Date with optional time fields, used for range start/end values.',
           props: [
             {
               name: 'date',
@@ -396,8 +398,7 @@ function App() {
         {
           name: 'RangeValue',
           kind: 'type',
-          description:
-            'A single date range with unique id, used in multipleRange mode.',
+          description: 'A single date range with unique id, used in multipleRange mode.',
           props: [
             {
               name: 'id',
@@ -425,8 +426,7 @@ function App() {
         {
           name: 'DateValue',
           kind: 'type',
-          description:
-            'Value object for DatePicker. Shape varies by selection mode.',
+          description: 'Value object for DatePicker. Shape varies by selection mode.',
           props: [
             {
               name: 'date',
@@ -468,13 +468,15 @@ function App() {
               name: 'minute',
               type: 'number',
               default: '-',
-              description: 'Selected minute (0-59) when showTime is enabled (single mode).',
+              description:
+                'Selected minute (0-59) when showTime is enabled (single mode).',
             },
             {
               name: 'second',
               type: 'number',
               default: '-',
-              description: 'Selected second (0-59) when showTime is enabled (single mode).',
+              description:
+                'Selected second (0-59) when showTime is enabled (single mode).',
             },
           ],
         },
@@ -493,7 +495,8 @@ function App() {
               name: 'apply',
               type: 'string',
               default: '"Apply"',
-              description: 'Label for the apply/confirm button (shown when showFooter is true).',
+              description:
+                'Label for the apply/confirm button (shown when showFooter is true).',
             },
           ],
         },

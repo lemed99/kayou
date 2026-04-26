@@ -1126,7 +1126,7 @@ export function DataTable<T extends Record<string, unknown>>(
               aria-expanded={expanded()}
               aria-label={expanded() ? l().collapse : l().seeMore}
               onClick={() => setExpanded((v) => !v)}
-              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
+              class="group flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-neutral-600 hover:bg-neutral-50 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-blue-400"
             >
               <Show
                 when={expanded()}

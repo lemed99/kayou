@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { Dimensions, Rect } from '../hooks/useFloating/types';
 import { computePosition } from '../hooks/useFloating/utils';
-import type { Rect, Dimensions } from '../hooks/useFloating/types';
 
 /**
  * Helper: create a viewport rect (the visible scrollable area).
@@ -20,12 +20,7 @@ function viewport(top: number, left: number, width: number, height: number): Rec
 /**
  * Helper: create a reference element rect.
  */
-function refRect(
-  top: number,
-  left: number,
-  width: number,
-  height: number,
-): Rect {
+function refRect(top: number, left: number, width: number, height: number): Rect {
   return {
     top,
     left,

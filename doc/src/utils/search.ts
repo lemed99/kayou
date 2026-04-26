@@ -47,7 +47,10 @@ function extractTextFromSource(source: string): string {
       // Remove remaining code symbols
       .replace(/[{}();=<>/\\[\]|&!?@#$%^*~+]/g, ' ')
       // Remove common code tokens
-      .replace(/\b(const|let|var|function|return|class|interface|type|extends|implements|new|if|else|switch|case|break|continue|for|while|do|try|catch|finally|throw|typeof|instanceof|void|null|undefined|true|false|this|super|import|export|default|from|as|async|await)\b/g, '')
+      .replace(
+        /\b(const|let|var|function|return|class|interface|type|extends|implements|new|if|else|switch|case|break|continue|for|while|do|try|catch|finally|throw|typeof|instanceof|void|null|undefined|true|false|this|super|import|export|default|from|as|async|await)\b/g,
+        '',
+      )
       // Normalize whitespace
       .replace(/\s+/g, ' ')
       .trim()
@@ -69,9 +72,7 @@ function generateSearchIndex(): SearchDocument[] {
     if (!path.includes('(doc)/')) continue;
 
     // Extract route path: ../routes/(doc)/components/button.tsx -> /components/button
-    const routePath = path
-      .replace(/^.*\(doc\)/, '')
-      .replace('.tsx', '');
+    const routePath = path.replace(/^.*\(doc\)/, '').replace('.tsx', '');
 
     // Determine category from path
     let category = 'Getting Started';
