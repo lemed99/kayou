@@ -31,6 +31,12 @@ const subComponents = [
         default: '"currentColor"',
         description: 'Color of the axis line and tick marks',
       },
+      {
+        name: 'angle',
+        type: 'number',
+        default: '0',
+        description: 'Angle (in degrees) to rotate tick labels',
+      },
     ],
   },
   {

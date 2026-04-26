@@ -31,10 +31,12 @@ function formatCellValue(value: unknown): string {
   if (
     typeof value === 'number' ||
     typeof value === 'boolean' ||
-    typeof value === 'bigint'
+    typeof value === 'bigint' ||
+    typeof value === 'symbol' ||
+    typeof value === 'function'
   )
     return value.toString();
-  return String(value as string);
+  return '';
 }
 
 export function DataTableRow<T extends Record<string, unknown>>(
@@ -225,7 +227,7 @@ export function DataTableRow<T extends Record<string, unknown>>(
       >
         {/* Row lock icon */}
         <Show when={ctx.rowLocking}>
-          <div class="absolute top-1/2 left-1 z-10 -translate-y-1/2">
+          <div class="absolute left-1 top-1/2 z-10 -translate-y-1/2">
             <Tooltip
               content={isLocked() ? ctx.labels().unlockRow : ctx.labels().lockRow}
               placement="right"

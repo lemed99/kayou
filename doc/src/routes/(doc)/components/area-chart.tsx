@@ -14,6 +14,12 @@ const subComponents = [
         required: true,
       },
       {
+        name: 'tickCount',
+        type: 'number',
+        default: '-',
+        description: 'Suggested number of ticks to display on the axis',
+      },
+      {
         name: 'tickFormatter',
         type: '(v: string | number) => string',
         default: '-',
@@ -24,6 +30,12 @@ const subComponents = [
         type: 'string',
         default: '"currentColor"',
         description: 'Color of the axis line and tick marks',
+      },
+      {
+        name: 'angle',
+        type: 'number',
+        default: '0',
+        description: 'Angle (in degrees) to rotate tick labels',
       },
     ],
   },

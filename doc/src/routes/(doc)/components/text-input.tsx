@@ -15,7 +15,9 @@ function TextInputExamples() {
           id="basic-input"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Basic Input</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Basic Input
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Standard single-line text entry with placeholder support.
           </p>
@@ -47,7 +49,9 @@ function TextInputExamples() {
           id="size-variants"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Size Variants</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Size Variants
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             `TextInput` keeps the same structure across compact and regular sizes.
           </p>
@@ -82,7 +86,9 @@ function TextInputExamples() {
           id="with-addon"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">With Addon</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            With Addon
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Left addons remain the default for prefix-style values.
           </p>
@@ -110,7 +116,9 @@ function TextInputExamples() {
           id="loading-state"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Loading State</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Loading State
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Loading disables the field and swaps the leading icon slot for a spinner.
           </p>
@@ -123,7 +131,9 @@ function TextInputExamples() {
           id="disabled-state"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Disabled State</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Disabled State
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Disabled inputs keep their value visible while blocking interaction.
           </p>
@@ -136,7 +146,9 @@ function TextInputExamples() {
           id="required-field"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Required Field</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Required Field
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Required fields preserve native form semantics and add a visual indicator.
           </p>
@@ -189,7 +201,8 @@ export default function TextInputPage() {
         },
         {
           term: 'Icons and Addons',
-          explanation: 'Icons stay inside the field; addons can attach to the left or right edge.',
+          explanation:
+            'Icons stay inside the field; addons can attach to the left or right edge.',
         },
         {
           term: 'Accessibility',
@@ -262,6 +275,42 @@ export default function TextInputPage() {
           type: 'boolean',
           default: 'false',
           description: 'Shows increment/decrement arrow buttons',
+        },
+        {
+          name: 'onArrowUp',
+          type: '(event: MouseEvent) => void',
+          default: '-',
+          description: 'Fired when the increment arrow is pressed (mousedown)',
+        },
+        {
+          name: 'onArrowDown',
+          type: '(event: MouseEvent) => void',
+          default: '-',
+          description: 'Fired when the decrement arrow is pressed (mousedown)',
+        },
+        {
+          name: 'onArrowUpMouseUp',
+          type: '(event: MouseEvent) => void',
+          default: '-',
+          description: 'Fired when the increment arrow is released (mouseup)',
+        },
+        {
+          name: 'onArrowDownMouseUp',
+          type: '(event: MouseEvent) => void',
+          default: '-',
+          description: 'Fired when the decrement arrow is released (mouseup)',
+        },
+        {
+          name: 'upBtnRef',
+          type: '(el: HTMLButtonElement) => void',
+          default: '-',
+          description: 'Ref callback for the increment button element',
+        },
+        {
+          name: 'downBtnRef',
+          type: '(el: HTMLButtonElement) => void',
+          default: '-',
+          description: 'Ref callback for the decrement button element',
         },
         {
           name: 'fitContent',

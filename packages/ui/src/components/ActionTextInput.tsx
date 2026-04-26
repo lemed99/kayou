@@ -112,10 +112,8 @@ const ActionTextInput = (props: ActionTextInputProps): JSX.Element => {
           {...inputProps}
           id={inputId()}
           ref={(el) => {
-            if (inputProps.ref) {
-              typeof inputProps.ref === 'function'
-                ? inputProps.ref(el)
-                : (inputProps.ref = el);
+            if (typeof inputProps.ref === 'function') {
+              inputProps.ref(el);
             }
             inputRef = el;
           }}
@@ -138,8 +136,8 @@ const ActionTextInput = (props: ActionTextInputProps): JSX.Element => {
               <Button
                 type={actionType()}
                 form={local.actionForm}
-                onClick={() => {
-                  local.onActionClick;
+                onClick={(event) => {
+                  local.onActionClick?.(event);
                   inputRef?.blur();
                 }}
                 color={actionColor()}

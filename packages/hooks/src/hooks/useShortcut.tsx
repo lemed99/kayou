@@ -1,6 +1,6 @@
 import { onCleanup, useContext } from 'solid-js';
 
-import { ShortcutContext, type ShortcutAction } from '../context/ShortcutContext';
+import { type ShortcutAction, ShortcutContext } from '../context/ShortcutContext';
 
 export interface UseShortcutOptions {
   shortcut: string;
@@ -8,6 +8,7 @@ export interface UseShortcutOptions {
   label: string;
   description?: string;
   category?: string;
+  /** When true, the shortcut is suppressed while an input/textarea/contenteditable has focus. @default true */
   ignoreInputs?: boolean;
 }
 
@@ -15,7 +16,10 @@ export interface UseShortcutReturn {
   trigger: () => void;
 }
 
-export function useShortcut(actionId: string, options: UseShortcutOptions): UseShortcutReturn {
+export function useShortcut(
+  actionId: string,
+  options: UseShortcutOptions,
+): UseShortcutReturn {
   const context = useContext(ShortcutContext);
   if (!context) {
     throw new Error('useShortcut must be used within a ShortcutProvider');

@@ -1,4 +1,13 @@
-import { type Component, For, type JSX, Show, Suspense, createMemo, createSignal, onMount } from 'solid-js';
+import {
+  type Component,
+  For,
+  type JSX,
+  Show,
+  Suspense,
+  createMemo,
+  createSignal,
+  onMount,
+} from 'solid-js';
 
 import { ChevronRightIcon, Menu01Icon } from '@kayou/icons';
 import { A, useLocation } from '@solidjs/router';
@@ -24,6 +33,7 @@ const hooksPackageHooks = [
   'use-intl',
   'use-mutation',
   'use-shortcut',
+  'use-theme',
   'use-toast',
   'use-virtual-list',
 ];
@@ -52,7 +62,15 @@ const componentCategories: Record<string, string[]> = {
     'toggle-switch',
     'upload-file',
   ],
-  Layout: ['accordion', 'drawer', 'modal', 'popover', 'shortcut-panel', 'sidebar', 'tabs'],
+  Layout: [
+    'accordion',
+    'drawer',
+    'modal',
+    'popover',
+    'shortcut-panel',
+    'sidebar',
+    'tabs',
+  ],
   Feedback: ['alert', 'badge', 'skeleton', 'spinner', 'tooltip'],
   Navigation: ['breadcrumb', 'pagination'],
   'Data Display': ['data-table', 'dynamic-virtual-list', 'virtual-grid', 'virtual-list'],
@@ -207,7 +225,9 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
     const name = path.split('/').pop() || '';
     return name
       .split('-')
-      .map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+      .map((word, index) =>
+        index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
+      )
       .join('');
   };
 
@@ -313,7 +333,12 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
                 </button>
                 <ul class={`mt-1 space-y-0.5 pl-4 ${isCatExpanded() ? '' : 'hidden'}`}>
                   <For each={items}>
-                    {(item) => renderLink(`${fullPath}/${item.path}`, formatComponentPath(item.path))}
+                    {(item) =>
+                      renderLink(
+                        `${fullPath}/${item.path}`,
+                        formatComponentPath(item.path),
+                      )
+                    }
                   </For>
                 </ul>
               </div>
@@ -400,7 +425,7 @@ const DocLayout: Component<{ children: JSX.Element }> = (props): JSX.Element => 
         </aside>
 
         {/* Main content */}
-        <main class="min-w-0 w-full">
+        <main class="w-full min-w-0">
           <Suspense>{props.children}</Suspense>
         </main>
       </div>

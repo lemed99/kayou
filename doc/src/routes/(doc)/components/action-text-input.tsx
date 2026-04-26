@@ -46,7 +46,9 @@ function ActionTextInputExamples() {
           id="submit-action"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Submit Action</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Submit Action
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             The in-input CTA can submit a surrounding form through `actionType` and
             `actionForm`.
@@ -80,7 +82,9 @@ function ActionTextInputExamples() {
           id="hidden-action"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Hidden Action</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Hidden Action
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Hide the CTA when the field should behave like a standard text input.
           </p>
@@ -101,7 +105,9 @@ function ActionTextInputExamples() {
           id="loading-action"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Loading Action</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Loading Action
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Action loading swaps the icon for a spinner and disables the CTA.
           </p>
@@ -121,7 +127,9 @@ function ActionTextInputExamples() {
           id="disabled-action"
           class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <h3 class="text-base font-medium text-neutral-900 dark:text-white">Disabled Action</h3>
+          <h3 class="text-base font-medium text-neutral-900 dark:text-white">
+            Disabled Action
+          </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Disabled fields automatically disable the in-input CTA as well.
           </p>
@@ -235,9 +243,15 @@ export default function ActionTextInputPage() {
         },
         {
           name: 'actionColor',
-          type: '"info" | "danger" | "theme" | "anti-theme" | "gray"',
-          default: '"anti-theme"',
+          type: '"info" | "danger" | "anti-theme" | "gray"',
+          default: '"info"',
           description: 'Sets the color of the action button.',
+        },
+        {
+          name: 'actionVariant',
+          type: '"solid" | "outline" | "transparent"',
+          default: '"solid"',
+          description: 'Visual style of the action button.',
         },
         {
           name: 'actionClass',
