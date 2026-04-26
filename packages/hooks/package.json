@@ -53,8 +53,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kayou"
+    "url": "https://github.com/lemed99/kayou.git",
+    "directory": "packages/hooks"
   },
+  "author": "MEDEWANOU Léonce",
   "license": "MIT",
   "keywords": [
     "solidjs",

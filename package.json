@@ -18,11 +18,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "publish:lib": "pnpm --filter @kayou/ui publish",
-    "claude:init": "claude /project:init-project",
-    "claude:audit": "claude /project:audit-component",
-    "claude:docs": "claude /project:document-component",
-    "claude:fix": "claude /project:fix-component"
+    "publish:lib": "pnpm --filter @kayou/ui publish"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -39,7 +35,9 @@
     "typescript-eslint": "^8.44.1"
   },
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/lemed99/kayou.git"
   },
-  "license": "SEE LICENSE IN LICENSE.md"
+  "author": "MEDEWANOU Léonce",
+  "license": "MIT"
 }

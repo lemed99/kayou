@@ -18,4 +18,3 @@ tailwind.config.js
 
 # CI/CD
 .github/
-.gitlab-ci.yml

@@ -15,3 +15,10 @@ playwright-report
 .vinxi
 
 /e2e/screenshots
+
+# Internal tooling (kept locally, not published)
+.claude/
+skills/
+README-CLAUDE-SETUP.md
+A11y/
+generate-icons.ts
