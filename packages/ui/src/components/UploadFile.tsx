@@ -172,10 +172,8 @@ export interface UploadFileProps {
  */
 type FileCategory = 'image' | 'video' | 'audio' | 'pdf' | 'archive' | 'code' | 'document';
 
-const getFileCategory = (
-  file: File | { name: string; type?: string },
-): FileCategory => {
-  const type = (file instanceof File ? file.type : file.type ?? '').toLowerCase();
+const getFileCategory = (file: File | { name: string; type?: string }): FileCategory => {
+  const type = (file instanceof File ? file.type : (file.type ?? '')).toLowerCase();
   const name = file.name.toLowerCase();
 
   if (type.startsWith('image/')) return 'image';
@@ -236,8 +234,8 @@ const generateId = (): string => {
 export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
   const props = mergeProps(
     {
-      labels: {} as Partial<UploadFileLabels>,
-      ariaLabels: {} as Partial<UploadFileAriaLabels>,
+      labels: {},
+      ariaLabels: {},
     },
     rawProps,
   );
@@ -473,7 +471,7 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
     const newTrackedFiles: TrackedFile[] = validFiles.map((file) => ({
       file,
       id: generateId(),
-      state: (hasUploader ? 'queued' : 'success') as UploadState,
+      state: hasUploader ? 'queued' : 'success',
       progress: hasUploader ? 0 : 100,
       previewUrl: createPreviewUrl(file),
     }));
@@ -506,7 +504,10 @@ export const UploadFile = (rawProps: UploadFileProps): JSX.Element => {
   };
 
   // File icon component based on file type
-  const FileIcon = (iconProps: { file: File | { name: string; type?: string }; class?: string }) => {
+  const FileIcon = (iconProps: {
+    file: File | { name: string; type?: string };
+    class?: string;
+  }) => {
     const category = () => getFileCategory(iconProps.file);
 
     return (

@@ -106,7 +106,9 @@ function InstallSection() {
 
   return (
     <section class="mb-12">
-      <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">Installation</h2>
+      <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">
+        Installation
+      </h2>
       <p class="mt-4 text-neutral-600 dark:text-neutral-400">
         Install Kayou using your preferred package manager:
       </p>
@@ -134,7 +136,15 @@ function InstallSection() {
         </pre>
       </div>
       <p class="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-        This automatically installs <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">@kayou/hooks</code> and <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">@kayou/icons</code> as dependencies.
+        This automatically installs{' '}
+        <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+          @kayou/hooks
+        </code>{' '}
+        and{' '}
+        <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+          @kayou/icons
+        </code>{' '}
+        as dependencies.
       </p>
     </section>
   );
@@ -161,8 +171,8 @@ export default function QuickstartPage() {
             components are built for SolidJS
           </li>
           <li>
-            <strong class="text-neutral-950 dark:text-white">TailwindCSS 3.4+</strong> - For
-            styling (optional but recommended)
+            <strong class="text-neutral-950 dark:text-white">TailwindCSS 3.4+</strong> -
+            For styling (optional but recommended)
           </li>
         </ul>
       </section>
@@ -172,7 +182,9 @@ export default function QuickstartPage() {
 
       {/* Basic Usage */}
       <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">Basic Usage</h2>
+        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">
+          Basic Usage
+        </h2>
         <p class="mt-4 text-neutral-600 dark:text-neutral-400">
           Import components and hooks directly from the package:
         </p>
@@ -185,27 +197,41 @@ export default function QuickstartPage() {
 
       {/* Icons */}
       <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">Using Icons</h2>
+        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">
+          Using Icons
+        </h2>
         <p class="mt-4 text-neutral-600 dark:text-neutral-400">
-          Kayou ships with a comprehensive icon library. Icons are SolidJS components that accept{' '}
-          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">class</code>{' '}
+          Kayou ships with a comprehensive icon library. Icons are SolidJS components that
+          accept{' '}
+          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+            class
+          </code>{' '}
           and{' '}
-          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">strokeWidth</code>{' '}
+          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+            strokeWidth
+          </code>{' '}
           props.
         </p>
 
-        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">Standalone</h3>
+        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">
+          Standalone
+        </h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
           <Suspense fallback={<CodeFallback code={iconStandaloneCode} />}>
             <ReadonlyCode code={iconStandaloneCode} />
           </Suspense>
         </div>
 
-        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">With components</h3>
+        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">
+          With components
+        </h3>
         <p class="mt-2 text-neutral-600 dark:text-neutral-400">
           Many components accept an{' '}
-          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">icon</code>{' '}
-          prop. Pass the icon component reference directly — no need to render it yourself.
+          <code class="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+            icon
+          </code>{' '}
+          prop. Pass the icon component reference directly — no need to render it
+          yourself.
         </p>
         <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
           <Suspense fallback={<CodeFallback code={iconWithComponentCode} />}>
@@ -216,19 +242,26 @@ export default function QuickstartPage() {
 
       {/* Hooks */}
       <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">Using Hooks</h2>
+        <h2 class="text-2xl font-semibold text-neutral-950 dark:text-white">
+          Using Hooks
+        </h2>
         <p class="mt-4 text-neutral-600 dark:text-neutral-400">
-          Kayou provides utility hooks for common tasks like data mutation, internationalization, toasts, and floating UI positioning.
+          Kayou provides utility hooks for common tasks like data mutation,
+          internationalization, toasts, and floating UI positioning.
         </p>
 
-        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">Data mutation</h3>
+        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">
+          Data mutation
+        </h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
           <Suspense fallback={<CodeFallback code={hooksUsageCode} />}>
             <ReadonlyCode code={hooksUsageCode} />
           </Suspense>
         </div>
 
-        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">Internationalization</h3>
+        <h3 class="mt-6 text-lg font-medium text-neutral-950 dark:text-white">
+          Internationalization
+        </h3>
         <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
           <Suspense fallback={<CodeFallback code={hooksIntlCode} />}>
             <ReadonlyCode code={hooksIntlCode} />

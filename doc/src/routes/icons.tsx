@@ -1,12 +1,12 @@
 import {
-    Component,
-    For,
-    type JSX,
-    Show,
-    createEffect,
-    createMemo,
-    createSignal,
-    onMount,
+  Component,
+  For,
+  type JSX,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onMount,
 } from 'solid-js';
 
 import { Copy01Icon, SearchSmIcon, Star01Icon } from '@kayou/icons';
@@ -388,9 +388,7 @@ const categorizeIcon = (name: string): string => {
   return 'General';
 };
 
-function buildCategorizedIcons(
-  allIcons: IconEntry[],
-): Record<string, IconEntry[]> {
+function buildCategorizedIcons(allIcons: IconEntry[]): Record<string, IconEntry[]> {
   const categories: Record<string, IconEntry[]> = {};
 
   for (const entry of allIcons) {
@@ -508,7 +506,7 @@ export default function IconsPage() {
       {/* Header */}
       <div class="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-blue-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-blue-950/20">
         {/* Decorative icon */}
-        <div class="pointer-events-none absolute -right-20 -top-20 opacity-[0.07] dark:opacity-[0.04]">
+        <div class="pointer-events-none absolute -top-20 -right-20 opacity-[0.07] dark:opacity-[0.04]">
           <Star01Icon class="size-[500px] text-blue-600" />
         </div>
 
@@ -539,7 +537,7 @@ export default function IconsPage() {
               placeholder="Search all icons..."
               value={searchQuery()}
               onInput={(e) => setSearchQuery(e.currentTarget.value)}
-              class="flex-1 border-0 bg-transparent text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder-neutral-500"
+              class="flex-1 border-0 bg-transparent text-sm text-neutral-900 placeholder-neutral-400 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-neutral-500"
             />
           </div>
         </div>
@@ -585,7 +583,9 @@ export default function IconsPage() {
           when={iconsData()}
           fallback={
             <div class="flex items-center justify-center py-20">
-              <p class="text-sm text-neutral-400 dark:text-neutral-500">Loading icons...</p>
+              <p class="text-sm text-neutral-400 dark:text-neutral-500">
+                Loading icons...
+              </p>
             </div>
           }
         >
@@ -596,8 +596,7 @@ export default function IconsPage() {
               fallback={<span>Showing all {allIconsList().length} icons</span>}
             >
               <span>
-                {filteredIcons().length}{' '}
-                {filteredIcons().length === 1 ? 'icon' : 'icons'}
+                {filteredIcons().length} {filteredIcons().length === 1 ? 'icon' : 'icons'}
                 <Show when={selectedCategory()}>
                   <span>
                     {' '}
@@ -643,7 +642,7 @@ export default function IconsPage() {
                 {(icon) => {
                   const IconComponent = icon.component;
                   return (
-                    <div class="group relative flex flex-col items-center gap-2 rounded-xl border border-transparent cursor-pointer bg-neutral-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
+                    <div class="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-transparent bg-neutral-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50 hover:shadow-md dark:bg-neutral-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30">
                       <div class="flex size-5 items-center justify-center text-neutral-700 transition-colors group-hover:text-blue-600 dark:text-neutral-300 dark:group-hover:text-blue-400">
                         <IconComponent class="size-5" />
                       </div>
@@ -654,7 +653,7 @@ export default function IconsPage() {
                       {/* Copy button on hover */}
                       <button
                         onClick={(e) => copyIconName(icon.name, e)}
-                        class="absolute right-2 top-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-neutral-700 opacity-0 shadow-sm transition-opacity hover:bg-neutral-100 group-hover:opacity-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                        class="absolute top-2 right-2 flex cursor-pointer items-center gap-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-neutral-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700"
                         title={`Copy ${icon.name}`}
                       >
                         <Copy01Icon class="size-3" />

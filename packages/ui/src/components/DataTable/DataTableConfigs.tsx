@@ -1,11 +1,6 @@
 import { For, JSX, Show, createSignal } from 'solid-js';
 
-import {
-  CheckIcon,
-  Edit05Icon,
-  Settings01Icon,
-  Trash03Icon,
-} from '@kayou/icons';
+import { CheckIcon, Edit05Icon, Settings01Icon, Trash03Icon } from '@kayou/icons';
 import { twMerge } from 'tailwind-merge';
 
 import Button from '../Button';
@@ -184,7 +179,9 @@ export function DataTableConfigs(): JSX.Element {
                         <button
                           type="button"
                           onClick={() => handleActivate(config.id)}
-                          aria-current={ctx.activeConfigId() === config.id ? 'true' : undefined}
+                          aria-current={
+                            ctx.activeConfigId() === config.id ? 'true' : undefined
+                          }
                           class="flex flex-1 cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm"
                         >
                           <Show when={ctx.activeConfigId() === config.id}>
@@ -252,15 +249,9 @@ export function DataTableConfigs(): JSX.Element {
                   data-config-delete-confirm
                   class="flex flex-col gap-2 rounded-md bg-red-50 p-2 text-red-700 dark:bg-red-900/30 dark:text-red-300"
                 >
-                  <span class="text-sm font-medium">
-                    {ctx.labels().confirmDeletion}
-                  </span>
+                  <span class="text-sm font-medium">{ctx.labels().confirmDeletion}</span>
                   <div class="flex gap-2">
-                    <Button
-                      size="xs"
-                      color="theme"
-                      onClick={cancelDeleteConfig}
-                    >
+                    <Button size="xs" color="theme" onClick={cancelDeleteConfig}>
                       {ctx.labels().cancel}
                     </Button>
                     <Button
@@ -367,11 +358,7 @@ export function DataTableConfigs(): JSX.Element {
           </Button>
         </Show>
 
-        <Show
-          when={
-            ctx.isDirty() && ctx.isAtLimit() && ctx.activeConfigId() === null
-          }
-        >
+        <Show when={ctx.isDirty() && ctx.isAtLimit() && ctx.activeConfigId() === null}>
           <span class="text-sm text-neutral-500 dark:text-neutral-400">
             {ctx.labels().maxConfigsReached}
           </span>
@@ -381,9 +368,7 @@ export function DataTableConfigs(): JSX.Element {
           content={() => (
             // Stop delegated click from crossing Portal _$host boundary
             // to the Popover trigger, which would toggle the popover closed.
-            <div onClick={(e) => e.stopPropagation()}>
-              {popoverContent()}
-            </div>
+            <div onClick={(e) => e.stopPropagation()}>{popoverContent()}</div>
           )}
           position="bottom-end"
           backgroundScrollBehavior="follow"
@@ -404,11 +389,17 @@ export function DataTableConfigs(): JSX.Element {
               aria-expanded={listOpen()}
               onClick={handleListTriggerClick}
             >
-              {activeConfig()?.name ?? ctx.labels().configurations} ({ctx.configs().length}/{MAX_CONFIGS})
+              {activeConfig()?.name ?? ctx.labels().configurations} (
+              {ctx.configs().length}/{MAX_CONFIGS})
               <Show
-                when={ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)}
+                when={
+                  ctx.isDirty() && (!ctx.isAtLimit() || ctx.activeConfigId() !== null)
+                }
               >
-                <span class="h-2 w-2 animate-pulse rounded-full bg-amber-500" aria-hidden="true" />
+                <span
+                  class="h-2 w-2 animate-pulse rounded-full bg-amber-500"
+                  aria-hidden="true"
+                />
                 <span class="sr-only">(unsaved changes)</span>
               </Show>
             </Button>

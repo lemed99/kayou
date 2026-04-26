@@ -71,7 +71,11 @@ function SchemaValidators() {
   const form = useForm({
     initialValues: { username: '', email: '', age: 0, website: '' },
     schema: {
-      username: [v.required('Username is required'), v.minLength(3, 'Min 3 chars'), v.maxLength(20, 'Max 20 chars')],
+      username: [
+        v.required('Username is required'),
+        v.minLength(3, 'Min 3 chars'),
+        v.maxLength(20, 'Max 20 chars'),
+      ],
       email: [v.required('Email is required'), v.email('Invalid email')],
       age: [v.min(18, 'Must be 18+'), v.max(99, 'Must be under 100')],
       website: [v.pattern(/^https:\/\//, 'Must start with https://')],
@@ -258,10 +262,7 @@ function PasswordInternalValidation() {
   });
 
   return (
-    <Section
-      id="password-internal-validation"
-      title="Password Component Validation"
-    >
+    <Section id="password-internal-validation" title="Password Component Validation">
       <Form onSubmit={form.handleSubmit} isSubmitting={form.isSubmitting()}>
         <div class="flex flex-col gap-3">
           <Password
@@ -290,10 +291,7 @@ function PasswordCustomValidationMessage() {
   });
 
   return (
-    <Section
-      id="password-custom-message"
-      title="Password Custom Validation Message"
-    >
+    <Section id="password-custom-message" title="Password Custom Validation Message">
       <Form onSubmit={form.handleSubmit} isSubmitting={form.isSubmitting()}>
         <div class="flex flex-col gap-3">
           <Password
@@ -408,8 +406,12 @@ function FormState() {
           <p data-testid="is-dirty">{form.isDirty() ? 'dirty' : 'pristine'}</p>
           <p data-testid="is-valid">{form.isValid() ? 'valid' : 'invalid'}</p>
           <div class="flex gap-2">
-            <Button type="submit" disabled={form.isSubmitting()}>Submit</Button>
-            <Button type="button" color="theme" onClick={() => form.reset()}>Reset</Button>
+            <Button type="submit" disabled={form.isSubmitting()}>
+              Submit
+            </Button>
+            <Button type="button" color="theme" onClick={() => form.reset()}>
+              Reset
+            </Button>
           </div>
         </div>
       </Form>

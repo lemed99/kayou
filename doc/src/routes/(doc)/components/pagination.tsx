@@ -59,9 +59,24 @@ export default function PaginationPage() {
           kind: 'type',
           description: 'Visible text labels for the pagination component',
           props: [
-            { name: 'page', type: 'string', default: '"Page"', description: 'Label for the page input' },
-            { name: 'of', type: 'string', default: '"of"', description: 'Label between current page and total' },
-            { name: 'pageN', type: '(n: number) => string', default: '(n) => `Page ${n}`', description: 'Function to generate page label' },
+            {
+              name: 'page',
+              type: 'string',
+              default: '"Page"',
+              description: 'Label for the page input',
+            },
+            {
+              name: 'of',
+              type: 'string',
+              default: '"of"',
+              description: 'Label between current page and total',
+            },
+            {
+              name: 'pageN',
+              type: '(n: number) => string',
+              default: '(n) => `Page ${n}`',
+              description: 'Function to generate page label',
+            },
           ],
         },
         {
@@ -69,11 +84,36 @@ export default function PaginationPage() {
           kind: 'type',
           description: 'Accessibility labels for screen readers',
           props: [
-            { name: 'goToFirst', type: 'string', default: '"Go to first page"', description: 'Aria label for first page button' },
-            { name: 'goToPrevious', type: 'string', default: '"Go to previous page"', description: 'Aria label for previous page button' },
-            { name: 'goToNext', type: 'string', default: '"Go to next page"', description: 'Aria label for next page button' },
-            { name: 'goToLast', type: 'string', default: '"Go to last page"', description: 'Aria label for last page button' },
-            { name: 'page', type: 'string', default: '"Page"', description: 'Aria label for page input' },
+            {
+              name: 'goToFirst',
+              type: 'string',
+              default: '"Go to first page"',
+              description: 'Aria label for first page button',
+            },
+            {
+              name: 'goToPrevious',
+              type: 'string',
+              default: '"Go to previous page"',
+              description: 'Aria label for previous page button',
+            },
+            {
+              name: 'goToNext',
+              type: 'string',
+              default: '"Go to next page"',
+              description: 'Aria label for next page button',
+            },
+            {
+              name: 'goToLast',
+              type: 'string',
+              default: '"Go to last page"',
+              description: 'Aria label for last page button',
+            },
+            {
+              name: 'page',
+              type: 'string',
+              default: '"Page"',
+              description: 'Aria label for page input',
+            },
           ],
         },
       ]}

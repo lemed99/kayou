@@ -187,7 +187,9 @@ export interface SidebarCollapseProps {
 const isSidebarItem = (item: SidebarItem | undefined): item is SidebarItem =>
   item !== undefined;
 
-const sanitizeSidebarItems = (itemList: readonly (SidebarItem | undefined)[]): SidebarItem[] =>
+const sanitizeSidebarItems = (
+  itemList: readonly (SidebarItem | undefined)[],
+): SidebarItem[] =>
   itemList.filter(isSidebarItem).map((item) => ({
     ...item,
     children: item.children?.filter(isSidebarItem),

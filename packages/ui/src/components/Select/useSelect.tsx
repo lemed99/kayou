@@ -646,16 +646,14 @@ const useSelect = <T extends MergedSelectProps>(
                   'z-100 w-fit rounded-lg border border-neutral-200 bg-white shadow dark:border-neutral-800 dark:bg-neutral-900',
                   props.floatingClass,
                 )}
-                style={
-                  {
-                    ...floatingStyles(),
-                    opacity: isVisible() ? '1' : '0',
-                    transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
-                    'transition-property': 'opacity, transform',
-                    'transition-duration': '.2s',
-                    'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
-                  } as JSX.CSSProperties
-                }
+                style={{
+                  ...floatingStyles(),
+                  opacity: isVisible() ? '1' : '0',
+                  transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+                  'transition-property': 'opacity, transform',
+                  'transition-duration': '.2s',
+                  'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+                }}
               >
                 {layoutProps.preOptionsComponent}
 
@@ -682,7 +680,7 @@ const useSelect = <T extends MergedSelectProps>(
                           <For
                             each={filteredOptions()}
                             fallback={
-                              <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                              <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                                 {selectLabels().noResults}
                               </div>
                             }
@@ -699,7 +697,7 @@ const useSelect = <T extends MergedSelectProps>(
                             <Show
                               when={filteredOptions().length > 0}
                               fallback={
-                                <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                                <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                                   {selectLabels().noResults}
                                 </div>
                               }
@@ -783,7 +781,7 @@ const useSelect = <T extends MergedSelectProps>(
                         }
                         setScrollPosition={setScrollTop}
                         fallback={
-                          <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                          <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                             {selectLabels().noResults}
                           </div>
                         }
@@ -809,7 +807,7 @@ const useSelect = <T extends MergedSelectProps>(
                       }
                       setScrollPosition={setScrollTop}
                       fallback={
-                        <div class="px-2 py-1.5 text-sm whitespace-nowrap">
+                        <div class="whitespace-nowrap px-2 py-1.5 text-sm">
                           {selectLabels().noResults}
                         </div>
                       }

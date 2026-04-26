@@ -372,7 +372,7 @@ export const ToastProvider = (props: ToastProviderProps) => {
       dismiss,
       pause,
       play,
-    } as ToastAPIBase,
+    },
     {
       get(target, prop) {
         if (prop in target) {

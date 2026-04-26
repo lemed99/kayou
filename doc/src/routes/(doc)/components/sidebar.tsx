@@ -234,9 +234,24 @@ export default function SidebarPage() {
           kind: 'type',
           description: 'Visible text labels for the sidebar',
           props: [
-            { name: 'pinned', type: 'string', default: '"Pinned"', description: 'Label for the pinned section' },
-            { name: 'unpin', type: 'string', default: '"Unpin"', description: 'Label for the unpin action' },
-            { name: 'pin', type: 'string', default: '"Pin"', description: 'Label for the pin action' },
+            {
+              name: 'pinned',
+              type: 'string',
+              default: '"Pinned"',
+              description: 'Label for the pinned section',
+            },
+            {
+              name: 'unpin',
+              type: 'string',
+              default: '"Unpin"',
+              description: 'Label for the unpin action',
+            },
+            {
+              name: 'pin',
+              type: 'string',
+              default: '"Pin"',
+              description: 'Label for the pin action',
+            },
           ],
         },
         {
@@ -244,9 +259,24 @@ export default function SidebarPage() {
           kind: 'type',
           description: 'Accessibility labels for screen readers',
           props: [
-            { name: 'collapse', type: 'string', default: '"Collapse sidebar"', description: 'Aria label for collapse button' },
-            { name: 'expand', type: 'string', default: '"Expand sidebar"', description: 'Aria label for expand button' },
-            { name: 'sidebar', type: 'string', default: '"Sidebar"', description: 'Aria label for sidebar navigation' },
+            {
+              name: 'collapse',
+              type: 'string',
+              default: '"Collapse sidebar"',
+              description: 'Aria label for collapse button',
+            },
+            {
+              name: 'expand',
+              type: 'string',
+              default: '"Expand sidebar"',
+              description: 'Aria label for expand button',
+            },
+            {
+              name: 'sidebar',
+              type: 'string',
+              default: '"Sidebar"',
+              description: 'Aria label for sidebar navigation',
+            },
           ],
         },
       ]}

@@ -6,14 +6,19 @@ export default function UseShortcutPage() {
       title="useShortcut"
       description="Register a keyboard shortcut action within a ShortcutProvider. The shortcut is automatically unregistered when the component unmounts. Must be used within a ShortcutProvider."
       relatedHooks={[
-        { name: 'ShortcutPanel', path: '/components/shortcut-panel', description: 'UI panel for viewing and editing keyboard shortcuts.' },
+        {
+          name: 'ShortcutPanel',
+          path: '/components/shortcut-panel',
+          description: 'UI panel for viewing and editing keyboard shortcuts.',
+        },
       ]}
       parameters={[
         {
           name: 'actionId',
           type: 'string',
           required: true,
-          description: 'Unique identifier for the action. If an action with this ID already exists, it is replaced.',
+          description:
+            'Unique identifier for the action. If an action with this ID already exists, it is replaced.',
         },
         {
           name: 'options',
@@ -38,7 +43,8 @@ export default function UseShortcutPage() {
             {
               name: 'shortcut',
               type: 'string',
-              description: 'Key combination string, e.g. "Ctrl+S", "Ctrl+Shift+K". Modifiers: Ctrl, Alt, Shift, Meta.',
+              description:
+                'Key combination string, e.g. "Ctrl+S", "Ctrl+Shift+K". Modifiers: Ctrl, Alt, Shift, Meta.',
             },
             {
               name: 'handler',
@@ -66,7 +72,8 @@ export default function UseShortcutPage() {
               name: 'ignoreInputs',
               type: 'boolean',
               default: 'true',
-              description: 'When true, the shortcut is suppressed while focus is in an input, textarea, select, or contenteditable element.',
+              description:
+                'When true, the shortcut is suppressed while focus is in an input, textarea, select, or contenteditable element.',
             },
           ],
         },
@@ -87,11 +94,34 @@ export default function UseShortcutPage() {
           props: [
             { name: 'id', type: 'string', description: 'Unique action identifier.' },
             { name: 'label', type: 'string', description: 'Human-readable label.' },
-            { name: 'description', type: 'string', default: '-', description: 'Action description.' },
-            { name: 'category', type: 'string', default: '-', description: 'Grouping category.' },
-            { name: 'defaultShortcut', type: 'string', description: 'Default key combination.' },
-            { name: 'handler', type: '() => void', description: 'Action handler function.' },
-            { name: 'ignoreInputs', type: 'boolean', default: 'true', description: 'Whether to suppress in input elements.' },
+            {
+              name: 'description',
+              type: 'string',
+              default: '-',
+              description: 'Action description.',
+            },
+            {
+              name: 'category',
+              type: 'string',
+              default: '-',
+              description: 'Grouping category.',
+            },
+            {
+              name: 'defaultShortcut',
+              type: 'string',
+              description: 'Default key combination.',
+            },
+            {
+              name: 'handler',
+              type: '() => void',
+              description: 'Action handler function.',
+            },
+            {
+              name: 'ignoreInputs',
+              type: 'boolean',
+              default: 'true',
+              description: 'Whether to suppress in input elements.',
+            },
           ],
         },
       ]}

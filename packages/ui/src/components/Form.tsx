@@ -3,8 +3,10 @@ import { type JSX, splitProps } from 'solid-js';
 /**
  * Props for the Form component.
  */
-export interface FormProps
-  extends Omit<JSX.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+export interface FormProps extends Omit<
+  JSX.FormHTMLAttributes<HTMLFormElement>,
+  'onSubmit'
+> {
   /** Submit handler. Typically pass `form.handleSubmit` from useForm. */
   onSubmit: (e: SubmitEvent) => void | Promise<void>;
 
@@ -27,11 +29,7 @@ export interface FormProps
  * ```
  */
 const Form = (props: FormProps): JSX.Element => {
-  const [local, formProps] = splitProps(props, [
-    'onSubmit',
-    'isSubmitting',
-    'children',
-  ]);
+  const [local, formProps] = splitProps(props, ['onSubmit', 'isSubmitting', 'children']);
 
   const handleSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (e) => {
     e.preventDefault();

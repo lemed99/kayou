@@ -24,7 +24,8 @@ export default function UploadFilePage() {
         },
         {
           term: 'Pre-existing Files',
-          explanation: 'Pass server-side files via value prop. Users can view and remove them alongside new uploads.',
+          explanation:
+            'Pass server-side files via value prop. Users can view and remove them alongside new uploads.',
         },
       ]}
       props={[
@@ -132,7 +133,8 @@ export default function UploadFilePage() {
         {
           name: 'ExistingFile',
           kind: 'type',
-          description: 'Represents a file already on the server (e.g. a previously uploaded document).',
+          description:
+            'Represents a file already on the server (e.g. a previously uploaded document).',
           props: [
             {
               name: 'id',

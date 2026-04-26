@@ -70,11 +70,12 @@ export default function UseToastPage() {
         },
         {
           name: 'ToastOptions',
-          description: 'Options that can be passed when creating a toast to override provider defaults.',
+          description:
+            'Options that can be passed when creating a toast to override provider defaults.',
           props: [
             {
               name: 'position',
-              type: "ToastPosition",
+              type: 'ToastPosition',
               default: "'top-right'",
               description: 'Override the position for this specific toast.',
             },
@@ -82,20 +83,29 @@ export default function UseToastPage() {
               name: 'duration',
               type: 'number',
               default: '3000',
-              description: 'Override the auto-dismiss duration in milliseconds for this toast.',
+              description:
+                'Override the auto-dismiss duration in milliseconds for this toast.',
             },
             {
               name: 'pauseOnHover',
               type: 'boolean',
               default: 'true',
-              description: 'Override whether hovering pauses the auto-dismiss timer for this toast.',
+              description:
+                'Override whether hovering pauses the auto-dismiss timer for this toast.',
             },
           ],
         },
         {
           name: 'ToastPosition',
           description: 'Available positions for toast notifications.',
-          values: ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'],
+          values: [
+            'top-left',
+            'top-center',
+            'top-right',
+            'bottom-left',
+            'bottom-center',
+            'bottom-right',
+          ],
         },
       ]}
       usage={`

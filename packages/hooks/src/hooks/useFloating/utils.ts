@@ -171,7 +171,10 @@ function shiftWithinBounds(
     if (left < viewportRect.left) {
       const shiftedLeft = referenceRect.left;
       const currentOverflow = viewportRect.left - left;
-      const shiftedOverflow = Math.max(0, shiftedLeft + dimensions.width - viewportRect.right);
+      const shiftedOverflow = Math.max(
+        0,
+        shiftedLeft + dimensions.width - viewportRect.right,
+      );
       if (shiftedOverflow < currentOverflow) {
         finalAlignment = 'start';
         left = shiftedLeft;
@@ -191,7 +194,10 @@ function shiftWithinBounds(
     if (top < viewportRect.top) {
       const shiftedTop = referenceRect.top;
       const currentOverflow = viewportRect.top - top;
-      const shiftedOverflow = Math.max(0, shiftedTop + dimensions.height - viewportRect.bottom);
+      const shiftedOverflow = Math.max(
+        0,
+        shiftedTop + dimensions.height - viewportRect.bottom,
+      );
       if (shiftedOverflow < currentOverflow) {
         finalAlignment = 'start';
         top = shiftedTop;
@@ -459,7 +465,9 @@ export function getScrollableAncestor(el: HTMLElement | null): HTMLElement | nul
  * Get all scrollable ancestors of an element, from nearest to furthest.
  * Includes window as the last element if no other scrollable ancestors prevent it.
  */
-export function getAllScrollableAncestors(el: HTMLElement | null): (HTMLElement | Window)[] {
+export function getAllScrollableAncestors(
+  el: HTMLElement | null,
+): (HTMLElement | Window)[] {
   const ancestors: (HTMLElement | Window)[] = [];
   let current: HTMLElement | null = el?.parentElement || null;
 

@@ -18,11 +18,7 @@ function Basic24h() {
 
   return (
     <Section id="basic-24h" title="Basic 24h Format">
-      <TimePicker
-        label="Start Time"
-        value={time()}
-        onChange={setTime}
-      />
+      <TimePicker label="Start Time" value={time()} onChange={setTime} />
       <p data-testid="basic-24h-value" class="mt-2 text-sm text-neutral-500">
         {`${time().hour}:${time().minute}:${time().second}`}
       </p>
@@ -37,12 +33,7 @@ function Format12h() {
 
   return (
     <Section id="format-12h" title="12h Format with AM/PM">
-      <TimePicker
-        label="Meeting Time"
-        format="12h"
-        value={time()}
-        onChange={setTime}
-      />
+      <TimePicker label="Meeting Time" format="12h" value={time()} onChange={setTime} />
       <p data-testid="format-12h-value" class="mt-2 text-sm text-neutral-500">
         {`${time().hour}:${time().minute}:${time().second}`}
       </p>
@@ -57,12 +48,7 @@ function WithSeconds() {
 
   return (
     <Section id="with-seconds" title="With Seconds">
-      <TimePicker
-        label="Precise Time"
-        showSeconds
-        value={time()}
-        onChange={setTime}
-      />
+      <TimePicker label="Precise Time" showSeconds value={time()} onChange={setTime} />
       <p data-testid="with-seconds-value" class="mt-2 text-sm text-neutral-500">
         {`${time().hour}:${time().minute}:${time().second}`}
       </p>
@@ -77,12 +63,7 @@ function StepControl() {
 
   return (
     <Section id="step-control" title="15-Minute Steps">
-      <TimePicker
-        label="Appointment"
-        minuteStep={15}
-        value={time()}
-        onChange={setTime}
-      />
+      <TimePicker label="Appointment" minuteStep={15} value={time()} onChange={setTime} />
       <p data-testid="step-value" class="mt-2 text-sm text-neutral-500">
         {`${time().hour}:${time().minute}`}
       </p>
@@ -95,11 +76,7 @@ function StepControl() {
 function Disabled() {
   return (
     <Section id="disabled" title="Disabled">
-      <TimePicker
-        label="Disabled"
-        disabled
-        value={{ hour: 10, minute: 0, second: 0 }}
-      />
+      <TimePicker label="Disabled" disabled value={{ hour: 10, minute: 0, second: 0 }} />
     </Section>
   );
 }
@@ -109,10 +86,7 @@ function Disabled() {
 function Loading() {
   return (
     <Section id="loading" title="Loading">
-      <TimePicker
-        label="Loading"
-        isLoading
-      />
+      <TimePicker label="Loading" isLoading />
     </Section>
   );
 }
@@ -129,21 +103,9 @@ function ValidationColors() {
           helperText="Time is required"
           required
         />
-        <TimePicker
-          label="Warning"
-          color="warning"
-          helperText="Outside business hours"
-        />
-        <TimePicker
-          label="Success"
-          color="success"
-          helperText="Time is valid"
-        />
-        <TimePicker
-          label="Info"
-          color="info"
-          helperText="Select a preferred time"
-        />
+        <TimePicker label="Warning" color="warning" helperText="Outside business hours" />
+        <TimePicker label="Success" color="success" helperText="Time is valid" />
+        <TimePicker label="Info" color="info" helperText="Select a preferred time" />
       </div>
     </Section>
   );

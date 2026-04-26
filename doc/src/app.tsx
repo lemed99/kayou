@@ -14,16 +14,13 @@ function RootLayout(props: RouteSectionProps): JSX.Element {
   const isPreviewPage = () => location.pathname.startsWith('/preview');
 
   return (
-    <Show
-      when={!isPreviewPage()}
-      fallback={<Suspense>{props.children}</Suspense>}
-    >
-        <div class="min-h-dvh">
-          <Navbar />
-          <main>
-            <Suspense>{props.children}</Suspense>
-          </main>
-        </div>
+    <Show when={!isPreviewPage()} fallback={<Suspense>{props.children}</Suspense>}>
+      <div class="min-h-dvh">
+        <Navbar />
+        <main>
+          <Suspense>{props.children}</Suspense>
+        </main>
+      </div>
     </Show>
   );
 }

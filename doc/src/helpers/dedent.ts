@@ -13,7 +13,8 @@
 export function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
   // Combine template literal parts with interpolated values
   const result = strings.reduce(
-    (acc, str, i) => acc + str + (i < values.length ? String(values[i] as string | number) : ''),
+    (acc, str, i) =>
+      acc + str + (i < values.length ? String(values[i] as string | number) : ''),
     '',
   );
 

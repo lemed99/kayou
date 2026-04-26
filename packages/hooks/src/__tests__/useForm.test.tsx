@@ -1,5 +1,8 @@
 import { createRoot } from 'solid-js';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { type UseFormOptions, type UseFormReturn, useForm } from '../hooks/useForm';
 
 const formContextMock = vi.hoisted(() => ({
   get: vi.fn(),
@@ -10,8 +13,6 @@ const formContextMock = vi.hoisted(() => ({
 vi.mock('../context/FormContext', () => ({
   useFormContext: () => formContextMock,
 }));
-
-import { useForm, type UseFormOptions, type UseFormReturn } from '../hooks/useForm';
 
 function createTestForm<T extends Record<string, unknown>>(
   options: UseFormOptions<T>,
@@ -49,10 +50,12 @@ function createInputEvent({
 }
 
 function createNestedForm(
-  overrides: Partial<UseFormOptions<{
-    name: string;
-    units: { name: string; conversion_factor: number; is_reference: boolean }[];
-  }>> = {},
+  overrides: Partial<
+    UseFormOptions<{
+      name: string;
+      units: { name: string; conversion_factor: number; is_reference: boolean }[];
+    }>
+  > = {},
 ) {
   return createTestForm({
     initialValues: {
@@ -73,7 +76,7 @@ function createNestedForm(
       if (
         typeof values.units[0]?.conversion_factor !== 'number' ||
         Number.isNaN(values.units[0]?.conversion_factor) ||
-        values.units[0]!.conversion_factor <= 0
+        values.units[0].conversion_factor <= 0
       ) {
         errors['units.0.conversion_factor'] = 'Conversion factor must be positive';
       }
@@ -148,9 +151,11 @@ describe('useForm', () => {
     const { form, dispose } = createNestedForm();
 
     try {
-      form.handleChangeAt('units', 0, 'conversion_factor')(
-        createInputEvent({ type: 'number', value: '2.5' }),
-      );
+      form.handleChangeAt(
+        'units',
+        0,
+        'conversion_factor',
+      )(createInputEvent({ type: 'number', value: '2.5' }));
       expect(form.values.units[0].conversion_factor).toBe(2.5);
     } finally {
       dispose();

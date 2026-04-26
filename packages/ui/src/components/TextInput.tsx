@@ -193,11 +193,11 @@ const TextInput = (props: TextInputProps): JSX.Element => {
   const showArrows = createMemo(() => local.showArrows || false);
   const fitContent = createMemo(() => local.fitContent || false);
   const addonPosition = createMemo(() => local.addonPosition || 'left');
-  const resolvedAddonLeft = createMemo(() =>
-    local.addonLeft ?? (addonPosition() === 'left' ? local.addon : undefined),
+  const resolvedAddonLeft = createMemo(
+    () => local.addonLeft ?? (addonPosition() === 'left' ? local.addon : undefined),
   );
-  const resolvedAddonRight = createMemo(() =>
-    local.addonRight ?? (addonPosition() === 'right' ? local.addon : undefined),
+  const resolvedAddonRight = createMemo(
+    () => local.addonRight ?? (addonPosition() === 'right' ? local.addon : undefined),
   );
   const hasLeftAddon = createMemo(() => Boolean(resolvedAddonLeft()));
   const hasRightAddon = createMemo(() => Boolean(resolvedAddonRight()));
@@ -266,7 +266,12 @@ const TextInput = (props: TextInputProps): JSX.Element => {
   });
 
   const leftAddonClass = createMemo(() =>
-    twMerge(theme.addon.base, theme.addon.position.left, local.addonClass, local.addonLeftClass),
+    twMerge(
+      theme.addon.base,
+      theme.addon.position.left,
+      local.addonClass,
+      local.addonLeftClass,
+    ),
   );
   const rightAddonClass = createMemo(() =>
     twMerge(

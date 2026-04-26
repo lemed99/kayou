@@ -1,12 +1,13 @@
 import { type Accessor, createRoot, createSignal } from 'solid-js';
+
 import { vi } from 'vitest';
 
 import { CustomResourceProvider } from '../../context/CustomResourceContext';
 import type { ResourceOptions } from '../../context/CustomResourceContext';
 import {
-  useCustomResource,
   type CustomResource,
   type CustomResourceProps,
+  useCustomResource,
 } from '../../hooks/useCustomResource';
 
 export interface TestProviderOptions {
@@ -116,10 +117,7 @@ export function mockFetchSuccess<T>(data: T, delay = 0) {
 /**
  * Creates a mock fetch that returns an error response.
  */
-export function mockFetchError(
-  status: number,
-  body: unknown = { message: 'Error' },
-) {
+export function mockFetchError(status: number, body: unknown = { message: 'Error' }) {
   return vi.fn().mockResolvedValue({
     ok: false,
     status,
@@ -132,7 +130,9 @@ export function mockFetchError(
  * Creates a mock fetch that rejects (network error).
  */
 export function mockFetchNetworkError() {
-  return vi.fn().mockRejectedValue(
-    new TypeError('Failed to fetch'),
-  ) as unknown as typeof globalThis.fetch;
+  return vi
+    .fn()
+    .mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    ) as unknown as typeof globalThis.fetch;
 }

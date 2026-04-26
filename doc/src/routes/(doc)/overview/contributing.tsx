@@ -1,13 +1,13 @@
 import {
-    GitBranch01Icon,
-    GitPullRequestIcon,
-    HeartIcon,
-    MessageSquare01Icon,
+  GitBranch01Icon,
+  GitPullRequestIcon,
+  HeartIcon,
+  MessageSquare01Icon,
 } from '@kayou/icons';
 
 import BaseDocPage from '../../../components/BaseDocPage';
 
-const cloneCode = `git clone https://github.com/kayou.git
+const cloneCode = `git clone https://github.com/lemed99/kayou.git
 cd kayou
 pnpm install
 pnpm dev`;
@@ -51,7 +51,9 @@ export default function ContributingPage() {
           </div>
           <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">
             <GitBranch01Icon class="size-8 text-green-600 dark:text-green-400" />
-            <h3 class="mt-4 font-semibold text-neutral-950 dark:text-white">Bug Reports</h3>
+            <h3 class="mt-4 font-semibold text-neutral-950 dark:text-white">
+              Bug Reports
+            </h3>
             <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
               Report bugs with detailed reproduction steps to help us identify and fix
               issues.
@@ -83,7 +85,7 @@ export default function ContributingPage() {
               Fork the repository on GitHub, then clone your fork locally:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
-              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+              <pre class="bg-[#282c34] px-4 py-3 font-mono text-xs text-white">
                 {cloneCode}
               </pre>
             </div>
@@ -97,7 +99,7 @@ export default function ContributingPage() {
               Create a new branch for your changes:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
-              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+              <pre class="bg-[#282c34] px-4 py-3 font-mono text-xs text-white">
                 {branchCode}
               </pre>
             </div>
@@ -120,7 +122,7 @@ export default function ContributingPage() {
               Commit your changes with a descriptive message:
             </p>
             <div class="mt-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
-              <pre class="px-4 py-3 font-mono text-xs text-white bg-[#282c34]">
+              <pre class="bg-[#282c34] px-4 py-3 font-mono text-xs text-white">
                 {commitCode}
               </pre>
             </div>
@@ -149,8 +151,8 @@ export default function ContributingPage() {
               1
             </span>
             <span>
-              <strong class="text-neutral-950 dark:text-white">TypeScript</strong> — All code
-              must be written in TypeScript with proper type annotations.
+              <strong class="text-neutral-950 dark:text-white">TypeScript</strong> — All
+              code must be written in TypeScript with proper type annotations.
             </span>
           </li>
           <li class="flex items-start gap-3">
@@ -184,8 +186,8 @@ export default function ContributingPage() {
               4
             </span>
             <span>
-              <strong class="text-neutral-950 dark:text-white">Testing</strong> — Add tests
-              for new features and ensure existing tests pass.
+              <strong class="text-neutral-950 dark:text-white">Testing</strong> — Add
+              tests for new features and ensure existing tests pass.
             </span>
           </li>
           <li class="flex items-start gap-3">
@@ -233,7 +235,9 @@ export default function ContributingPage() {
             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
               <tr>
                 <td class="px-4 py-3 font-mono text-blue-600 dark:text-blue-400">feat</td>
-                <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">New feature</td>
+                <td class="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                  New feature
+                </td>
               </tr>
               <tr>
                 <td class="px-4 py-3 font-mono text-blue-600 dark:text-blue-400">fix</td>

@@ -1604,16 +1604,14 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
                 nextElement.focus({ preventScroll: true });
               }
             }}
-            style={
-              {
-                ...floatingStyles(),
-                opacity: isVisible() ? '1' : '0',
-                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
-                'transition-property': 'opacity, transform',
-                'transition-duration': '.2s',
-                'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
-              } as JSX.CSSProperties
-            }
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+              'transition-property': 'opacity, transform',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
             class={twMerge(
               'z-100 w-fit rounded-lg border border-neutral-300 bg-white px-2.5 py-3 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
             )}

@@ -20,8 +20,7 @@ export default function BreadcrumbPage() {
         },
         {
           term: 'Hierarchical Navigation',
-          explanation:
-            'Items represent hierarchy levels from root to current page.',
+          explanation: 'Items represent hierarchy levels from root to current page.',
         },
         {
           term: 'Current Page Indicator',
@@ -72,8 +71,7 @@ export default function BreadcrumbPage() {
               name: 'label',
               type: 'JSX.Element',
               default: '-',
-              description:
-                'Text or JSX content displayed for the breadcrumb item',
+              description: 'Text or JSX content displayed for the breadcrumb item',
             },
             {
               name: 'href',

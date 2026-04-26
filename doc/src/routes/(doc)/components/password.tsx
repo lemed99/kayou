@@ -10,7 +10,8 @@ function PasswordBehaviorExamples() {
 
   const [thresholdTypedValue, setThresholdTypedValue] = createSignal('');
   const [thresholdAcceptedValue, setThresholdAcceptedValue] = createSignal('');
-  const [thresholdStrength, setThresholdStrength] = createSignal<PasswordStrength>('weak');
+  const [thresholdStrength, setThresholdStrength] =
+    createSignal<PasswordStrength>('weak');
 
   const [customTypedValue, setCustomTypedValue] = createSignal('');
   const [customAcceptedValue, setCustomAcceptedValue] = createSignal('');
@@ -35,8 +36,8 @@ function PasswordBehaviorExamples() {
       <h2 class="mb-4 text-2xl font-medium">Behavior Examples</h2>
       <p class="mb-6 max-w-3xl text-sm text-neutral-600 dark:text-neutral-400">
         These examples show the difference between the typed password and the value
-        exposed to consumers when `requiredStrength` is enabled. The supported
-        consumer callbacks are `onInput(value: string)` and `onChange(value: string)`.
+        exposed to consumers when `requiredStrength` is enabled. The supported consumer
+        callbacks are `onInput(value: string)` and `onChange(value: string)`.
       </p>
 
       <div class="grid gap-6 xl:grid-cols-2">
@@ -72,8 +73,8 @@ function PasswordBehaviorExamples() {
             Accepted value with `onChange`
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            Use `onInput` for the current typed value and `onChange` for the exposed
-            value emitted on each input update after the strength gate is applied.
+            Use `onInput` for the current typed value and `onChange` for the exposed value
+            emitted on each input update after the strength gate is applied.
           </p>
           <div class="mt-4">
             <Password
@@ -110,8 +111,8 @@ function PasswordBehaviorExamples() {
             Custom strength calculator
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            This example treats any password ending with `z` as `strong`, even if it
-            would be weak under the default requirements.
+            This example treats any password ending with `z` as `strong`, even if it would
+            be weak under the default requirements.
           </p>
           <div class="mt-4">
             <Password
@@ -128,7 +129,7 @@ function PasswordBehaviorExamples() {
                 return 'weak';
               }}
               showStrength
-                helperText="onChange fires on each input update after the custom strength check."
+              helperText="onChange fires on each input update after the custom strength check."
             />
             <p data-testid="custom-typed" class="mt-3 text-xs text-neutral-500">
               Typed value: {customTypedValue() || '[empty]'}
@@ -150,8 +151,8 @@ function PasswordBehaviorExamples() {
             Threshold styling overrides color
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            Even with `color=&quot;info&quot;`, the input renders failure styling until the
-            strong threshold is met.
+            Even with `color=&quot;info&quot;`, the input renders failure styling until
+            the strong threshold is met.
           </p>
           <div class="mt-4">
             <Password
@@ -165,10 +166,7 @@ function PasswordBehaviorExamples() {
               showStrength
               helperText="The field stays visually invalid until the threshold is met."
             />
-            <p
-              data-testid="color-override-typed"
-              class="mt-3 text-xs text-neutral-500"
-            >
+            <p data-testid="color-override-typed" class="mt-3 text-xs text-neutral-500">
               Typed value: {colorOverrideTypedValue() || '[empty]'}
             </p>
             <p
@@ -194,13 +192,13 @@ function PasswordBehaviorExamples() {
             `onChange` returns accepted value
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            `onChange` receives the strength-gated value on each input update, so it
-            is the right place to read the exposed password.
+            `onChange` receives the strength-gated value on each input update, so it is
+            the right place to read the exposed password.
           </p>
           <div class="mt-4">
             <Password
               label="Change event"
-               placeholder="Accepted value updates on each input"
+              placeholder="Accepted value updates on each input"
               onChange={setCamelChangeValue}
               requiredStrength="strong"
               showStrength
@@ -219,11 +217,11 @@ function PasswordBehaviorExamples() {
             Coupled to `useForm`
           </h3>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            Pass `form` and `name` to let `Password` own its validation and push
-            that field error into `useForm`. On invalid submit, Password hides the
-            strength bar, reveals the requirements list, and shows the field
-            message. Typing hides the message again. Do not also add schema or
-            validate rules for the same password field.
+            Pass `form` and `name` to let `Password` own its validation and push that
+            field error into `useForm`. On invalid submit, Password hides the strength
+            bar, reveals the requirements list, and shows the field message. Typing hides
+            the message again. Do not also add schema or validate rules for the same
+            password field.
           </p>
           <div class="mt-4">
             <Form onSubmit={form.handleSubmit} isSubmitting={form.isSubmitting()}>
@@ -236,10 +234,7 @@ function PasswordBehaviorExamples() {
                   showStrength
                 />
                 <Button type="submit">Submit</Button>
-                <p
-                  data-testid="form-coupling-submitted"
-                  class="text-xs text-neutral-500"
-                >
+                <p data-testid="form-coupling-submitted" class="text-xs text-neutral-500">
                   Submitted value: {submittedPassword() || '[empty]'}
                 </p>
               </div>

@@ -170,7 +170,7 @@ export function RichTextEditor(props: RichTextEditorProps): JSX.Element {
         if (isSettingContent) return;
         const html = ed.getHTML();
         props.onChange?.(html);
-        props.onChangeJSON?.(ed.getJSON() as Record<string, unknown>);
+        props.onChangeJSON?.(ed.getJSON());
       },
       onTransaction: () => {
         // Trigger toolbar state update on any transaction (format changes, selection, etc.)

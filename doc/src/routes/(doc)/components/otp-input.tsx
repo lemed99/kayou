@@ -124,8 +124,7 @@ export default function OTPInputPage() {
               name: 'digit',
               type: 'string',
               default: '-',
-              description:
-                'Label prefix for each cell (rendered as "Character 1 of 6")',
+              description: 'Label prefix for each cell (rendered as "Character 1 of 6")',
             },
           ],
         },

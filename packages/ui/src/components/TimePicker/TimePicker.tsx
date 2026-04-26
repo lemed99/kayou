@@ -217,7 +217,12 @@ const TimePicker = (props: TimePickerProps) => {
           disabled={isDisabled()}
           required={props.required}
         />
-        <span aria-hidden="true" class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
+        <span
+          aria-hidden="true"
+          class="font-medium text-neutral-400 dark:text-neutral-500"
+        >
+          :
+        </span>
         <NumberInput
           value={zeroPad(currentMinute())}
           sizing={sizing()}
@@ -236,7 +241,12 @@ const TimePicker = (props: TimePickerProps) => {
           required={props.required}
         />
         <Show when={showSeconds()}>
-          <span aria-hidden="true" class="font-medium text-neutral-400 dark:text-neutral-500">:</span>
+          <span
+            aria-hidden="true"
+            class="font-medium text-neutral-400 dark:text-neutral-500"
+          >
+            :
+          </span>
           <NumberInput
             value={zeroPad(currentSecond())}
             sizing={sizing()}

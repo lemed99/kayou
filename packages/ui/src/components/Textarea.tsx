@@ -14,8 +14,10 @@ export type TextareaColor = 'gray' | 'info' | 'failure' | 'warning' | 'success';
 /**
  * Props for the Textarea component.
  */
-export interface TextareaProps
-  extends Omit<JSX.TextareaHTMLAttributes<HTMLTextAreaElement>, 'color'> {
+export interface TextareaProps extends Omit<
+  JSX.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'color'
+> {
   /**
    * Helper text displayed below the textarea.
    */

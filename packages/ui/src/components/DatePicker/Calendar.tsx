@@ -458,7 +458,8 @@ const Calendar = (props: CalendarProps) => {
     const range = rangeSelection(date);
     if (range.start) parts.push('(range start)');
     if (range.end) parts.push('(range end)');
-    if (!range.start && !range.end && !isSelected(date) && isInDateRange(date)) parts.push('(in range)');
+    if (!range.start && !range.end && !isSelected(date) && isInDateRange(date))
+      parts.push('(in range)');
     const edit = rangeInEdit(date);
     if (edit.start) parts.push('(editing range start)');
     if (edit.end) parts.push('(editing range end)');

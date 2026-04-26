@@ -36,15 +36,13 @@ export default function FormPage() {
           name: 'onSubmit',
           type: '(e: SubmitEvent) => void | Promise<void>',
           default: '-',
-          description:
-            'Submit handler. Typically pass form.handleSubmit from useForm.',
+          description: 'Submit handler. Typically pass form.handleSubmit from useForm.',
         },
         {
           name: 'isSubmitting',
           type: 'boolean',
           default: 'false',
-          description:
-            'Whether the form is currently submitting. Controls aria-busy.',
+          description: 'Whether the form is currently submitting. Controls aria-busy.',
         },
       ]}
       playground={`

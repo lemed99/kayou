@@ -1,4 +1,13 @@
-import { type JSX, type ParentComponent, createContext, createEffect, createMemo, on, onCleanup, useContext } from 'solid-js';
+import {
+  type JSX,
+  type ParentComponent,
+  createContext,
+  createEffect,
+  createMemo,
+  on,
+  onCleanup,
+  useContext,
+} from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 
 export interface ShortcutAction {
@@ -59,7 +68,9 @@ export function normalizeCombo(combo: string): string {
   }
 
   modifiers.sort(
-    (a, b) => MODIFIER_ORDER.indexOf(a as (typeof MODIFIER_ORDER)[number]) - MODIFIER_ORDER.indexOf(b as (typeof MODIFIER_ORDER)[number]),
+    (a, b) =>
+      MODIFIER_ORDER.indexOf(a as (typeof MODIFIER_ORDER)[number]) -
+      MODIFIER_ORDER.indexOf(b as (typeof MODIFIER_ORDER)[number]),
   );
 
   return [...modifiers, key].filter(Boolean).join('+');
@@ -183,7 +194,9 @@ export const ShortcutProvider: ParentComponent<ShortcutProviderProps> = (props) 
   const register = (action: ShortcutAction): void => {
     const existing = registry[action.id];
     if (existing) {
-      console.warn(`[ShortcutProvider] Action "${action.id}" already registered. Replacing.`);
+      console.warn(
+        `[ShortcutProvider] Action "${action.id}" already registered. Replacing.`,
+      );
     }
 
     const customCombo = customBindings[action.id];

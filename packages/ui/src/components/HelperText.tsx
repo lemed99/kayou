@@ -10,8 +10,10 @@ export type HelperTextColor = 'gray' | 'info' | 'failure' | 'warning' | 'success
 /**
  * Props for the HelperText component.
  */
-export interface HelperTextProps
-  extends Omit<JSX.HTMLAttributes<HTMLSpanElement>, 'color'> {
+export interface HelperTextProps extends Omit<
+  JSX.HTMLAttributes<HTMLSpanElement>,
+  'color'
+> {
   /**
    * The helper text content to display.
    */

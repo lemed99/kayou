@@ -11,8 +11,8 @@ export default function PopoverFlipPreview() {
             <div class="p-4" style={{ width: '580px', height: '200px' }}>
               <p class="text-sm font-medium">Wide popover</p>
               <p class="text-sm text-neutral-500">
-                This popover is wide enough to trigger horizontal flip logic on
-                a mobile screen.
+                This popover is wide enough to trigger horizontal flip logic on a mobile
+                screen.
               </p>
             </div>
           }

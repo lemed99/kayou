@@ -192,16 +192,14 @@ const Tooltip = (props: TooltipProps): JSX.Element => {
             ref={refs.setFloating}
             role="tooltip"
             id={tooltipId}
-            style={
-              {
-                ...floatingStyles(),
-                opacity: isVisible() ? '1' : '0',
-                transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
-                'transition-property': 'opacity, transform',
-                'transition-duration': '.2s',
-                'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
-              } as JSX.CSSProperties
-            }
+            style={{
+              ...floatingStyles(),
+              opacity: isVisible() ? '1' : '0',
+              transform: isVisible() ? 'scale(1)' : 'scale(0.8)',
+              'transition-property': 'opacity, transform',
+              'transition-duration': '.2s',
+              'transition-timing-function': 'cubic-bezier(.32, .72, 0, 1)',
+            }}
             class={twMerge(merged.class, theme.base, theme.tooltip[merged.theme])}
           >
             <div

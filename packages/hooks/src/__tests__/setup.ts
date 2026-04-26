@@ -1,4 +1,4 @@
-import { vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 vi.mock('../helpers/indexedDB', () => ({
   getCacheRow: vi.fn().mockResolvedValue(null),

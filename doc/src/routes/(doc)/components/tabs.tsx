@@ -28,8 +28,7 @@ export default function TabsPage() {
         },
         {
           term: 'Variants',
-          explanation:
-            'Three visual styles: underline (default), pills, and bordered.',
+          explanation: 'Three visual styles: underline (default), pills, and bordered.',
         },
       ]}
       props={[
@@ -50,7 +49,8 @@ export default function TabsPage() {
           name: 'onTabChange',
           type: '(key: string) => void',
           default: '-',
-          description: 'Callback when active tab changes (works in both controlled and uncontrolled modes)',
+          description:
+            'Callback when active tab changes (works in both controlled and uncontrolled modes)',
         },
         {
           name: 'variant',
@@ -101,15 +101,30 @@ export default function TabsPage() {
           kind: 'type',
           description: 'Data structure for each tab',
           props: [
-            { name: 'key', type: 'string', default: '-', description: 'Unique identifier for the tab' },
-            { name: 'label', type: 'JSX.Element', default: '-', description: 'Content displayed in the tab button' },
+            {
+              name: 'key',
+              type: 'string',
+              default: '-',
+              description: 'Unique identifier for the tab',
+            },
+            {
+              name: 'label',
+              type: 'JSX.Element',
+              default: '-',
+              description: 'Content displayed in the tab button',
+            },
             {
               name: 'content',
               type: 'JSX.Element | () => JSX.Element',
               default: '-',
               description: 'Panel content. Use a function for lazy evaluation.',
             },
-            { name: 'disabled', type: 'boolean', default: 'false', description: 'Whether the tab is disabled' },
+            {
+              name: 'disabled',
+              type: 'boolean',
+              default: 'false',
+              description: 'Whether the tab is disabled',
+            },
           ],
         },
         {
@@ -117,7 +132,12 @@ export default function TabsPage() {
           kind: 'type',
           description: 'Accessibility labels for i18n',
           props: [
-            { name: 'tabList', type: 'string', default: '"Tabs"', description: 'aria-label for the tablist element' },
+            {
+              name: 'tabList',
+              type: 'string',
+              default: '"Tabs"',
+              description: 'aria-label for the tablist element',
+            },
           ],
         },
       ]}
