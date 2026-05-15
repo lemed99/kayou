@@ -87,6 +87,7 @@ export default function MultiSelect(props: MultiSelectProps): JSX.Element {
     'ariaLabels',
     'color',
     'capitalizeFirstWord',
+    'floatingClass',
   ]);
 
   const a = createMemo(() => ({ ...DEFAULT_SELECT_ARIA_LABELS, ...local.ariaLabels }));

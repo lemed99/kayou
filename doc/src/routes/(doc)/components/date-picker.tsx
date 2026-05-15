@@ -184,9 +184,10 @@ function App() {
         },
         {
           name: 'popoverPosition',
-          type: '"top" | "bottom"',
+          type: '"top" | "top-start" | "top-end" | "bottom" | "bottom-start" | "bottom-end" | "left" | "left-start" | "left-end" | "right" | "right-start" | "right-end"',
           default: '"bottom"',
-          description: 'Position of the calendar popup relative to the input.',
+          description:
+            'Floating UI-style placement of the calendar popup relative to the input.',
         },
         {
           name: 'displayValue',
@@ -205,6 +206,13 @@ function App() {
           type: 'string',
           default: '-',
           description: 'Additional CSS classes for the calendar popup.',
+        },
+        {
+          name: 'popoverClass',
+          type: 'string',
+          default: '-',
+          description:
+            'Additional CSS classes for the floating popover wrapper. Use this for placement wrapper styling separate from calendar content styling.',
         },
         {
           name: 'style',

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **NumberInput `debounceDelay` prop** - Configurable delay before processing input
 - **TextInput unique IDs** - Auto-generated IDs for label/input association
 - **SelectWithSearch combobox ARIA** - Full WAI-ARIA combobox pattern support
+- **DatePicker `popoverClass` prop** - Allows styling the floating popover wrapper separately from calendar content.
 - **Audit system** - Component audit tracker and reports in `.claude/audits/`
 
 ### Changed
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **MultiSelect** - Improved ARIA support with listbox pattern
 - **useSelect hook** - Added default for `noSearchResultPlaceholder`
 - **Accordion** - Improved keyboard navigation and ARIA attributes
+- **DatePicker `popoverPosition`** - Supports full floating placements including start/end, left, and right positions.
 
 ### Fixed
 

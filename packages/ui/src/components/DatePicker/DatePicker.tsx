@@ -174,10 +174,24 @@ export interface DatePickerProps {
   inputClass?: string;
   /** Additional CSS classes for the calendar popup. */
   calendarClass?: string;
+  /** Additional CSS classes for the floating popover wrapper. */
+  popoverClass?: string;
   /** Locale for date formatting and day/month names. */
   locale: string;
   /** Position of the calendar popup. @default 'bottom' */
-  popoverPosition?: 'top' | 'bottom';
+  popoverPosition?:
+    | 'top'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'left'
+    | 'left-start'
+    | 'left-end'
+    | 'right'
+    | 'right-start'
+    | 'right-end';
   /** Whether the input is disabled. */
   disabled?: boolean;
   /** Whether the input is in a loading state. */
@@ -1267,7 +1281,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
 
   const { refs, floatingStyles, container } = useFloating({
     get placement() {
-      return `${props.popoverPosition ?? 'bottom'}-start` as Placement;
+      return `${props.popoverPosition ?? 'bottom'}` as Placement;
     },
     isOpen: isMounted,
     offset: 4,
@@ -1614,6 +1628,7 @@ const DatePicker = (props: DatePickerProps): JSX.Element => {
             }}
             class={twMerge(
               'z-100 w-fit rounded-lg border border-neutral-300 bg-white px-2.5 py-3 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200',
+              props.popoverClass,
             )}
           >
             <div class="flex gap-3">

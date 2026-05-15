@@ -110,7 +110,7 @@ export interface DrawerProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const theme = {
   backdrop: {
     base: 'fixed z-[90] overflow-hidden inset-0 w-full h-full',
-    show: 'bg-neutral-800/50 dark:bg-neutral-900/80',
+    show: 'bg-neutral-800/50 dark:bg-neutral-900/30 backdrop-blur-xs',
   },
   content: {
     positions: {
@@ -121,7 +121,7 @@ const theme = {
     },
     base: 'fixed z-[91]',
     inner: {
-      base: 'relative bg-white flex flex-col w-full h-full dark:bg-neutral-800 overflow-auto',
+      base: 'relative bg-white flex flex-col w-full h-full dark:bg-neutral-900 border-l border-l-neutral-200 dark:border-l-neutral-800 overflow-auto',
       positions: {
         top: 'rounded-b-lg',
         bottom: 'rounded-t-lg',
