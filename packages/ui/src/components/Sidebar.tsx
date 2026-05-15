@@ -422,7 +422,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
           content={
             <div class="min-w-[180px]">
               <Show when={!isSidebarOpen()}>
-                <div class="rounded-t border-b border-neutral-200 bg-neutral-50 py-2.5 pl-7 pr-2.5 text-xs font-semibold dark:border-neutral-800 dark:bg-neutral-800 dark:text-white">
+                <div class="rounded-t border-b border-neutral-200 bg-neutral-50 py-2.5 pr-2.5 pl-7 text-xs font-semibold dark:border-neutral-800 dark:bg-neutral-800 dark:text-white">
                   {mn.label}
                 </div>
               </Show>
@@ -513,7 +513,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
             {/* Logo and toggle button */}
             <Show when={local.children !== undefined}>
               <div class="mb-2 flex h-12 items-center justify-between px-2.5">
-                <div class={isSidebarOpen() ? '' : 'hidden'}>{local.children}</div>
+                <div class={isSidebarOpen() ? 'w-full' : 'hidden'}>{local.children}</div>
                 <Show when={props.setIsSidebarOpen}>
                   <button
                     type="button"
@@ -568,7 +568,7 @@ const Sidebar = (props: SidebarProps): JSX.Element => {
         </Show>
 
         {/* Body section - scrollable main menu */}
-        <div class="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+        <div class="flex-1 overflow-x-hidden overflow-y-auto pt-2">
           <ul class={sidebarTheme.itemGroup} role="menu">
             <For each={sanitizedItems}>
               {(mn) => renderMenuItem(mn, { showPinButton: true })}

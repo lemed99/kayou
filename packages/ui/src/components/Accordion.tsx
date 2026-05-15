@@ -244,7 +244,7 @@ const Panel = (props: PanelProps): JSX.Element => {
   return (
     <div
       class={twMerge(
-        'border-neutral-200 dark:border-neutral-700',
+        'border-neutral-200 dark:border-neutral-800',
         props.isSeparated ? 'rounded-lg border' : 'border-b',
         !props.isSimple &&
           !props.isSeparated &&
@@ -301,7 +301,7 @@ const Panel = (props: PanelProps): JSX.Element => {
           role="region"
           aria-labelledby={triggerId()}
           class={twMerge(
-            'overflow-hidden border-t border-neutral-200 dark:border-neutral-700',
+            'overflow-hidden border-t border-neutral-200 dark:border-neutral-800',
             !props.isSimple && 'dark:bg-neutral-900/50',
             props.isSeparated && 'rounded-b-lg',
           )}

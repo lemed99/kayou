@@ -614,7 +614,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
         <Show
           when={draftFilters().length > 0}
           fallback={
-            <span class="py-2 text-sm text-neutral-500 dark:text-neutral-400">
+            <span class="inline-block py-2 text-sm text-neutral-500 dark:text-neutral-400">
               {props.noFiltersText ?? l().noFiltersApplied}
             </span>
           }
@@ -623,7 +623,7 @@ export function DataTableFilters<T>(props: DataTableFiltersProps<T>): JSX.Elemen
             {(filter, index) => (
               <>
                 <Show when={index > 0}>
-                  <span class="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">
+                  <span class="text-xs font-medium text-neutral-400 uppercase dark:text-neutral-500">
                     {l().and}
                   </span>
                 </Show>
